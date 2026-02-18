@@ -3,20 +3,33 @@ import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
 
 import styles from "./EmployeeInvite.module.css";
-import { useState } from "react";
+import { use, useState } from "react";
 
 import { InputText } from "primereact/inputtext";
-import { InputTextarea} from "primereact/inputtextarea"
 import { Calendar } from 'primereact/calendar';
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 
-function EmployeeInvite({ visible, setVisible }) {
+import axios from 'axios';
 
+function EmployeeInvite({ visible, setVisible }) {
   const [expiryDate, setExpiryDate] = useState(null);
+  const [email, setEmail] = useState(null);
+
   const today = new Date();
   const maxDay = new Date();
   maxDay.setMonth(maxDay.getMonth() + 1);
+
+  const handleSendInvite = async () => {
+    try {
+      await axios.post("http://localhost:8000/invite/send-invite", {
+        email: email,
+        expiry_date: expiryDate ? expiryDate.toISOString() : null,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   return (
     <div>
@@ -28,13 +41,13 @@ function EmployeeInvite({ visible, setVisible }) {
         draggable={false}
         dismissableMask
         >
-        <p className={styles.d_description}>Send an invite to an employee by specifying their email address. You can also set an optional message and expiry date for the invitation.</p>
+        <p className={styles.d_description}>Send an invite to an employee by specifying the recipient's email address. You can also set an expiry date for the invitation.</p>
         
         <div className={styles.d_email_container}>
             <small id="email-address">
                 Enter your employee's email address
             </small>
-            <InputText id="email-address" aria-describedby="email-address" className={styles.d_email_input} placeholder="Email address"/>
+            <InputText id="email-address" aria-describedby="email-address" className={styles.d_email_input} placeholder="Email address" value={email} onChange={(e) => setEmail(e.target.value)}/>
             <small id="expiry-date">
                 Select an expiry date for the invite
             </small>
@@ -46,17 +59,8 @@ function EmployeeInvite({ visible, setVisible }) {
                 maxDate={maxDay} 
                 value={expiryDate} onChange={(e) => setExpiryDate(e.value)} dateFormat="dd/mm/yy" 
             />
-            <small id="text-area">
-                Attach a customised message to your invite
-            </small>
-            <InputTextarea 
-                id="text-area" 
-                className={styles.d_textarea_input} 
-                maxLength={100} 
-                rows={9} 
-                placeholder="Hi [Employee Name], &#10;&#10;You have been invited to join our system. Please use the link below to activate your account before the expiry date. If you have any questions, feel free to reach out. &#10;&#10;Best regards, &#10;&#10;[Admin Name]"/>
         </div>
-        <Button>Send Invite <i style={{ marginLeft: 10}} className="pi pi-send"></i></Button>
+        <Button onClick={() => handleSendInvite()}>Send Invite <i style={{ marginLeft: 10}} className="pi pi-send"></i></Button>
       </Dialog>
     </div>
   );
