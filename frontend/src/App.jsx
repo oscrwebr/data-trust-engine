@@ -1,19 +1,30 @@
-import { useEffect, useState } from "react";
+import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import Roles from "./components/roles/roles";
 
-function App() {
-  const [status, setStatus] = useState("loading...");
-
-  useEffect(() => {
-    fetch("http://127.0.0.1:8000/health")
-      .then(res => res.json())
-      .then(data => setStatus(data.status));
-  }, []);
-
+function Home() {
   return (
     <div>
-      <h1>React + FastAPI</h1>
-      <p>Backend status: {status}</p>
+      <h1>Home Page</h1>
+      <p>Welcome to the React + FastAPI app!</p>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <div>
+        <nav style={{ marginBottom: "1rem" }}>
+          <Link to="/" style={{ marginRight: "1rem" }}>Home</Link>
+          <Link to="/roles">Roles</Link>
+        </nav>
+
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/roles" element={<Roles />} />
+        </Routes>
+      </div>
+    </BrowserRouter>
   );
 }
 
