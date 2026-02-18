@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI
+app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
@@ -11,6 +11,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/health")
-def root():
-    return {"status": "ok"}
+@app.get("/dashboard")
+def dashboard():
+    return {"status": "dashboard"}
