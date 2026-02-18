@@ -1,7 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI
+from app.scanning.router import router as scanning_router
+
+app = FastAPI()
+app.include_router(scanning_router)
 
 app.add_middleware(
     CORSMiddleware,
