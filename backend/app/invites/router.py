@@ -1,8 +1,9 @@
 from fastapi import APIRouter
-from typing import Annotated
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
+
+from .service import create_invite
 
 router = APIRouter(prefix="/invite", tags=["invite"])
 
@@ -12,6 +13,6 @@ class InviteRequest(BaseModel):
 
 @router.post("/send-invite")
 async def send_invite(invite: InviteRequest):
-    print(invite.email)
-    print(invite.expiry_date)
-    return {"success":True}
+    result = await create_invite(invite)
+    print(result)
+    return {"success":result}
