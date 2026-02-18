@@ -1,0 +1,40 @@
+.d_email_container {
+  display: flex;
+  flex-direction: column;
+}
+
+.d_description {
+    margin-bottom: 20px;
+}
+
+.d_dialog {
+    width: 30vw;
+}
+
+.d_dialog_header {
+    margin: 0;
+}
+
+.d_email_input {
+  width: 20vw;
+  margin-top: 5px;
+  margin-bottom: 20px;
+}
+
+.d_date_input {
+  width: 20vw;
+  margin-top: 5px;
+  margin-bottom: 20px;
+}
+
+.d_textarea_input {
+  width: 20vw;
+  margin-top: 5px;
+  margin-bottom: 20px;
+  resize: none;
+  font-size: 12px;
+}
+
+
+
+
