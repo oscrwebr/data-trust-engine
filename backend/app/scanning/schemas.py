@@ -1,8 +1,10 @@
 from pydantic import BaseModel
 
-class ScanRequest(BaseModel):
-    file_id: int
+# Placeholder classes, pydantic to be used in later feature, no need for it yet
 
-class ScanResponse(BaseModel):
-    scan_id: int
-    status: str
+# class ScanRequest(BaseModel):
+#     file_id: int
+
+# class ScanResponse(BaseModel):
+#     scan_id: int
+#     status: str

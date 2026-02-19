@@ -1,24 +1,24 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.core.database import get_database
-from .schemas import ScanRequest, ScanResponse
 from app.scanning import service, repository
 
 router = APIRouter(prefix="/scanning", tags=["scanning"])
 
-@router.get("/hash")
-def run_hash_endpoint(file_id):
-    hash_result = service.hash_file(file_id)
-    print(hash_result)
 
-    return
+@router.post("/update_file_hash")
+def update_file_hash(graph_file_id: str, db: Session=Depends(get_database)):
+    service.update_file_hash(graph_file_id)
 
-@router.post("/create_test_file")
-def create_test_file(file_extension: str, db: Session = Depends(get_database)):
-    hash_result = service.hash_file("app/scanning/test_files/client_services_agreement.pdf")
+
+# Route for creating files (for dev only)
+@router.post("/create_file")
+def create_file(file_extension: str, db: Session = Depends(get_database)):
+    hash_result = service.get_file_hash("app/scanning/test_files/client_services_agreement.pdf")
 
     repository.create_file(db, file_extension, hash_result)
-    
+
+
 @router.get("/get_all_files")
 def get_all_files(db: Session = Depends(get_database)):
     return repository.get_all_files(db=db)
