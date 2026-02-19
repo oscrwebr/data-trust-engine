@@ -22,12 +22,12 @@ class InviteRequest(BaseModel):
     expiry_date: Optional[datetime] = None
 
 conf = ConnectionConfig(
-   MAIL_FROM="datatrustengine@outlook.com",
-   MAIL_USERNAME="datatrustengine@outlook.com",
+   MAIL_FROM="datatrustengine@gmail.com",
+   MAIL_USERNAME="datatrustengine@gmail.com",
    MAIL_PASSWORD=mail_password,
    MAIL_PORT=587,
    MAIL_FROM_NAME="Data Trust Engine",   
-   MAIL_SERVER="smtp.office365.com",
+   MAIL_SERVER="smtp.gmail.com",
    MAIL_STARTTLS=True,
    MAIL_SSL_TLS=False,
    USE_CREDENTIALS=True,

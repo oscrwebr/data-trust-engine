@@ -3,10 +3,11 @@ import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
 
 import styles from "./EmployeeInvite.module.css";
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 import { InputText } from "primereact/inputtext";
 import { IconField } from "primereact/iconfield";
+import { Toast } from 'primereact/toast';
 import { InputIcon } from "primereact/inputicon";
 import { Calendar } from 'primereact/calendar';
 import { Message } from 'primereact/message';
@@ -21,6 +22,11 @@ function EmployeeInvite({ visible, setVisible }) {
   const [email_error, setEmailError] = useState(false);
   const [date_error, setDateError] = useState(false);
   const [email_valid, setEmailValid] = useState(false);
+  const toast_success = useRef(null);
+
+  const showMessage = () => {
+      toast_success.current.show({ severity: 'success', summary: 'Success', detail: 'Invite successfully sent!', life: 4000});
+  };
 
   const today = new Date();
   const maxDay = new Date();
@@ -44,9 +50,14 @@ function EmployeeInvite({ visible, setVisible }) {
         setEmailValid(true)
         
       } else if (response.data.success) {
+        showMessage(toast_success);
         setDateError(false);
         setEmailError(false);
-        setEmailValid(true)
+        setEmailValid(true);
+        setVisible(false);
+        setEmail(null);
+        setExpiryDate(null);
+        setEmailValid(false);
       }
  
     } catch (error) {
@@ -56,10 +67,11 @@ function EmployeeInvite({ visible, setVisible }) {
 
   return (
     <div>
+      <Toast ref={toast_success} position="top-right" />
       <Dialog 
         className={styles.d_dialog}
         visible={visible} 
-        onHide={() => setVisible(false)}
+        onHide={() => {setVisible(false), setEmail(null), setExpiryDate(null), setEmailValid(false)}}
         header={<h2 className={styles.d_dialog_header}>Send your employee an invite</h2>}
         draggable={false}
         dismissableMask
