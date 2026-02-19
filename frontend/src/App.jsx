@@ -13,17 +13,10 @@ function Home() {
 function App() {
   return (
     <BrowserRouter>
-      <div>
-        <nav style={{ marginBottom: "1rem" }}>
-          <Link to="/" style={{ marginRight: "1rem" }}>Home</Link>
-          <Link to="/roles">Roles</Link>
-        </nav>
-
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/roles" element={<Roles />} />
-        </Routes>
-      </div>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/roles" element={<Roles />} />
+      </Routes>
     </BrowserRouter>
   );
 }
