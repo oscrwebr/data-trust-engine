@@ -6,6 +6,8 @@ import styles from "./EmployeeInvite.module.css";
 import { useState } from "react";
 
 import { InputText } from "primereact/inputtext";
+import { IconField } from "primereact/iconfield";
+import { InputIcon } from "primereact/inputicon";
 import { Calendar } from 'primereact/calendar';
 import { Message } from 'primereact/message';
 import { Dialog } from "primereact/dialog";
@@ -18,6 +20,7 @@ function EmployeeInvite({ visible, setVisible }) {
   const [email, setEmail] = useState(null);
   const [email_error, setEmailError] = useState(false);
   const [date_error, setDateError] = useState(false);
+  const [email_valid, setEmailValid] = useState(false);
 
   const today = new Date();
   const maxDay = new Date();
@@ -33,14 +36,17 @@ function EmployeeInvite({ visible, setVisible }) {
       if(response.data.success == "invalid"){
         setEmailError(true);
         setDateError(false);
+        setEmailValid(false);
 
       } else if (response.data.success == "expiry") {
         setDateError(true);
         setEmailError(false);
+        setEmailValid(true)
         
       } else if (response.data.success) {
         setDateError(false);
         setEmailError(false);
+        setEmailValid(true)
       }
  
     } catch (error) {
@@ -65,7 +71,10 @@ function EmployeeInvite({ visible, setVisible }) {
             <small id="email-address">
                 Enter your employee's email address
             </small>
-            <InputText id={styles.d_email_address} aria-describedby="email-address" className={`mr-2 ${email_error ? "p-invalid" : ""}`} placeholder="Email address" value={email} onChange={(e) => setEmail(e.target.value)}/>
+            <IconField iconPosition="right" className={styles.d_icon_field}>
+                {email_valid ? (<InputIcon id={styles.d_check_icon} className="pi pi-check-circle" />) : (<span/>)}
+                <InputText id={styles.d_email_address} aria-describedby="email-address" className={`mr-2 ${email_error ? "p-invalid" : ""}`} placeholder="Email address" value={email} onChange={(e) => setEmail(e.target.value)}/>
+            </IconField>
             {email_error &&(<Message severity="error" className={styles.d_error} text={<p className={styles.d_error_text}>This email address doesn't exist</p>}/>)}
          
             <small id="expiry-date" className={styles.d_expiry_date}>
