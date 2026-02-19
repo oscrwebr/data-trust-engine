@@ -1,8 +1,10 @@
 import hashlib
+from sqlalchemy.orm import Session
 from app.scanning import repository
+from app.scanning.models import File
 
 
-def get_file_hash(file):
+def get_file_hash(file: File):
     # Create hash object
     hash = hashlib.sha256()
 
@@ -19,23 +21,23 @@ def get_file_hash(file):
     return hash.hexdigest()
 
 
-def update_file_hash(graph_file_id):
-    file = repository.get_file_by_graph_id(graph_file_id)
+def update_file_hash(db: Session, graph_file_id: str):
+    file = repository.get_file_by_graph_id(db=db, graph_file_id=graph_file_id)
     
     # Placeholder, will be replaced by ingestion component's "fetch_file" method when implemented
     graph_file = fetch_graph_file(graph_file_id)
 
     new_hash = get_file_hash(graph_file)
 
-    repository.set_file_hash(file=file, new_hash=new_hash)
+    repository.set_file_hash(db=db, file=file, new_hash=new_hash)
 
 
 # Placeholder for dev purposes, returns hard coded test files' paths for testing
-def fetch_graph_file(graph_file_id):
+def fetch_graph_file(graph_file_id: str):
     match graph_file_id:
         case "abc123":
-            return "app\scanning\test_files\client_services_agreement.pdf"
+            return "app/scanning/test_files/client_services_agreement.pdf"
         case "def456":
-            return "app\scanning\test_files\confidential_client_list.pdf"
+            return "app/scanning/test_files/confidential_client_list.pdf"
         case "ghi789":
-            return "app\scanning\test_files\finance_and_credentials_overview.pdf"
+            return "app/scanning/test_files/finance_and_credentials_overview.pdf"

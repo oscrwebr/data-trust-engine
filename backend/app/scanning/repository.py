@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
 from app.scanning.models import File
 
-def create_file(db: Session, extension: str, file_hash: str):
-    file = File(file_extension=extension, hash=file_hash)
+def create_file(db: Session, graph_file_id:str, name: str, extension: str, file_hash: str):
+    file = File(graph_file_id=graph_file_id, file_name=name, file_extension=extension, hash=file_hash)
     db.add(file)
     db.commit()
     db.refresh(file)
