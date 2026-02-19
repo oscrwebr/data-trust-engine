@@ -1,9 +1,10 @@
 import os
+
 from dotenv import load_dotenv
+from .schema import EmailSchema, conf
 from zerobouncesdk import ZeroBounce, ZBException
 from fastapi_mail import FastMail, MessageSchema
 from starlette.responses import JSONResponse
-from .schema import EmailSchema, conf
 from datetime import datetime
 from typing import List
 
@@ -12,10 +13,10 @@ load_dotenv()
 ZEROBOUNCE_API_KEY = os.getenv("ZEROBOUNCE_API_KEY")
 
 #Creating, sending and logging invite
-async def create_invite(invite):
+def create_invite(invite):
 
     # Validate inputs
-    is_invite_valid = await validate_invite(invite.email, invite.expiry_date)
+    is_invite_valid = validate_invite(invite.email, invite.expiry_date)
     if(is_invite_valid == True):
     
         #Send invite
@@ -26,14 +27,12 @@ async def create_invite(invite):
     else:
         return is_invite_valid
     
-         
-
 
 # Validating the invite
-async def validate_invite(email: str, expiry_date: datetime | None):
+def validate_invite(email: str, expiry_date: datetime | None):
     
     # Call validate email function
-    is_email_valid = await validate_email(email)
+    is_email_valid = validate_email(email)
     if(is_email_valid == "invalid"):
         return is_email_valid
    
@@ -45,7 +44,7 @@ async def validate_invite(email: str, expiry_date: datetime | None):
 
     
 # Using ZeroBounce API to validate email address
-async def validate_email(email: str):
+def validate_email(email: str):
     zero_bounce = ZeroBounce(ZEROBOUNCE_API_KEY) 
 
     # Check whether email is valid

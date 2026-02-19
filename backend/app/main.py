@@ -5,7 +5,8 @@ from invites.router import router as invite_router
 from app.scanning.router import router as scanning_router
 
 app = FastAPI()
-app.include_router(invite_router, scanning_router)
+app.include_router(invite_router)
+app.include_router(scanning_router)
 
 app.add_middleware(
     CORSMiddleware,
