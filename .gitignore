@@ -1,3 +1,30 @@
+# Python / backend
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.env
+backend/.env
+*.log
+.venv/
+venv/
+
+# Node / frontend
+node_modules/
+dist/
+build/
+
+# Vite / react env
+frontend/.env
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
 env/
 .env
 __pycache__
