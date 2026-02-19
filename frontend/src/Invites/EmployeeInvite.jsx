@@ -3,10 +3,11 @@ import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
 
 import styles from "./EmployeeInvite.module.css";
-import { use, useState } from "react";
+import { useState } from "react";
 
 import { InputText } from "primereact/inputtext";
 import { Calendar } from 'primereact/calendar';
+import { Message } from 'primereact/message';
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 
@@ -15,6 +16,8 @@ import axios from 'axios';
 function EmployeeInvite({ visible, setVisible }) {
   const [expiryDate, setExpiryDate] = useState(null);
   const [email, setEmail] = useState(null);
+  const [email_error, setEmailError] = useState(false);
+  const [date_error, setDateError] = useState(false);
 
   const today = new Date();
   const maxDay = new Date();
@@ -22,10 +25,24 @@ function EmployeeInvite({ visible, setVisible }) {
 
   const handleSendInvite = async () => {
     try {
-      await axios.post("http://localhost:8000/invite/send-invite", {
+      const response = await axios.post("http://localhost:8000/invite/send-invite", {
         email: email,
         expiry_date: expiryDate ? expiryDate.toISOString() : null,
       });
+      
+      if(response.data.success == "invalid"){
+        setEmailError(true);
+        setDateError(false);
+
+      } else if (response.data.success == "expiry") {
+        setDateError(true);
+        setEmailError(false);
+        
+      } else if (response.data.success) {
+        setDateError(false);
+        setEmailError(false);
+      }
+ 
     } catch (error) {
       console.log(error);
     }
@@ -43,24 +60,29 @@ function EmployeeInvite({ visible, setVisible }) {
         >
         <p className={styles.d_description}>Send an invite to an employee by specifying the recipient's email address. You can also set an expiry date for the invitation.</p>
         
-        <div className={styles.d_email_container}>
+        <div className={styles.d_container}>
+          <div className={styles.d_input_container}>
             <small id="email-address">
                 Enter your employee's email address
             </small>
-            <InputText id="email-address" aria-describedby="email-address" className={styles.d_email_input} placeholder="Email address" value={email} onChange={(e) => setEmail(e.target.value)}/>
-            <small id="expiry-date">
+            <InputText id={styles.d_email_address} aria-describedby="email-address" className={`mr-2 ${email_error ? "p-invalid" : ""}`} placeholder="Email address" value={email} onChange={(e) => setEmail(e.target.value)}/>
+            {email_error &&(<Message severity="error" className={styles.d_error} text={<p className={styles.d_error_text}>This email address doesn't exist</p>}/>)}
+         
+            <small id="expiry-date" className={styles.d_expiry_date}>
                 Select an expiry date for the invite
             </small>
             <Calendar
-                id="expiry-date"
-                className={styles.d_date_input}
-                showIcon
-                minDate={today}    
-                maxDate={maxDay} 
-                value={expiryDate} onChange={(e) => setExpiryDate(e.value)} dateFormat="dd/mm/yy" 
+              id={styles.d_date_input}
+              className={`mr-2 ${date_error ? "p-invalid" : ""}`}
+              showIcon
+              minDate={today}    
+              maxDate={maxDay} 
+              value={expiryDate} onChange={(e) => setExpiryDate(e.value)} dateFormat="dd/mm/yy" 
             />
+            {date_error &&(<Message severity="error" className={styles.d_error} text={<p className={styles.d_error_text}>No expiry date selected</p>}/>)}
+            <Button onClick={() => handleSendInvite()} id={styles.d_send_button}>Send Invite <i style={{ marginLeft: 10}} className="pi pi-send"></i></Button>
+          </div>
         </div>
-        <Button onClick={() => handleSendInvite()}>Send Invite <i style={{ marginLeft: 10}} className="pi pi-send"></i></Button>
       </Dialog>
     </div>
   );

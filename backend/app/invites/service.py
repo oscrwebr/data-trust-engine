@@ -8,16 +8,21 @@ ZEROBOUNCE_API_KEY = os.getenv("ZEROBOUNCE_API_KEY")
 
 async def create_invite(invite):
 
+    # Validate email address
+    is_email_valid = await validate_email(invite.email)
+    if(is_email_valid == "invalid"):
+        return is_email_valid
+
     # Check whether expiry date is not null
     if(invite.expiry_date == None):
         return "expiry"
     
-    # Validate email address
-    return await validate_email(invite.email)
+    
 
     # send email
+
     # log the invite request?
-    return
+    return True
 
 # Using ZeroBounce API to validate email address
 async def validate_email(email: str):

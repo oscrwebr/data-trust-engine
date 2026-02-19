@@ -15,4 +15,4 @@ class InviteRequest(BaseModel):
 async def send_invite(invite: InviteRequest):
     result = await create_invite(invite)
     print(result)
-    return {"success":result}
+    return {"success": result}
