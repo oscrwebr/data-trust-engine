@@ -24,3 +24,8 @@ frontend/.env
 # OS
 .DS_Store
 Thumbs.db
+
+env/
+.env
+__pycache__
+*.egg-info/
