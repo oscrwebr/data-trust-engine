@@ -1,6 +1,7 @@
-from fastapi import FastAPI, APIRouter, Form, Depends
+from fastapi import FastAPI, APIRouter, Form, Depends, Request
 from fastapi.responses import RedirectResponse
 from fastapi.security import OAuth2PasswordBearer
+from starlette.middleware import Middleware
 from msal import ConfidentialClientApplication
 import os
 from dotenv import load_dotenv
@@ -16,25 +17,25 @@ router = APIRouter(
 )
 
 @router.get("/sign-in")
-async def sign_in():
-    result = application.initiate_auth_code_flow(scopes=os.environ.get("SCOPES").split(), response_mode='form_post')
-    print(result)
-    return RedirectResponse(result['auth_uri'])
+async def sign_in(request: Request):
+    flow = application.initiate_auth_code_flow(scopes=os.environ.get("SCOPES").split())
+    # print(flow)
+    request.session["flow"] = flow
+    print(request.session)
+    return RedirectResponse(flow['auth_uri'])
 
-@router.post("/success/")
-async def login_redirect(client_info: Annotated[str, Form()], code: Annotated[str, Form()], state: Annotated[str, Form()]):
-
-    # application.acquire_token_by_auth_code_flow()
-    return {
-        "client_info": client_info,
+@router.get("/success/")
+async def login_redirect(client_info: str, code: str, state: str, request: Request):
+    result = application.acquire_token_by_auth_code_flow(
+        auth_code_flow = request.session["flow"],
+        auth_response = {
+            "client_info": client_info,
         "code": code,
         "state": state
+        }
+    )
+    print(result)
+    return {
+        "message": result
     }
 
-# oauth_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
-# # @router.get("/test")
-# # async def test(token: Annotated[str, Depends(oauth_scheme)]):
-# #     return {
-# #         "token": token
-# #     }
