@@ -35,7 +35,7 @@ function EmployeeInvite({ visible, setVisible }) {
   const handleSendInvite = async () => {
     try {
       const response = await axios.post("http://localhost:8000/invite/send-invite", {
-        email: email,
+        email: email || null,
         expiry_date: expiryDate ? expiryDate.toISOString() : null,
       });
       

@@ -1,4 +1,5 @@
 import os
+import arrow
 
 from dotenv import load_dotenv
 from .schema import EmailSchema, conf
@@ -13,15 +14,17 @@ load_dotenv()
 ZEROBOUNCE_API_KEY = os.getenv("ZEROBOUNCE_API_KEY")
 
 #Creating, sending and logging invite
-def create_invite(invite):
+async def create_invite(invite):
 
     # Validate inputs
     is_invite_valid = validate_invite(invite.email, invite.expiry_date)
     if(is_invite_valid == True):
-    
+        
+        expiry = arrow.get(str(invite.expiry_date.date()), "YYYY-MM-DD")
+        expiry = expiry.format("Do MMMM YYYY")
+
         #Send invite
-        print("Invite email has been sent")
-        #await send_invite([invite.email])
+        await send_invite(invite, expiry)
         return True 
 
     else:
@@ -30,6 +33,9 @@ def create_invite(invite):
 
 # Validating the invite
 def validate_invite(email: str, expiry_date: datetime | None):
+
+    if email is None:
+        return "invalid"
     
     # Call validate email function
     is_email_valid = validate_email(email)
@@ -56,8 +62,8 @@ def validate_email(email: str):
   
 
 #Using FastAPI smtplib to send the email
-async def send_invite(email: EmailSchema):
-    template = """
+async def send_invite(invite: EmailSchema, expiry: str):
+    template = f"""
             <html>
                 <body style="margin:0; padding:0; font-family:Arial, sans-serif; background-color:#f5f5f5;">
                     <table align="center" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px; background:#ffffff;">
@@ -75,11 +81,11 @@ async def send_invite(email: EmailSchema):
                     <tr>
                         <td style="padding:20px;">
                         <p style="font-size:16px; color:#333333;">
-                            Hi <strong>[employee_name]</strong>,
+                            Hi there,
                         </p>
 
                         <p style="font-size:14px; color:#333333;">
-                            You have been invited to join our system.
+                            You have been invited to join our workspace.
                             Please use the link below to activate your account before the expiry date.  
                             If you have any questions, feel free to reach out.
                         </p>
@@ -90,7 +96,7 @@ async def send_invite(email: EmailSchema):
                         </p>
 
                         <p style="font-size:14px; color:#333333; margin-top:25px;">
-                            This invite expires on: <strong>[expiry_date]</strong>
+                            This invite expires on the <strong>{expiry}</strong> at <strong>23:59</strong>.
                         </p>
 
                         <!-- Accept invite button -->
@@ -123,7 +129,7 @@ async def send_invite(email: EmailSchema):
 
     message = MessageSchema(
         subject="[Organisation name] Invite Request",
-        recipients=email, 
+        recipients=[invite.email], 
         body=template,
         subtype="html"
     )

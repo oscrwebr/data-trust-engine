@@ -10,8 +10,8 @@ from .schema import InviteRequest
 router = APIRouter(prefix="/invite", tags=["invite"])
 
 @router.post("/send-invite")
-def send_invite(invite: InviteRequest, db: Session=Depends(get_database)):
-    result = create_invite(invite)
+async def send_invite(invite: InviteRequest, db: Session=Depends(get_database)):
+    result = await create_invite(invite)
     if(result == True):
 
         # Record invite in database

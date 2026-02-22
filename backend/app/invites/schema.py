@@ -18,7 +18,7 @@ class EmailSchema(BaseModel):
    email: List[EmailStr]
 
 class InviteRequest(BaseModel):
-    email: str
+    email: Optional[str] = None
     expiry_date: Optional[datetime] = None
 
 conf = ConnectionConfig(
