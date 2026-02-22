@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from invites.router import router as invite_router
+from app.invites.router import router as invite_router
 from app.scanning.router import router as scanning_router
 
 app = FastAPI()
