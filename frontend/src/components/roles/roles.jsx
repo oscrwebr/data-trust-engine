@@ -175,7 +175,7 @@ function Roles() {
                   <input
                     type="number"
                     min="1"
-                    placeholder="Leave blank for unlimited"
+                    placeholder="Null"
                     value={thresholds[sub.sensitivity_subcategory_id] ?? ""}
                     onChange={(e) =>
                       handleThresholdChange(sub.sensitivity_subcategory_id, e.target.value)
