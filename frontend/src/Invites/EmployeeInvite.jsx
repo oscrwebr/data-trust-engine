@@ -84,7 +84,7 @@ function EmployeeInvite({ visible, setVisible }) {
                 Enter your employee's email address
             </small>
             <IconField iconPosition="right" className={styles.d_icon_field}>
-                {email_valid ? (<InputIcon id={styles.d_check_icon} className="pi pi-check-circle" />) : (<span/>)}
+                {email_valid ? (<InputIcon data-testid="email-valid-icon" id={styles.d_check_icon} className="pi pi-check-circle" />) : (<span/>)}
                 <InputText id={styles.d_email_address} aria-describedby="email-address" className={`mr-2 ${email_error ? "p-invalid" : ""}`} placeholder="Email address" value={email} onChange={(e) => setEmail(e.target.value)}/>
             </IconField>
             {email_error &&(<Message severity="error" className={styles.d_error} text={<p className={styles.d_error_text}>This email address doesn't exist</p>}/>)}
@@ -101,7 +101,7 @@ function EmployeeInvite({ visible, setVisible }) {
               value={expiryDate} onChange={(e) => setExpiryDate(e.value)} dateFormat="dd/mm/yy" 
             />
             {date_error &&(<Message severity="error" className={styles.d_error} text={<p className={styles.d_error_text}>No expiry date selected</p>}/>)}
-            <Button onClick={() => handleSendInvite()} id={styles.d_send_button}>Send Invite <i style={{ marginLeft: 10}} className="pi pi-send"></i></Button>
+            <Button onClick={() => handleSendInvite()} data-testid="send-invite-button" id={styles.d_send_button}>Send Invite <i style={{ marginLeft: 10}} className="pi pi-send"></i></Button>
           </div>
         </div>
       </Dialog>
