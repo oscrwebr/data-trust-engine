@@ -11,10 +11,9 @@ app = FastAPI()
 app.include_router(invite_router)
 app.include_router(scanning_router)
 app.include_router(roles_router)
+app.include_router(auth_router)
 
 app.add_middleware(SessionMiddleware, secret_key="data-trust-engine-21a")
-
-app.include_router(auth_router)
 
 app.add_middleware(
     CORSMiddleware,

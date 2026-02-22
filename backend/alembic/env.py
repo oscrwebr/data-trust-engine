@@ -36,6 +36,7 @@ from app.scanning import models
 from app.invites import models
 from app.authentication import models
 from app.roles import models
+from app.authentication import models
 
 target_metadata = Base.metadata
 
