@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
-import Roles from "./components/roles/roles";
+import Roles from "./roles/roles";
 
 function Home() {
   return (

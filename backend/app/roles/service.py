@@ -37,8 +37,8 @@ def create_role(db: Session, name: str, thresholds: list[dict]):
     db.commit()
     return get_roles(db)[-1]  # return newly created role
 
-def update_role(db: Session, role_id: int, thresholds: list[dict]):
-    return repository.update_role_thresholds(db, role_id, thresholds)
+def update_role(db: Session, role_id: int, name: str, thresholds: list[dict]):
+    return repository.update_role(db, role_id, name, thresholds)
 
 def delete_role(db: Session, role_id: int):
     repository.delete_role(db, role_id)

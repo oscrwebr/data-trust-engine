@@ -27,8 +27,9 @@ def create_role(payload: dict, db: Session = Depends(get_database)):
 
 @router.put("/update/{role_id}")
 def update_role(role_id: int, payload: dict, db: Session = Depends(get_database)):
+    name = payload.get("name")
     thresholds = payload.get("thresholds", [])
-    return service.update_role(db, role_id, thresholds)
+    return service.update_role(db, role_id, name, thresholds)
 
 @router.delete("/delete/{role_id}")
 def delete_role(role_id: int, db: Session = Depends(get_database)):

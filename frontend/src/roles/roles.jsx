@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import api from "../../api/axiosConfig";
+import api from "../api/axiosConfig";
 import styles from "./styles.module.css";
 
 function Roles() {

@@ -25,17 +25,21 @@ def delete_role(db: Session, role_id: int):
     db.query(Role).filter(Role.role_id == role_id).delete(synchronize_session=False)
     db.commit()
 
-def update_role_thresholds(db: Session, role_id: int, thresholds: list[dict]):
-    """
-    thresholds = [
-        {"sensitivity_subcategory_id": 1, "threshold": 50},
-        ...
-    ]
-    """
-    # Remove existing permissions
-    db.query(RolePermission).filter(RolePermission.role_id == role_id).delete(synchronize_session=False)
+def update_role(db: Session, role_id: int, name: str, thresholds: list[dict]):
+    role = db.query(Role).filter(Role.role_id == role_id).first()
 
-    # Add new permissions
+    if not role:
+        return None
+
+    # 🔹 Update role name
+    role.name = name
+
+    # 🔹 Remove old permissions
+    db.query(RolePermission).filter(
+        RolePermission.role_id == role_id
+    ).delete(synchronize_session=False)
+
+    # 🔹 Add new permissions
     for t in thresholds:
         perm = RolePermission(
             role_id=role_id,
@@ -45,7 +49,9 @@ def update_role_thresholds(db: Session, role_id: int, thresholds: list[dict]):
         db.add(perm)
 
     db.commit()
-    return db.query(Role).filter(Role.role_id == role_id).first()
+    db.refresh(role)
+
+    return role
 
 # -------- SENSITIVITY CATEGORIES --------
 
