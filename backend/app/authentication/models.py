@@ -8,6 +8,6 @@ class User(Base):
     firstname = Column(String(50), nullable=False)
     surname = Column(String(50), nullable=False)
     email = Column(String(254), nullable=False)
-    oid = Column(String(40), unique=True, index=True, nullable=False) # ensure that this is hashed!
+    oid = Column(String(40), unique=True, index=True, nullable=False)
     refresh_token = Column(Text()) # Change this to a BLOB when using encryption
     

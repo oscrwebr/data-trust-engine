@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_database
 
 load_dotenv()
-
+# make this singleton!
 application = ConfidentialClientApplication(client_id=os.environ.get("CLIENT_ID"), authority=os.environ.get("AUTHORITY"), client_credential=os.environ.get("CLIENT_SECRET"))
 
 router = APIRouter(
@@ -29,7 +29,7 @@ async def sign_in(request: Request):
     return RedirectResponse(flow['auth_uri'])
 
 @router.get("/success/")
-async def login_redirect(client_info: str, code: str, state: str, request: Request, db: Session=Depends(get_database)):
+async def login_redirect(client_info: str, code: str, state: str, request: Request, db: Annotated[Session, Depends(get_database)]):
     result = application.acquire_token_by_auth_code_flow(
         auth_code_flow = request.session["flow"],
         auth_response = {
@@ -53,7 +53,7 @@ async def login_redirect(client_info: str, code: str, state: str, request: Reque
         }
 
 @router.get("/test")
-async def test_repo(db: Session=Depends(get_database)):
+async def test_repo(db: Annotated[Session, Depends(get_database)]):
     service.check_exists("Hello World!", db=db)
     return {
         "message": "This has gotten to the return at least lol!"
