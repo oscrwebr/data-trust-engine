@@ -39,8 +39,12 @@ def validate_invite(email: str, expiry_date: datetime | None):
     
     # Call validate email function
     is_email_valid = validate_email(email)
-    if(is_email_valid == "invalid"):
-        return is_email_valid
+    if (is_email_valid == "invalid"):
+        return "invalid"
+    
+    # Check for existing but untrustworthy email
+    if (is_email_valid == "do_not_mail"):
+        return "trust"
    
     # Check whether expiry date is not null
     if(expiry_date == None and is_email_valid == "valid"):
@@ -56,6 +60,7 @@ def validate_email(email: str):
     # Check whether email is valid
     try:
         response = zero_bounce.validate(email)
+        print(response)
         return str(response.status.value)
     except ZBException as e:
         return str(e)

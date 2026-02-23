@@ -7,6 +7,7 @@ import { useState, useRef } from "react";
 
 import { InputText } from "primereact/inputtext";
 import { IconField } from "primereact/iconfield";
+import { ProgressSpinner} from "primereact/ProgressSpinner"
 import { Toast } from 'primereact/toast';
 import { InputIcon } from "primereact/inputicon";
 import { Calendar } from 'primereact/calendar';
@@ -17,9 +18,11 @@ import { Button } from "primereact/button";
 import axios from 'axios';
 
 function EmployeeInvite({ visible, setVisible }) {
+  const [loading, setLoading] = useState(false);
   const [expiryDate, setExpiryDate] = useState(null);
   const [email, setEmail] = useState(null);
   const [email_error, setEmailError] = useState(false);
+  const [email_trust, setEmailTrust] = useState(false);
   const [date_error, setDateError] = useState(false);
   const [email_valid, setEmailValid] = useState(false);
   const toast_success = useRef(null);
@@ -33,6 +36,7 @@ function EmployeeInvite({ visible, setVisible }) {
   maxDay.setMonth(maxDay.getMonth() + 1);
 
   const handleSendInvite = async () => {
+    setLoading(true);
     try {
       const response = await axios.post("http://localhost:8000/invite/send-invite", {
         email: email || null,
@@ -44,12 +48,18 @@ function EmployeeInvite({ visible, setVisible }) {
         setDateError(false);
         setEmailValid(false);
 
+      } else if (response.data.success == "trust") {
+        setDateError(false);
+        setEmailError(false);
+        setEmailValid(true);
+        setEmailTrust(true)
+
       } else if (response.data.success == "expiry") {
         setDateError(true);
         setEmailError(false);
         setEmailValid(true)
         
-      } else if (response.data.success) {
+      } else if (response.data.success == true) {
         showMessage(toast_success);
         setDateError(false);
         setEmailError(false);
@@ -63,6 +73,7 @@ function EmployeeInvite({ visible, setVisible }) {
     } catch (error) {
       console.log(error);
     }
+    setLoading(false);
   }
 
   return (
@@ -87,8 +98,8 @@ function EmployeeInvite({ visible, setVisible }) {
                 {email_valid ? (<InputIcon data-testid="email-valid-icon" id={styles.d_check_icon} className="pi pi-check-circle" />) : (<span/>)}
                 <InputText id={styles.d_email_address} aria-describedby="email-address" className={`mr-2 ${email_error ? "p-invalid" : ""}`} placeholder="Email address" value={email} onChange={(e) => setEmail(e.target.value)}/>
             </IconField>
-            {email_error &&(<Message severity="error" className={styles.d_error} text={<p className={styles.d_error_text}>This email address doesn't exist</p>}/>)}
-         
+            {email_error &&(<Message severity="error" className={styles.d_error} text={<p className={styles.d_error_text}>This email address doesn't exist.</p>}/>)}
+            {email_trust &&(<Message severity="error" className={styles.d_error} text={<p className={styles.d_error_text}>This email is untrustworthy, please use a different email.</p>}/>)}
             <small id="expiry-date" className={styles.d_expiry_date}>
                 Select an expiry date for the invite
             </small>
@@ -100,8 +111,14 @@ function EmployeeInvite({ visible, setVisible }) {
               maxDate={maxDay} 
               value={expiryDate} onChange={(e) => setExpiryDate(e.value)} dateFormat="dd/mm/yy" 
             />
-            {date_error &&(<Message severity="error" className={styles.d_error} text={<p className={styles.d_error_text}>No expiry date selected</p>}/>)}
-            <Button onClick={() => handleSendInvite()} data-testid="send-invite-button" id={styles.d_send_button}>Send Invite <i style={{ marginLeft: 10}} className="pi pi-send"></i></Button>
+            {date_error &&(<Message severity="error" className={styles.d_error} text={<p className={styles.d_error_text}>No expiry date selected.</p>}/>)}
+            {loading ? (
+              <ProgressSpinner style={{ width: "40px", height: "40px", marginTop: "15px"}} strokeWidth="8" animationDuration=".5s"/>
+            ) : (
+              <Button onClick={handleSendInvite} data-testid="send-invite-button" id={styles.d_send_button}>Send Invite
+                <i style={{ marginLeft: 10 }} className="pi pi-send"></i>
+              </Button>
+            )}
           </div>
         </div>
       </Dialog>
