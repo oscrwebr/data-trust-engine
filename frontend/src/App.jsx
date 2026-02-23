@@ -1,19 +1,13 @@
-import { useEffect, useState } from "react";
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Dashboard from './Dashboard/Dashboard';
 
 function App() {
-  const [status, setStatus] = useState("loading...");
-
-  useEffect(() => {
-    fetch("http://127.0.0.1:8000/health")
-      .then(res => res.json())
-      .then(data => setStatus(data.status));
-  }, []);
-
   return (
-    <div>
-      <h1>React + FastAPI</h1>
-      <p>Backend status: {status}</p>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/dashboard" element={<Dashboard/>}></Route>
+      </Routes>
+    </Router>
   );
 }
 
