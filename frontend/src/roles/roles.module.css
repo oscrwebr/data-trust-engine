@@ -238,6 +238,17 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
+.editButton {
+  background-color: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+.editButton:hover {
+  background-color: var(--border);
+  border: 2px solid var(--accent-blue);
+}
+
 /* ========== Messages ========== */
 .message {
   text-align: center;

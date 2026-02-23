@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../api/axiosConfig";
-import styles from "./styles.module.css";
+import styles from "./roles.module.css";
 
 function Roles() {
   const [roles, setRoles] = useState([]);
@@ -9,7 +9,7 @@ function Roles() {
   const [error, setError] = useState(null);
 
   // Form state for Add / Edit
-  const [editingRole, setEditingRole] = useState(null); // null = adding new
+  const [editingRole, setEditingRole] = useState(null);
   const [roleName, setRoleName] = useState("");
   const [thresholds, setThresholds] = useState({});
 
