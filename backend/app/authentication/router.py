@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, Form, Depends, Request
+from fastapi import FastAPI, APIRouter, Form, Depends, Request, HTTPException, status
 from fastapi.responses import RedirectResponse
 from fastapi.security import OAuth2PasswordBearer
 from starlette.middleware import Middleware
@@ -8,6 +8,8 @@ from dotenv import load_dotenv
 from typing import Annotated
 
 from app.authentication import service
+from ..core.security import create_access_token, get_user_from_access_token
+from ..core.security_schemas import User
 from sqlalchemy.orm import Session
 from app.core.database import get_database
 
@@ -43,18 +45,19 @@ async def login_redirect(client_info: str, code: str, state: str, request: Reque
 
     # print(result)
     if user:
-        return {
-            "name": f"{user.firstname} {user.surname}",
-            "email": f"{user.email}"            
-        }
+        return create_access_token(data= {
+            "userId": user.user_id
+        })
     else:
-        return {
-        "message": "User doesn't exist" 
-        }
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User does not exist"
+        )
 
 @router.get("/test")
-async def test_repo(db: Annotated[Session, Depends(get_database)]):
-    service.check_exists("Hello World!", db=db)
+async def test_repo(db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)]):
+    print(current_user.user_id)
+    # service.check_exists("Hello World!", db=db)
     return {
         "message": "This has gotten to the return at least lol!"
     }
