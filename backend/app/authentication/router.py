@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, Form, Depends, Request, HTTPException, status
+from fastapi import FastAPI, APIRouter, Form, Depends, Request, Response, HTTPException, status
 from fastapi.responses import RedirectResponse
 from fastapi.security import OAuth2PasswordBearer
 from starlette.middleware import Middleware
@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 from typing import Annotated
 
 from app.authentication import service
-from ..core.security import create_access_token, get_user_from_access_token
+from ..core.security import create_access_token, get_user_from_access_token, create_refresh_token, hash_user_refresh_token
 from ..core.security_schemas import User
 from sqlalchemy.orm import Session
 from app.core.database import get_database
@@ -31,9 +31,9 @@ async def sign_in(request: Request):
     return RedirectResponse(flow['auth_uri'])
 
 @router.get("/success/")
-async def login_redirect(client_info: str, code: str, state: str, request: Request, db: Annotated[Session, Depends(get_database)]):
+async def login_redirect(client_info: str, code: str, state: str, request: Request, response: Response, db: Annotated[Session, Depends(get_database)]):
     result = application.acquire_token_by_auth_code_flow(
-        auth_code_flow = request.session["flow"],
+        auth_code_flow = request.session["flow"], # Remember to delete the session!
         auth_response = {
             "client_info": client_info,
             "code": code,
@@ -45,9 +45,10 @@ async def login_redirect(client_info: str, code: str, state: str, request: Reque
 
     # print(result)
     if user:
-        return create_access_token(data= {
-            "userId": user.user_id
-        })
+        access_token = create_access_token(data={"userId": user.user_id})
+        refresh_token = create_refresh_token()
+        response.set_cookie(key="dte_refresh_token", value=refresh_token.opaque_token, expires=refresh_token.expiry_date, httponly=True, samesite = None)
+        return access_token
     else:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

@@ -1,8 +1,8 @@
-"""Creating the initial migration
+"""CREATED everything again
 
-Revision ID: 15a6cb35dcd6
+Revision ID: b0f6a19f7ae3
 Revises: 
-Create Date: 2026-02-23 14:35:55.372144
+Create Date: 2026-02-24 18:11:34.719163
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '15a6cb35dcd6'
+revision: str = 'b0f6a19f7ae3'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -30,6 +30,17 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('file_id')
     )
     op.create_index(op.f('ix_file_file_id'), 'file', ['file_id'], unique=False)
+    op.create_table('refresh',
+    sa.Column('refresh_id', sa.Integer(), nullable=False),
+    sa.Column('token', sa.Text(), nullable=False),
+    sa.Column('expiry', sa.DateTime(), nullable=True),
+    sa.Column('is_revoked', sa.Boolean(), nullable=False),
+    sa.Column('replaced_by', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['replaced_by'], ['refresh.refresh_id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('refresh_id')
+    )
+    op.create_index(op.f('ix_refresh_refresh_id'), 'refresh', ['refresh_id'], unique=False)
+    op.create_index(op.f('ix_refresh_token'), 'refresh', ['token'], unique=True)
     op.create_table('user',
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('firstname', sa.String(length=50), nullable=False),
@@ -50,6 +61,9 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_user_user_id'), table_name='user')
     op.drop_index(op.f('ix_user_oid'), table_name='user')
     op.drop_table('user')
+    op.drop_index(op.f('ix_refresh_token'), table_name='refresh')
+    op.drop_index(op.f('ix_refresh_refresh_id'), table_name='refresh')
+    op.drop_table('refresh')
     op.drop_index(op.f('ix_file_file_id'), table_name='file')
     op.drop_table('file')
     # ### end Alembic commands ###
