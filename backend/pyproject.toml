@@ -43,6 +43,7 @@ dependencies = [
     "rignore>=0.7.6",
     "sentry-sdk>=2.53.0",
     "shellingham>=1.5.4",
+    "SQLAlchemy>=2.0.47",
     "starlette>=0.52.1",
     "tomli>=2.4.0",
     "typer>=0.24.0",
