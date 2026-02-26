@@ -22,3 +22,9 @@ def create_file(graph_file_id: str, file_name: str, file_extension: str, db: Ses
 @router.get("/get_all_files")
 def get_all_files(db: Session = Depends(get_database)):
     return repository.get_all_files(db=db)
+
+
+@router.get("/scan_file")
+def scan_file(file_path: str, db: Session = Depends(get_database)):
+    return service.extract_text_from_pdf(file_path)
+    

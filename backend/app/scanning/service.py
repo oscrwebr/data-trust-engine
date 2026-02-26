@@ -1,4 +1,5 @@
 import hashlib
+import pymupdf
 from sqlalchemy.orm import Session
 from app.scanning import repository
 from app.scanning.models import File
@@ -31,6 +32,21 @@ def update_file_hash(db: Session, graph_file_id: str):
 
     repository.set_file_hash(db=db, file=file, new_hash=new_hash)
 
+
+## Extract text from pdf into dict
+def extract_text_from_pdf(filepath: str) -> dict:
+    file = pymupdf.open(filepath)
+    extracted_text = {}
+
+    for page_number in range(len(file)):
+        page = file.load_page(page_number)
+        text = page.get_text("text")
+        extracted_text[page_number] = text
+
+    file.close()
+    print(extracted_text)
+    return extracted_text
+    
 
 # Placeholder for dev purposes, returns hard coded test files' paths for testing
 def fetch_graph_file(graph_file_id: str):
