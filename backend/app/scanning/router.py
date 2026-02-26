@@ -26,5 +26,7 @@ def get_all_files(db: Session = Depends(get_database)):
 
 @router.get("/scan_file")
 def scan_file(file_path: str, db: Session = Depends(get_database)):
-    return service.extract_text_from_pdf(file_path)
+    extracted_text = service.extract_text_from_pdf(file_path)
+    service.detect_pii_in_text(extracted_text)
+    return extracted_text
     

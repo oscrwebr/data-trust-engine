@@ -1,9 +1,12 @@
 import hashlib
 import pymupdf
+import spacy
 from sqlalchemy.orm import Session
 from app.scanning import repository
 from app.scanning.models import File
 
+# Load the spacy NLP model 
+nlp = spacy.load("en_core_web_sm")
 
 def get_file_hash(file: File):
     # Create hash object
@@ -33,7 +36,7 @@ def update_file_hash(db: Session, graph_file_id: str):
     repository.set_file_hash(db=db, file=file, new_hash=new_hash)
 
 
-## Extract text from pdf into dict
+# Extract text from pdf into dict
 def extract_text_from_pdf(filepath: str) -> dict:
     file = pymupdf.open(filepath)
     extracted_text = {}
@@ -46,7 +49,18 @@ def extract_text_from_pdf(filepath: str) -> dict:
     file.close()
     print(extracted_text)
     return extracted_text
-    
+
+
+def detect_pii_in_text(text_dict):
+    # Named entity recognition (names, organisations) using spacy nlp model
+    for page in text_dict:
+        doc = nlp(text_dict[page])
+
+        # Find named entities
+        for entity in doc.ents:
+            print(entity.text, entity.label_)
+
+
 
 # Placeholder for dev purposes, returns hard coded test files' paths for testing
 def fetch_graph_file(graph_file_id: str):
