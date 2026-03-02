@@ -1,13 +1,13 @@
 import os
-import arrow
 
 from dotenv import load_dotenv
-from .schema import EmailSchema, conf
+from .schema import conf
 from zerobouncesdk import ZeroBounce, ZBException
 from fastapi_mail import FastMail, MessageSchema
 from starlette.responses import JSONResponse
-from datetime import datetime
-from typing import List
+from datetime import datetime, date
+from sqlalchemy.orm import Session
+from app.invites.models import Invite
 
 load_dotenv()
 
@@ -19,12 +19,7 @@ async def create_invite(invite):
     # Validate inputs
     is_invite_valid = validate_invite(invite.email, invite.expiry_date)
     if(is_invite_valid == True):
-        
-        expiry = arrow.get(str(invite.expiry_date.date()), "YYYY-MM-DD")
-        expiry = expiry.format("Do MMMM YYYY")
-
-        #Send invite
-        #await send_invite(invite, expiry)
+    
         return True 
 
     else:
@@ -66,7 +61,7 @@ def validate_email(email: str):
   
 
 #Using FastAPI smtplib to send the email
-async def send_invite(invite: EmailSchema, expiry: str):
+async def send_invite_service(email: str, expiry: str, token: str):
     template = f"""
             <html>
                 <body style="margin:0; padding:0; font-family:Arial, sans-serif; background-color:#f5f5f5;">
@@ -84,7 +79,7 @@ async def send_invite(invite: EmailSchema, expiry: str):
                     <!-- Body content -->
                     <tr>
                         <td style="padding:20px;">
-                        <p style="font-size:16px; color:#333333;">
+                        <p style="font-size:14px; color:#333333;">
                             Hi there,
                         </p>
 
@@ -108,8 +103,7 @@ async def send_invite(invite: EmailSchema, expiry: str):
                             <tr>
                             <td align="center">
                                 <a 
-                                href="http://localhost:5173/dashboard" 
-                                target="_blank"
+                                href="http://localhost:8000/invite/invite-processing?token={token}"
                                 style="background-color:#007bff; color:#ffffff; padding:12px 24px; text-decoration:none; font-weight:bold; font-size:16px; border-radius:4px; display:inline-block;">
                                 Accept Invite
                                 </a>
@@ -133,7 +127,7 @@ async def send_invite(invite: EmailSchema, expiry: str):
 
     message = MessageSchema(
         subject="[Organisation name] Invite Request",
-        recipients=[invite.email], 
+        recipients=[email], 
         body=template,
         subtype="html"
     )
@@ -141,3 +135,24 @@ async def send_invite(invite: EmailSchema, expiry: str):
     fm = FastMail(conf)
     await fm.send_message(message)
     return JSONResponse(status_code=200, content={"message": "email has been sent"})
+
+def check_invite(token:str, db: Session):
+    
+    # Get the invite record based on token
+    invite = db.query(Invite).filter(Invite.token == token).first()
+
+    # Check invite expiry date
+    if(invite.expiry_date < date.today()):
+        invite.status = "expired"
+
+        # Redirect user to expiry error page
+        return True
+    
+    if(invite.status != "sent"):
+
+        # Redirect user to used already error page
+        return True
+    
+    invite.status = "accepted"
+    # Redirect user to login page 
+    return
