@@ -23,6 +23,7 @@ def create_refresh_token():
     return RefreshToken(opaque_token=opaque_token, hashed_ot=hashed_ot, expiry_date=expiry_date)
 
 def hash_user_refresh_token(refresh_token: str):
+    # print(f"\n\nthis is the refresh token: {refresh_token}\n\n")
     hashed_token = hashlib.sha256(refresh_token.encode()).hexdigest()
     return hashed_token
 
