@@ -12,7 +12,7 @@ ALGORITHM = os.getenv("ALGORITHM")
 
 def create_access_token(data: dict):
     to_encode = data.copy()
-    to_encode["exp"] = datetime.now(timezone.utc) + timedelta(seconds=30)
+    to_encode["exp"] = datetime.now(timezone.utc) + timedelta(minutes=15)
     signed_access_jwt = jwt.encode(payload=to_encode, key=ACCESS_TOKEN_SECRET, algorithm=ALGORITHM)
     return AccessToken(access_token=signed_access_jwt, token_type="Bearer")
 
