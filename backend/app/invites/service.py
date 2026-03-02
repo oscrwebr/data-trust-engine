@@ -24,7 +24,7 @@ async def create_invite(invite):
         expiry = expiry.format("Do MMMM YYYY")
 
         #Send invite
-        await send_invite(invite, expiry)
+        #await send_invite(invite, expiry)
         return True 
 
     else:
@@ -60,7 +60,6 @@ def validate_email(email: str):
     # Check whether email is valid
     try:
         response = zero_bounce.validate(email)
-        print(response)
         return str(response.status.value)
     except ZBException as e:
         return str(e)
@@ -109,7 +108,7 @@ async def send_invite(invite: EmailSchema, expiry: str):
                             <tr>
                             <td align="center">
                                 <a 
-                                href="[activation_link]" 
+                                href="http://localhost:5173/dashboard" 
                                 target="_blank"
                                 style="background-color:#007bff; color:#ffffff; padding:12px 24px; text-decoration:none; font-weight:bold; font-size:16px; border-radius:4px; display:inline-block;">
                                 Accept Invite

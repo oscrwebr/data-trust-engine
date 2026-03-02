@@ -1,5 +1,6 @@
 import secrets
-from app.invites import repository
+from app.invites import repository as invite_repository
+from app.authentication import repository as user_repository
 from app.core.database import get_database
 from sqlalchemy.orm import Session
 from datetime import datetime
@@ -14,8 +15,8 @@ async def send_invite(invite: InviteRequest, db: Session=Depends(get_database)):
     result = await create_invite(invite)
     if(result == True):
 
-        # Record invite in database
-        token = str(secrets.token_hex(16))
-        repository.add_invite(db, datetime.now(), token, invite.expiry_date.date(), "sent", False)
-
+        # Record invite and new user in database
+        user = user_repository.add_user(db, invite.email)
+        invite_repository.add_invite(db, datetime.now(), invite.expiry_date.date(), "sent", False, user.id)
+        
     return {"success": result}
