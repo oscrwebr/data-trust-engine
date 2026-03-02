@@ -141,18 +141,19 @@ def check_invite(token:str, db: Session):
     # Get the invite record based on token
     invite = db.query(Invite).filter(Invite.token == token).first()
 
+    # Check the invite hasn't already been clicked
+    if(invite.used == True):
+
+        print("Redirect user to invite link already used page")
+        # Redirect user to expiry error page
+
     # Check invite expiry date
     if(invite.expiry_date < date.today()):
+
         invite.status = "expired"
-
+        invite.used = True
         # Redirect user to expiry error page
-        return True
     
-    if(invite.status != "sent"):
-
-        # Redirect user to used already error page
-        return True
-    
-    invite.status = "accepted"
     # Redirect user to login page 
+    invite.used = True
     return

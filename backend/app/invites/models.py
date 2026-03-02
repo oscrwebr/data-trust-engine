@@ -9,6 +9,7 @@ class Invite(Base):
     created_at = Column(DateTime)
     expiry_date = Column(Date)
     status = Column(String(16))
+    used = Column(Boolean)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     user = relationship("User", backref="invites")
     token = Column(String(250))
