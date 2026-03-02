@@ -62,17 +62,21 @@ def refresh_flow(db, client_refresh: str, current_time: datetime):
                 return return_dict
             else:
                 print("This is bad - kill session chain immediately!!!")
+                # Revoke refresh_family
+                repository.revoke_refresh_family(db, refresh_details.refresh_family_id)
                 return return_dict
     
     # Check the expiry - this should be cleared daily, but that is just garbage collection. This must be checked.
     if refresh_details.expiry.replace(tzinfo=timezone.utc) < datetime.now(timezone.utc):
         print("Token has expired - redo authentication workflow")
+        # Revoke refresh_family
+        repository.revoke_refresh_family(db, refresh_details.refresh_family_id)
         return return_dict
     # ISSUING NEW ACCESS TOKEN AND REFRESH TOKEN
     uid = repository.get_uid_from_refresh_id(db=db, refresh_id = refresh_details.refresh_id)
     access_token, refresh_token, new_entry_details = create_access_refresh(db=db, data={"userId": uid}, refresh_family_id=refresh_details.refresh_family_id)
     # UPDATING PREVIOUS REFRESH TOKEN
-    update = repository.update_prev_refresh_entry(db=db, prev_id=refresh_details.refresh_id, new_id=new_entry_details.refresh_id)
+    repository.update_prev_refresh_entry(db=db, prev_id=refresh_details.refresh_id, new_id=new_entry_details.refresh_id)
     return_dict = {
         "access_token": access_token,
         "refresh_token": refresh_token

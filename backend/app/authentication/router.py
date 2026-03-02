@@ -33,6 +33,8 @@ async def sign_in(request: Request):
 
 @router.get("/success/")
 async def login_redirect(client_info: str, code: str, state: str, request: Request, response: Response, db: Annotated[Session, Depends(get_database)]):
+    if not request.session:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
     result = application.acquire_token_by_auth_code_flow(
         auth_code_flow = request.session["flow"], # Remember to delete the session!
         auth_response = {
@@ -41,6 +43,7 @@ async def login_redirect(client_info: str, code: str, state: str, request: Reque
             "state": state
         }
     )
+    request.session.clear()
     # Flow to find out if the user exists or not
     user = service.check_exists(result['id_token_claims']['oid'], db)
 

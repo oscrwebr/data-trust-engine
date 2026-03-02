@@ -52,4 +52,10 @@ def update_prev_refresh_entry(db: Session, prev_id, new_id) -> None:
     db.execute(update_statement)
     db.commit()
 
+def revoke_refresh_family(db: Session, refresh_family_id: int) -> None:
+    update_statement = update(RefreshFamily).where(RefreshFamily.refresh_family_id == refresh_family_id).values({
+        RefreshFamily.is_revoked : True
+    })
+    db.execute(update_statement)
+    db.commit()
 
