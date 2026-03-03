@@ -1,4 +1,5 @@
 import hashlib
+import camelcaser as cc
 from sqlalchemy.orm import Session
 from app.scanning import repository
 from app.scanning.models import File
@@ -41,3 +42,11 @@ def fetch_graph_file(graph_file_id: str):
             return "app/scanning/test_files/confidential_client_list.pdf"
         case "ghi789":
             return "app/scanning/test_files/finance_and_credentials_overview.pdf"
+
+FILE_NAME = "clientreport"
+
+def is_camel_case(file):
+    return cc.is_camelcase(FILE_NAME)
+
+def to_camel_case(file):
+    return cc.camelcase(FILE_NAME)
