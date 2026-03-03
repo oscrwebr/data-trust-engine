@@ -2,11 +2,10 @@ import secrets
 import arrow
 
 from app.invites import repository as invite_repository
-from app.invites.models import Invite
 from app.authentication import repository as user_repository
 from app.core.database import get_database
 from sqlalchemy.orm import Session
-from datetime import datetime, date
+from datetime import datetime
 from fastapi import APIRouter, Depends, Query
 from .service import create_invite, send_invite_service, check_invite
 from .schema import InviteRequest
@@ -47,5 +46,5 @@ async def process_invite(token: str = Query(...), db: Session = Depends(get_data
     if(result == "expired"):
         return RedirectResponse(f"http://localhost:5173/invite-error/expired?date={invite.expiry_date}")
     
-    print("VALID")
+    return "valid"
 
