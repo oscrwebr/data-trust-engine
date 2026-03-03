@@ -8,6 +8,7 @@ from starlette.responses import JSONResponse
 from datetime import datetime, date
 from sqlalchemy.orm import Session
 from app.invites.models import Invite
+from fastapi.responses import RedirectResponse
 
 load_dotenv()
 
@@ -136,24 +137,22 @@ async def send_invite_service(email: str, expiry: str, token: str):
     await fm.send_message(message)
     return JSONResponse(status_code=200, content={"message": "email has been sent"})
 
-def check_invite(token:str, db: Session):
-    
-    # Get the invite record based on token
-    invite = db.query(Invite).filter(Invite.token == token).first()
+def check_invite(invite:Invite, db: Session):
 
     # Check the invite hasn't already been clicked
+    print(invite.used)
     if(invite.used == True):
-
-        print("Redirect user to invite link already used page")
-        # Redirect user to expiry error page
+        print("here")
+        return "used"
 
     # Check invite expiry date
     if(invite.expiry_date < date.today()):
-
         invite.status = "expired"
         invite.used = True
-        # Redirect user to expiry error page
+        db.commit()
+        return "expired"
     
-    # Redirect user to login page 
+    # Redirect user to sign up page 
     invite.used = True
-    return
+    db.commit()
+    return "valid"

@@ -10,3 +10,8 @@ def add_invite(db: Session, createdAt:datetime, expiryDate:date, status:str, use
     db.commit()
     db.refresh(invite)
     return invite
+
+def get_invite(db: Session, token:str):
+    invite = db.query(Invite).filter(Invite.token == token).first()
+
+    return invite

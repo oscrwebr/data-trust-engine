@@ -7,7 +7,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/dashboard" element={<Dashboard/>}></Route>
-        <Route path="/invite-error" element={<EmployeeInviteError/>}></Route>
+        <Route path="/invite-error/:type" element={<EmployeeInviteError />} />
       </Routes>
     </Router>
   );

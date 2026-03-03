@@ -10,6 +10,7 @@ from datetime import datetime, date
 from fastapi import APIRouter, Depends, Query
 from .service import create_invite, send_invite_service, check_invite
 from .schema import InviteRequest
+from fastapi.responses import RedirectResponse
 
 router = APIRouter(prefix="/invite", tags=["invite"])
 
@@ -35,7 +36,16 @@ async def send_invite(invite: InviteRequest, db: Session=Depends(get_database)):
 @router.get("/invite-processing")
 async def process_invite(token: str = Query(...), db: Session = Depends(get_database)):
     
-    # Check the expiry date
-    check_invite(token, db)
+    invite = invite_repository.get_invite(db, token)
 
-    return 
+    # Check the expiry date
+    result = check_invite(invite, db)
+
+    if(result == "used"):
+        return RedirectResponse(f"http://localhost:5173/invite-error/used")
+
+    if(result == "expired"):
+        return RedirectResponse(f"http://localhost:5173/invite-error/expired?date={invite.expiry_date}")
+    
+    print("VALID")
+
