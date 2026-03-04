@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 from app.authentication import service
 from ..core.security import create_access_token, get_user_from_access_token, hash_user_refresh_token
 from ..core.security_schemas import User
+from ..core import config
 from sqlalchemy.orm import Session
 from app.core.database import get_database
 
@@ -33,11 +34,17 @@ async def sign_in(request: Request, next: str):
     # print(flow)
     request.session["flow"] = flow
     request.session["next"] = next
-    print(f"\n\n request.session: {request.session}")
+    # print(f"\n\n request.session: {request.session}")
     return RedirectResponse(flow['auth_uri'])
 
 @router.get("/success/")
-async def login_redirect(client_info: str, code: str, state: str, request: Request, response: Response, db: Annotated[Session, Depends(get_database)]):
+async def login_redirect(request: Request, response: Response, db: Annotated[Session, Depends(get_database)], client_info: str | None=None, code: str | None=None, state: str | None=None, error: str | None=None, error_description: str | None=None):
+    print(f"\n\n This is the response: {response}\n\n")
+    if error and error_description:
+        return RedirectResponse(url=f"{config.FRONTEND_BASE_URL}/error/422")
+    if error:
+        return RedirectResponse(url=f"{config.FRONTEND_BASE_URL}/error/422")
+
     if not request.session:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
     result = application.acquire_token_by_auth_code_flow(
@@ -54,19 +61,17 @@ async def login_redirect(client_info: str, code: str, state: str, request: Reque
     # Flow to find out if the user exists or not
     user = service.check_exists(result['id_token_claims']['oid'], db)
 
-    print(result)
+    # print(result)
     if user:
         # access_token = create_access_token(data={"userId": user.user_id})
-        access_token, refresh_token, _ = service.create_access_refresh(db=db, data={"userId": user.user_id})
+        _, refresh_token, _ = service.create_access_refresh(db=db, data={"userId": user.user_id})
         redirect_response = RedirectResponse(f"http://localhost:5173{url}") # This will redirect the user back to the page that they were on originally
         redirect_response.set_cookie(key="dte_refresh_token", value=refresh_token.opaque_token, expires=refresh_token.expiry_date, httponly=True, samesite = None)
-        print("\n\nCOOKIE HAS BEEN SET!!\n\n")
-        print("This is the next url: ", url, "\n\n")
-
         # return {"access_token": access_token} # This is now technically irrelevant - optimised flow to save milliseconds would be to remove this entirely
         return redirect_response
 
     else:
+        return RedirectResponse(f"{config.FRONTEND_BASE_URL}/error/403")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User does not exist"
@@ -82,7 +87,7 @@ async def refresh_access(db: Annotated[Session, Depends(get_database)], response
             status_code=status.HTTP_403_FORBIDDEN,
             detail="User has no Refresh Token!"
         )
-    print(refresh_response)
+    # print(refresh_response)
     if "access_token" and "refresh_token" in refresh_response:
         print("This has an access token and refresh_token")
         response.set_cookie(key="dte_refresh_token", value=refresh_response["refresh_token"].opaque_token, expires=refresh_response["refresh_token"].expiry_date, httponly=True, samesite = None)
