@@ -8,6 +8,7 @@ backend/.env
 *.log
 .venv/
 venv/
+.pytest_cache/
 
 # Node / frontend
 node_modules/

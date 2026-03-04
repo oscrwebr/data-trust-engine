@@ -1,7 +1,0 @@
-{
-  "dependencies": {
-    "@exodus/bytes": "^1.14.1",
-    "alembic": "^0.0.3",
-    "html-encoding-sniffer": "^6.0.0"
-  }
-}
