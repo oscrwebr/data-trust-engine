@@ -58,6 +58,11 @@ def to_snake_case(file_name):
     snake_case_name = '_'.join(word.lower() for word in words)
     return snake_case_name
 
+def to_pascal_case(file_name):
+    words = split_file_name(file_name)
+    pascal_case_name = ''.join(word.capitalize() for word in words)
+    return pascal_case_name
+
 def to_kebab_case(file_name):
     words = split_file_name(file_name)
     kebab_case_name = '-'.join(word.lower() for word in words)
