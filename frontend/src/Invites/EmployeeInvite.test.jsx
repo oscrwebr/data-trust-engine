@@ -1,7 +1,9 @@
-import { cleanup, fireEvent, render, screen, within, waitFor, act } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
+import { cleanup, fireEvent, render, screen, within, waitFor } from "@testing-library/react";
+import { MemoryRouter, redirect, Route, Routes } from "react-router-dom";
 import axios from 'axios';
 import { afterEach, describe, expect, test, vi } from "vitest";
+import EmployeeInviteError from "./EmployeeInviteError";
+import Dashboard from "../Dashboard/Dashboard.jsx";
 
  vi.mock("primereact/calendar", () => ({
             Calendar: ({ value, onChange }) => (
@@ -186,5 +188,59 @@ describe("Invite Component", () => {
         await waitFor(async () => {
             expect(await screen.findByText("Invite successfully sent!")).toBeInTheDocument();
         });
+    })
+
+    // Test 6
+    test("Test correct information displayed when user redirected to invite expiry error page", async () => {
+        render(
+            <MemoryRouter initialEntries={["/invite-error/expired?date=2026-03-03"]}>
+                <Routes>
+                    <Route path="/invite-error/:type" element={<EmployeeInviteError />} />
+                </Routes>
+            </MemoryRouter>
+        )
+        expect(screen.getByText("This invite link is no longer valid")).toBeInTheDocument();
+        expect(screen.getByText("Return to home")).toBeInTheDocument();
+        expect(screen.getByText("Request to join workspace")).toBeInTheDocument();
+        expect(screen.getByText("The Data Trust Engine")).toBeInTheDocument();
+
+        const paragraph = screen.getByText(/expired on the/i);
+
+        expect(paragraph).toHaveTextContent("The invite that your supervisor sent you expired on the");
+        expect(paragraph).toHaveTextContent("3 March 2026");
+        expect(paragraph).toHaveTextContent("To access your workspace, please ask your supervisor to send a new invite link");
+    })
+
+    // Test 7
+    test("Test correct information displayed when user redirected to invite used error page", async () => {
+        render(
+            <MemoryRouter initialEntries={["/invite-error/used"]}>
+                <Routes>
+                    <Route path="/invite-error/:type" element={<EmployeeInviteError />} />
+                </Routes>
+            </MemoryRouter>
+        )
+        expect(screen.getByText("This invite link is no longer valid")).toBeInTheDocument();
+        expect(screen.getByText("Return to home")).toBeInTheDocument();
+        expect(screen.getByText("Request to join workspace")).toBeInTheDocument();
+        expect(screen.getByText("The Data Trust Engine")).toBeInTheDocument();
+        expect(screen.getByText("This invite that your supervisor sent you has already been used. To access your workspace, please ask your supervisor to send a new invite link.")).toBeInTheDocument();
+    })
+
+
+    // Test 8
+    test("Test user is redirected to home when they click 'Return to home' from invite error page", async () => {
+        render(
+            <MemoryRouter initialEntries={["/invite-error/used"]}>
+                <Routes>
+                    <Route path="/invite-error/:type" element={<EmployeeInviteError />} />
+                    <Route path="/dashboard" element={<Dashboard />} />
+                </Routes>
+            </MemoryRouter>
+
+        )
+        
+        fireEvent.click(screen.getByText("Return to home"));
+        expect(await screen.findByText("Dashboard")).toBeInTheDocument();
     })
 })

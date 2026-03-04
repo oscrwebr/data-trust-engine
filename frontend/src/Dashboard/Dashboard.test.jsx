@@ -1,6 +1,5 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, test, vi } from "vitest";
 import Dashboard from "../Dashboard/Dashboard.jsx";
 
@@ -11,6 +10,7 @@ describe("Dashboard Component", () => {
         cleanup();
     });
 
+    // Test 1
     test("Test modal box appears when invite employee button clicked", async () => {
         render(
             <MemoryRouter>
