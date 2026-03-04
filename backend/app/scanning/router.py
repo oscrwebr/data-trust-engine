@@ -23,6 +23,6 @@ def create_file(graph_file_id: str, file_name: str, file_extension: str, db: Ses
 def get_all_files(db: Session = Depends(get_database)):
     return repository.get_all_files(db=db)
 
-# @router.post("/organisational_scan")
-# def organisational_scan():
-    
+@router.post("/organisational_scan")
+def organisational_scan():
+    return service.to_camel_case("codingreports2026")

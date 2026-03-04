@@ -1,5 +1,5 @@
 import hashlib
-import camelcaser as cc
+import wordninja
 from sqlalchemy.orm import Session
 from app.scanning import repository
 from app.scanning.models import File
@@ -43,10 +43,22 @@ def fetch_graph_file(graph_file_id: str):
         case "ghi789":
             return "app/scanning/test_files/finance_and_credentials_overview.pdf"
 
-FILE_NAME = "clientreport"
+# All naming convention methods use the Word Ninja library to split file names into English words
+# https://github.com/keredson/wordninja
+def split_file_name(file_name):
+    return wordninja.split(file_name)
 
-def is_camel_case(file):
-    return cc.is_camelcase(FILE_NAME)
+def to_camel_case(file_name):
+    words = split_file_name(file_name)
+    camel_case_name = words[0].lower() + ''.join(word.capitalize() for word in words[1:])
+    return camel_case_name
 
-def to_camel_case(file):
-    return cc.camelcase(FILE_NAME)
+def to_snake_case(file_name):
+    words = split_file_name(file_name)
+    snake_case_name = '_'.join(word.lower() for word in words)
+    return snake_case_name
+
+def to_kebab_case(file_name):
+    words = split_file_name(file_name)
+    kebab_case_name = '-'.join(word.lower() for word in words)
+    return kebab_case_name

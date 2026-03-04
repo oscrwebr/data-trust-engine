@@ -29,7 +29,6 @@ class NamingConvention(Base):
 
     naming_convention_id = Column(Integer, primary_key=True, index=True)
     name = Column(String(128))
-    
 
 class ScanNamingConvention(Base):
     __tablename__ = 'scan_naming_convention'
