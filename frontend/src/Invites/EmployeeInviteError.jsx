@@ -1,4 +1,5 @@
 import { Link, useParams, useSearchParams } from "react-router-dom";
+import dayjs from "dayjs";
 import styles from "./EmployeeInvite.module.css";
 import "primeicons/primeicons.css";
 
@@ -16,7 +17,7 @@ function EmployeeInviteError(){
 
     useEffect(() => {
             if(params.type == "expired"){ 
-                setErrorDesc(<>The invite that your supervisor sent you expired on the <strong>{expiry}</strong>. To access your workspace, please ask your supervisor to send a new invite link</>)
+                setErrorDesc(<>The invite that your supervisor sent you expired on the <strong>{dayjs(expiry).format("D MMMM YYYY")}</strong>. To access your workspace, please ask your supervisor to send a new invite link</>)
             } else {
                 setErrorDesc(<>This invite that your supervisor sent you has already been used. To access your workspace, please ask your supervisor to send a new invite link.</>);
             }
