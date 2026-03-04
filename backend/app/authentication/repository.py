@@ -6,7 +6,10 @@ from datetime import datetime, timezone
 def get_all(db: Session):
     return db.query(User).all()
 
-def get_by_id(oid: str, db: Session):
+def get_by_id(user_id: int, db: Session):
+    return db.query(User).filter(User.user_id == user_id).first()
+
+def get_by_oid(oid: str, db: Session):
     return db.query(User).filter(User.oid == oid).first()
 
 def add_user(db: Session, email: str):

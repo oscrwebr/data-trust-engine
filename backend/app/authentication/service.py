@@ -5,8 +5,12 @@ from datetime import datetime, timezone, timedelta
 
 def check_exists(oid: str, db):
     # print(oid)
-    user = repository.get_by_id(oid, db)
+    user = repository.get_by_oid(oid, db)
     # print(f"User details:\nFirstname: {res.firstname}\nSurname: {res.surname}\nemail: {res.email}") if res else print("There is nothing there!")
+    return user if user else None
+
+def test_route(id: int, db):
+    user = repository.get_by_id(user_id=id, db=db)
     return user if user else None
 
 def create_access_refresh(db: Session, data: dict, refresh_family_id: int | None=None):

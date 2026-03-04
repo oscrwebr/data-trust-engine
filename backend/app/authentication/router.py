@@ -24,11 +24,16 @@ router = APIRouter(
 )
 
 @router.get("/sign-in")
-async def sign_in(request: Request):
+async def sign_in(request: Request, next: str):
+    # Protect against url manipulation!
+    if not next.startswith("/"):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+    
     flow = application.initiate_auth_code_flow(scopes=os.environ.get("SCOPES").split())
     # print(flow)
     request.session["flow"] = flow
-    print(request.session)
+    request.session["next"] = next
+    print(f"\n\n request.session: {request.session}")
     return RedirectResponse(flow['auth_uri'])
 
 @router.get("/success/")
@@ -43,7 +48,9 @@ async def login_redirect(client_info: str, code: str, state: str, request: Reque
             "state": state
         }
     )
+    url = request.session["next"]
     request.session.clear()
+    response.delete_cookie("session") # This is to remove the cookie from the user's browser
     # Flow to find out if the user exists or not
     user = service.check_exists(result['id_token_claims']['oid'], db)
 
@@ -51,8 +58,14 @@ async def login_redirect(client_info: str, code: str, state: str, request: Reque
     if user:
         # access_token = create_access_token(data={"userId": user.user_id})
         access_token, refresh_token, _ = service.create_access_refresh(db=db, data={"userId": user.user_id})
-        response.set_cookie(key="dte_refresh_token", value=refresh_token.opaque_token, expires=refresh_token.expiry_date, httponly=True, samesite = None)
-        return {"access_token": access_token}
+        redirect_response = RedirectResponse(f"http://localhost:5173{url}") # This will redirect the user back to the page that they were on originally
+        redirect_response.set_cookie(key="dte_refresh_token", value=refresh_token.opaque_token, expires=refresh_token.expiry_date, httponly=True, samesite = None)
+        print("\n\nCOOKIE HAS BEEN SET!!\n\n")
+        print("This is the next url: ", url, "\n\n")
+
+        # return {"access_token": access_token} # This is now technically irrelevant - optimised flow to save milliseconds would be to remove this entirely
+        return redirect_response
+
     else:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -64,6 +77,7 @@ async def refresh_access(db: Annotated[Session, Depends(get_database)], response
     if dte_refresh_token:
         refresh_response = service.refresh_flow(db=db, client_refresh=dte_refresh_token, current_time=datetime.now(timezone.utc))
     else:
+        print("user has no refresh token!!!")
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="User has no Refresh Token!"
@@ -87,7 +101,5 @@ async def refresh_access(db: Annotated[Session, Depends(get_database)], response
 @router.get("/test")
 async def test_repo(db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)]):
     print(current_user.user_id)
-    # service.check_exists("Hello World!", db=db)
-    return {
-        "message": "This has gotten to the return at least lol!"
-    }
+    user = service.test_route(current_user.user_id, db=db)
+    return {"user": user} if user else {"message": "no user"}

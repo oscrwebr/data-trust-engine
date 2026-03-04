@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import Dashboard from './Dashboard/Dashboard';
 import EmployeeInviteError from './Invites/EmployeeInviteError';
 import Roles from "./roles/roles";
+import Test from "./Test/Test.jsx";
 
 function Home() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/roles" element={<Roles />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/test" element={<Test/>} />
         <Route path="/invite-error/:type" element={<EmployeeInviteError />} />
       </Routes>
     </BrowserRouter>
