@@ -9,7 +9,7 @@ from typing import Annotated
 from datetime import datetime, timezone
 
 from app.authentication import service
-from ..core.security import create_access_token, get_user_from_access_token, hash_user_refresh_token
+from ..core.security import create_access_token, get_user_from_access_token, hash_user_refresh_token, application
 from ..core.security_schemas import User
 from ..core import config
 from sqlalchemy.orm import Session
@@ -17,7 +17,7 @@ from app.core.database import get_database
 
 load_dotenv()
 # make this singleton!
-application = ConfidentialClientApplication(client_id=os.environ.get("CLIENT_ID"), authority=os.environ.get("AUTHORITY"), client_credential=os.environ.get("CLIENT_SECRET"))
+# application = ConfidentialClientApplication(client_id=os.environ.get("CLIENT_ID"), authority=os.environ.get("AUTHORITY"), client_credential=os.environ.get("CLIENT_SECRET"))
 
 router = APIRouter(
     prefix = "/auth",
@@ -25,7 +25,7 @@ router = APIRouter(
 )
 
 @router.get("/sign-in")
-async def sign_in(request: Request, next: str):
+async def sign_in(application: Annotated[ConfidentialClientApplication, Depends(application)], request: Request, next: str):
     # Protect against url manipulation!
     if not next.startswith("/"):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
@@ -38,7 +38,7 @@ async def sign_in(request: Request, next: str):
     return RedirectResponse(flow['auth_uri'])
 
 @router.get("/success/")
-async def login_redirect(request: Request, response: Response, db: Annotated[Session, Depends(get_database)], client_info: str | None=None, code: str | None=None, state: str | None=None, error: str | None=None, error_description: str | None=None):
+async def login_redirect(application: Annotated[ConfidentialClientApplication, Depends(application)], request: Request, response: Response, db: Annotated[Session, Depends(get_database)], client_info: str | None=None, code: str | None=None, state: str | None=None, error: str | None=None, error_description: str | None=None):
     print(f"\n\n This is the response: {response}\n\n")
     if error and error_description:
         return RedirectResponse(url=f"{config.FRONTEND_BASE_URL}/error/422")
@@ -72,10 +72,10 @@ async def login_redirect(request: Request, response: Response, db: Annotated[Ses
 
     else:
         return RedirectResponse(f"{config.FRONTEND_BASE_URL}/error/403")
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User does not exist"
-        )
+        # raise HTTPException(
+        #     status_code=status.HTTP_404_NOT_FOUND,
+        #     detail="User does not exist"
+        # )
     
 @router.get("/token/refresh")
 async def refresh_access(db: Annotated[Session, Depends(get_database)], response: Response, dte_refresh_token: Annotated[str | None, Cookie()] = None):

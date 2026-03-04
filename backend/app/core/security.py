@@ -3,12 +3,19 @@ from jwt.exceptions import InvalidTokenError
 from typing import Annotated
 from fastapi.security import OAuth2PasswordBearer
 from fastapi import HTTPException, status, Depends
+from functools import lru_cache
 from .security_schemas import *
 from datetime import datetime, timezone, timedelta
+from msal import ConfidentialClientApplication
+import os
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="success")
 ACCESS_TOKEN_SECRET = os.getenv("ACCESS_TOKEN_SECRET")
 ALGORITHM = os.getenv("ALGORITHM")
+
+@lru_cache
+def application() -> ConfidentialClientApplication:
+    return ConfidentialClientApplication(client_id=os.environ.get("CLIENT_ID"), authority=os.environ.get("AUTHORITY"), client_credential=os.environ.get("CLIENT_SECRET"))
 
 def create_access_token(data: dict):
     to_encode = data.copy()

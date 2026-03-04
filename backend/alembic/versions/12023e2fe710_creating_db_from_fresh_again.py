@@ -1,8 +1,8 @@
-"""creating db from scratch
+"""Creating db from fresh again
 
-Revision ID: d12ee9c0e7ec
+Revision ID: 12023e2fe710
 Revises: 
-Create Date: 2026-03-03 15:00:02.017918
+Create Date: 2026-03-04 17:05:25.482173
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'd12ee9c0e7ec'
+revision: str = '12023e2fe710'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -30,17 +30,6 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('file_id')
     )
     op.create_index(op.f('ix_file_file_id'), 'file', ['file_id'], unique=False)
-    op.create_table('invites',
-    sa.Column('invite_id', sa.Integer(), nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=True),
-    sa.Column('token', sa.String(length=255), nullable=True),
-    sa.Column('expiry_date', sa.Date(), nullable=True),
-    sa.Column('status', sa.String(length=16), nullable=True),
-    sa.Column('used', sa.Boolean(), nullable=True),
-    sa.PrimaryKeyConstraint('invite_id'),
-    sa.UniqueConstraint('token')
-    )
-    op.create_index(op.f('ix_invites_invite_id'), 'invites', ['invite_id'], unique=False)
     op.create_table('refresh_family',
     sa.Column('refresh_family_id', sa.Integer(), nullable=False),
     sa.Column('is_revoked', sa.Boolean(), nullable=True),
@@ -69,6 +58,18 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_user_oid'), 'user', ['oid'], unique=True)
     op.create_index(op.f('ix_user_user_id'), 'user', ['user_id'], unique=False)
+    op.create_table('invites',
+    sa.Column('invite_id', sa.Integer(), nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
+    sa.Column('expiry_date', sa.Date(), nullable=True),
+    sa.Column('status', sa.String(length=16), nullable=True),
+    sa.Column('used', sa.Boolean(), nullable=True),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('token', sa.String(length=250), nullable=True),
+    sa.ForeignKeyConstraint(['user_id'], ['user.user_id'], ),
+    sa.PrimaryKeyConstraint('invite_id')
+    )
+    op.create_index(op.f('ix_invites_invite_id'), 'invites', ['invite_id'], unique=False)
     op.create_table('refresh',
     sa.Column('refresh_id', sa.Integer(), nullable=False),
     sa.Column('token', sa.Text(), nullable=False),
@@ -118,6 +119,8 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_refresh_refresh_id'), table_name='refresh')
     op.drop_index(op.f('ix_refresh_refresh_family_id'), table_name='refresh')
     op.drop_table('refresh')
+    op.drop_index(op.f('ix_invites_invite_id'), table_name='invites')
+    op.drop_table('invites')
     op.drop_index(op.f('ix_user_user_id'), table_name='user')
     op.drop_index(op.f('ix_user_oid'), table_name='user')
     op.drop_table('user')
@@ -127,8 +130,6 @@ def downgrade() -> None:
     op.drop_table('role')
     op.drop_index(op.f('ix_refresh_family_refresh_family_id'), table_name='refresh_family')
     op.drop_table('refresh_family')
-    op.drop_index(op.f('ix_invites_invite_id'), table_name='invites')
-    op.drop_table('invites')
     op.drop_index(op.f('ix_file_file_id'), table_name='file')
     op.drop_table('file')
     # ### end Alembic commands ###
