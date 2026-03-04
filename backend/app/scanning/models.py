@@ -15,7 +15,7 @@ class Scan(Base):
 
     scan_id = Column(Integer, primary_key=True, index=True)
     started_at = Column(DateTime)
-    finished_at = Column(DateTime)
+    finished_at = Column(DateTime, nullable=True)
 
 class ScanFiles(Base):
     __tablename__ = 'scan_files'

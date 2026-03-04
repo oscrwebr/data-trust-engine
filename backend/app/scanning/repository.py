@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from app.scanning.models import File, NamingConvention, ScanNamingConvention, NamingConventionScanResult
+from app.scanning.models import File, NamingConvention, Scan, ScanNamingConvention, NamingConventionScanResult
 
 def create_file(db: Session, graph_file_id:str, name: str, extension: str, file_hash: str):
     file = File(graph_file_id=graph_file_id, file_name=name, file_extension=extension, hash=file_hash)
@@ -38,4 +38,11 @@ def set_naming_convention_scan_result(db: Session, scan_file_id: int, scan_namin
     db.commit()
     db.refresh(naming_convention_scan_result)
     return naming_convention_scan_result
+
+def create_scan(db: Session):
+    scan = Scan()
+    db.add(scan)
+    db.commit()
+    db.refresh(scan)
+    return scan
 
