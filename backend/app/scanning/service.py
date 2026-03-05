@@ -87,7 +87,7 @@ def is_kebab_case(file_name):
 
 def organisation_scan(db: Session, naming_convention_ids: list[int]):
     scan = repository.create_scan(db=db)
-    # Scan all files for now (potentially in future will be selectable)
+    # Scan all files for now (potentially in future can be selectable)
     files = repository.get_all_files(db=db)
 
     # User will be able to select multiple naming conventions on frontend
@@ -95,7 +95,12 @@ def organisation_scan(db: Session, naming_convention_ids: list[int]):
         repository.create_scan_naming_convention(db=db, scan_id=scan.scan_id, naming_convention_id=naming_convention_id)
 
     for file in files:
-        scan_file = repository.create_scan_file(db=db, scan_id=scan.scan_id, file_id=file.file_id)
+        repository.create_scan_file(db=db, scan_id=scan.scan_id, file_id=file.file_id)
+
+    scan_files = repository.get_scan_files_by_scan_id(db=db, scan_id=scan.scan_id)
+
+    for scan_file in scan_files:
+        file = repository.get_file_by_id(db=db, file_id=scan_file.file_id)
 
         for naming_convention_id in naming_convention_ids:
             # Naming convention checks
@@ -120,4 +125,6 @@ def organisation_scan(db: Session, naming_convention_ids: list[int]):
                 suggested_name = None
                 if passed == False:
                     suggested_name = to_kebab_case(file.file_name)
+
+            repository.set_naming_convention_scan_result(db=db, scan_file_id=scan_file.scan_file_id, scan_naming_convention_id=naming_convention_id, passed=passed, suggested_name=suggested_name)
 

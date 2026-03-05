@@ -1,5 +1,7 @@
+from datetime import datetime
+
 from sqlalchemy.orm import Session
-from app.scanning.models import File, NamingConvention, Scan, ScanNamingConvention, NamingConventionScanResult
+from app.scanning.models import File, NamingConvention, Scan, ScanFiles, ScanNamingConvention, NamingConventionScanResult
 
 def create_file(db: Session, graph_file_id:str, name: str, extension: str, file_hash: str):
     file = File(graph_file_id=graph_file_id, file_name=name, file_extension=extension, hash=file_hash)
@@ -40,9 +42,25 @@ def set_naming_convention_scan_result(db: Session, scan_file_id: int, scan_namin
     return naming_convention_scan_result
 
 def create_scan(db: Session):
-    scan = Scan()
+    scan = Scan(started_at=datetime.now())
     db.add(scan)
     db.commit()
     db.refresh(scan)
     return scan
 
+def create_scan_file(db: Session, scan_id: int, file_id: int):
+    scan_file = ScanFiles(scan_id=scan_id, file_id=file_id)
+    db.add(scan_file)
+    db.commit()
+    db.refresh(scan_file)
+    return scan_file
+
+def create_scan_naming_convention(db: Session, scan_id: int, naming_convention_id: int):
+    scan_naming_convention = ScanNamingConvention(scan_id=scan_id, naming_convention_id=naming_convention_id)
+    db.add(scan_naming_convention)
+    db.commit()
+    db.refresh(scan_naming_convention)
+    return scan_naming_convention
+
+def get_scan_files_by_scan_id(db: Session, scan_id: int):
+    return db.query(ScanFiles).filter(ScanFiles.scan_id == scan_id).all()
