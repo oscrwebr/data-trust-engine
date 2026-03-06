@@ -1,7 +1,7 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, test, vi } from "vitest";
-import Dashboard from "../Dashboard/Dashboard.jsx";
+import Dashboard from "./Dashboard.jsx";
 
 vi.mock("axios");
 describe("Dashboard Component", () => {

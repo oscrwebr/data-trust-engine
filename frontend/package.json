@@ -18,6 +18,7 @@
     "axios": "^1.6.8",
     "dayjs": "^1.11.19",
     "encoding-sniffer": "^0.2.1",
+    "flowbite-react": "^0.12.17",
     "html-encoding-sniffer": "^6.0.0",
     "primeicons": "^7.0.0",
     "primereact": "^10.9.7",
