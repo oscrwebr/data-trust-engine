@@ -72,7 +72,7 @@ def to_kebab_case(file_name):
     kebab_case_name = '-'.join(word.lower() for word in words)
     return kebab_case_name
 
-# Checks for each naming convention for future use
+# Checks for each naming convention
 def is_camel_case(file_name):
     return file_name == to_camel_case(file_name)
 
@@ -90,41 +90,47 @@ def organisation_scan(db: Session, naming_convention_ids: list[int]):
     # Scan all files for now (potentially in future can be selectable)
     files = repository.get_all_files(db=db)
 
-    # User will be able to select multiple naming conventions on frontend
+    # Users will be able to select multiple naming conventions on frontend
     for naming_convention_id in naming_convention_ids:
         repository.create_scan_naming_convention(db=db, scan_id=scan.scan_id, naming_convention_id=naming_convention_id)
 
+    # Create a scan file record for each file
     for file in files:
         repository.create_scan_file(db=db, scan_id=scan.scan_id, file_id=file.file_id)
 
-    scan_files = repository.get_scan_files_by_scan_id(db=db, scan_id=scan.scan_id)
+    # Get the naming conventions for this scan
+    scan_naming_conventions = repository.get_scan_naming_convention_by_scan_id(db=db, scan_id=scan.scan_id)
 
-    for scan_file in scan_files:
-        file = repository.get_file_by_id(db=db, file_id=scan_file.file_id)
+    # Join query to get scan files with their corresponding file table data
+    scan_files = repository.get_scan_files_with_file(db=db, scan_id=scan.scan_id)
 
-        for naming_convention_id in naming_convention_ids:
-            # Naming convention checks
-            # ID 1 = camelCase, ID 2 = snake_case, ID 3 = PascalCase, ID 4 = kebab-case
-            if naming_convention_id == 1:
-                passed = is_camel_case(file.file_name)
-                suggested_name = None
-                if passed == False:
-                    suggested_name = to_camel_case(file.file_name)
-            elif naming_convention_id == 2:
-                passed = is_snake_case(file.file_name)
-                suggested_name = None
-                if passed == False:
-                    suggested_name = to_snake_case(file.file_name)
-            elif naming_convention_id == 3:
-                passed = is_pascal_case(file.file_name)
-                suggested_name = None
-                if passed == False:
-                    suggested_name = to_pascal_case(file.file_name)
-            elif naming_convention_id == 4:
-                passed = is_kebab_case(file.file_name)
-                suggested_name = None
-                if passed == False:
-                    suggested_name = to_kebab_case(file.file_name)
 
-            repository.set_naming_convention_scan_result(db=db, scan_file_id=scan_file.scan_file_id, scan_naming_convention_id=naming_convention_id, passed=passed, suggested_name=suggested_name)
+    # Optimising if/elif code blocks adapted from:
+    # https://www.reddit.com/r/learnpython/comments/iq5qhl/most_efficient_way_to_do_lots_of_ifelif_statements/
+    naming_convention_checks = {
+        1: is_camel_case,
+        2: is_snake_case,
+        3: is_pascal_case,
+        4: is_kebab_case
+    }
 
+    naming_convention_suggestions = {
+        1: to_camel_case,
+        2: to_snake_case,
+        3: to_pascal_case,
+        4: to_kebab_case
+    }
+
+    for scan_file, file in scan_files:
+
+        for scan_naming_convention in scan_naming_conventions:
+            checks = naming_convention_checks.get(scan_naming_convention.naming_convention_id)
+            suggestions = naming_convention_suggestions.get(scan_naming_convention.naming_convention_id)
+
+            passed = checks(file.file_name)
+            suggested_name = None
+            if passed == False:
+                suggested_name = suggestions(file.file_name)
+                
+            repository.set_naming_convention_scan_result(db=db, scan_file_id=scan_file.scan_file_id, scan_naming_convention_id=scan_naming_convention.scan_naming_convention_id, passed=passed, suggested_name=suggested_name)
+    repository.end_scan(db=db, scan=scan)

@@ -48,6 +48,12 @@ def create_scan(db: Session):
     db.refresh(scan)
     return scan
 
+def end_scan(db: Session, scan: Scan):
+    scan.finished_at = datetime.now()
+    db.commit()
+    db.refresh(scan)
+    return scan
+
 def create_scan_file(db: Session, scan_id: int, file_id: int):
     scan_file = ScanFiles(scan_id=scan_id, file_id=file_id)
     db.add(scan_file)
@@ -64,3 +70,12 @@ def create_scan_naming_convention(db: Session, scan_id: int, naming_convention_i
 
 def get_scan_files_by_scan_id(db: Session, scan_id: int):
     return db.query(ScanFiles).filter(ScanFiles.scan_id == scan_id).all()
+
+def get_scan_naming_convention(db: Session, scan_id: int, naming_convention_id: int):
+    return db.query(ScanNamingConvention).filter(ScanNamingConvention.scan_id == scan_id, ScanNamingConvention.naming_convention_id == naming_convention_id).first()
+
+def get_scan_naming_convention_by_scan_id(db: Session, scan_id: int):
+    return db.query(ScanNamingConvention).filter(ScanNamingConvention.scan_id == scan_id).all()
+
+def get_scan_files_with_file(db: Session, scan_id: int):
+    return db.query(ScanFiles, File).join(File, ScanFiles.file_id == File.file_id).filter(ScanFiles.scan_id == scan_id).all()
