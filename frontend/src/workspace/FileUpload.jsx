@@ -1,18 +1,14 @@
 import {React, useState} from 'react';
 import { useDropzone } from 'react-dropzone';
+import FileCard from './FileCard.jsx';
 
 import styles from "./CreateWorkspace.module.css";
 
 function FileUpload() {
     const [file, setFile] = useState([]);
     const { getRootProps, getInputProps } = useDropzone({
-        onDrop: (acceptedFiles) => {
-            if (acceptedFiles.length > 1) {
-                return;
-            } else {
-                setFile(acceptedFiles[0])
-            }
-        },
+        maxFiles: 1,
+        onDrop: (acceptedFiles) => {setFile(acceptedFiles)}
     });
 
     return (
@@ -25,12 +21,13 @@ function FileUpload() {
                 </div>
             </div>
             <div>
-                {file.map((f) => (
-                <FileCard
-                  name={f.name}  
-                />
-            ))}
-
+                {file.map((file, index) => (
+                    <FileCard 
+                    key={index} 
+                    file={file} 
+                    onRemove={() => setFile([])} 
+                    />
+                ))}
             </div>
         </div>
     );

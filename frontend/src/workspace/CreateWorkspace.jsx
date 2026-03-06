@@ -1,11 +1,11 @@
-import { React, useState } from "react";
+import React, { useState } from "react";
 
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { Toast } from 'primereact/toast';
 import { Dialog } from "primereact/dialog";
 
-import FileUploadComponent from './FileUpload';
+import FileUploadComponent from './FileUpload.jsx';
 import styles from "./CreateWorkspace.module.css";
 
 function CreateWorkspace() {
