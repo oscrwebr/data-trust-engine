@@ -28,8 +28,9 @@ def get_all_files(db: Session = Depends(get_database)):
 def scan_file(file_path: str, db: Session = Depends(get_database)):
     extracted_text = service.extract_text_from_pdf(file_path)
 
-    detected_named_entities = service.detect_named_entities(extracted_text)
-    detected_phone_numbers = service.detect_phone_numbers(extracted_text)
+    detections = []
+    detections.extend(service.detect_named_entities(extracted_text))
+    detections.extend(service.detect_phone_numbers(extracted_text))
 
-    return extracted_text
+    return detections
     

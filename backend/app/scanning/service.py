@@ -56,22 +56,33 @@ def extract_text_from_pdf(filepath: str) -> dict:
 
 # Named entity recognition detection (names, organisations) using spacy nlp model
 def detect_named_entities(text_dict):
-    for page in text_dict:
-        doc = nlp(text_dict[page])
+    detections = []
+
+    for page_number, text in text_dict.items():
+        doc = nlp(text)
+
         for entity in doc.ents:
-            print(entity.text, entity.label_)
+            if entity.label_ == "PERSON":
+                detections.append({
+                    "sensitivity_subcategory": "NAME",
+                    "page_number": page_number
+                })
+
+    return detections
 
 
 # Phone number detection using regex
 def detect_phone_numbers(text_dict):
-    count = 0
+    detections = []
 
-    for page in text_dict:
-        text = text_dict[page]
+    for page_number, text in text_dict.items():
         for match in UK_PHONE_REGEX.finditer(text):
-            count += 1
+            detections.append({
+                "sensitivity_subcategory": "PHONE",
+                "page_number": page_number
+            })
     
-    return count
+    return detections
             
 
 # Placeholder for dev purposes, returns hard coded test files' paths for testing
