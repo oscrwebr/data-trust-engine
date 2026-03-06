@@ -54,6 +54,11 @@ def scan_file(db: Session, graph_file_id: str, scan_id: int):
 
     detections.extend(detect_named_entities(file_extracted_text))
     detections.extend(detect_phone_numbers(file_extracted_text))
+    detections.extend(detect_emails(file_extracted_text))
+    detections.extend(detect_addresses(file_extracted_text))
+    detections.extend(detect_postcodes(file_extracted_text))
+    detections.extend(detect_ibans(file_extracted_text))
+    detections.extend(detect_vats(file_extracted_text))
 
     # Create scan_file_detection records for every detection
     for detection in detections:
