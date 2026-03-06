@@ -20,8 +20,8 @@ class Scan(Base):
     finished_at = Column(DateTime)
 
 
-class ScanFiles(Base):
-    __tablename__ = 'scan_files'
+class ScanFile(Base):
+    __tablename__ = 'scan_file'
 
     scan_file_id = Column(Integer, primary_key=True, index=True)
     scan_id = Column(Integer, ForeignKey("scans.scan_id"), nullable=False)
@@ -32,7 +32,7 @@ class ScanFileDetection(Base):
     __tablename__ = 'scan_file_detection'
 
     scan_file_detection_id = Column(Integer, primary_key=True, index=True)
-    scan_file_id = Column(Integer, ForeignKey("scan_files.scan_file_id"))
+    scan_file_id = Column(Integer, ForeignKey("scan_file.scan_file_id"))
 
     sensitivity_subcategory = Column(String(64))
     page_number = Column(Integer)

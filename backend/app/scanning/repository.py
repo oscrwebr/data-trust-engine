@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from app.scanning.models import File, Scan
+from app.scanning.models import File, Scan, ScanFile
 from datetime import datetime, timezone
 
 
@@ -16,7 +16,20 @@ def create_scan(db: Session):
     return scan
 
 
-def create_file(db: Session, graph_file_id:str, name: str, extension: str, file_hash: str):
+def create_scan_file(db: Session, scan_id: int, graph_file_id: str):
+    scan_file = ScanFile(
+        scan_id = scan_id,
+        graph_file_id = graph_file_id
+    )
+
+    db.add(scan_file)
+    db.commit()
+    db.refresh(scan_file)
+
+    return scan_file
+
+
+def create_file(db: Session, graph_file_id: str, name: str, extension: str, file_hash: str):
     file = File(graph_file_id=graph_file_id, file_name=name, file_extension=extension, hash=file_hash)
     db.add(file)
     db.commit()

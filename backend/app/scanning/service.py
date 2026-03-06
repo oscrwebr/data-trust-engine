@@ -21,11 +21,19 @@ def perform_scan(db: Session, graph_file_ids: list[str]):
 
 # Scan one individual file
 def scan_file(db: Session, graph_file_id: str, scan_id: int):
-    # fetch file
+
+    # Fetch file using its graph_file_id (ingestion component will be integrated here later)
+    file_path = fetch_graph_file(graph_file_id=graph_file_id)
+
     # create scan_file record
+    
+
     # extract text
+
     # detect sensitive data
+
     # create scan_file_detection records
+
     pass
 
 
