@@ -135,15 +135,25 @@ def detect_addresses(text_dict):
     for page_number, text in text_dict.items():
         for match in ADDRESS_REGEX.finditer(text):
             detections.append({
-                "sensitivity_subcategory": "EMAIL",
+                "sensitivity_subcategory": "ADDRESS",
                 "page_number": page_number
             })
 
-            print(f'ADDRESS detect: {match} | PAGE: {page_number}')
+            print(f'ADDRESS detection: {match} | PAGE: {page_number}')
 
 
 # Postcode detection using regex
+def detect_postcodes(text_dict):
+    detections = []
 
+    for page_number, text in text_dict.items():
+        for match in UK_POSTCODE_REGEX.finditer(text):
+            detections.append({
+                "sensitivity_subcategory": "POSTCODE",
+                "page_number": page_number
+            })
+
+            print(f'POSTCODE detection: {match} | PAGE: {page_number}')
 
 # IBAN detection using regex
             
