@@ -44,13 +44,13 @@ def extract_text_from_pdf(filepath: str) -> dict:
     file = pymupdf.open(filepath)
     extracted_text = {}
 
+    # Make page numbers 1 indexed, because user think in page 1, 2, 3 not 0, 1, 2
     for page_number in range(len(file)):
         page = file.load_page(page_number)
         text = page.get_text("text")
-        extracted_text[page_number] = text
+        extracted_text[page_number + 1] = text
 
     file.close()
-    print(extracted_text)
     return extracted_text
 
 
