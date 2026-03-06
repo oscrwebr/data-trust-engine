@@ -68,6 +68,8 @@ def detect_named_entities(text_dict):
                     "page_number": page_number
                 })
 
+    print(f'Number of NAME detections: {len(detections)}')
+
     return detections
 
 
@@ -81,6 +83,8 @@ def detect_phone_numbers(text_dict):
                 "sensitivity_subcategory": "PHONE",
                 "page_number": page_number
             })
+
+    print(f'Number of PHONE detections: {len(detections)}')
     
     return detections
             
