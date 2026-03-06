@@ -25,7 +25,7 @@ def create_access_refresh(db: Session, data: dict, refresh_family_id: int | None
     new_entry = repository.create_refresh(db=db, uid=data['userId'], hashed_token=hashed_token, expiry=refresh_token.expiry_date, refresh_family_id=refresh_family_id, access_token=access_token)
     return access_token, refresh_token, new_entry
 
-def update_refresh(refresh_token: str, expiry_date: datetime, db):
+def update_refresh(refresh_token: str, expiry_date: datetime, db): # This doesn't seem to be used anywhere??
     hashed_token = hash_user_refresh_token(refresh_token)
     print(f"refresh token from client: {refresh_token} -- hashed token: {hashed_token}")
     matched_refresh = repository.verify_refresh(hashed_token=hashed_token, expiry=expiry_date, db=db)
@@ -59,7 +59,7 @@ def refresh_flow(db, client_refresh: str, current_time: datetime):
     if refresh_details.replaced_by:
         # These are checks incase the client has sent multiple requests at once within the grace period of 30 seconds
         if replaced_at := refresh_details.replaced_at:
-            print(f"\n\nreplaced at: {replaced_at.replace(tzinfo=timezone.utc)}\nCurrent time: {current_time}\n\n")
+            # print(f"\n\nreplaced at: {replaced_at.replace(tzinfo=timezone.utc)}\nCurrent time: {current_time}\n\n")
             if replaced_at.replace(tzinfo=timezone.utc) + timedelta(seconds=30) > current_time:
                 print("This is within accepted boundaries - return the access token to the user and don't rotate refresh token")
                 return_dict["access_token"] = refresh_details.access_token

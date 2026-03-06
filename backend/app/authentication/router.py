@@ -39,9 +39,6 @@ async def sign_in(application: Annotated[ConfidentialClientApplication, Depends(
 
 @router.get("/success/")
 async def login_redirect(application: Annotated[ConfidentialClientApplication, Depends(application)], request: Request, response: Response, db: Annotated[Session, Depends(get_database)], client_info: str | None=None, code: str | None=None, state: str | None=None, error: str | None=None, error_description: str | None=None):
-    print(f"\n\n This is the response: {response}\n\n")
-    if error and error_description:
-        return RedirectResponse(url=f"{config.FRONTEND_BASE_URL}/error/422")
     if error:
         return RedirectResponse(url=f"{config.FRONTEND_BASE_URL}/error/422")
 
@@ -69,13 +66,8 @@ async def login_redirect(application: Annotated[ConfidentialClientApplication, D
         redirect_response.set_cookie(key="dte_refresh_token", value=refresh_token.opaque_token, expires=refresh_token.expiry_date, httponly=True, samesite = None)
         # return {"access_token": access_token} # This is now technically irrelevant - optimised flow to save milliseconds would be to remove this entirely
         return redirect_response
-
     else:
         return RedirectResponse(f"{config.FRONTEND_BASE_URL}/error/403")
-        # raise HTTPException(
-        #     status_code=status.HTTP_404_NOT_FOUND,
-        #     detail="User does not exist"
-        # )
     
 @router.get("/token/refresh")
 async def refresh_access(db: Annotated[Session, Depends(get_database)], response: Response, dte_refresh_token: Annotated[str | None, Cookie()] = None):

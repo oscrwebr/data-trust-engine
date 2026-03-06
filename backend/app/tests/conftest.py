@@ -29,7 +29,7 @@ def db_engine():
 def db(db_engine):
     connection = db_engine.connect() # This opens the connection
     transaction = connection.begin() # Begins a transaction
-    TestingSession = sessionmaker(autocommit=False, autoflush=False, bind=db_engine)
+    TestingSession = sessionmaker(autocommit=False, autoflush=False, bind=connection)
     session = TestingSession() # This creates the db session for each test
     try:
         yield session # This gives the test the session
