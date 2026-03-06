@@ -94,7 +94,7 @@ def detect_named_entities(text_dict):
                     "page_number": page_number
                 })
 
-    print(f'Number of NER detections: {len(detections)}')
+                print(f'PERSON detection: {entity} | PAGE: {page_number}')
 
     return detections
 
@@ -110,19 +110,46 @@ def detect_phone_numbers(text_dict):
                 "page_number": page_number
             })
 
-    print(f'Number of PHONE detections: {len(detections)}')
-    
+            print(f'PHONE detection: {match} | PAGE: {page_number}')
+
     return detections
 
 # Email detection using regex
+def detect_emails(text_dict):
+    detections = []
+
+    for page_number, text in text_dict.items():
+        for match in EMAIL_REGEX.finditer(text):
+            detections.append({
+                "sensitivity_subcategory": "EMAIL",
+                "page_number": page_number
+            })
+
+            print(f'EMAIL detection: {match} | PAGE: {page_number}')
+
 
 # Address detection using regex
+def detect_addresses(text_dict):
+    detections = []
+
+    for page_number, text in text_dict.items():
+        for match in ADDRESS_REGEX.finditer(text):
+            detections.append({
+                "sensitivity_subcategory": "EMAIL",
+                "page_number": page_number
+            })
+
+            print(f'ADDRESS detect: {match} | PAGE: {page_number}')
+
 
 # Postcode detection using regex
 
+
 # IBAN detection using regex
             
+
 # VAT detection using regex
+
 
 # Placeholder for dev purposes, returns hard coded test files' paths for testing
 def fetch_graph_file(graph_file_id: str):
