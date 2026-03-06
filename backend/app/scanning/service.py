@@ -155,10 +155,33 @@ def detect_postcodes(text_dict):
 
             print(f'POSTCODE detection: {match} | PAGE: {page_number}')
 
+
 # IBAN detection using regex
-            
+def detect_ibans(text_dict):
+    detections = []
+
+    for page_number, text in text_dict.items():
+        for match in IBAN_REGEX.finditer(text):
+            detections.append({
+                "sensitivity_subcategory": "IBAN",
+                "page_number": page_number
+            })
+
+            print(f'IBAN detection: {match} | PAGE: {page_number}')
+
 
 # VAT detection using regex
+def detect_vats(text_dict):
+    detections = []
+
+    for page_number, text in text_dict.items():
+        for match in UK_VAT_REGEX.finditer(text):
+            detections.append({
+                "sensitivity_subcategory": "VAT",
+                "page_number": page_number
+            })
+
+            print(f'VAT detection: {match} | PAGE: {page_number}')
 
 
 # Placeholder for dev purposes, returns hard coded test files' paths for testing
