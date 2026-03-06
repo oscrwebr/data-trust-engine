@@ -28,18 +28,11 @@ class ScanFiles(Base):
     file_id = Column(Integer, ForeignKey("file.file_id"), nullable=False)
 
 
-class ScanFileResult(Base):
-    __tablename__ = 'scan_file_result'
+class ScanFileDetection(Base):
+    __tablename__ = 'scan_file_detection'
 
-    scan_file_result_id = Column(Integer, primary_key=True, index=True)
+    scan_file_detection_id = Column(Integer, primary_key=True, index=True)
     scan_file_id = Column(Integer, ForeignKey("scan_files.scan_file_id"))
 
-    # Counts
-    name_count = Column(Integer, nullable=False, default=0)
-    phone_count = Column(Integer, nullable=False, default=0)
-    email_count = Column(Integer, nullable=False, default=0)
-    address_count = Column(Integer, nullable=False, default=0)
-    postcode_count = Column(Integer, nullable=False, default=0)
-    number_plate_count = Column(Integer, nullable=False, default=0)
-    iban_count = Column(Integer, nullable=False, default=0)
-    vat_count = Column(Integer, nullable=False, default=0)
+    sensitivity_subcategory = Column(String(64))
+    page_number = Column(Integer)
