@@ -16,7 +16,15 @@ def perform_scan(db: Session, graph_file_ids: list[str]):
     scan = repository.create_scan(db=db)
     
     for graph_file_id in graph_file_ids:
-        scan_file(db=db, graph_file_id=graph_file_id, scan_id=scan.scan_id)
+        try:
+            scan_file(db=db, graph_file_id=graph_file_id, scan_id=scan.scan_id)
+        except Exception:
+            continue
+
+    return {
+        "scan_id": scan.scan_id,
+        "files_requested": len(graph_file_ids)
+    }
 
 
 # Scan one individual file
@@ -26,7 +34,11 @@ def scan_file(db: Session, graph_file_id: str, scan_id: int):
     file_path = fetch_graph_file(graph_file_id=graph_file_id)
 
     # Create scan_file record
-    scan_file_record = repository.create_scan_file(db=db, scan_id=scan_id, graph_file_id=graph_file_id)
+    scan_file_record = repository.create_scan_file(
+        db=db, 
+        scan_id=scan_id, 
+        graph_file_id=graph_file_id
+    )
 
     # Extract text from fetched file
     file_extracted_text = extract_text_from_pdf(filepath=file_path)
@@ -39,13 +51,12 @@ def scan_file(db: Session, graph_file_id: str, scan_id: int):
 
     # Create scan_file_detection records for every detection
     for detection in detections:
-        repository.create_scan_file_detection(db=db, 
-                                              scan_file_id=scan_file_record.scan_file_id,
-                                              sensitivity_subcategory=detection["sensitivity_subcategory"],
-                                              page_number=detection["page_number"]
-                                              )
-
-    # 
+        repository.create_scan_file_detection(
+            db=db, 
+            scan_file_id=scan_file_record.scan_file_id,
+            sensitivity_subcategory=detection["sensitivity_subcategory"],
+            page_number=detection["page_number"]
+        )
 
 
 # Extract text from PDF into dict
