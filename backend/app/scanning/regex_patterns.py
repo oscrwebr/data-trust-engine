@@ -8,7 +8,20 @@ EMAIL_REGEX = re.compile(
     r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b"
 )
 
-UK_POSTCODE_REGEX = re.compile(
-    r"\b([A-Z]{1,2}[0-9][0-9A-Z]?\s?[0-9][A-Z]{2})\b",
+ADDRESS_REGEX = re.compile(
+    r"\b\d{1,4}[A-Za-z]?\s+[A-Za-z\s]{3,30}\s(?:Street|St|Road|Rd|Lane|Ln|Avenue|Ave|Drive|Dr|Close|Way)\b",
     re.IGNORECASE
+)
+
+UK_POSTCODE_REGEX = re.compile(
+    r"\b([A-Z]{1,2}\d[A-Z\d]? ?\d[A-Z]{2})\b",
+    re.IGNORECASE
+)
+
+IBAN_REGEX = re.compile(
+    r"\b[A-Z]{2}\d{2}[ ]?[A-Z0-9]{4}[ ]?[A-Z0-9]{4}[ ]?[A-Z0-9]{4}[ ]?[A-Z0-9]{4}[ ]?[A-Z0-9]{0,4}\b"
+)
+
+UK_VAT_REGEX = re.compile(
+    r"\b(?:GB)?\d{3}\s?\d{4}\s?\d{2}\b"
 )

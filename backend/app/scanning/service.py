@@ -113,7 +113,16 @@ def detect_phone_numbers(text_dict):
     print(f'Number of PHONE detections: {len(detections)}')
     
     return detections
+
+# Email detection using regex
+
+# Address detection using regex
+
+# Postcode detection using regex
+
+# IBAN detection using regex
             
+# VAT detection using regex
 
 # Placeholder for dev purposes, returns hard coded test files' paths for testing
 def fetch_graph_file(graph_file_id: str):
