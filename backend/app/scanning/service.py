@@ -3,40 +3,30 @@ import pymupdf
 import spacy
 from sqlalchemy.orm import Session
 from app.scanning import repository
-from app.scanning.models import File
+from app.scanning.models import File, Scan
 from app.scanning.regex_patterns import *
 
 # Load the spacy NLP model 
 nlp = spacy.load("en_core_web_sm")
 
 
-def get_file_hash(file: File):
-    # Create hash object
-    hash = hashlib.sha256()
-
-    # Read file in binary mode
-    with open(file, "rb") as file:
-        
-        # Loop until end of file, reading 1024 bytes at a time
-        chunk = 0
-        while chunk != b'':
-            chunk = file.read(1024)
-            hash.update(chunk)
-
-    # Return hash
-    return hash.hexdigest()
-
-
-# Update hash of file 
-def update_file_hash(db: Session, graph_file_id: str):
-    file = repository.get_file_by_graph_id(db=db, graph_file_id=graph_file_id)
+# Perform a scan
+def perform_scan(db: Session, graph_file_ids: list[str]):
+    # Initialise the Scan record
+    scan = repository.create_scan()
     
-    # Placeholder, will be replaced by ingestion component's "fetch_file" method when implemented
-    graph_file = fetch_graph_file(graph_file_id)
+    for graph_file_id in graph_file_ids:
+        scan_file(db=db, graph_file_id=graph_file_id, scan_id=scan.scan_id)
 
-    new_hash = get_file_hash(graph_file)
 
-    repository.set_file_hash(db=db, file=file, new_hash=new_hash)
+# Scan one individual file
+def scan_file(db: Session, graph_file_id: str, scan_id: int):
+    # fetch file
+    # create scan_file record
+    # extract text
+    # detect sensitive data
+    # create scan_file_detection records
+    pass
 
 
 # Extract text from PDF into dict
@@ -68,7 +58,7 @@ def detect_named_entities(text_dict):
                     "page_number": page_number
                 })
 
-    print(f'Number of NAME detections: {len(detections)}')
+    print(f'Number of NER detections: {len(detections)}')
 
     return detections
 
@@ -98,3 +88,32 @@ def fetch_graph_file(graph_file_id: str):
             return "app/scanning/test_files/confidential_client_list.pdf"
         case "ghi789":
             return "app/scanning/test_files/finance_and_credentials_overview.pdf"
+        
+
+def get_file_hash(file: File):
+    # Create hash object
+    hash = hashlib.sha256()
+
+    # Read file in binary mode
+    with open(file, "rb") as file:
+        
+        # Loop until end of file, reading 1024 bytes at a time
+        chunk = 0
+        while chunk != b'':
+            chunk = file.read(1024)
+            hash.update(chunk)
+
+    # Return hash
+    return hash.hexdigest()
+
+
+# Update hash of file 
+def update_file_hash(db: Session, graph_file_id: str):
+    file = repository.get_file_by_graph_id(db=db, graph_file_id=graph_file_id)
+    
+    # Placeholder, will be replaced by ingestion component's "fetch_file" method when implemented
+    graph_file = fetch_graph_file(graph_file_id)
+
+    new_hash = get_file_hash(graph_file)
+
+    repository.set_file_hash(db=db, file=file, new_hash=new_hash)

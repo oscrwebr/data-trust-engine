@@ -24,7 +24,7 @@ def get_all_files(db: Session = Depends(get_database)):
     return repository.get_all_files(db=db)
 
 
-@router.get("/scan_file")
+@router.get("/scan_files")
 def scan_file(file_path: str, db: Session = Depends(get_database)):
     extracted_text = service.extract_text_from_pdf(file_path)
 
@@ -33,4 +33,6 @@ def scan_file(file_path: str, db: Session = Depends(get_database)):
     detections.extend(service.detect_phone_numbers(extracted_text))
 
     return detections
+
+
     
