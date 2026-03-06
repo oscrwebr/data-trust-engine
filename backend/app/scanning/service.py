@@ -193,11 +193,11 @@ def detect_vats(text_dict):
 def fetch_graph_file(graph_file_id: str):
     match graph_file_id:
         case "abc123":
-            return "app/scanning/test_files/client_services_agreement.pdf"
+            return "app/scanning/test_files/operational_report_document.pdf"
         case "def456":
-            return "app/scanning/test_files/confidential_client_list.pdf"
+            return "app/scanning/test_files/realistic_contract_document.pdf"
         case "ghi789":
-            return "app/scanning/test_files/finance_and_credentials_overview.pdf"
+            return "app/scanning/test_files/supplier_agreement_document.pdf"
         
 
 def get_file_hash(file: File):
