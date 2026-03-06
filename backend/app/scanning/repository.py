@@ -16,10 +16,10 @@ def create_scan(db: Session):
     return scan
 
 
-def create_scan_file(db: Session, scan_id: int, graph_file_id: str):
+def create_scan_file(db: Session, scan_id: int, file_id: int):
     scan_file = ScanFile(
         scan_id = scan_id,
-        graph_file_id = graph_file_id
+        file_id = file_id
     )
 
     db.add(scan_file)

@@ -18,7 +18,8 @@ def perform_scan(db: Session, graph_file_ids: list[str]):
     for graph_file_id in graph_file_ids:
         try:
             scan_file(db=db, graph_file_id=graph_file_id, scan_id=scan.scan_id)
-        except Exception:
+        except Exception as e:
+            print(f"FILE SCAN ERROR: {e}")
             continue
 
     return {
@@ -34,10 +35,15 @@ def scan_file(db: Session, graph_file_id: str, scan_id: int):
     file_path = fetch_graph_file(graph_file_id=graph_file_id)
 
     # Create scan_file record
+    file = repository.get_file_by_graph_id(db=db, graph_file_id=graph_file_id)
+
+    if file is None:
+        raise ValueError(f"File with graph_file_id '{graph_file_id}' not found")
+
     scan_file_record = repository.create_scan_file(
         db=db, 
         scan_id=scan_id, 
-        graph_file_id=graph_file_id
+        file_id=file.file_id
     )
 
     # Extract text from fetched file

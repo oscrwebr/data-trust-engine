@@ -2,14 +2,19 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.core.database import get_database
 from app.scanning import service, repository
+from pydantic import BaseModel
 
 router = APIRouter(prefix="/scanning", tags=["scanning"])
 
 
+class ScanFilesRequest(BaseModel):
+    graph_file_ids: list[str]
+
+
 # Scanning files using provide graph file ids
 @router.post("/scan_files")
-def scan_files(graph_file_ids: list[str], db: Session = Depends(get_database)):
-    service.perform_scan(graph_file_ids=graph_file_ids, db=db)
+def scan_files(scan_files_request: ScanFilesRequest, db: Session = Depends(get_database)):
+    service.perform_scan(graph_file_ids=scan_files_request.graph_file_ids, db=db)
 
 
 @router.post("/update_file_hash")
