@@ -5,6 +5,7 @@ import { InputText } from "primereact/inputtext";
 import { Toast } from 'primereact/toast';
 import { Dialog } from "primereact/dialog";
 
+import FileUploadComponent from './FileUpload';
 import styles from "./CreateWorkspace.module.css";
 
 function CreateWorkspace() {
@@ -24,8 +25,8 @@ function CreateWorkspace() {
               <label className={styles.cw_label}>Workspace Name</label>
               <InputText className={styles.cw_workspace_name} placeholder="Enter workspace name" value={name} onChange={(e) => setName(e.target.value)}/>
 
-              <label className={styles.cw_label}>Upload Image</label>
-
+              <label className={styles.cw_label}>Upload Workspace Image</label>
+              <FileUploadComponent/>
               <Button data-testid="send-invite-button" id={styles.cw_create_workspace}>Create Workspace</Button>
             </div>
           </div>
