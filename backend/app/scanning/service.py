@@ -13,7 +13,7 @@ nlp = spacy.load("en_core_web_sm")
 # Perform a scan
 def perform_scan(db: Session, graph_file_ids: list[str]):
     # Initialise the Scan record
-    scan = repository.create_scan()
+    scan = repository.create_scan(db=db)
     
     for graph_file_id in graph_file_ids:
         scan_file(db=db, graph_file_id=graph_file_id, scan_id=scan.scan_id)
@@ -22,19 +22,30 @@ def perform_scan(db: Session, graph_file_ids: list[str]):
 # Scan one individual file
 def scan_file(db: Session, graph_file_id: str, scan_id: int):
 
-    # Fetch file using its graph_file_id (ingestion component will be integrated here later)
+    # Fetch file (for now a hardcoded file path) using its graph_file_id (ingestion component will be integrated here later)
     file_path = fetch_graph_file(graph_file_id=graph_file_id)
 
-    # create scan_file record
-    
+    # Create scan_file record
+    scan_file_record = repository.create_scan_file(db=db, scan_id=scan_id, graph_file_id=graph_file_id)
 
-    # extract text
+    # Extract text from fetched file
+    file_extracted_text = extract_text_from_pdf(filepath=file_path)
 
-    # detect sensitive data
+    # Detect sensitive data in file's extracted text
+    detections = []
 
-    # create scan_file_detection records
+    detections.extend(detect_named_entities(file_extracted_text))
+    detections.extend(detect_phone_numbers(file_extracted_text))
 
-    pass
+    # Create scan_file_detection records for every detection
+    for detection in detections:
+        repository.create_scan_file_detection(db=db, 
+                                              scan_file_id=scan_file_record.scan_file_id,
+                                              sensitivity_subcategory=detection["sensitivity_subcategory"],
+                                              page_number=detection["page_number"]
+                                              )
+
+    # 
 
 
 # Extract text from PDF into dict
