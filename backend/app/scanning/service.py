@@ -123,14 +123,17 @@ def organisation_scan(db: Session, naming_convention_ids: list[int]):
 
     for scan_file, file in scan_files:
 
+        # As file names will be stored with their extension, this removes the extension for naming convention checks
+        file_name = file.file_name.rsplit('.', 1)[0]
+
         for scan_naming_convention in scan_naming_conventions:
             checks = naming_convention_checks.get(scan_naming_convention.naming_convention_id)
             suggestions = naming_convention_suggestions.get(scan_naming_convention.naming_convention_id)
 
-            passed = checks(file.file_name)
+            passed = checks(file_name)
             suggested_name = None
             if passed == False:
-                suggested_name = suggestions(file.file_name)
+                suggested_name = suggestions(file_name)
                 
             repository.set_naming_convention_scan_result(db=db, scan_file_id=scan_file.scan_file_id, scan_naming_convention_id=scan_naming_convention.scan_naming_convention_id, passed=passed, suggested_name=suggested_name)
     repository.end_scan(db=db, scan=scan)
