@@ -10,7 +10,7 @@ class Invite(Base):
     expiry_date = Column(Date)
     status = Column(String(16))
     used = Column(Boolean)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("user.user_id"), nullable=False)
     user = relationship("User", backref="invites")
     token = Column(String(250))
 
