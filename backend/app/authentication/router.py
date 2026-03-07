@@ -25,7 +25,7 @@ router = APIRouter(
 )
 
 @router.get("/sign-in")
-async def sign_in(application: Annotated[ConfidentialClientApplication, Depends(application)], request: Request, next: str):
+async def sign_in(application: Annotated[ConfidentialClientApplication, Depends(application)], request: Request, next: str, signup: bool | None=None):
     # Protect against url manipulation!
     if not next.startswith("/"):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
@@ -34,6 +34,10 @@ async def sign_in(application: Annotated[ConfidentialClientApplication, Depends(
     # print(flow)
     request.session["flow"] = flow
     request.session["next"] = next
+    if signup:
+        print("It has been added!")
+        request.session["signup"] = signup
+
     # print(f"\n\n request.session: {request.session}")
     return RedirectResponse(flow['auth_uri'])
 
@@ -53,6 +57,12 @@ async def login_redirect(application: Annotated[ConfidentialClientApplication, D
         }
     )
     url = request.session["next"]
+
+    if "signup" in request.session:
+        request.session.clear()
+        response.delete_cookie("session")
+        return {"message": "Hello World!"}
+
     request.session.clear()
     response.delete_cookie("session") # This is to remove the cookie from the user's browser
     # Flow to find out if the user exists or not
