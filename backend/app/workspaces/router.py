@@ -10,6 +10,6 @@ router = APIRouter(prefix="/workspace", tags=["workspace"])
 @router.post("/create-workspace")
 def create_workspace(workspace: CreateWorkspace, db: Session=Depends(get_database)):
 
-    result = validate_workspace(workspace.name, workspace.image)
+    result = validate_workspace(workspace.name, workspace.image, db)
     
     return result

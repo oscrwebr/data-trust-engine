@@ -3,7 +3,7 @@ import { MemoryRouter, redirect, Route, Routes } from "react-router-dom";
 import axios from 'axios';
 import { afterEach, describe, expect, test, vi } from "vitest";
 import EmployeeInviteError from "./EmployeeInviteError.jsx";
-import Dashboard from "../Dashboard/Dashboard.jsx";
+import Dashboard from "../dashboard/Dashboard.jsx";
 
  vi.mock("primereact/calendar", () => ({
             Calendar: ({ value, onChange }) => (
