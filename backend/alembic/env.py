@@ -33,6 +33,10 @@ if config.config_file_name is not None:
 # target_metadata = mymodel.Base.metadata
 from app.core.database import Base
 from app.scanning import models
+from app.invites import models
+from app.authentication import models
+from app.roles import models
+from app.authentication import models
 
 target_metadata = Base.metadata
 
