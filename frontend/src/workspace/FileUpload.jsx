@@ -4,8 +4,7 @@ import FileCard from './FileCard.jsx';
 
 import styles from "./CreateWorkspace.module.css";
 
-function FileUpload() {
-    const [file, setFile] = useState([]);
+function FileUpload({file, setFile}) {
     const { getRootProps, getInputProps } = useDropzone({
         maxFiles: 1,
         onDrop: (acceptedFiles) => {setFile(acceptedFiles)}
@@ -21,10 +20,10 @@ function FileUpload() {
                 </div>
             </div>
             <div>
-                {file.map((file, index) => (
+                {file.map((f, index) => (
                     <FileCard 
                     key={index} 
-                    file={file} 
+                    file={f} 
                     onRemove={() => setFile([])} 
                     />
                 ))}

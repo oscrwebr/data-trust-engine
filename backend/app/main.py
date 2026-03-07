@@ -4,11 +4,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.invites.router import router as invite_router
 from app.scanning.router import router as scanning_router
 from app.roles.router import router as roles_router
+from app.workspaces.router import router as workspaces_router
 
 app = FastAPI()
 app.include_router(invite_router)
 app.include_router(scanning_router)
 app.include_router(roles_router)
+app.include_router(workspaces_router)
 
 app.add_middleware(
     CORSMiddleware,
