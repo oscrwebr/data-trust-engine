@@ -1,8 +1,8 @@
-"""created db again!
+"""Created tables again
 
-Revision ID: 1814dc251a81
+Revision ID: ce19c2f7ae14
 Revises: 
-Create Date: 2026-03-06 18:34:37.759024
+Create Date: 2026-03-07 13:56:12.394896
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '1814dc251a81'
+revision: str = 'ce19c2f7ae14'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -30,6 +30,12 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('file_id')
     )
     op.create_index(op.f('ix_file_file_id'), 'file', ['file_id'], unique=False)
+    op.create_table('refresh_family',
+    sa.Column('refresh_family_id', sa.Integer(), nullable=False),
+    sa.Column('is_revoked', sa.Boolean(), nullable=True),
+    sa.PrimaryKeyConstraint('refresh_family_id')
+    )
+    op.create_index(op.f('ix_refresh_family_refresh_family_id'), 'refresh_family', ['refresh_family_id'], unique=False)
     op.create_table('role',
     sa.Column('role_id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=128), nullable=False),
@@ -42,12 +48,16 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('sensitivity_category_id')
     )
     op.create_index(op.f('ix_sensitivity_category_sensitivity_category_id'), 'sensitivity_category', ['sensitivity_category_id'], unique=False)
-    op.create_table('users',
-    sa.Column('id', sa.Integer(), nullable=False),
+    op.create_table('user',
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('firstname', sa.String(length=50), nullable=False),
+    sa.Column('surname', sa.String(length=50), nullable=False),
     sa.Column('email', sa.String(length=254), nullable=False),
-    sa.PrimaryKeyConstraint('id')
+    sa.Column('oid', sa.String(length=40), nullable=True),
+    sa.PrimaryKeyConstraint('user_id')
     )
-    op.create_index(op.f('ix_users_id'), 'users', ['id'], unique=False)
+    op.create_index(op.f('ix_user_oid'), 'user', ['oid'], unique=True)
+    op.create_index(op.f('ix_user_user_id'), 'user', ['user_id'], unique=False)
     op.create_table('workspaces',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=255), nullable=False),
@@ -63,10 +73,27 @@ def upgrade() -> None:
     sa.Column('used', sa.Boolean(), nullable=True),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('token', sa.String(length=250), nullable=True),
-    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['user.user_id'], ),
     sa.PrimaryKeyConstraint('invite_id')
     )
     op.create_index(op.f('ix_invites_invite_id'), 'invites', ['invite_id'], unique=False)
+    op.create_table('refresh',
+    sa.Column('refresh_id', sa.Integer(), nullable=False),
+    sa.Column('token', sa.Text(), nullable=False),
+    sa.Column('expiry', sa.DateTime(), nullable=True),
+    sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.Column('refresh_family_id', sa.Integer(), nullable=True),
+    sa.Column('replaced_by', sa.Integer(), nullable=True),
+    sa.Column('replaced_at', sa.DateTime(), nullable=True),
+    sa.Column('access_token', sa.Text(), nullable=False),
+    sa.ForeignKeyConstraint(['refresh_family_id'], ['refresh_family.refresh_family_id'], ),
+    sa.ForeignKeyConstraint(['replaced_by'], ['refresh.refresh_id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['user_id'], ['user.user_id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('refresh_id')
+    )
+    op.create_index(op.f('ix_refresh_refresh_family_id'), 'refresh', ['refresh_family_id'], unique=False)
+    op.create_index(op.f('ix_refresh_refresh_id'), 'refresh', ['refresh_id'], unique=False)
+    op.create_index(op.f('ix_refresh_token'), 'refresh', ['token'], unique=True)
     op.create_table('sensitivity_subcategory',
     sa.Column('sensitivity_subcategory_id', sa.Integer(), nullable=False),
     sa.Column('sensitivity_category_id', sa.Integer(), nullable=True),
@@ -95,16 +122,23 @@ def downgrade() -> None:
     op.drop_table('role_permission')
     op.drop_index(op.f('ix_sensitivity_subcategory_sensitivity_subcategory_id'), table_name='sensitivity_subcategory')
     op.drop_table('sensitivity_subcategory')
+    op.drop_index(op.f('ix_refresh_token'), table_name='refresh')
+    op.drop_index(op.f('ix_refresh_refresh_id'), table_name='refresh')
+    op.drop_index(op.f('ix_refresh_refresh_family_id'), table_name='refresh')
+    op.drop_table('refresh')
     op.drop_index(op.f('ix_invites_invite_id'), table_name='invites')
     op.drop_table('invites')
     op.drop_index(op.f('ix_workspaces_id'), table_name='workspaces')
     op.drop_table('workspaces')
-    op.drop_index(op.f('ix_users_id'), table_name='users')
-    op.drop_table('users')
+    op.drop_index(op.f('ix_user_user_id'), table_name='user')
+    op.drop_index(op.f('ix_user_oid'), table_name='user')
+    op.drop_table('user')
     op.drop_index(op.f('ix_sensitivity_category_sensitivity_category_id'), table_name='sensitivity_category')
     op.drop_table('sensitivity_category')
     op.drop_index(op.f('ix_role_role_id'), table_name='role')
     op.drop_table('role')
+    op.drop_index(op.f('ix_refresh_family_refresh_family_id'), table_name='refresh_family')
+    op.drop_table('refresh_family')
     op.drop_index(op.f('ix_file_file_id'), table_name='file')
     op.drop_table('file')
     # ### end Alembic commands ###
