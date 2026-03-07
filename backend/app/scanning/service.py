@@ -85,7 +85,7 @@ def is_pascal_case(file_name):
 def is_kebab_case(file_name):
     return file_name == to_kebab_case(file_name)
 
-def organisation_scan(db: Session, naming_convention_ids: list[int]):
+def perform_organisation_scan(db: Session, naming_convention_ids: list[int]):
     scan = repository.create_scan(db=db)
     # Scan all files for now (potentially in future can be selectable)
     files = repository.get_all_files(db=db)
@@ -94,7 +94,7 @@ def organisation_scan(db: Session, naming_convention_ids: list[int]):
     for naming_convention_id in naming_convention_ids:
         repository.create_scan_naming_convention(db=db, scan_id=scan.scan_id, naming_convention_id=naming_convention_id)
 
-    # Create a scan file record for each file
+    # Create a scan_file record for each file
     for file in files:
         repository.create_scan_file(db=db, scan_id=scan.scan_id, file_id=file.file_id)
 
