@@ -1,5 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
+from .authentication.router import router as auth_router
+from starlette.middleware.sessions import SessionMiddleware
 
 from app.invites.router import router as invite_router
 from app.scanning.router import router as scanning_router
@@ -9,6 +11,9 @@ app = FastAPI()
 app.include_router(invite_router)
 app.include_router(scanning_router)
 app.include_router(roles_router)
+app.include_router(auth_router)
+
+app.add_middleware(SessionMiddleware, secret_key="data-trust-engine-21a")
 
 app.add_middleware(
     CORSMiddleware,
