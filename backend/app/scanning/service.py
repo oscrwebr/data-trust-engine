@@ -115,7 +115,7 @@ def detect_phone_numbers(text_dict):
                 "page_number": page_number
             })
 
-            print(f'PHONE detection: {match} | PAGE: {page_number}')
+            print(f'PHONE detection: {match.group()} | PAGE: {page_number}')
 
     return detections
 
@@ -130,7 +130,9 @@ def detect_emails(text_dict):
                 "page_number": page_number
             })
 
-            print(f'EMAIL detection: {match} | PAGE: {page_number}')
+            print(f'EMAIL detection: {match.group()} | PAGE: {page_number}')
+
+    return detections
 
 
 # Address detection using regex
@@ -144,7 +146,9 @@ def detect_addresses(text_dict):
                 "page_number": page_number
             })
 
-            print(f'ADDRESS detection: {match} | PAGE: {page_number}')
+            print(f'ADDRESS detection: {match.group()} | PAGE: {page_number}')
+
+    return detections
 
 
 # Postcode detection using regex
@@ -158,7 +162,9 @@ def detect_postcodes(text_dict):
                 "page_number": page_number
             })
 
-            print(f'POSTCODE detection: {match} | PAGE: {page_number}')
+            print(f'POSTCODE detection: {match.group()} | PAGE: {page_number}')
+
+    return detections
 
 
 # IBAN detection using regex
@@ -172,7 +178,9 @@ def detect_ibans(text_dict):
                 "page_number": page_number
             })
 
-            print(f'IBAN detection: {match} | PAGE: {page_number}')
+            print(f'IBAN detection: {match.group()} | PAGE: {page_number}')
+
+    return detections
 
 
 # VAT detection using regex
@@ -186,7 +194,9 @@ def detect_vats(text_dict):
                 "page_number": page_number
             })
 
-            print(f'VAT detection: {match} | PAGE: {page_number}')
+            print(f'VAT detection: {match.group()} | PAGE: {page_number}')
+    
+    return detections
 
 
 # Placeholder for dev purposes, returns hard coded test files' paths for testing

@@ -14,7 +14,7 @@ ADDRESS_REGEX = re.compile(
 )
 
 UK_POSTCODE_REGEX = re.compile(
-    r"\b([A-Z]{1,2}\d[A-Z\d]? ?\d[A-Z]{2})\b",
+    r"\b([A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2})\b",
     re.IGNORECASE
 )
 
