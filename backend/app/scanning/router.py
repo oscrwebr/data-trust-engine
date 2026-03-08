@@ -25,7 +25,8 @@ def update_file_hash(graph_file_id: str, db: Session=Depends(get_database)):
 # Route for creating files (for dev only)
 @router.post("/create_file")
 def create_file(graph_file_id: str, file_name: str, file_extension: str, db: Session = Depends(get_database)):
-    hash_result = service.get_file_hash("app/scanning/test_files/client_services_agreement.pdf")
+    file = service.fetch_graph_file(graph_file_id=graph_file_id)
+    hash_result = service.get_file_hash(file)
 
     repository.create_file(db, graph_file_id, file_name, file_extension, hash_result)
 
