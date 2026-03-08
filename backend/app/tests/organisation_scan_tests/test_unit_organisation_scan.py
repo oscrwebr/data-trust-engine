@@ -105,6 +105,7 @@ def test_split_file_name(file_name, expected):
 def test_split_file_name_ignores_separators(file_name, expected):
     assert split_file_name(file_name) == expected
 
+# Checks that Word Ninja correctly splits file names with numbers into words and numbers
 @pytest.mark.parametrize("file_name, expected", [
     ("clientconfidential2026", ["client", "confidential", "2026"]),
     ("employee_salary_report_2021", ["employee", "salary", "report", "2021"]),
