@@ -74,7 +74,8 @@ dependencies = [
     "iniconfig>=2.3.0",
     "packaging>=26.0",
     "pluggy>=1.6.0",
-    "pytest>=9.0.2"
+    "pytest>=9.0.2",
+    "spacy"
 ]
 
 [tool.setuptools.packages.find]
