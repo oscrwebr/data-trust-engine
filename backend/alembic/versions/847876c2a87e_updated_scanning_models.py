@@ -1,8 +1,8 @@
-"""Creating db from fresh again
+"""updated scanning models
 
-Revision ID: 12023e2fe710
+Revision ID: 847876c2a87e
 Revises: 
-Create Date: 2026-03-04 17:05:25.482173
+Create Date: 2026-03-08 17:20:05.384588
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '12023e2fe710'
+revision: str = '847876c2a87e'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -25,11 +25,16 @@ def upgrade() -> None:
     sa.Column('file_id', sa.Integer(), nullable=False),
     sa.Column('graph_file_id', sa.String(length=128), nullable=True),
     sa.Column('file_name', sa.String(length=128), nullable=True),
-    sa.Column('file_extension', sa.String(length=16), nullable=True),
     sa.Column('hash', sa.String(length=64), nullable=True),
     sa.PrimaryKeyConstraint('file_id')
     )
     op.create_index(op.f('ix_file_file_id'), 'file', ['file_id'], unique=False)
+    op.create_table('naming_convention',
+    sa.Column('naming_convention_id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(length=128), nullable=True),
+    sa.PrimaryKeyConstraint('naming_convention_id')
+    )
+    op.create_index(op.f('ix_naming_convention_naming_convention_id'), 'naming_convention', ['naming_convention_id'], unique=False)
     op.create_table('refresh_family',
     sa.Column('refresh_family_id', sa.Integer(), nullable=False),
     sa.Column('is_revoked', sa.Boolean(), nullable=True),
@@ -42,6 +47,13 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('role_id')
     )
     op.create_index(op.f('ix_role_role_id'), 'role', ['role_id'], unique=False)
+    op.create_table('scans',
+    sa.Column('scan_id', sa.Integer(), nullable=False),
+    sa.Column('started_at', sa.DateTime(), nullable=True),
+    sa.Column('finished_at', sa.DateTime(), nullable=True),
+    sa.PrimaryKeyConstraint('scan_id')
+    )
+    op.create_index(op.f('ix_scans_scan_id'), 'scans', ['scan_id'], unique=False)
     op.create_table('sensitivity_category',
     sa.Column('sensitivity_category_id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=128), nullable=False),
@@ -87,6 +99,24 @@ def upgrade() -> None:
     op.create_index(op.f('ix_refresh_refresh_family_id'), 'refresh', ['refresh_family_id'], unique=False)
     op.create_index(op.f('ix_refresh_refresh_id'), 'refresh', ['refresh_id'], unique=False)
     op.create_index(op.f('ix_refresh_token'), 'refresh', ['token'], unique=True)
+    op.create_table('scan_file',
+    sa.Column('scan_file_id', sa.Integer(), nullable=False),
+    sa.Column('scan_id', sa.Integer(), nullable=False),
+    sa.Column('file_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['file_id'], ['file.file_id'], ),
+    sa.ForeignKeyConstraint(['scan_id'], ['scans.scan_id'], ),
+    sa.PrimaryKeyConstraint('scan_file_id')
+    )
+    op.create_index(op.f('ix_scan_file_scan_file_id'), 'scan_file', ['scan_file_id'], unique=False)
+    op.create_table('scan_naming_convention',
+    sa.Column('scan_naming_convention_id', sa.Integer(), nullable=False),
+    sa.Column('scan_id', sa.Integer(), nullable=False),
+    sa.Column('naming_convention_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['naming_convention_id'], ['naming_convention.naming_convention_id'], ),
+    sa.ForeignKeyConstraint(['scan_id'], ['scans.scan_id'], ),
+    sa.PrimaryKeyConstraint('scan_naming_convention_id')
+    )
+    op.create_index(op.f('ix_scan_naming_convention_scan_naming_convention_id'), 'scan_naming_convention', ['scan_naming_convention_id'], unique=False)
     op.create_table('sensitivity_subcategory',
     sa.Column('sensitivity_subcategory_id', sa.Integer(), nullable=False),
     sa.Column('sensitivity_category_id', sa.Integer(), nullable=True),
@@ -95,6 +125,17 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('sensitivity_subcategory_id')
     )
     op.create_index(op.f('ix_sensitivity_subcategory_sensitivity_subcategory_id'), 'sensitivity_subcategory', ['sensitivity_subcategory_id'], unique=False)
+    op.create_table('naming_convention_scan_result',
+    sa.Column('naming_convention_scan_result_id', sa.Integer(), nullable=False),
+    sa.Column('scan_file_id', sa.Integer(), nullable=False),
+    sa.Column('scan_naming_convention_id', sa.Integer(), nullable=False),
+    sa.Column('passed', sa.Boolean(), nullable=False),
+    sa.Column('suggested_name', sa.String(length=128), nullable=True),
+    sa.ForeignKeyConstraint(['scan_file_id'], ['scan_file.scan_file_id'], ),
+    sa.ForeignKeyConstraint(['scan_naming_convention_id'], ['scan_naming_convention.scan_naming_convention_id'], ),
+    sa.PrimaryKeyConstraint('naming_convention_scan_result_id')
+    )
+    op.create_index(op.f('ix_naming_convention_scan_result_naming_convention_scan_result_id'), 'naming_convention_scan_result', ['naming_convention_scan_result_id'], unique=False)
     op.create_table('role_permission',
     sa.Column('role_permission_id', sa.Integer(), nullable=False),
     sa.Column('role_id', sa.Integer(), nullable=True),
@@ -105,16 +146,33 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('role_permission_id')
     )
     op.create_index(op.f('ix_role_permission_role_permission_id'), 'role_permission', ['role_permission_id'], unique=False)
+    op.create_table('scan_file_detection',
+    sa.Column('scan_file_detection_id', sa.Integer(), nullable=False),
+    sa.Column('scan_file_id', sa.Integer(), nullable=True),
+    sa.Column('sensitivity_subcategory', sa.String(length=64), nullable=True),
+    sa.Column('page_number', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['scan_file_id'], ['scan_file.scan_file_id'], ),
+    sa.PrimaryKeyConstraint('scan_file_detection_id')
+    )
+    op.create_index(op.f('ix_scan_file_detection_scan_file_detection_id'), 'scan_file_detection', ['scan_file_detection_id'], unique=False)
     # ### end Alembic commands ###
 
 
 def downgrade() -> None:
     """Downgrade schema."""
     # ### commands auto generated by Alembic - please adjust! ###
+    op.drop_index(op.f('ix_scan_file_detection_scan_file_detection_id'), table_name='scan_file_detection')
+    op.drop_table('scan_file_detection')
     op.drop_index(op.f('ix_role_permission_role_permission_id'), table_name='role_permission')
     op.drop_table('role_permission')
+    op.drop_index(op.f('ix_naming_convention_scan_result_naming_convention_scan_result_id'), table_name='naming_convention_scan_result')
+    op.drop_table('naming_convention_scan_result')
     op.drop_index(op.f('ix_sensitivity_subcategory_sensitivity_subcategory_id'), table_name='sensitivity_subcategory')
     op.drop_table('sensitivity_subcategory')
+    op.drop_index(op.f('ix_scan_naming_convention_scan_naming_convention_id'), table_name='scan_naming_convention')
+    op.drop_table('scan_naming_convention')
+    op.drop_index(op.f('ix_scan_file_scan_file_id'), table_name='scan_file')
+    op.drop_table('scan_file')
     op.drop_index(op.f('ix_refresh_token'), table_name='refresh')
     op.drop_index(op.f('ix_refresh_refresh_id'), table_name='refresh')
     op.drop_index(op.f('ix_refresh_refresh_family_id'), table_name='refresh')
@@ -126,10 +184,14 @@ def downgrade() -> None:
     op.drop_table('user')
     op.drop_index(op.f('ix_sensitivity_category_sensitivity_category_id'), table_name='sensitivity_category')
     op.drop_table('sensitivity_category')
+    op.drop_index(op.f('ix_scans_scan_id'), table_name='scans')
+    op.drop_table('scans')
     op.drop_index(op.f('ix_role_role_id'), table_name='role')
     op.drop_table('role')
     op.drop_index(op.f('ix_refresh_family_refresh_family_id'), table_name='refresh_family')
     op.drop_table('refresh_family')
+    op.drop_index(op.f('ix_naming_convention_naming_convention_id'), table_name='naming_convention')
+    op.drop_table('naming_convention')
     op.drop_index(op.f('ix_file_file_id'), table_name='file')
     op.drop_table('file')
     # ### end Alembic commands ###

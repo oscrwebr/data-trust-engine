@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_database
 from app.scanning import service, repository
 from pydantic import BaseModel
+from app.scanning.schemas import OrganisationScanRequest
 
 router = APIRouter(prefix="/scanning", tags=["scanning"])
 
@@ -34,5 +35,10 @@ def create_file(graph_file_id: str, file_name: str, file_extension: str, db: Ses
 @router.get("/get_all_files")
 def get_all_files(db: Session = Depends(get_database)):
     return repository.get_all_files(db=db)
+
+@router.post("/organisation_scan")
+def organisation_scan(organisation_scan_request: OrganisationScanRequest, db: Session = Depends(get_database)):
+    service.perform_organisation_scan(db, organisation_scan_request.naming_convention_ids)
+    return {"message": "Organisation scan completed successfully"}
 
     
