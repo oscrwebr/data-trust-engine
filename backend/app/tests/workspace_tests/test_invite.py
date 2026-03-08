@@ -1,7 +1,6 @@
 import secrets
 from app.invites.models import Invite
 from app.invites.repository import add_invite, get_invite
-from app.authentication.repository import add_user
 from app.authentication.models import PendingUser
 from datetime import datetime
 from sqlalchemy import insert
