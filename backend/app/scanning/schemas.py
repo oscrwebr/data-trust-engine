@@ -8,3 +8,6 @@ from pydantic import BaseModel
 # class ScanResponse(BaseModel):
 #     scan_id: int
 #     status: str
+
+class OrganisationScanRequest(BaseModel):
+    naming_convention_ids: list[int]
