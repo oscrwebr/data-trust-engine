@@ -79,3 +79,6 @@ def get_scan_naming_convention_by_scan_id(db: Session, scan_id: int):
 
 def get_scan_files_with_file(db: Session, scan_id: int):
     return db.query(ScanFiles, File).join(File, ScanFiles.file_id == File.file_id).filter(ScanFiles.scan_id == scan_id).all()
+
+def get_naming_convention_ids(db: Session):
+    return db.query(NamingConvention.naming_convention_id).all()

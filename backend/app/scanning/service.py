@@ -85,7 +85,20 @@ def is_pascal_case(file_name):
 def is_kebab_case(file_name):
     return file_name == to_kebab_case(file_name)
 
+def remove_file_extension(file_name):
+    return file_name.rsplit('.', 1)[0]
+
 def perform_organisation_scan(db: Session, naming_convention_ids: list[int]):
+
+    # Validate the list of naming convention ids
+    if not naming_convention_ids:
+        raise ValueError("No naming convention(s) selected")
+    
+    valid_naming_convention_ids = repository.get_naming_convention_ids(db=db)
+    for naming_convention_id in naming_convention_ids:
+        if naming_convention_id not in valid_naming_convention_ids:
+            raise ValueError(f"Invalid naming convention id: {naming_convention_id}")
+
     scan = repository.create_scan(db=db)
     # Scan all files for now (potentially in future can be selectable)
     files = repository.get_all_files(db=db)
@@ -124,7 +137,7 @@ def perform_organisation_scan(db: Session, naming_convention_ids: list[int]):
     for scan_file, file in scan_files:
 
         # As file names will be stored with their extension, this removes the extension for naming convention checks
-        file_name = file.file_name.rsplit('.', 1)[0]
+        file_name = remove_file_extension(file.file_name)
 
         for scan_naming_convention in scan_naming_conventions:
             checks = naming_convention_checks.get(scan_naming_convention.naming_convention_id)
