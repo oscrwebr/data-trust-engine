@@ -119,6 +119,7 @@ def detect_phone_numbers(text_dict):
 
     return detections
 
+
 # Email detection using regex
 def detect_emails(text_dict):
     detections = []
