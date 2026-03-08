@@ -37,8 +37,17 @@ function CreateWorkspace({toast}) {
   const handleCreateWorkspace = async () => {
     
     try {
-      formData.append("image", file[0]);
-      formData.append("name", name);
+      formData.append(
+        "name",
+        name && !["null", "undefined"].includes(name) ? name : ""
+      );
+
+      if (file[0]) {
+        formData.append("image", file[0]);
+      }
+
+      console.log(name)
+      console.log(file[0])
       
       const response = await api.post("/workspace/create-workspace", formData);
 

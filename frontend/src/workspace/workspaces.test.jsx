@@ -80,8 +80,8 @@ describe("Workspace Component", () => {
         });
 
         const formData = api.post.mock.calls[0][1];
-        expect(formData.get("name")).toBe("null"); 
-        expect(formData.get("image")).toBe("undefined");
+        expect(formData.get("name")).toBe(""); 
+        expect(formData.get("image")).toBe(null);
 
         const errorMessage = await screen.findByText(/You must give your workspace a name\./i);
         expect(errorMessage).toBeInTheDocument();
@@ -112,7 +112,7 @@ describe("Workspace Component", () => {
 
         const formData = api.post.mock.calls[0][1];
         expect(formData.get("name")).toBe("Test Workspace"); 
-        expect(formData.get("image")).toBe("undefined");
+        expect(formData.get("image")).toBe(null);
 
         const errorMessage = await screen.findByText(/You must upload your workspace's image\./i);
         expect(errorMessage).toBeInTheDocument();

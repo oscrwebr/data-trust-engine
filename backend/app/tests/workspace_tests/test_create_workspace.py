@@ -1,8 +1,10 @@
-from app.workspaces import service, models
-from sqlalchemy import insert
+from app.workspaces import models as workspace_model
+from app.authentication import models as auth_model, repository, service
+from sqlalchemy import insert, select, desc
 from io import BytesIO
 from PIL import Image
 import base64
+
 
 # Creating test image 
 def create_test_image():
@@ -15,31 +17,85 @@ def create_test_image():
 # Testing add_workspace function to make sure record is inserted
 def test_add_workspace_record(db):
     image = create_test_image()
-    insert_statement = insert(models.Workspace).values(name="Test Workspace", image=image)
+
+    oid = "000000-7sdf77-88asdf8-9sdiy99"
+    insert_statement = insert(auth_model.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid)
+    res=db.execute(insert_statement)
+
+    insert_statement = insert(workspace_model.Workspace).values(name="Test Workspace", image=image, user_id=res.inserted_primary_key[0])
     db.execute(insert_statement)
-    assert db.query(models.Workspace).count() == 1 
+    assert db.query(workspace_model.Workspace).count() == 1 
 
 # Testing /create-workspace endpoint with null name
 def test_create_workspace_null_name(db, client):
-    response = client.post("/workspace/create-workspace", json={"name":None, "image":None})
+    oid = "000000-7sdf77-88asdf8-9sdiy99"
+    insert_statement = insert(auth_model.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid)
+    res = db.execute(insert_statement)
+
+    refresh_family = repository.create_refresh_family(db)
+
+    access, refresh, _ = service.create_access_refresh(db, data={"userId": res.inserted_primary_key[0]}, refresh_family_id=refresh_family.refresh_family_id)
+
+    req = client.build_request(
+        method="post",
+        url="/workspace/create-workspace",
+        headers={"Authorization": f"Bearer {access}"}, 
+        data={"name": "null"}, 
+        files={"image": ("test.png", BytesIO(b"fake image content"), "image/png")},
+    )
+
+    response = client.send(request = req)
+
     assert response.status_code == 200
     assert response.json() == "name"
-    assert db.query(models.Workspace).count() == 0 
+    assert db.query(workspace_model.Workspace).count() == 0 
 
 
 # Testing /create-workspace endpoint with null image
 def test_create_workspace_null_image(db, client):
-    response = client.post("/workspace/create-workspace", json={"name":"Test Workspace", "image":None})
+    oid = "000000-7sdf77-88asdf8-9sdiy99"
+    insert_statement = insert(auth_model.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid)
+    res=db.execute(insert_statement)
+
+    refresh_family = repository.create_refresh_family(db)
+
+    access, refresh, _ = service.create_access_refresh(db, data={"userId": res.inserted_primary_key[0]}, refresh_family_id=refresh_family.refresh_family_id)
+
+    req = client.build_request(
+        method="post",
+        url="/workspace/create-workspace",
+        headers={"Authorization": f"Bearer {access}"}, 
+        data={"name": "Test Workspace"}, 
+        files={},
+    )
+
+    response = client.send(request = req)
+
     assert response.status_code == 200
     assert response.json() == "image"
-    assert db.query(models.Workspace).count() == 0
+    assert db.query(workspace_model.Workspace).count() == 0
 
 
 # Testing /create-workspace endpoint with valid response 
 def test_create_workspace_valid(db, client):
-    image = create_test_image()
-    encoded_image = base64.b64encode(image).decode()
-    response = client.post("/workspace/create-workspace", json={"name":"Test Workspace", "image":encoded_image})
+    oid = "000000-7sdf77-88asdf8-9sdiy99"
+    insert_statement = insert(auth_model.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid)
+    res=db.execute(insert_statement)
+
+    refresh_family = repository.create_refresh_family(db)
+
+    access, refresh, _ = service.create_access_refresh(db, data={"userId": res.inserted_primary_key[0]}, refresh_family_id=refresh_family.refresh_family_id)
+
+    req = client.build_request(
+        method="post",
+        url="/workspace/create-workspace",
+        headers={"Authorization": f"Bearer {access}"}, 
+        data={"name": "Test Workspace"}, 
+        files={"image": ("test.png", BytesIO(b"fake image content"), "image/png")},
+    )
+
+    response = client.send(request = req)
+
     assert response.status_code == 200
     assert response.json() == True
-    assert db.query(models.Workspace).count() == 1 
+    assert db.query(workspace_model.Workspace).count() == 1 
