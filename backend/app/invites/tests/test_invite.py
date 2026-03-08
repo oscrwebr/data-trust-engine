@@ -23,7 +23,6 @@ def db_session():
     transaction.rollback() 
     connection.close()
 
-client = TestClient(app)
 
 # Test a null email input
 def test_null_email_input(db_session):
