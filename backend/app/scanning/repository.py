@@ -2,7 +2,7 @@ from datetime import datetime
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from app.scanning.models import File, NamingConvention, Scan, ScanFiles, ScanNamingConvention, NamingConventionScanResult, Scan, ScanFile, ScanFileDetection
+from app.scanning.models import File, NamingConvention, Scan, ScanNamingConvention, NamingConventionScanResult, Scan, ScanFile, ScanFileDetection
 from datetime import datetime, timezone
 
 
@@ -129,3 +129,10 @@ def get_scan_files_with_file(db: Session, scan_id: int):
 
 def get_naming_convention_ids(db: Session):
         return db.execute(select(NamingConvention.naming_convention_id)).scalars().all()
+
+def create_test_file(db: Session, graph_file_id: str, file_name: str, hash: str):
+    file = File(graph_file_id=graph_file_id, file_name= file_name, hash=hash)
+    db.add(file)
+    db.commit()
+    db.refresh(file)
+    return file

@@ -35,7 +35,7 @@ class NamingConventionScanResult(Base):
     __tablename__ = 'naming_convention_scan_result'
 
     naming_convention_scan_result_id = Column(Integer, primary_key=True, index=True)
-    scan_file_id = Column(Integer, ForeignKey("scan_files.scan_file_id"), nullable=False)
+    scan_file_id = Column(Integer, ForeignKey("scan_file.scan_file_id"), nullable=False)
     scan_naming_convention_id = Column(Integer, ForeignKey("scan_naming_convention.scan_naming_convention_id"), nullable=False)
     passed = Column(Boolean, nullable=False)
     suggested_name = Column(String(128))
