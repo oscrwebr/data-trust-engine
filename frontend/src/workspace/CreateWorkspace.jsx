@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import api from "../api/axiosConfig.js";
 import { useNavigate } from "react-router-dom";
 
 import { Button } from "primereact/button";
@@ -18,7 +19,7 @@ function CreateWorkspace({toast}) {
   const [name, setName] = useState(null);
   const [file, setFile] = useState([]);
   const navigate = useNavigate();
-
+  const formData = new FormData();
   const [nameError, setNameError] = useState(false);
   const [imageError, setImageError] = useState(false);
 
@@ -36,16 +37,10 @@ function CreateWorkspace({toast}) {
   const handleCreateWorkspace = async () => {
     
     try {
-      let image = null;
-      if(file.length > 0){
-        const base64 = await toBase64(file[0]);
-        image = base64.split(",")[1];
-      }
+      formData.append("image", file[0]);
+      formData.append("name", name);
       
-      const response = await axios.post("http://localhost:8000/workspace/create-workspace", {
-        name: name || null,
-        image: image,
-      });
+      const response = await api.post("/workspace/create-workspace", formData);
 
       if(response.data == "name"){
         setNameError(true);
@@ -66,13 +61,6 @@ function CreateWorkspace({toast}) {
     }
   }
 
-  const toBase64 = file => new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-  });
-
   return (
     <div>
         <Dialog
@@ -80,6 +68,7 @@ function CreateWorkspace({toast}) {
           visible={visible}
           header={<h2 className={styles.cw_dialog_header}>Create Your Workspace</h2>}
           draggable={false}
+          closable={false}
           >
           <div>
             <div className={styles.cw_input_container}>

@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
 from app.workspaces.models import Workspace
 
-def add_workspace(db: Session, name:str, image:bytes):
-    workspace = Workspace(name=name, image=image)
+def add_workspace(db: Session, name:str, image:bytes, user_id:int):
+    workspace = Workspace(name=name, image=image, user_id=user_id)
     db.add(workspace)
     db.commit()
     db.refresh(workspace)

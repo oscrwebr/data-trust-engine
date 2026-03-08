@@ -1,8 +1,8 @@
-"""Created tables again
+"""Created tables again after merge with development
 
-Revision ID: ce19c2f7ae14
+Revision ID: 875b09f3d2ce
 Revises: 
-Create Date: 2026-03-07 13:56:12.394896
+Create Date: 2026-03-08 13:19:38.671455
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'ce19c2f7ae14'
+revision: str = '875b09f3d2ce'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -30,6 +30,12 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('file_id')
     )
     op.create_index(op.f('ix_file_file_id'), 'file', ['file_id'], unique=False)
+    op.create_table('pending_users',
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('email', sa.String(length=254), nullable=False),
+    sa.PrimaryKeyConstraint('user_id')
+    )
+    op.create_index(op.f('ix_pending_users_user_id'), 'pending_users', ['user_id'], unique=False)
     op.create_table('refresh_family',
     sa.Column('refresh_family_id', sa.Integer(), nullable=False),
     sa.Column('is_revoked', sa.Boolean(), nullable=True),
@@ -53,7 +59,7 @@ def upgrade() -> None:
     sa.Column('firstname', sa.String(length=50), nullable=False),
     sa.Column('surname', sa.String(length=50), nullable=False),
     sa.Column('email', sa.String(length=254), nullable=False),
-    sa.Column('oid', sa.String(length=40), nullable=True),
+    sa.Column('oid', sa.String(length=40), nullable=False),
     sa.PrimaryKeyConstraint('user_id')
     )
     op.create_index(op.f('ix_user_oid'), 'user', ['oid'], unique=True)
@@ -73,7 +79,7 @@ def upgrade() -> None:
     sa.Column('used', sa.Boolean(), nullable=True),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('token', sa.String(length=250), nullable=True),
-    sa.ForeignKeyConstraint(['user_id'], ['user.user_id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['pending_users.user_id'], ),
     sa.PrimaryKeyConstraint('invite_id')
     )
     op.create_index(op.f('ix_invites_invite_id'), 'invites', ['invite_id'], unique=False)
@@ -139,6 +145,8 @@ def downgrade() -> None:
     op.drop_table('role')
     op.drop_index(op.f('ix_refresh_family_refresh_family_id'), table_name='refresh_family')
     op.drop_table('refresh_family')
+    op.drop_index(op.f('ix_pending_users_user_id'), table_name='pending_users')
+    op.drop_table('pending_users')
     op.drop_index(op.f('ix_file_file_id'), table_name='file')
     op.drop_table('file')
     # ### end Alembic commands ###
