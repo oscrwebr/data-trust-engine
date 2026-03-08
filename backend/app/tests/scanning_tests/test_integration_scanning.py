@@ -14,6 +14,8 @@ def test_supplier_agreement_contains_phone_detections():
     extracted_text = extract_text_from_pdf("tests/scanning_tests/fixtures/supplier_agreement_document.pdf")
     detections = detect_phone_numbers(extracted_text)
 
+    print(extracted_text)
+
     # Assert that detections are made for PHONE
     assert len(detections) > 0
     assert all(detection["sensitivity_subcategory"] == "PHONE" for detection in detections)

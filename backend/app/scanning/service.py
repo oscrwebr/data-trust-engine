@@ -79,6 +79,11 @@ def extract_text_from_pdf(filepath: str) -> dict:
     for page_number in range(len(file)):
         page = file.load_page(page_number)
         text = page.get_text("text")
+        
+        # Normalisation to remove line breaks
+        text = text.replace("\n", " ")
+        text = re.sub(r"\s+", " ", text).strip()
+
         extracted_text[page_number + 1] = text
 
     file.close()

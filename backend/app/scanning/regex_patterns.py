@@ -1,7 +1,7 @@
 import re
 
 UK_PHONE_REGEX = re.compile(
-    r"(\+44\s?7\d{3}\s?\d{6}|\+44\s?\d{4}\s?\d{6}|07\d{3}\s?\d{6}|0\d{4}\s?\d{6})"
+    r"(\+44\s?7\d{3}\s?\d{5,6}|\+44\s?\d{4}\s?\d{5,6}|07\d{3}\s?\d{6}|0\d{4}\s?\d{6})"
 )
 
 EMAIL_REGEX = re.compile(
