@@ -1,4 +1,4 @@
-import EmployeeInvite from "../invites/EmployeeInvite";
+import EmployeeInvite from "../invites/invites";
 import { Button } from "primereact/button";
 import { useState, useRef } from "react";
 

@@ -2,7 +2,7 @@ import { cleanup, fireEvent, render, screen, within, waitFor } from "@testing-li
 import { MemoryRouter, redirect, Route, Routes } from "react-router-dom";
 import axios from 'axios';
 import { afterEach, describe, expect, test, vi } from "vitest";
-import EmployeeInviteError from "./EmployeeInviteError.jsx";
+import EmployeeInviteError from "./error.jsx";
 import Dashboard from "../dashboard/Dashboard.jsx";
 
  vi.mock("primereact/calendar", () => ({
@@ -15,7 +15,7 @@ import Dashboard from "../dashboard/Dashboard.jsx";
             )
         }));
 
-import EmployeeInvite from "./EmployeeInvite.jsx";
+import EmployeeInvite from "./invites.jsx";
 
 vi.mock("axios");
 describe("Invite Component", () => {
@@ -186,7 +186,6 @@ describe("Invite Component", () => {
         const calendarInput = within(modal).getByTestId("calendar-input");
         fireEvent.change(calendarInput, { target: { value: "2030-04-01" } });
 
-
         const submitButton = within(modal).getByRole("button", { name: /send invite/i });
         fireEvent.click(submitButton);
 
@@ -212,6 +211,8 @@ describe("Invite Component", () => {
             }
         })
     })
+
+
     // Test 6
     test("Test correct information displayed when user redirected to invite expiry error page", async () => {
         render(

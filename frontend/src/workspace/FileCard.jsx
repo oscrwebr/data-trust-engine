@@ -26,7 +26,7 @@ function FileCard({file, onRemove}){
                 <div><i className="pi pi-image"></i></div>
             )}
             <p><strong>{file.name}</strong></p>
-            <Button onClick={onRemove} className={styles.f_remove_button} icon="pi pi-times-circle" text/>
+            <Button onClick={onRemove} className={styles.f_remove_button} icon="pi pi-times-circle" text data-testid="file-remove"/>
         </div>
     )
 }

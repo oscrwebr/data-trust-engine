@@ -11,7 +11,7 @@ function FileUpload({file, setFile}) {
     });
 
     return (
-        <div className={styles.cw_container}>
+        <div className={styles.cw_container} data-testid="file-upload">
             <div {...getRootProps()} className={styles.cw_file_input}>
                 <input {...getInputProps()} />
                 <div className={styles.cw_upload_container}>

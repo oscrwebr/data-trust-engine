@@ -2,7 +2,7 @@ import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
 
-import styles from "./EmployeeInvite.module.css";
+import styles from "./invites.module.css";
 import { useState } from "react";
 
 import { InputText } from "primereact/inputtext";
