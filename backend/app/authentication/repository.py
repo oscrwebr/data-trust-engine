@@ -19,6 +19,13 @@ def add_user(db: Session, email: str):
     db.refresh(user)
     return user
 
+def create_user(db: Session, firstname: str, surname: str, email: str, oid: str) -> User:
+    user = User(firstname=firstname, surname=surname, email=email, oid=oid)
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user
+
 def verify_refresh(hashed_token: str, expiry: datetime, db: Session) -> Refresh:
     return db.query(Refresh).filter(Refresh.token == hashed_token).first()
 
