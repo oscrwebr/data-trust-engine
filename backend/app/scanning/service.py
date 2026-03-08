@@ -130,6 +130,9 @@ def perform_organisation_scan(db: Session, naming_convention_ids: list[int]):
             checks = naming_convention_checks.get(scan_naming_convention.naming_convention_id)
             suggestions = naming_convention_suggestions.get(scan_naming_convention.naming_convention_id)
 
+            if checks is None or suggestions is None:
+                continue
+
             passed = checks(file_name)
             suggested_name = None
             if passed == False:
@@ -137,3 +140,4 @@ def perform_organisation_scan(db: Session, naming_convention_ids: list[int]):
                 
             repository.set_naming_convention_scan_result(db=db, scan_file_id=scan_file.scan_file_id, scan_naming_convention_id=scan_naming_convention.scan_naming_convention_id, passed=passed, suggested_name=suggested_name)
     repository.end_scan(db=db, scan=scan)
+    return scan
