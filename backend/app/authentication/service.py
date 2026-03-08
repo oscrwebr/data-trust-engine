@@ -3,6 +3,20 @@ from app.authentication import repository
 from ..core.security import create_refresh_token, create_access_token, hash_user_refresh_token
 from datetime import datetime, timezone, timedelta
 
+def create_user(db, details: dict):
+    split_name = details["name"].split()
+    firstname, surname = split_name[0], split_name[-1]
+
+    user = repository.create_user(
+        db=db,
+        firstname=firstname,
+        surname=surname,
+        email=details["email"],
+        oid=details["oid"]
+    )
+    print(user)
+    return user
+
 def check_exists(oid: str, db):
     # print(oid)
     user = repository.get_by_oid(oid, db)
