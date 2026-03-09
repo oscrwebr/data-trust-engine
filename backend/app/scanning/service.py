@@ -7,11 +7,13 @@ from app.scanning import repository
 from app.scanning.models import File, Scan
 from app.scanning.regex_patterns import *
 
+import lexnlp.extract.en.citations as nlp_citations
+import lexnlp.extract.en.regulations as nlp_regulations
+import lexnlp.extract.en.courts as nlp_courts
+import lexnlp.extract.en.acts as nlp_acts
+
 # Load the spaCy NLP model
 nlp = spacy.load("en_core_web_sm")
-
-# Load the spaCy Blackstone NLP model (for legal entity detection)
-legal_nlp = spacy.load("en_blackstone_proto")
 
 
 # Perform a scan
@@ -216,14 +218,15 @@ def detect_vats(text_dict):
 
 
 ## LEGAL CATEGORY SENSITIVE DATA DETECTION
-def detect_case_names(text_dict):
+def detect_citations(text_dict):
     detections = []
 
     for page_number, text in text_dict.items():
-        doc = legal_nlp(text)
-
-        for entity in doc.ents:
-            print(entity.text, entity.label_)
+        for citation in nlp_citations.get_citations(text):
+            detections.append({
+                "sensitivity_subcategory": "CITATION",
+                "page_number": page_number
+            })
 
 
     # for page_number, text in text_dict.items():
