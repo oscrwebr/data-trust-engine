@@ -2,13 +2,12 @@ import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
 
-import styles from "./EmployeeInvite.module.css";
-import { useState, useRef } from "react";
+import styles from "./invites.module.css";
+import { useState } from "react";
 
 import { InputText } from "primereact/inputtext";
 import { IconField } from "primereact/iconfield";
 import { ProgressSpinner} from "primereact/ProgressSpinner"
-import { Toast } from 'primereact/toast';
 import { InputIcon } from "primereact/inputicon";
 import { Calendar } from 'primereact/calendar';
 import { Message } from 'primereact/message';
@@ -17,7 +16,7 @@ import { Button } from "primereact/button";
 
 import axios from 'axios';
 
-function EmployeeInvite({ visible, setVisible }) {
+function EmployeeInvite({ visible, setVisible, toast}) {
   const [loading, setLoading] = useState(false);
   const [expiryDate, setExpiryDate] = useState(null);
   const [email, setEmail] = useState(null);
@@ -25,10 +24,9 @@ function EmployeeInvite({ visible, setVisible }) {
   const [email_trust, setEmailTrust] = useState(false);
   const [date_error, setDateError] = useState(false);
   const [email_valid, setEmailValid] = useState(false);
-  const toast_success = useRef(null);
 
   const showMessage = () => {
-      toast_success.current.show({ severity: 'success', summary: 'Success', detail: 'Invite successfully sent!', life: 4000});
+      toast.current.show({ severity: 'success', summary: 'Success', detail: 'Invite successfully sent!', life: 4000});
   };
 
   const today = new Date();
@@ -60,7 +58,7 @@ function EmployeeInvite({ visible, setVisible }) {
         setEmailValid(true)
         
       } else if (response.data.success == true) {
-        showMessage(toast_success);
+        showMessage();
         setDateError(false);
         setEmailError(false);
         setEmailValid(true);
@@ -78,7 +76,6 @@ function EmployeeInvite({ visible, setVisible }) {
 
   return (
     <div>
-      <Toast ref={toast_success} position="top-right" />
       <Dialog 
         className={styles.d_dialog}
         visible={visible} 

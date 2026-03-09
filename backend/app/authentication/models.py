@@ -10,6 +10,12 @@ class User(Base):
     email = Column(String(254), nullable=False)
     oid = Column(String(40), unique=True, index=True, nullable=False) # Handle this!
 
+class PendingUser(Base):
+    __tablename__ = 'pending_users'
+
+    user_id = Column(Integer, primary_key=True, index=True)
+    email = Column(String(254), nullable=False)
+
 class RefreshFamily(Base):
     __tablename__ = 'refresh_family'
 

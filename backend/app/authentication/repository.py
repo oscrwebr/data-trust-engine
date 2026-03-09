@@ -13,7 +13,7 @@ def get_by_oid(oid: str, db: Session):
     return db.query(User).filter(User.oid == oid).first()
 
 def add_user(db: Session, email: str):
-    user = User(email=email)
+    user = PendingUser(email=email)
     db.add(user)
     db.commit()
     db.refresh(user)
