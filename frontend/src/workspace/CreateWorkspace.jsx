@@ -22,20 +22,19 @@ function CreateWorkspace({toast}) {
   const formData = new FormData();
   const [nameError, setNameError] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const hasRedirected = useRef(false);
 
-   useEffect(() => {
+  useEffect(() => {
     if (file){
       setImageError(false);
     }
-    }, [file]);
-  
+  }, [file]);
 
   const showMessage = () => {
       toast.current.show({ severity: 'success', summary: 'Success', detail: 'Workspace successfully created!', life: 4000});
   };
 
   const handleCreateWorkspace = async () => {
-    
     try {
       formData.append(
         "name",

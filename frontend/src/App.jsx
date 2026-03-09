@@ -1,6 +1,6 @@
 import { useRef } from "react";
 
-import { BrowserRouter, Routes, Route, Link} from "react-router-dom";
+import { BrowserRouter, Routes, Route, useNavigate} from "react-router-dom";
 import Dashboard from './dashboard/Dashboard';
 import EmployeeInviteError from './invites/error.jsx';
 import Roles from "./roles/roles";
@@ -14,15 +14,14 @@ import Unprocessable422 from "./Errors/unprocessable422.jsx";
 import Forbidden403 from "./Errors/Forbidden403.jsx";
 
 function Home() {
+  const navigate = useNavigate();
 
   function handleCreateWorkspace(){
-    window.location.href = "http://localhost:8000/auth/sign-in?next=/create-workspace&signup=true";
+    navigate("/create-workspace")
   }
 
   return (
     <div>
-      <h1>Home Page</h1>
-      <p>Welcome to the React + FastAPI app!</p>
       <Button onClick={handleCreateWorkspace}>Create a workspace</Button>
     </div>
   );
