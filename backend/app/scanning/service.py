@@ -7,8 +7,11 @@ from app.scanning import repository
 from app.scanning.models import File, Scan
 from app.scanning.regex_patterns import *
 
-# Load the spacy NLP model 
+# Load the spaCy NLP model
 nlp = spacy.load("en_core_web_sm")
+
+# Load the spaCy Blackstone NLP model (for legal entity detection)
+legal_nlp = spacy.load("en_blackstone_proto")
 
 
 # Perform a scan
@@ -53,13 +56,19 @@ def scan_file(db: Session, graph_file_id: str, scan_id: int):
     # Detect sensitive data in file's extracted text
     detections = []
 
+    # Detection of PII (Personally Identifiable Information) information
     detections.extend(detect_named_entities(file_extracted_text))
     detections.extend(detect_phone_numbers(file_extracted_text))
     detections.extend(detect_emails(file_extracted_text))
     detections.extend(detect_addresses(file_extracted_text))
     detections.extend(detect_postcodes(file_extracted_text))
+
+    # Detection of financial information
     detections.extend(detect_ibans(file_extracted_text))
     detections.extend(detect_vats(file_extracted_text))
+
+    # Detection of legal case information
+    detections.extend(detect_case_names((file_extracted_text)))
 
     # Create scan_file_detection records for every detection
     for detection in detections:
@@ -205,6 +214,31 @@ def detect_vats(text_dict):
     
     return detections
 
+
+## LEGAL CATEGORY SENSITIVE DATA DETECTION
+def detect_case_names(text_dict):
+    detections = []
+
+    for page_number, text in text_dict.items():
+        doc = legal_nlp(text)
+
+        for entity in doc.ents:
+            print(entity.text, entity.label_)
+
+
+    # for page_number, text in text_dict.items():
+    #     doc = nlp(text)
+
+    #     for entity in doc.ents:
+    #         if entity.label_ == "PERSON":
+    #             detections.append({
+    #                 "sensitivity_subcategory": "NAME",
+    #                 "page_number": page_number
+    #             })
+
+    #             print(f'PERSON detection: {entity} | PAGE: {page_number}')
+
+    # return detections
 
 # Placeholder for dev purposes, returns hard coded test files' paths for testing
 def fetch_graph_file(graph_file_id: str):
