@@ -1,30 +1,18 @@
-<<<<<<<< HEAD:backend/alembic/versions/875b09f3d2ce_created_tables_again_after_merge_with_.py
-"""Created tables again after merge with development
+"""Initial migration after merge with development
 
-Revision ID: 875b09f3d2ce
+Revision ID: eb4520e159d8
 Revises: 
-Create Date: 2026-03-08 13:19:38.671455
-========
-"""updated scanning models
-
-Revision ID: 847876c2a87e
-Revises: 
-Create Date: 2026-03-08 17:20:05.384588
->>>>>>>> 39a9a32b204a0a93404eeeee0d7facc83b333a34:backend/alembic/versions/847876c2a87e_updated_scanning_models.py
+Create Date: 2026-03-08 23:39:49.396091
 
 """
 from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
-
+from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-<<<<<<<< HEAD:backend/alembic/versions/875b09f3d2ce_created_tables_again_after_merge_with_.py
-revision: str = '875b09f3d2ce'
-========
-revision: str = '847876c2a87e'
->>>>>>>> 39a9a32b204a0a93404eeeee0d7facc83b333a34:backend/alembic/versions/847876c2a87e_updated_scanning_models.py
+revision: str = 'eb4520e159d8'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -41,21 +29,18 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('file_id')
     )
     op.create_index(op.f('ix_file_file_id'), 'file', ['file_id'], unique=False)
-<<<<<<<< HEAD:backend/alembic/versions/875b09f3d2ce_created_tables_again_after_merge_with_.py
-    op.create_table('pending_users',
-    sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.Column('email', sa.String(length=254), nullable=False),
-    sa.PrimaryKeyConstraint('user_id')
-    )
-    op.create_index(op.f('ix_pending_users_user_id'), 'pending_users', ['user_id'], unique=False)
-========
     op.create_table('naming_convention',
     sa.Column('naming_convention_id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=128), nullable=True),
     sa.PrimaryKeyConstraint('naming_convention_id')
     )
     op.create_index(op.f('ix_naming_convention_naming_convention_id'), 'naming_convention', ['naming_convention_id'], unique=False)
->>>>>>>> 39a9a32b204a0a93404eeeee0d7facc83b333a34:backend/alembic/versions/847876c2a87e_updated_scanning_models.py
+    op.create_table('pending_users',
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('email', sa.String(length=254), nullable=False),
+    sa.PrimaryKeyConstraint('user_id')
+    )
+    op.create_index(op.f('ix_pending_users_user_id'), 'pending_users', ['user_id'], unique=False)
     op.create_table('refresh_family',
     sa.Column('refresh_family_id', sa.Integer(), nullable=False),
     sa.Column('is_revoked', sa.Boolean(), nullable=True),
@@ -91,13 +76,6 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_user_oid'), 'user', ['oid'], unique=True)
     op.create_index(op.f('ix_user_user_id'), 'user', ['user_id'], unique=False)
-    op.create_table('workspaces',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.String(length=255), nullable=False),
-    sa.Column('image', sa.LargeBinary(), nullable=False),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_workspaces_id'), 'workspaces', ['id'], unique=False)
     op.create_table('invites',
     sa.Column('invite_id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=True),
@@ -153,6 +131,15 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('sensitivity_subcategory_id')
     )
     op.create_index(op.f('ix_sensitivity_subcategory_sensitivity_subcategory_id'), 'sensitivity_subcategory', ['sensitivity_subcategory_id'], unique=False)
+    op.create_table('workspaces',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(length=255), nullable=False),
+    sa.Column('image', mysql.MEDIUMBLOB(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['user_id'], ['user.user_id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_workspaces_id'), 'workspaces', ['id'], unique=False)
     op.create_table('naming_convention_scan_result',
     sa.Column('naming_convention_scan_result_id', sa.Integer(), nullable=False),
     sa.Column('scan_file_id', sa.Integer(), nullable=False),
@@ -195,6 +182,8 @@ def downgrade() -> None:
     op.drop_table('role_permission')
     op.drop_index(op.f('ix_naming_convention_scan_result_naming_convention_scan_result_id'), table_name='naming_convention_scan_result')
     op.drop_table('naming_convention_scan_result')
+    op.drop_index(op.f('ix_workspaces_id'), table_name='workspaces')
+    op.drop_table('workspaces')
     op.drop_index(op.f('ix_sensitivity_subcategory_sensitivity_subcategory_id'), table_name='sensitivity_subcategory')
     op.drop_table('sensitivity_subcategory')
     op.drop_index(op.f('ix_scan_naming_convention_scan_naming_convention_id'), table_name='scan_naming_convention')
@@ -207,8 +196,6 @@ def downgrade() -> None:
     op.drop_table('refresh')
     op.drop_index(op.f('ix_invites_invite_id'), table_name='invites')
     op.drop_table('invites')
-    op.drop_index(op.f('ix_workspaces_id'), table_name='workspaces')
-    op.drop_table('workspaces')
     op.drop_index(op.f('ix_user_user_id'), table_name='user')
     op.drop_index(op.f('ix_user_oid'), table_name='user')
     op.drop_table('user')
@@ -220,13 +207,10 @@ def downgrade() -> None:
     op.drop_table('role')
     op.drop_index(op.f('ix_refresh_family_refresh_family_id'), table_name='refresh_family')
     op.drop_table('refresh_family')
-<<<<<<<< HEAD:backend/alembic/versions/875b09f3d2ce_created_tables_again_after_merge_with_.py
     op.drop_index(op.f('ix_pending_users_user_id'), table_name='pending_users')
     op.drop_table('pending_users')
-========
     op.drop_index(op.f('ix_naming_convention_naming_convention_id'), table_name='naming_convention')
     op.drop_table('naming_convention')
->>>>>>>> 39a9a32b204a0a93404eeeee0d7facc83b333a34:backend/alembic/versions/847876c2a87e_updated_scanning_models.py
     op.drop_index(op.f('ix_file_file_id'), table_name='file')
     op.drop_table('file')
     # ### end Alembic commands ###
