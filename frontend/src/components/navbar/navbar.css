@@ -1,0 +1,9 @@
+.navbar-base {
+    position: fixed;
+    top: 0;
+    left: 0;
+
+    background-color: #191919;
+    width: 250px;
+    height: 100%;
+}

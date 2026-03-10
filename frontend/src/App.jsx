@@ -1,3 +1,4 @@
+import "./App.css"
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import Dashboard from './Dashboard/Dashboard';
 import EmployeeInviteError from './Invites/EmployeeInviteError';
@@ -20,6 +21,7 @@ function App() {
   return (
     <BrowserRouter>
     <Navbar/>
+    <div className="content-frame">
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/roles" element={<Roles />} />
@@ -29,6 +31,7 @@ function App() {
         <Route path="/error/403" element={<Forbidden403/>}/>
         <Route path="/invite-error/:type" element={<EmployeeInviteError />} />
       </Routes>
+    </div>
     </BrowserRouter>
   );
 }
