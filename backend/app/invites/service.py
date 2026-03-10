@@ -150,7 +150,6 @@ def check_invite(invite:Invite, db: Session):
         db.commit()
         return "expired"
     
-    # Redirect user to sign up page 
     invite.used = True
     db.commit()
     return True

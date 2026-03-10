@@ -10,8 +10,15 @@ class Invite(Base):
     expiry_date = Column(Date)
     status = Column(String(16))
     used = Column(Boolean)
-    user_id = Column(Integer, ForeignKey("pending_users.user_id"), nullable=False)
-    user = relationship("PendingUser", backref="invites")
     token = Column(String(250))
+
+    # relations
+    user_id = Column(
+        Integer,
+        ForeignKey("pending_users.user_id", ondelete="CASCADE"),  # <- cascade here
+        nullable=False
+    )
+
+    pending_user = relationship("PendingUser", back_populates="invites")
 
     # Must also link to the workspace table

@@ -22,6 +22,13 @@ def add_user(db: Session, email: str):
 def get_by_email(db: Session, email:str):
     return db.query(PendingUser).filter(PendingUser.email == email).first()
 
+def get_pending_by_id(db: Session, id: int):
+    return db.query(PendingUser).filter(PendingUser.user_id == id).first()
+
+def delete_pending_user(db: Session, user: PendingUser):
+    db.delete(user)
+    db.commit()
+
 def create_user(db: Session, firstname: str, surname: str, email: str, oid: str) -> User:
     user = User(firstname=firstname, surname=surname, email=email, oid=oid)
     db.add(user)

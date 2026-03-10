@@ -10,6 +10,7 @@ from fastapi import APIRouter, Depends, Query
 from .service import create_invite, send_invite_service, check_invite
 from .schema import InviteRequest
 from fastapi.responses import RedirectResponse
+from urllib.parse import quote
 
 router = APIRouter(prefix="/invite", tags=["invite"])
 
@@ -40,6 +41,12 @@ async def process_invite(token: str = Query(...), db: Session = Depends(get_data
     
     invite = invite_repository.get_invite(db, token)
 
+    if not invite:
+        return RedirectResponse(f"http://localhost:5173/invite-error/used")
+
+    # Get the pending_user based on the invite
+    user = user_repository.get_pending_by_id(db, invite.user_id)
+
     # Check the expiry date
     result = check_invite(invite, db)
 
@@ -49,5 +56,11 @@ async def process_invite(token: str = Query(...), db: Session = Depends(get_data
     if(result == "expired"):
         return RedirectResponse(f"http://localhost:5173/invite-error/expired?date={invite.expiry_date}")
     
-    return RedirectResponse("http://localhost:8000/auth/sign-in?next=/", status_code=302)
+    # Remove the user from the pending_users table
+    user_repository.delete_pending_user(db, user)
+
+    next_url = "/?toast=signup"
+    redirect_url = f"http://localhost:8000/auth/sign-in?next={quote(next_url)}&signup=true"
+
+    return RedirectResponse(redirect_url, status_code=302)
 

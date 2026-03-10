@@ -1,6 +1,6 @@
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 
-import { BrowserRouter, Routes, Route, useNavigate} from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Dashboard from './dashboard/Dashboard';
 import EmployeeInviteError from './invites/error.jsx';
 import Roles from "./roles/roles";
@@ -12,8 +12,22 @@ import Test from "./Test/Test.jsx";
 import Unprocessable422 from "./Errors/unprocessable422.jsx";
 import Forbidden403 from "./Errors/Forbidden403.jsx";
 
-function Home() {
-  const navigate = useNavigate();
+function Home({toast}) {
+  const params = new URLSearchParams(location.search);
+  const toastParam = params.get("toast");
+  const shownRef = useRef(false);
+
+  useEffect(() => {
+    if (toastParam && toast.current && !shownRef.current) {
+      toast.current.show({ 
+        severity: 'success', 
+        summary: 'Success', 
+        detail: 'You have joined your workspace!', 
+        life: 4000 
+      });
+      shownRef.current = true;
+    }
+  }, [toastParam]);
 
   function handleCreateWorkspace(){
     window.location.href = "http://localhost:8000/auth/sign-in?next=/test&signup=true"
@@ -33,7 +47,7 @@ function App() {
     <BrowserRouter>
       <Toast ref={toast} position="top-right"/>
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Home toast={toast}/>} />
         <Route path="/roles" element={<Roles />} />
         <Route path="/dashboard" element={<Dashboard toast={toast}/>} />
         <Route path="/create-workspace" element={<CreateWorkspace  toast={toast}/>} />
