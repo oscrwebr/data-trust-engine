@@ -3,6 +3,7 @@ import Dashboard from './Dashboard/Dashboard';
 import EmployeeInviteError from './Invites/EmployeeInviteError';
 import Roles from "./roles/roles";
 import Test from "./Test/Test.jsx";
+import Navbar from "./components/navbar/Navbar.jsx";
 import Unprocessable422 from "./Errors/unprocessable422.jsx";
 import Forbidden403 from "./Errors/Forbidden403.jsx";
 
@@ -18,6 +19,7 @@ function Home() {
 function App() {
   return (
     <BrowserRouter>
+    <Navbar/>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/roles" element={<Roles />} />
