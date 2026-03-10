@@ -19,6 +19,9 @@ def add_user(db: Session, email: str):
     db.refresh(user)
     return user
 
+def get_by_email(db: Session, email:str):
+    return db.query(PendingUser).filter(PendingUser.email == email).first()
+
 def create_user(db: Session, firstname: str, surname: str, email: str, oid: str) -> User:
     user = User(firstname=firstname, surname=surname, email=email, oid=oid)
     db.add(user)

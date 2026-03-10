@@ -4,11 +4,10 @@ import { BrowserRouter, Routes, Route, useNavigate} from "react-router-dom";
 import Dashboard from './dashboard/Dashboard';
 import EmployeeInviteError from './invites/error.jsx';
 import Roles from "./roles/roles";
-import CreateWorkspace from "./Workspace/CreateWorkspace";
+import CreateWorkspace from "./workspace/CreateWorkspace";
 import { Button } from "primereact/button";
 import { Toast } from 'primereact/toast';
 
-import axios from 'axios';
 import Test from "./Test/Test.jsx";
 import Unprocessable422 from "./Errors/unprocessable422.jsx";
 import Forbidden403 from "./Errors/Forbidden403.jsx";
@@ -17,7 +16,7 @@ function Home() {
   const navigate = useNavigate();
 
   function handleCreateWorkspace(){
-    navigate("/create-workspace")
+    window.location.href = "http://localhost:8000/auth/sign-in?next=/test&signup=true"
   }
 
   return (

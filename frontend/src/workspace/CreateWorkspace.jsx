@@ -5,8 +5,6 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { Message } from "primereact/message";
-import { Toast } from 'primereact/toast';
-import axios from 'axios';
 import { Dialog } from "primereact/dialog";
 
 import FileUpload from "./FileUpload.jsx";

@@ -8,6 +8,7 @@ from starlette.responses import JSONResponse
 from datetime import datetime, date
 from sqlalchemy.orm import Session
 from app.invites.models import Invite
+from fastapi.responses import RedirectResponse
 
 load_dotenv()
 
@@ -152,4 +153,4 @@ def check_invite(invite:Invite, db: Session):
     # Redirect user to sign up page 
     invite.used = True
     db.commit()
-    return "valid"
+    return True

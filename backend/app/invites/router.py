@@ -26,8 +26,11 @@ async def send_invite(invite: InviteRequest, db: Session=Depends(get_database)):
         #Send invite
         await send_invite_service(invite.email, expiry, token)
 
-        # Record invite and new user in database
-        user = user_repository.add_user(db, invite.email)
+        # Record invite and new user in database (if user doesn't already exist)
+        user = user_repository.get_by_email(db, invite.email)
+        if not user:
+            user = user_repository.add_user(db, invite.email)
+        
         invite_repository.add_invite(db, datetime.now(), invite.expiry_date.date(), "sent", False, user.user_id, token)
         
     return {"success": result}
@@ -46,5 +49,5 @@ async def process_invite(token: str = Query(...), db: Session = Depends(get_data
     if(result == "expired"):
         return RedirectResponse(f"http://localhost:5173/invite-error/expired?date={invite.expiry_date}")
     
-    return "valid"
+    return RedirectResponse("http://localhost:8000/auth/sign-in?next=/", status_code=302)
 
