@@ -34,3 +34,7 @@ UK_VAT_REGEX = re.compile(
 CITATION_REGEX = re.compile(
     r"\[\d{4}\]\s+[A-Z][A-Za-z]*(?:\s+[A-Z][A-Za-z]*)*\s+\d+"
 )
+
+ACT_REGEX = re.compile(
+    r"\b[A-Z][A-Za-z]*(?:\s+[A-Z][A-Za-z]*)*\s+Act\s+\d{4}\b"
+)

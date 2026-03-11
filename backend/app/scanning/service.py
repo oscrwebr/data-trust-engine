@@ -68,7 +68,8 @@ def scan_file(db: Session, graph_file_id: str, scan_id: int):
     detections.extend(detect_vats(file_extracted_text))
 
     # Detection of legal case information
-    detections.extend(detect_citations((file_extracted_text)))
+    detections.extend(detect_citations(file_extracted_text))
+    detections.extend(detect_acts(file_extracted_text))
 
     # Create scan_file_detection records for every detection
     for detection in detections:
@@ -229,6 +230,22 @@ def detect_citations(text_dict):
             print(f'CITATION detection: {match.group()} | PAGE: {page_number}')
     
     return detections
+
+
+def detect_acts(text_dict):
+    detections = []
+
+    for page_number, text in text_dict.items():
+        for match in ACT_REGEX.finditer(text):
+            detections.append({
+                "sensitivity_subcategory": "ACT",
+                "page_number": page_number
+            })
+
+            print(f'ACT detection: {match.group()} | PAGE: {page_number}')
+    
+    return detections
+
 
 # Placeholder for dev purposes, returns hard coded test files' paths for testing
 def fetch_graph_file(graph_file_id: str):
