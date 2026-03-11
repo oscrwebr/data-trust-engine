@@ -1,7 +1,9 @@
 import { useRef, useEffect } from "react";
 import { Button } from "primereact/button";
+import { useLocation } from "react-router-dom";
 
 function Home({toast}) {
+  const location = useLocation();
   const params = new URLSearchParams(location.search);
   const toastParam = params.get("toast");
   const shownRef = useRef(false);

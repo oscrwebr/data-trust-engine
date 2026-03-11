@@ -279,4 +279,39 @@ describe("Invite Component", () => {
         expect(await screen.findByText("Create a workspace")).toBeInTheDocument();
 
     })
+
+    // Test 9
+    test("Test for users who will have logged in to accept invite are redirected to home & see success message", async () => {
+
+        let toastCalled = null;
+        const mockToast = {
+            current: {
+                show: (args) => {
+                    toastCalled = args;
+                    console.log("Toast triggered:", args);
+                },
+            },
+        };
+        
+        render(
+            <MemoryRouter initialEntries={["/?toast=signup"]}>
+                <Routes>
+                    <Route path="/" element={<Home toast={mockToast}/>} />
+                </Routes>
+            </MemoryRouter>
+        )
+        
+        expect(await screen.findByText("Create a workspace")).toBeInTheDocument();
+        await waitFor(() => {
+            if (!toastCalled) {
+                throw new Error("Toast was not triggered");
+            }
+            
+            if (
+                !toastCalled.detail.includes("You have joined your workspace!")
+            ) {
+                throw new Error("Toast called with wrong arguments");
+            }
+        })
+    })
 })
