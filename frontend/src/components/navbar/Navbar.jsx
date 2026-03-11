@@ -1,7 +1,7 @@
 import "./navbar.css";
 import logo from "../../assets/CIH_long_logo.png";
 import { Link } from "react-router-dom";
-
+import NavbarItem from "./NavbarItem";
 
 function Navbar() {
 
@@ -15,8 +15,8 @@ function Navbar() {
         </Link>
         <div className="navbar-list">
             <ul className="navbar-items">
-                <li>Files</li>
-                <li>Scans</li>
+                <NavbarItem url="/files" text="Files"/>
+                <NavbarItem url="/scans" text="Scans"/>
             </ul>
         </div>
     </div>

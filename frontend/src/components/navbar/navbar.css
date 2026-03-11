@@ -31,7 +31,7 @@
     gap: 5px;
 
     font-size: 35px;
-    font-weight: 600;
+    
 }
 
 .navbar-items li {
@@ -43,4 +43,10 @@
 
 .navbar-items li:hover {
     background-color: #313131;
+}
+
+.navbar-items li a {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
 }
