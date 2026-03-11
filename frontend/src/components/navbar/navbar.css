@@ -43,6 +43,13 @@
     cursor: pointer;
 }
 
+.navbar-items li a {
+    display: block;
+    width: 100%;
+    color: white;
+    text-decoration: none;
+}
+
 .navbar-items li:hover {
     background-color: #313131;
 }
