@@ -19,11 +19,11 @@ def add_user(db: Session, email: str):
     db.refresh(user)
     return user
 
-def get_by_email(db: Session, email:str):
-    return db.query(PendingUser).filter(PendingUser.email == email).first()
-
-def get_pending_by_id(db: Session, id: int):
+def get_pending_user_by_id(db: Session, id: int):
     return db.query(PendingUser).filter(PendingUser.user_id == id).first()
+
+def get_pending_user_by_email(db: Session, email: str):
+    return db.query(PendingUser).filter(PendingUser.email == email).first()
 
 def delete_pending_user(db: Session, user: PendingUser):
     db.delete(user)

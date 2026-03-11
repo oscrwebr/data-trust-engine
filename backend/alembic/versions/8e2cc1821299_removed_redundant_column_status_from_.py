@@ -1,8 +1,8 @@
-"""Initial migration after merge with development
+"""Removed redundant column status from invites table
 
-Revision ID: eb4520e159d8
+Revision ID: 8e2cc1821299
 Revises: 
-Create Date: 2026-03-08 23:39:49.396091
+Create Date: 2026-03-11 10:34:07.328539
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision: str = 'eb4520e159d8'
+revision: str = '8e2cc1821299'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -80,11 +80,10 @@ def upgrade() -> None:
     sa.Column('invite_id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('expiry_date', sa.Date(), nullable=True),
-    sa.Column('status', sa.String(length=16), nullable=True),
     sa.Column('used', sa.Boolean(), nullable=True),
-    sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('token', sa.String(length=250), nullable=True),
-    sa.ForeignKeyConstraint(['user_id'], ['pending_users.user_id'], ),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['user_id'], ['pending_users.user_id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('invite_id')
     )
     op.create_index(op.f('ix_invites_invite_id'), 'invites', ['invite_id'], unique=False)

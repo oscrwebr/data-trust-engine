@@ -28,11 +28,11 @@ async def send_invite(invite: InviteRequest, db: Session=Depends(get_database)):
         await send_invite_service(invite.email, expiry, token)
 
         # Record invite and new user in database (if user doesn't already exist)
-        user = user_repository.get_by_email(db, invite.email)
+        user = user_repository.get_pending_user_by_email(db, invite.email)
         if not user:
             user = user_repository.add_user(db, invite.email)
         
-        invite_repository.add_invite(db, datetime.now(), invite.expiry_date.date(), "sent", False, user.user_id, token)
+        invite_repository.add_invite(db, datetime.now(), invite.expiry_date.date(), False, user.user_id, token)
         
     return {"success": result}
 
@@ -45,16 +45,19 @@ async def process_invite(token: str = Query(...), db: Session = Depends(get_data
         return RedirectResponse(f"http://localhost:5173/invite-error/used")
 
     # Get the pending_user based on the invite
-    user = user_repository.get_pending_by_id(db, invite.user_id)
+    user = user_repository.get_pending_user_by_id(db, invite.user_id)
 
     # Check the expiry date
     result = check_invite(invite, db)
 
     if(result == "used"):
+        user_repository.delete_pending_user(db, user)
         return RedirectResponse(f"http://localhost:5173/invite-error/used")
 
     if(result == "expired"):
-        return RedirectResponse(f"http://localhost:5173/invite-error/expired?date={invite.expiry_date}")
+        expiry = invite.expiry_date
+        user_repository.delete_pending_user(db, user)
+        return RedirectResponse(f"http://localhost:5173/invite-error/expired?date={expiry}")
     
     # Remove the user from the pending_users table
     user_repository.delete_pending_user(db, user)

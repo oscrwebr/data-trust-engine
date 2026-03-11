@@ -145,7 +145,6 @@ def check_invite(invite:Invite, db: Session):
 
     # Check invite expiry date
     if(invite.expiry_date < date.today()):
-        invite.status = "expired"
         invite.used = True
         db.commit()
         return "expired"
