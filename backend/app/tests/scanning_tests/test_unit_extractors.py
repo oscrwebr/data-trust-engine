@@ -1,4 +1,4 @@
-from app.scanning.service import extract_text_from_pdf
+from app.scanning.extractors import *
 
 
 def test_extract_text_from_pdf_operational_report_document():

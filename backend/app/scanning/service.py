@@ -1,11 +1,12 @@
 import hashlib
-import pymupdf
 import wordninja
 from sqlalchemy.orm import Session
 from app.scanning import repository
 from app.scanning.models import File, Scan
+
 from app.scanning.regex_patterns import *
 from app.scanning.detectors import *
+from app.scanning.extractors import *
 
 
 # Perform a scan
@@ -78,26 +79,6 @@ def scan_file(db: Session, graph_file_id: str, scan_id: int):
             sensitivity_subcategory=detection["sensitivity_subcategory"],
             page_number=detection["page_number"]
         )
-
-
-# Extract text from PDF into dict
-def extract_text_from_pdf(filepath: str) -> dict:
-    file = pymupdf.open(filepath)
-    extracted_text = {}
-
-    # Make page numbers 1 indexed, because user think in page 1, 2, 3 not 0, 1, 2
-    for page_number in range(len(file)):
-        page = file.load_page(page_number)
-        text = page.get_text("text")
-        
-        # Normalisation to remove line breaks
-        text = text.replace("\n", " ")
-        text = re.sub(r"\s+", " ", text).strip()
-
-        extracted_text[page_number + 1] = text
-
-    file.close()
-    return extracted_text
 
 
 # Placeholder for dev purposes, returns hard coded test files' paths for testing

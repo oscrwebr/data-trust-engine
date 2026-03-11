@@ -1,6 +1,4 @@
-from app.scanning.service import (
-    extract_text_from_pdf
-)
+from app.scanning.extractors import *
 from app.scanning.detectors import *
 
 
