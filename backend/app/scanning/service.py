@@ -70,6 +70,8 @@ def scan_file(db: Session, graph_file_id: str, scan_id: int):
     # Detection of legal case information
     detections.extend(detect_citations(file_extracted_text))
     detections.extend(detect_acts(file_extracted_text))
+    detections.extend(detect_regulations(file_extracted_text))
+    detections.extend(detect_case_names(file_extracted_text))
 
     # Create scan_file_detection records for every detection
     for detection in detections:
@@ -243,6 +245,36 @@ def detect_acts(text_dict):
             })
 
             print(f'ACT detection: {match.group()} | PAGE: {page_number}')
+    
+    return detections
+
+
+def detect_regulations(text_dict):
+    detections = []
+
+    for page_number, text in text_dict.items():
+        for match in REGULATION_REGEX.finditer(text):
+            detections.append({
+                "sensitivity_subcategory": "REGULATION",
+                "page_number": page_number
+            })
+
+            print(f'REGULATION detection: {match.group()} | PAGE: {page_number}')
+    
+    return detections
+
+
+def detect_case_names(text_dict):
+    detections = []
+
+    for page_number, text in text_dict.items():
+        for match in CASE_NAME_REGEX.finditer(text):
+            detections.append({
+                "sensitivity_subcategory": "CASE_NAME",
+                "page_number": page_number
+            })
+
+            print(f'CASE_NAME detection: {match.group()} | PAGE: {page_number}')
     
     return detections
 

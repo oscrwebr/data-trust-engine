@@ -38,3 +38,11 @@ CITATION_REGEX = re.compile(
 ACT_REGEX = re.compile(
     r"\b[A-Z][A-Za-z]*(?:\s+[A-Z][A-Za-z]*)*\s+Act\s+\d{4}\b"
 )
+
+REGULATION_REGEX = re.compile(
+    r"\b(Regulation\s*\([A-Z]{2,}\)\s*\d{4}/\d+|UK GDPR|GDPR)\b"
+)
+
+CASE_NAME_REGEX = re.compile(
+    r"\b[A-Z][A-Za-z]*(?:\s+[A-Z][A-Za-z]*)*\s+v\.?\s+[A-Z][A-Za-z]*(?:\s+[A-Z][A-Za-z]*)*"
+)
