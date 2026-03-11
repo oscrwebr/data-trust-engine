@@ -1,8 +1,12 @@
 from app.core import config
 from sqlalchemy import insert, select, update, func, desc
 from datetime import datetime, timezone, timedelta
+from dataclasses import asdict
 
 from app.authentication import models, service, repository
+from app.tests.authentication_tests.dummy_user import User
+
+dummy_user = User()
 
 # This tests whether an unauthenticated user can access a protected endpoint
 def test_unauthenticated_user_cannot_access_protected_endpoints(client):
@@ -27,21 +31,20 @@ def test_success_with_error_in_query_params(client):
 # This tests whether the 'check_exists' function works correctly in 'authentication/service.py' when the user exists
 def test_user_returned_when_they_exist_in_db(db):
     # Creating the user
-    oid = "000000-7sdf77-88asdf8-9sdiy99"
-    insert_statement = insert(models.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid)
+    insert_statement = insert(models.User).values(asdict(dummy_user))
     db.execute(insert_statement)
     assert db.query(models.User).count() == 1 # incase the user doesn't get added
 
     # Checking the service works
-    response = service.check_exists(oid=oid, db=db)
+    response = service.check_get_by_oid(oid=dummy_user.oid, db=db)
     assert response
-    assert response.oid == oid
+    assert response.oid == dummy_user.oid
 
 # This tests whether the 'check_exists' function works correctly in the 'authentication/service.py' when the user doesn't exist
 def test_none_returned_when_user_does_not_exist(db):
     oid = "000000-7sdf77-88asdf8-9sdiy99"
     assert db.query(models.User).count() == 0
-    response = service.check_exists(oid=oid, db=db)
+    response = service.check_get_by_oid(oid=oid, db=db)
     assert response == None
 
 # This tests whether the '/auth/token/refresh' endpoint raises a 403 error if the user doesn't have a refresh token in the header
@@ -53,8 +56,7 @@ def test_403_if_no_refresh_present(client):
 def test_auth_and_refresh_token_rotated_if_user_has_valid_refresh(db, client):
     ## SETTING UP THE TEST
     # Insert the test user
-    oid = "000000-7sdf77-88asdf8-9sdiy99"
-    insert_statement = insert(models.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid)
+    insert_statement = insert(models.User).values(asdict(dummy_user))
     res = db.execute(insert_statement)
 
     # Create test refresh_family entry
@@ -85,8 +87,7 @@ def test_auth_and_refresh_token_rotated_if_user_has_valid_refresh(db, client):
 def test_replaced_by_and_at_updated_if_refresh_token_is_valid(db, client):
     ## SETTING UP THE TEST
     # Insert the test user
-    oid = "000000-7sdf77-88asdf8-9sdiy99"
-    insert_statement = insert(models.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid)
+    insert_statement = insert(models.User).values(asdict(dummy_user))
     res = db.execute(insert_statement)
 
     # Create test refresh_family entry
@@ -132,8 +133,7 @@ def test_replaced_by_and_at_updated_if_refresh_token_is_valid(db, client):
 def test_401_raised_if_refresh_family_is_revoked(db, client):
     ## SETTING UP THE TEST
     # Insert the test user
-    oid = "000000-7sdf77-88asdf8-9sdiy99"
-    insert_statement = insert(models.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid)
+    insert_statement = insert(models.User).values(asdict(dummy_user))
     res = db.execute(insert_statement)
 
     # Create test refresh_family entry
@@ -158,8 +158,7 @@ def test_401_raised_if_refresh_family_is_revoked(db, client):
 def test_no_rotation_and_same_access_token_returned_if_requests_within_30_seconds(db, client):
     ## SETTING UP THE TEST
     # Insert the test user
-    oid = "000000-7sdf77-88asdf8-9sdiy99"
-    insert_statement = insert(models.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid)
+    insert_statement = insert(models.User).values(asdict(dummy_user))
     res = db.execute(insert_statement)
 
     # Create test refresh_family entry
@@ -207,8 +206,7 @@ def test_no_rotation_and_same_access_token_returned_if_requests_within_30_second
 def test_401_returned_if_refresh_expired(db, client):
     ## SETTING UP THE TEST
     # Insert the test user
-    oid = "000000-7sdf77-88asdf8-9sdiy99"
-    insert_statement = insert(models.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid)
+    insert_statement = insert(models.User).values(asdict(dummy_user))
     res = db.execute(insert_statement)
 
     # Create test refresh_family entry
@@ -240,8 +238,7 @@ def test_401_returned_if_refresh_expired(db, client):
 def test_is_revoked_is_true_if_refresh_expired(db, client):
     ## SETTING UP THE TEST
     # Insert the test user
-    oid = "000000-7sdf77-88asdf8-9sdiy99"
-    insert_statement = insert(models.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid)
+    insert_statement = insert(models.User).values(asdict(dummy_user))
     res = db.execute(insert_statement)
 
     # Create test refresh_family entry
