@@ -80,7 +80,6 @@ dependencies = [
     "pytest>=9.0.2",
     "spacy",
     "Pillow",
-    "lexnlp",
 ]
 
 [tool.setuptools.packages.find]

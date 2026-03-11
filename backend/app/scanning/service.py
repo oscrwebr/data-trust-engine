@@ -7,11 +7,6 @@ from app.scanning import repository
 from app.scanning.models import File, Scan
 from app.scanning.regex_patterns import *
 
-import lexnlp.extract.en.citations as nlp_citations
-import lexnlp.extract.en.regulations as nlp_regulations
-import lexnlp.extract.en.courts as nlp_courts
-import lexnlp.extract.en.acts as nlp_acts
-
 # Load the spaCy NLP model
 nlp = spacy.load("en_core_web_sm")
 
@@ -222,26 +217,13 @@ def detect_citations(text_dict):
     detections = []
 
     for page_number, text in text_dict.items():
-        for citation in nlp_citations.get_citations(text):
+        for match in CITATION_REGEX.finditer(text):
             detections.append({
                 "sensitivity_subcategory": "CITATION",
                 "page_number": page_number
             })
 
-
-    # for page_number, text in text_dict.items():
-    #     doc = nlp(text)
-
-    #     for entity in doc.ents:
-    #         if entity.label_ == "PERSON":
-    #             detections.append({
-    #                 "sensitivity_subcategory": "NAME",
-    #                 "page_number": page_number
-    #             })
-
-    #             print(f'PERSON detection: {entity} | PAGE: {page_number}')
-
-    # return detections
+            print(f'CITATION detection: {match.group()} | PAGE: {page_number}')
 
 # Placeholder for dev purposes, returns hard coded test files' paths for testing
 def fetch_graph_file(graph_file_id: str):
