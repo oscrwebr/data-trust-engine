@@ -46,8 +46,8 @@ def create_scan_file_detection(db: Session, scan_file_id: int, sensitivity_subca
     return scan_file_detection
 
 
-def create_file(db: Session, graph_file_id: str, name: str, extension: str, file_hash: str):
-    file = File(graph_file_id=graph_file_id, file_name=name, file_extension=extension, hash=file_hash)
+def create_file(db: Session, graph_file_id: str, name: str, file_hash: str):
+    file = File(graph_file_id=graph_file_id, file_name=name, hash=file_hash)
     db.add(file)
     db.commit()
     db.refresh(file)
