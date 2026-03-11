@@ -1,8 +1,8 @@
-"""Initial migration after merge with development
+"""adding necessary columns
 
-Revision ID: eb4520e159d8
+Revision ID: b19d36bdc729
 Revises: 
-Create Date: 2026-03-08 23:39:49.396091
+Create Date: 2026-03-11 12:51:11.803426
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision: str = 'eb4520e159d8'
+revision: str = 'b19d36bdc729'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -72,6 +72,7 @@ def upgrade() -> None:
     sa.Column('surname', sa.String(length=50), nullable=False),
     sa.Column('email', sa.String(length=254), nullable=False),
     sa.Column('oid', sa.String(length=40), nullable=False),
+    sa.Column('refresh', sa.BLOB(), nullable=False),
     sa.PrimaryKeyConstraint('user_id')
     )
     op.create_index(op.f('ix_user_oid'), 'user', ['oid'], unique=True)

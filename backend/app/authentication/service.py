@@ -1,18 +1,20 @@
 from sqlalchemy.orm import Session
 from app.authentication import repository
-from ..core.security import create_refresh_token, create_access_token, hash_user_refresh_token
+from ..core.security import create_refresh_token, create_access_token, hash_user_refresh_token, encrypt_refresh
 from datetime import datetime, timezone, timedelta
 
-def create_user(db, details: dict):
+def create_user(db, details: dict, refresh: str):
     split_name = details["name"].split()
     firstname, surname = split_name[0], split_name[-1]
+    enc_refresh = encrypt_refresh(refresh)
 
     user = repository.create_user(
         db=db,
         firstname=firstname,
         surname=surname,
         email=details["email"],
-        oid=details["oid"]
+        oid=details["oid"],
+        refresh=enc_refresh
     )
     print(user)
     return user

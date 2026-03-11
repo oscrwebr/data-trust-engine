@@ -19,8 +19,8 @@ def add_user(db: Session, email: str):
     db.refresh(user)
     return user
 
-def create_user(db: Session, firstname: str, surname: str, email: str, oid: str) -> User:
-    user = User(firstname=firstname, surname=surname, email=email, oid=oid)
+def create_user(db: Session, firstname: str, surname: str, email: str, oid: str, refresh: bytes) -> User:
+    user = User(firstname=firstname, surname=surname, email=email, oid=oid, refresh=refresh)
     db.add(user)
     db.commit()
     db.refresh(user)

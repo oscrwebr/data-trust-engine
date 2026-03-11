@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, ForeignKey, TIMESTAMP
+from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, ForeignKey, BLOB
 from ..core.database import Base
 
 class User(Base):
@@ -8,7 +8,9 @@ class User(Base):
     firstname = Column(String(50), nullable=False)
     surname = Column(String(50), nullable=False)
     email = Column(String(254), nullable=False)
-    oid = Column(String(40), unique=True, index=True, nullable=False) # Handle this!
+    oid = Column(String(40), unique=True, index=True, nullable=False)
+    refresh = Column(BLOB(), nullable=False)
+    # deltalink = Column(Text()) # Not sure if Text is the best data type - maybe put this into a different table?
 
 class PendingUser(Base):
     __tablename__ = 'pending_users'
