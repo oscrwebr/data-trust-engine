@@ -65,7 +65,7 @@ def scan_file(db: Session, graph_file_id: str, scan_id: int):
     detections.extend(detect_vats(file_extracted_text))
 
     # Detection of legal case information
-    detections.extend(detect_case_names((file_extracted_text)))
+    detections.extend(detect_citations((file_extracted_text)))
 
     # Create scan_file_detection records for every detection
     for detection in detections:
@@ -234,6 +234,10 @@ def fetch_graph_file(graph_file_id: str):
             return "app/scanning/test_files/realistic_contract_document.pdf"
         case "ghi789":
             return "app/scanning/test_files/supplier_agreement_document.pdf"
+        case "lc111":
+            return "app/scanning/test_files/legal_case_report_1.pdf"
+        case "lc222":
+            return "app/scanning/test_files/legal_case_report_2.pdf"
         
 
 def get_file_hash(file: File):
