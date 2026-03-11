@@ -1,10 +1,11 @@
 import secrets
 from app.invites.models import Invite
 from app.invites.repository import add_invite, get_invite
+from app.authentication.repository import delete_pending_user, get_pending_user_by_id
 from app.authentication.models import PendingUser
-from datetime import datetime
+from datetime import datetime, date
 from sqlalchemy import insert
-from app.authentication import models
+from urllib.parse import quote
 
 # Test a null email input
 def test_null_email_input(db, client):
@@ -59,36 +60,54 @@ def test_valid_invite_request_user(db, client):
 # Test invite record can be retrieved using its token
 def test_retrieval_invite_record(db):
     token = str(secrets.token_hex(16))
-    insert_statement = insert(models.PendingUser).values(email="JohnSmith1@hotmail.com")
+    insert_statement = insert(PendingUser).values(email="JohnSmith1@hotmail.com")
     res = db.execute(insert_statement)
-    add_invite(db, datetime.now(), datetime.today(), "sent", False, res.inserted_primary_key[0], token)
+    add_invite(db, datetime.now(), datetime.today(), res.inserted_primary_key[0], token)
     invite = get_invite(db, token)
     assert invite is not None
-
-
-# Test return statement with invalid invite record which has already been used 
-def test_used_invite_record(db, client):
-    token = str(secrets.token_hex(16))
-    insert_statement = insert(models.PendingUser).values(email="JohnSmith1@hotmail.com")
-    res = db.execute(insert_statement)
-    add_invite(db, datetime.now(), datetime.today(), "sent", True, res.inserted_primary_key[0], token)
-    response = client.get("/invite/invite-processing", params={"token": token}, follow_redirects=False)
-    invite = get_invite(db, token)
-    assert invite.used == True
-    assert response.headers["location"] == "http://localhost:5173/invite-error/used"
 
 
 # Test return statement with invalid invite record with invalid expiry date 
 def test_expired_invite_record(db, client):
     token = str(secrets.token_hex(16))
-    insert_statement = insert(models.PendingUser).values(email="JohnSmith1@hotmail.com")
+    insert_statement = insert(PendingUser).values(email="JohnSmith1@hotmail.com")
     res = db.execute(insert_statement)
-    add_invite(db, datetime.now(), "2025-03-03", "sent", False, res.inserted_primary_key[0], token)
+    add_invite(db, datetime.now(), date(2025, 3, 3), res.inserted_primary_key[0], token)
     response = client.get("/invite/invite-processing", params={"token": token}, follow_redirects=False)
-    invite = get_invite(db, token)
-    assert invite.status == "expired"
-    assert invite.used == True
     assert response.headers["location"] == "http://localhost:5173/invite-error/expired?date=2025-03-03"
+    assert db.query(PendingUser).first() is None
+    assert db.query(Invite).first() is None 
+
+
+# Test if invite is clicked when the invite is not present in database
+def test_invite_clicked_when_not_in_database(client):
+    token = str(secrets.token_hex(16))
+    response = client.get("/invite/invite-processing", params={"token": token}, follow_redirects=False)
+    assert response.headers["location"] == "http://localhost:5173/invite-error/used"
+
+
+# Test return statement with valid invite
+def test_valid_invite(db, client):
+    token = str(secrets.token_hex(16))
+    insert_statement = insert(PendingUser).values(email="JohnSmith1@hotmail.com")
+    res = db.execute(insert_statement)
+    add_invite(db, datetime.now(), date(2030, 3, 3), res.inserted_primary_key[0], token)
+    response = client.get("/invite/invite-processing", params={"token": token}, follow_redirects=False)
+    next_url = "/?toast=signup"
+    redirect_url = f"http://localhost:8000/auth/sign-in?next={quote(next_url)}&signup=true"
+    assert response.headers["location"] == redirect_url
+    assert response.status_code == 302
+    assert db.query(PendingUser).first() is None
+    assert db.query(Invite).first() is None
+
+
+# Test getting pending user by their id and deleting pending user method
+def test_delete_pending_user_by_getting_id(db):
+    insert_statement = insert(PendingUser).values(email="JohnSmith1@hotmail.com")
+    res = db.execute(insert_statement)
+    user = get_pending_user_by_id(db, res.inserted_primary_key[0])
+    delete_pending_user(db, user)
+    assert db.query(PendingUser).first() is None
 
 
     

@@ -16,7 +16,7 @@ import { Button } from "primereact/button";
 
 import axios from 'axios';
 
-function EmployeeInvite({ visible, setVisible, toast}) {
+function Invite({ visible, setVisible, toast}) {
   const [loading, setLoading] = useState(false);
   const [expiryDate, setExpiryDate] = useState(null);
   const [email, setEmail] = useState(null);
@@ -123,4 +123,4 @@ function EmployeeInvite({ visible, setVisible, toast}) {
   );
 }
 
-export default EmployeeInvite;
+export default Invite;

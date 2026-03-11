@@ -1,4 +1,4 @@
-import EmployeeInvite from "../invites/invites";
+import Invite from "../invites/invites";
 import { Button } from "primereact/button";
 import { useState, useRef } from "react";
 
@@ -9,7 +9,7 @@ function Dashboard({toast}) {
     <div>
         <h1>Dashboard</h1>
         <Button onClick={() => setVisible(true)}>Invite Employee</Button>
-        <EmployeeInvite visible={visible} setVisible={setVisible} toast={toast}/>
+        <Invite visible={visible} setVisible={setVisible} toast={toast}/>
     </div>
   );
 }
