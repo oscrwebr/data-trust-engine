@@ -40,7 +40,7 @@ ACT_REGEX = re.compile(
 )
 
 REGULATION_REGEX = re.compile(
-    r"\b(Regulation\s*\([A-Z]{2,}\)\s*\d{4}/\d+|UK GDPR|GDPR)\b"
+    r"\b(Regulation\s*\([A-Z]{2,}\)\s*\d{4}/\d+)\b"
 )
 
 CASE_NAME_REGEX = re.compile(
