@@ -30,7 +30,7 @@ function EmployeeInviteError(){
                 <p className={styles.e_error_desc}>{error_desc}</p>
                 <Button className={styles.e_button}>Request to join workspace</Button>
                 <div className={styles.e_footer_container}>
-                    <Link className={styles.e_home_link} to={`/dashboard`}>Return to home</Link>
+                    <Link className={styles.e_home_link} to={`/`}>Return to home</Link>
                     <div className={styles.e_watermark_container}>
                         <Avatar image={logo} shape="circle" />
                         <p className={styles.e_dte_text}>The Data Trust Engine</p>

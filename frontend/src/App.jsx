@@ -1,33 +1,18 @@
 import "./App.css"
 import { useRef } from "react";
 
-import { BrowserRouter, Routes, Route, useNavigate, useLocation} from "react-router-dom";
+import { BrowserRouter, Routes, Route , useLocation} from "react-router-dom";
 import Dashboard from './dashboard/Dashboard';
 import EmployeeInviteError from './invites/error.jsx';
 import Roles from "./roles/roles";
-import CreateWorkspace from "./Workspace/CreateWorkspace";
-import { Button } from "primereact/button";
+import CreateWorkspace from "./workspace/CreateWorkspace";
+import Home from "./home/home.jsx"
 import { Toast } from 'primereact/toast';
 
-import axios from 'axios';
 import Test from "./Test/Test.jsx";
 import Navbar from "./components/navbar/Navbar.jsx";
 import Unprocessable422 from "./Errors/unprocessable422.jsx";
 import Forbidden403 from "./Errors/Forbidden403.jsx";
-
-function Home() {
-  const navigate = useNavigate();
-
-  function handleCreateWorkspace(){
-    navigate("/create-workspace")
-  }
-
-  return (
-    <div>
-      <Button onClick={handleCreateWorkspace}>Create a workspace</Button>
-    </div>
-  );
-}
 
 function App() {
   const toast = useRef(null);
@@ -45,7 +30,7 @@ function App() {
     {location.pathname !== "/" && <Navbar />}
     <div className={location.pathname !== "/" ? "content-frame" : ""}>
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Home toast={toast}/>} />
         <Route path="/roles" element={<Roles />} />
         <Route path="/dashboard" element={<Dashboard toast={toast}/>} />
         <Route path="/create-workspace" element={<CreateWorkspace  toast={toast}/>} />

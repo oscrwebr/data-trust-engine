@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, ForeignKey, TIMESTAMP
 from ..core.database import Base
+from sqlalchemy.orm import relationship
 
 class User(Base):
     __tablename__ = 'user'
@@ -15,6 +16,14 @@ class PendingUser(Base):
 
     user_id = Column(Integer, primary_key=True, index=True)
     email = Column(String(254), nullable=False)
+
+    # relation
+    invites = relationship(
+        "Invite",
+        back_populates="pending_user",
+        cascade="all, delete",
+        passive_deletes=True
+    )
 
 class RefreshFamily(Base):
     __tablename__ = 'refresh_family'
