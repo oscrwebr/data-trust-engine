@@ -1,12 +1,4 @@
-from app.scanning.service import (
-    detect_named_entities,
-    detect_phone_numbers,
-    detect_emails,
-    detect_addresses,
-    detect_postcodes,
-    detect_ibans,
-    detect_vats
-)
+from app.scanning.detectors import *
 
 
 def test_detects_named_entities():

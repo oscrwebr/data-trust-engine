@@ -1,13 +1,7 @@
 from app.scanning.service import (
-    extract_text_from_pdf,
-    detect_named_entities,
-    detect_phone_numbers,
-    detect_emails,
-    detect_addresses,
-    detect_postcodes,
-    detect_ibans,
-    detect_vats
+    extract_text_from_pdf
 )
+from app.scanning.detectors import *
 
 
 def test_supplier_agreement_contains_phone_detections():
