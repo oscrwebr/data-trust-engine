@@ -28,7 +28,7 @@ async def send_invite(invite: InviteRequest, db: Session=Depends(get_database)):
 
         # Record invite and new user in database
         user = user_repository.add_user(db, invite.email)
-        invite_repository.add_invite(db, datetime.now(), invite.expiry_date.date(), "sent", False, user.id, token)
+        invite_repository.add_invite(db, datetime.now(), invite.expiry_date.date(), "sent", False, user.user_id, token)
         
     return {"success": result}
 

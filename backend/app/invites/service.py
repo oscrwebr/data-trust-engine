@@ -8,7 +8,6 @@ from starlette.responses import JSONResponse
 from datetime import datetime, date
 from sqlalchemy.orm import Session
 from app.invites.models import Invite
-from fastapi.responses import RedirectResponse
 
 load_dotenv()
 

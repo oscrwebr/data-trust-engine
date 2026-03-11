@@ -2,8 +2,8 @@ import { cleanup, fireEvent, render, screen, within, waitFor } from "@testing-li
 import { MemoryRouter, redirect, Route, Routes } from "react-router-dom";
 import axios from 'axios';
 import { afterEach, describe, expect, test, vi } from "vitest";
-import EmployeeInviteError from "./EmployeeInviteError";
-import Dashboard from "../Dashboard/Dashboard.jsx";
+import EmployeeInviteError from "./error.jsx";
+import Dashboard from "../dashboard/Dashboard.jsx";
 
  vi.mock("primereact/calendar", () => ({
             Calendar: ({ value, onChange }) => (
@@ -15,7 +15,7 @@ import Dashboard from "../Dashboard/Dashboard.jsx";
             )
         }));
 
-import EmployeeInvite from "./EmployeeInvite.jsx";
+import EmployeeInvite from "./invites.jsx";
 
 vi.mock("axios");
 describe("Invite Component", () => {
@@ -159,20 +159,34 @@ describe("Invite Component", () => {
             data: { success: true }
         });
 
+        let toastCalled = null;
+        const mockToast = {
+            current: {
+            show: (args) => {
+                toastCalled = args;
+                console.log("Toast triggered:", args);
+            },
+            },
+        };
+
         render(
             <MemoryRouter>
-                <EmployeeInvite visible={true} setVisible={() => {}}/>
+                <Dashboard toast={mockToast} />
             </MemoryRouter>
         );
-        
-        const modal = screen.getByRole('dialog');
+
+        const inviteButton = screen.getByRole("button", { name: /invite employee/i });
+        fireEvent.click(inviteButton);
+
+        const modal = screen.getByRole("dialog");
+
         const emailInput = within(modal).getByPlaceholderText("Email address");
         fireEvent.change(emailInput, { target: { value: "valid@example.com" } });
 
         const calendarInput = within(modal).getByTestId("calendar-input");
-        fireEvent.change(calendarInput, { target: { value: "2026-04-01" } });
-    
-        const submitButton = within(modal).getByRole('button', { name: /send invite/i });
+        fireEvent.change(calendarInput, { target: { value: "2030-04-01" } });
+
+        const submitButton = within(modal).getByRole("button", { name: /send invite/i });
         fireEvent.click(submitButton);
 
         await waitFor(() => {
@@ -180,15 +194,24 @@ describe("Invite Component", () => {
                 'http://localhost:8000/invite/send-invite',
                 {
                     email: 'valid@example.com',
-                    expiry_date: new Date("2026-04-01").toISOString(),
+                    expiry_date: new Date("2030-04-01").toISOString(),
                 }
             );
         });
 
-        await waitFor(async () => {
-            expect(await screen.findByText("Invite successfully sent!")).toBeInTheDocument();
-        });
+        await waitFor(() => {
+            if (!toastCalled) {
+                throw new Error("Toast was not triggered");
+            }
+            
+            if (
+                !toastCalled.detail.includes("Invite successfully sent")
+            ) {
+                throw new Error("Toast called with wrong arguments");
+            }
+        })
     })
+
 
     // Test 6
     test("Test correct information displayed when user redirected to invite expiry error page", async () => {

@@ -78,7 +78,8 @@ dependencies = [
     "packaging>=26.0",
     "pluggy>=1.6.0",
     "pytest>=9.0.2",
-    "spacy"
+    "spacy",
+    "Pillow",
 ]
 
 [tool.setuptools.packages.find]

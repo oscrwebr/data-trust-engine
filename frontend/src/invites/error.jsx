@@ -1,6 +1,6 @@
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import dayjs from "dayjs";
-import styles from "./EmployeeInvite.module.css";
+import styles from "./invites.module.css";
 import "primeicons/primeicons.css";
 
 import logo from "../assets/CIH_logo.jpg";

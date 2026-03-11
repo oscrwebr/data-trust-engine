@@ -1,18 +1,18 @@
-"""updated scanning models
+"""Initial migration after merge with development
 
-Revision ID: 847876c2a87e
+Revision ID: eb4520e159d8
 Revises: 
-Create Date: 2026-03-08 17:20:05.384588
+Create Date: 2026-03-08 23:39:49.396091
 
 """
 from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
-
+from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision: str = '847876c2a87e'
+revision: str = 'eb4520e159d8'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -35,6 +35,12 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('naming_convention_id')
     )
     op.create_index(op.f('ix_naming_convention_naming_convention_id'), 'naming_convention', ['naming_convention_id'], unique=False)
+    op.create_table('pending_users',
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('email', sa.String(length=254), nullable=False),
+    sa.PrimaryKeyConstraint('user_id')
+    )
+    op.create_index(op.f('ix_pending_users_user_id'), 'pending_users', ['user_id'], unique=False)
     op.create_table('refresh_family',
     sa.Column('refresh_family_id', sa.Integer(), nullable=False),
     sa.Column('is_revoked', sa.Boolean(), nullable=True),
@@ -78,7 +84,7 @@ def upgrade() -> None:
     sa.Column('used', sa.Boolean(), nullable=True),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('token', sa.String(length=250), nullable=True),
-    sa.ForeignKeyConstraint(['user_id'], ['user.user_id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['pending_users.user_id'], ),
     sa.PrimaryKeyConstraint('invite_id')
     )
     op.create_index(op.f('ix_invites_invite_id'), 'invites', ['invite_id'], unique=False)
@@ -125,6 +131,15 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('sensitivity_subcategory_id')
     )
     op.create_index(op.f('ix_sensitivity_subcategory_sensitivity_subcategory_id'), 'sensitivity_subcategory', ['sensitivity_subcategory_id'], unique=False)
+    op.create_table('workspaces',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(length=255), nullable=False),
+    sa.Column('image', mysql.MEDIUMBLOB(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['user_id'], ['user.user_id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_workspaces_id'), 'workspaces', ['id'], unique=False)
     op.create_table('naming_convention_scan_result',
     sa.Column('naming_convention_scan_result_id', sa.Integer(), nullable=False),
     sa.Column('scan_file_id', sa.Integer(), nullable=False),
@@ -167,6 +182,8 @@ def downgrade() -> None:
     op.drop_table('role_permission')
     op.drop_index(op.f('ix_naming_convention_scan_result_naming_convention_scan_result_id'), table_name='naming_convention_scan_result')
     op.drop_table('naming_convention_scan_result')
+    op.drop_index(op.f('ix_workspaces_id'), table_name='workspaces')
+    op.drop_table('workspaces')
     op.drop_index(op.f('ix_sensitivity_subcategory_sensitivity_subcategory_id'), table_name='sensitivity_subcategory')
     op.drop_table('sensitivity_subcategory')
     op.drop_index(op.f('ix_scan_naming_convention_scan_naming_convention_id'), table_name='scan_naming_convention')
@@ -190,6 +207,8 @@ def downgrade() -> None:
     op.drop_table('role')
     op.drop_index(op.f('ix_refresh_family_refresh_family_id'), table_name='refresh_family')
     op.drop_table('refresh_family')
+    op.drop_index(op.f('ix_pending_users_user_id'), table_name='pending_users')
+    op.drop_table('pending_users')
     op.drop_index(op.f('ix_naming_convention_naming_convention_id'), table_name='naming_convention')
     op.drop_table('naming_convention')
     op.drop_index(op.f('ix_file_file_id'), table_name='file')
