@@ -10,27 +10,24 @@ afterEach(() => {
     cleanup();
 });
 
-test('renders the navbar component', () => {
+test('navbar renders on dashboard page', () => {
     // Arrange
-    
-    render(<MemoryRouter><Navbar/></MemoryRouter>);
-
-    // Assert
-    expect(screen.getByAltText("CIH Logo")).toBeInTheDocument();
-    expect(screen.getByText("Files")).toBeInTheDocument();
-    expect(screen.getByText("Scans")).toBeInTheDocument();
-
-})
-
-test('navbar renders on all pages', () => {
-    // Arrange
-    render(<App/>);
+    render(<MemoryRouter initialEntries={["/dashboard"]}><App/></MemoryRouter>);
 
     // Assert
     expect(screen.getByAltText("CIH Logo")).toBeInTheDocument();
     expect(screen.getByText("Files")).toBeInTheDocument();
     expect(screen.getByText("Scans")).toBeInTheDocument();
 })
+
+test('navbar does not render on home page', () => {
+    // Arrange
+    render(<MemoryRouter initialEntries={["/"]}><App /></MemoryRouter>);
+
+    // Assert
+    expect(screen.queryByText("Files")).not.toBeInTheDocument();
+});
+
 
 test('files item redirects to files page', async () => {
     // Arrange
