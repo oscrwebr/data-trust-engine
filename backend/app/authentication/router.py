@@ -30,7 +30,7 @@ async def sign_in(application: Annotated[ConfidentialClientApplication, Depends(
     if not next.startswith("/"):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
     
-    flow = application.initiate_auth_code_flow(scopes=os.environ.get("SCOPES").split())
+    flow = application.initiate_auth_code_flow(scopes=config.SCOPES)
     # print(flow)
     request.session["flow"] = flow
     request.session["next"] = next
@@ -58,28 +58,9 @@ async def login_redirect(application: Annotated[ConfidentialClientApplication, D
     )
     url = request.session["next"]
 
-    '''
-    --- THIS IS FOR TESTING REFRESH STUFF ---
-    '''
-    print("\n\nREFRESH TESTING\n\n")
-
-
-    account = application.get_accounts('daiyankhan63@hotmail.com')
-    print(f"This is the account: {account}\n\n")
-    if account:
-        access_token = application.acquire_token_silent(scopes=os.environ.get("SCOPES").split(), account=account[0])
-        print(access_token)
-    else:
-        print("need to get refresh and then follow through with access token flow!")
-
-
-    print("\n\nREFRESH TESTING\n\n")
-    '''
-    --- THIS IS FOR TESTING REFRESH STUFF ---
-    '''
     # Either create user or check if the user exists
     # Check if the user exists in the db before creating a new user, incase of repeated request
-    user = service.check_exists(result['id_token_claims']['oid'], db)
+    user = service.check_get_by_oid(result['id_token_claims']['oid'], db)
     if "signup" in request.session and not user:
         user = service.create_user(db=db, details=result["id_token_claims"], refresh=result["refresh_token"])
         

@@ -12,6 +12,7 @@ def create_user(db, details: dict, refresh: str):
         db=db,
         firstname=firstname,
         surname=surname,
+        username=details["preferred_username"],
         email=details["email"],
         oid=details["oid"],
         refresh=enc_refresh
@@ -19,7 +20,11 @@ def create_user(db, details: dict, refresh: str):
     print(user)
     return user
 
-def check_exists(oid: str, db):
+def check_get_by_id(id: int, db):
+    user = repository.get_by_id(id, db)
+    return user if user else None
+
+def check_get_by_oid(oid: str, db):
     # print(oid)
     user = repository.get_by_oid(oid, db)
     # print(f"User details:\nFirstname: {res.firstname}\nSurname: {res.surname}\nemail: {res.email}") if res else print("There is nothing there!")
