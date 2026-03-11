@@ -122,161 +122,71 @@ def detect_named_entities(text_dict):
     return detections
 
 
-# Phone number detection using regex
-def detect_phone_numbers(text_dict):
+# Regex detection helper method
+def detect_with_regex(detection_subcategory, detection_regex, text_dict):
     detections = []
 
+    # Iterate through the text of each page, find regex matches and append to detections array
     for page_number, text in text_dict.items():
-        for match in UK_PHONE_REGEX.finditer(text):
+        for match in detection_regex.finditer(text):
             detections.append({
-                "sensitivity_subcategory": "PHONE",
+                "sensitivity_subcategory": detection_subcategory,
                 "page_number": page_number
             })
 
-            print(f'PHONE detection: {match.group()} | PAGE: {page_number}')
+            print(f"{detection_subcategory} detection: {match.group()} | PAGE: {page_number}")
 
     return detections
+
+
+# Phone number detection using regex
+def detect_phone_numbers(text_dict):
+    return detect_with_regex("PHONE", UK_PHONE_REGEX, text_dict)
 
 
 # Email detection using regex
 def detect_emails(text_dict):
-    detections = []
-
-    for page_number, text in text_dict.items():
-        for match in EMAIL_REGEX.finditer(text):
-            detections.append({
-                "sensitivity_subcategory": "EMAIL",
-                "page_number": page_number
-            })
-
-            print(f'EMAIL detection: {match.group()} | PAGE: {page_number}')
-
-    return detections
+    return detect_with_regex("EMAIL", EMAIL_REGEX, text_dict)
 
 
 # Address detection using regex
 def detect_addresses(text_dict):
-    detections = []
-
-    for page_number, text in text_dict.items():
-        for match in ADDRESS_REGEX.finditer(text):
-            detections.append({
-                "sensitivity_subcategory": "ADDRESS",
-                "page_number": page_number
-            })
-
-            print(f'ADDRESS detection: {match.group()} | PAGE: {page_number}')
-
-    return detections
+    return detect_with_regex("ADDRESS", ADDRESS_REGEX, text_dict)
 
 
 # Postcode detection using regex
 def detect_postcodes(text_dict):
-    detections = []
-
-    for page_number, text in text_dict.items():
-        for match in UK_POSTCODE_REGEX.finditer(text):
-            detections.append({
-                "sensitivity_subcategory": "POSTCODE",
-                "page_number": page_number
-            })
-
-            print(f'POSTCODE detection: {match.group()} | PAGE: {page_number}')
-
-    return detections
+    return detect_with_regex("POSTCODE", UK_POSTCODE_REGEX, text_dict)
 
 
 # IBAN detection using regex
 def detect_ibans(text_dict):
-    detections = []
-
-    for page_number, text in text_dict.items():
-        for match in IBAN_REGEX.finditer(text):
-            detections.append({
-                "sensitivity_subcategory": "IBAN",
-                "page_number": page_number
-            })
-
-            print(f'IBAN detection: {match.group()} | PAGE: {page_number}')
-
-    return detections
+    return detect_with_regex("IBAN", IBAN_REGEX, text_dict)
 
 
 # VAT detection using regex
 def detect_vats(text_dict):
-    detections = []
-
-    for page_number, text in text_dict.items():
-        for match in UK_VAT_REGEX.finditer(text):
-            detections.append({
-                "sensitivity_subcategory": "VAT",
-                "page_number": page_number
-            })
-
-            print(f'VAT detection: {match.group()} | PAGE: {page_number}')
-    
-    return detections
+    return detect_with_regex("VAT", UK_VAT_REGEX, text_dict)
 
 
-## LEGAL CATEGORY SENSITIVE DATA DETECTION
+# Legal citation detection using regex
 def detect_citations(text_dict):
-    detections = []
-
-    for page_number, text in text_dict.items():
-        for match in CITATION_REGEX.finditer(text):
-            detections.append({
-                "sensitivity_subcategory": "CITATION",
-                "page_number": page_number
-            })
-
-            print(f'CITATION detection: {match.group()} | PAGE: {page_number}')
-    
-    return detections
+    return detect_with_regex("CITATION", CITATION_REGEX, text_dict)
 
 
+# Legal act detection using regex
 def detect_acts(text_dict):
-    detections = []
-
-    for page_number, text in text_dict.items():
-        for match in ACT_REGEX.finditer(text):
-            detections.append({
-                "sensitivity_subcategory": "ACT",
-                "page_number": page_number
-            })
-
-            print(f'ACT detection: {match.group()} | PAGE: {page_number}')
-    
-    return detections
+    return detect_with_regex("ACT", ACT_REGEX, text_dict)
 
 
+# Legal regulation detection using regex
 def detect_regulations(text_dict):
-    detections = []
-
-    for page_number, text in text_dict.items():
-        for match in REGULATION_REGEX.finditer(text):
-            detections.append({
-                "sensitivity_subcategory": "REGULATION",
-                "page_number": page_number
-            })
-
-            print(f'REGULATION detection: {match.group()} | PAGE: {page_number}')
-    
-    return detections
+    return detect_with_regex("REGULATION", REGULATION_REGEX, text_dict)
 
 
+# Legal case name detection using regex
 def detect_case_names(text_dict):
-    detections = []
-
-    for page_number, text in text_dict.items():
-        for match in CASE_NAME_REGEX.finditer(text):
-            detections.append({
-                "sensitivity_subcategory": "CASE_NAME",
-                "page_number": page_number
-            })
-
-            print(f'CASE_NAME detection: {match.group()} | PAGE: {page_number}')
-    
-    return detections
+    return detect_with_regex("CASE_NAME", CASE_NAME_REGEX, text_dict)
 
 
 # Placeholder for dev purposes, returns hard coded test files' paths for testing
