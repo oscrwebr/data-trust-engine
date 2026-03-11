@@ -35,7 +35,7 @@ async def sign_in(application: Annotated[ConfidentialClientApplication, Depends(
     request.session["flow"] = flow
     request.session["next"] = next
     if signup:
-        print("It has been added!")
+        # print("It has been added!")
         request.session["signup"] = signup
 
     # print(f"\n\n request.session: {request.session}")
@@ -59,7 +59,11 @@ async def login_redirect(application: Annotated[ConfidentialClientApplication, D
     url = request.session["next"]
 
     # Either create user or check if the user exists
-    user = service.create_user(db=db, details=result["id_token_claims"]) if "signup" in request.session else service.check_exists(result['id_token_claims']['oid'], db)
+    # Check if the user exists in the db before creating a new user, incase of repeated request
+    user = service.check_exists(result['id_token_claims']['oid'], db)
+    if "signup" in request.session and not user:
+        user = service.create_user(db=db, details=result["id_token_claims"])
+        
     request.session.clear()
     response.delete_cookie("session") # This is to remove the cookie from the user's browser
 
