@@ -23,6 +23,9 @@ def perform_scan(db: Session, graph_file_ids: list[str]):
             print(f"FILE SCAN ERROR: {e}")
             continue
 
+    # Set scan finish time
+    repository.end_scan(db=db, scan=scan)
+
     return {
         "scan_id": scan.scan_id,
         "files_requested": len(graph_file_ids)
