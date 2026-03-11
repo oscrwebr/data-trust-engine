@@ -2,6 +2,8 @@ import "./navbar.css";
 import logo from "../../assets/CIH_long_logo.png";
 import { Link } from "react-router-dom";
 import NavbarItem from "./NavbarItem";
+import { PiGear } from "react-icons/pi";
+import { PiUserCircleLight } from "react-icons/pi";
 
 function Navbar() {
 
@@ -19,6 +21,11 @@ function Navbar() {
                 <NavbarItem url="/scans" text="Scans"/>
             </ul>
         </div>
+        {/* future use with accounts and potentially settings */}
+        {/* <div className="navbar-bottom">
+            <PiGear size={55}/>
+            <PiUserCircleLight size={55}/>
+        </div> */}
     </div>
   );
 }
