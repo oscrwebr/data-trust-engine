@@ -17,6 +17,10 @@ class ScanFilesRequest(BaseModel):
 def scan_files(scan_files_request: ScanFilesRequest, db: Session = Depends(get_database)):
     service.perform_scan(graph_file_ids=scan_files_request.graph_file_ids, db=db)
 
+    return {
+        "message:" f"File content scan completed successfuly for files: {scan_files_request.graph_file_ids}"
+    }
+
 
 @router.post("/update_file_hash")
 def update_file_hash(graph_file_id: str, db: Session=Depends(get_database)):

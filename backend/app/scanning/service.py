@@ -8,7 +8,7 @@ from app.scanning.models import File, Scan
 from app.scanning.regex_patterns import *
 
 # Load the spaCy NLP model
-nlp = spacy.load("en_core_web_sm")
+nlp = spacy.load("en_core_web_lg")
 
 
 # Perform a scan
@@ -224,6 +224,8 @@ def detect_citations(text_dict):
             })
 
             print(f'CITATION detection: {match.group()} | PAGE: {page_number}')
+    
+    return detections
 
 # Placeholder for dev purposes, returns hard coded test files' paths for testing
 def fetch_graph_file(graph_file_id: str):
