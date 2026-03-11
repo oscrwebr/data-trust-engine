@@ -4,8 +4,9 @@ import axios from 'axios';
 import { afterEach, describe, expect, test, vi } from "vitest";
 import EmployeeInviteError from "./error.jsx";
 import Dashboard from "../dashboard/Dashboard.jsx";
+import Home from "../home/home.jsx"
 
- vi.mock("primereact/calendar", () => ({
+vi.mock("primereact/calendar", () => ({
             Calendar: ({ value, onChange }) => (
                 <input
                 data-testid="calendar-input"
@@ -253,17 +254,29 @@ describe("Invite Component", () => {
 
     // Test 8
     test("Test user is redirected to home when they click 'Return to home' from invite error page", async () => {
+
+        let toastCalled = null;
+        const mockToast = {
+            current: {
+                show: (args) => {
+                    toastCalled = args;
+                    console.log("Toast triggered:", args);
+                },
+            },
+        };
+
         render(
             <MemoryRouter initialEntries={["/invite-error/used"]}>
                 <Routes>
                     <Route path="/invite-error/:type" element={<EmployeeInviteError />} />
-                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/" element={<Home toast={mockToast}/>} />
                 </Routes>
             </MemoryRouter>
 
         )
         
         fireEvent.click(screen.getByText("Return to home"));
-        expect(await screen.findByText("Dashboard")).toBeInTheDocument();
+        expect(await screen.findByText("Create a workspace")).toBeInTheDocument();
+
     })
 })

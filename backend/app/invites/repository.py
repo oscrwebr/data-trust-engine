@@ -4,8 +4,8 @@ from app.authentication.models import User
 
 from datetime import datetime, date
 
-def add_invite(db: Session, createdAt:datetime, expiryDate:date, used:bool, user_id:int, token:str):
-    invite = Invite(created_at=createdAt, expiry_date=expiryDate, used=used, user_id=user_id, token=token)
+def add_invite(db: Session, createdAt:datetime, expiryDate:date, user_id:int, token:str):
+    invite = Invite(created_at=createdAt, expiry_date=expiryDate, user_id=user_id, token=token)
     db.add(invite)
     db.commit()
     db.refresh(invite)

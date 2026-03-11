@@ -32,7 +32,7 @@ async def send_invite(invite: InviteRequest, db: Session=Depends(get_database)):
         if not user:
             user = user_repository.add_user(db, invite.email)
         
-        invite_repository.add_invite(db, datetime.now(), invite.expiry_date.date(), False, user.user_id, token)
+        invite_repository.add_invite(db, datetime.now(), invite.expiry_date.date(), user.user_id, token)
         
     return {"success": result}
 
@@ -49,11 +49,7 @@ async def process_invite(token: str = Query(...), db: Session = Depends(get_data
 
     # Check the expiry date
     result = check_invite(invite, db)
-
-    if(result == "used"):
-        user_repository.delete_pending_user(db, user)
-        return RedirectResponse(f"http://localhost:5173/invite-error/used")
-
+    
     if(result == "expired"):
         expiry = invite.expiry_date
         user_repository.delete_pending_user(db, user)

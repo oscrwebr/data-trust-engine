@@ -8,7 +8,6 @@ class Invite(Base):
     invite_id = Column(Integer, primary_key=True, index=True)
     created_at = Column(DateTime)
     expiry_date = Column(Date)
-    used = Column(Boolean)
     token = Column(String(250))
 
     # relations

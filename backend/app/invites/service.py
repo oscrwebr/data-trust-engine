@@ -139,16 +139,10 @@ async def send_invite_service(email: str, expiry: str, token: str):
 
 def check_invite(invite:Invite, db: Session):
 
-    # Check the invite hasn't already been clicked
-    if(invite.used == True):
-        return "used"
-
     # Check invite expiry date
     if(invite.expiry_date < date.today()):
-        invite.used = True
         db.commit()
         return "expired"
-    
-    invite.used = True
+
     db.commit()
     return True
