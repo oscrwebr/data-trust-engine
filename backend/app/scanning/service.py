@@ -7,6 +7,7 @@ from app.scanning import repository
 from app.scanning.models import File, Scan
 from app.scanning.regex_patterns import *
 
+
 # Load the spaCy NLP model
 nlp = spacy.load("en_core_web_lg")
 
@@ -204,7 +205,8 @@ def fetch_graph_file(graph_file_id: str):
             return "app/scanning/test_files/legal_case_report_2.pdf"
         
 
-def get_file_hash(file: File):
+# Get hash of a file
+def get_file_hash(file):
     # Create hash object
     hash = hashlib.sha256()
 
@@ -232,10 +234,12 @@ def update_file_hash(db: Session, graph_file_id: str):
 
     repository.set_file_hash(db=db, file=file, new_hash=new_hash)
 
+
 # All naming convention methods use the Word Ninja library to split file names into English words
 # https://github.com/keredson/wordninja
 def split_file_name(file_name):
     return wordninja.split(file_name)
+
 
 def to_camel_case(file_name):
     words = split_file_name(file_name)
@@ -243,11 +247,13 @@ def to_camel_case(file_name):
     camel_case_name = words[0].lower() + ''.join(word.capitalize() for word in words[1:])
     return camel_case_name
 
+
 def to_snake_case(file_name):
     words = split_file_name(file_name)
     # Keep all words lowercase and join with underscores
     snake_case_name = '_'.join(word.lower() for word in words)
     return snake_case_name
+
 
 def to_pascal_case(file_name):
     words = split_file_name(file_name)
@@ -255,27 +261,34 @@ def to_pascal_case(file_name):
     pascal_case_name = ''.join(word.capitalize() for word in words)
     return pascal_case_name
 
+
 def to_kebab_case(file_name):
     words = split_file_name(file_name)
     # Keep all words lowercase and join with hyphens
     kebab_case_name = '-'.join(word.lower() for word in words)
     return kebab_case_name
 
+
 # Checks for each naming convention
 def is_camel_case(file_name):
     return file_name == to_camel_case(file_name)
 
+
 def is_snake_case(file_name):
     return file_name == to_snake_case(file_name)
+
 
 def is_pascal_case(file_name):
     return file_name == to_pascal_case(file_name)
 
+
 def is_kebab_case(file_name):
     return file_name == to_kebab_case(file_name)
 
+
 def remove_file_extension(file_name):
     return file_name.rsplit('.', 1)[0]
+
 
 def perform_organisation_scan(db: Session, naming_convention_ids: list[int]):
 
