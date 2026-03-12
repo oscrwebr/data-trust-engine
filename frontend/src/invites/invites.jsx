@@ -25,8 +25,12 @@ function Invite({ visible, setVisible, toast}) {
   const [date_error, setDateError] = useState(false);
   const [email_valid, setEmailValid] = useState(false);
 
-  const showMessage = () => {
+  const showSuccessMessage = () => {
       toast.current.show({ severity: 'success', summary: 'Success', detail: 'Invite successfully sent!', life: 4000});
+  };
+
+  const showCooldownMessage = () => {
+      toast.current.show({ severity: 'error', summary: 'Error', detail: 'You are sending this employee too many invites, please try again tomorrow.', life: 4000});
   };
 
   const today = new Date();
@@ -54,10 +58,13 @@ function Invite({ visible, setVisible, toast}) {
       } else if (res.data.success == "expiry") {
         setDateError(true);
         setEmailError(false);
-        setEmailValid(true)
+        setEmailValid(true);
+
+      } else if (res.data.success == "cooldown") {
+        showCooldownMessage();
         
       } else if (res.data.success == true) {
-        showMessage();
+        showSuccessMessage();
         setDateError(false);
         setEmailError(false);
         setEmailValid(true);

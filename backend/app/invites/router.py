@@ -22,7 +22,10 @@ router = APIRouter(prefix="/invite", tags=["invite"])
 
 @router.post("/send-invite")
 async def send_invite(db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)], invite: InviteRequest):
-    result = await create_invite(invite)
+    user = service.test_route(current_user.user_id, db=db)
+    workspace = get_workspace_by_user_id(db, current_user.user_id)
+    time_now = datetime.now()
+    result = await create_invite(db, invite, workspace, time_now)
     if(result == True):
 
         # Generate parameters
@@ -30,18 +33,15 @@ async def send_invite(db: Annotated[Session, Depends(get_database)], current_use
         expiry = arrow.get(str(invite.expiry_date.date()), "YYYY-MM-DD")
         expiry = expiry.format("Do MMMM YYYY")
 
-        user = service.test_route(current_user.user_id, db=db)
-        workspace = get_workspace_by_user_id(db, current_user.user_id)
-
         #Send invite
-        await send_invite_service(db, invite.email, expiry, token, user)
+        await send_invite_service(db, invite.email, expiry, token, workspace, user)
 
         # Record invite and new user in database (if user doesn't already exist)
         user = user_repository.get_pending_user_by_email(db, invite.email)
         if not user:
             user = user_repository.add_user(db, invite.email)
         
-        invite_repository.add_invite(db, datetime.now(), invite.expiry_date.date(), user.user_id, token, workspace)
+        invite_repository.add_invite(db, time_now, invite.expiry_date.date(), user.user_id, token, workspace)
 
     return {"success": result}
 

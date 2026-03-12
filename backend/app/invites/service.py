@@ -5,12 +5,15 @@ from .schema import conf
 from zerobouncesdk import ZeroBounce, ZBException
 from fastapi_mail import FastMail, MessageSchema
 from starlette.responses import JSONResponse
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from sqlalchemy.orm import Session
 from app.invites.models import Invite
+from app.invites.repository import get_invite_for_cooldown
+from app.workspaces.models import Workspace
+from app.authentication.repository import get_pending_user_by_email
 from app.authentication.models import User
-from app.workspaces import repository
 import base64
+
 
 
 load_dotenv()
@@ -18,20 +21,19 @@ load_dotenv()
 ZEROBOUNCE_API_KEY = os.getenv("ZEROBOUNCE_API_KEY")
 
 #Creating, sending and logging invite
-async def create_invite(invite):
+async def create_invite(db, invite, workspace, time_now):
 
     # Validate inputs
-    is_invite_valid = validate_invite(invite.email, invite.expiry_date)
+    is_invite_valid = validate_invite(db, invite.email, invite.expiry_date, workspace, time_now)
     if(is_invite_valid == True):
-    
-        return True 
-
+        return True
     else:
         return is_invite_valid
     
 
 # Validating the invite
-def validate_invite(email: str, expiry_date: datetime | None):
+def validate_invite(db, email: str, expiry_date: datetime | None, workspace: Workspace, time_now:datetime):
+    cooldown = timedelta(minutes=1)
 
     if email is None:
         return "invalid"
@@ -49,6 +51,14 @@ def validate_invite(email: str, expiry_date: datetime | None):
     if(expiry_date == None and is_email_valid == "valid"):
         return "expiry"
     
+    # Check to see if admin is able to send an invite (cooldown)
+    user = get_pending_user_by_email(db, email)
+    if user is not None:
+        latest_invite = get_invite_for_cooldown(db, workspace, user)
+        time_difference = time_now - latest_invite.created_at
+        if(time_difference < cooldown):
+            return "cooldown"
+
     return True
 
     
@@ -65,8 +75,7 @@ def validate_email(email: str):
   
 
 #Using FastAPI smtplib to send the email
-async def send_invite_service(db: Session, email: str, expiry: str, token: str, user: User):
-    workspace = repository.get_workspace_by_user_id(db, user.user_id)
+async def send_invite_service(db: Session, email: str, expiry: str, token: str, workspace: Workspace, user: User):
     image_base64 = base64.b64encode(workspace.image).decode("utf-8")
     template = f"""
             <html>
