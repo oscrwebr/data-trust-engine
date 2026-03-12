@@ -8,7 +8,10 @@ from starlette.responses import JSONResponse
 from datetime import datetime, date
 from sqlalchemy.orm import Session
 from app.invites.models import Invite
-from fastapi.responses import RedirectResponse
+from app.authentication.models import User
+from app.workspaces import repository
+import base64
+
 
 load_dotenv()
 
@@ -62,7 +65,9 @@ def validate_email(email: str):
   
 
 #Using FastAPI smtplib to send the email
-async def send_invite_service(email: str, expiry: str, token: str):
+async def send_invite_service(db: Session, email: str, expiry: str, token: str, user: User):
+    workspace = repository.get_workspace_by_user_id(db, user.user_id)
+    image_base64 = base64.b64encode(workspace.image).decode("utf-8")
     template = f"""
             <html>
                 <body style="margin:0; padding:0; font-family:Arial, sans-serif; background-color:#f5f5f5;">
@@ -71,7 +76,7 @@ async def send_invite_service(email: str, expiry: str, token: str):
                     <tr>
                         <td align="center" style="padding:20px 0;">
                         <img 
-                            src="http://blogs.cardiff.ac.uk/innovation/wp-content/uploads/sites/561/2023/01/CIH-Logo-Primary-Black.jpg" 
+                            src="data:image/png;base64,{image_base64}"
                             alt="Company Logo or Header" 
                             style="max-width:200px; width:100%; height:auto;" />
                         </td>
@@ -92,7 +97,7 @@ async def send_invite_service(email: str, expiry: str, token: str):
 
                         <p style="font-size:14px; color:#333333;">
                             Best regards,<br />
-                            <strong>[admin_name]</strong>
+                            <strong>{user.firstname} {user.surname}</strong>
                         </p>
 
                         <p style="font-size:14px; color:#333333; margin-top:25px;">
@@ -127,7 +132,7 @@ async def send_invite_service(email: str, expiry: str, token: str):
             """
 
     message = MessageSchema(
-        subject="[Organisation name] Invite Request",
+        subject=f"{workspace.name} Invite Request",
         recipients=[email], 
         body=template,
         subtype="html"

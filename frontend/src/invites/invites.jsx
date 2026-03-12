@@ -14,7 +14,7 @@ import { Message } from 'primereact/message';
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 
-import axios from 'axios';
+import api from "../api/axiosConfig.js";
 
 function Invite({ visible, setVisible, toast}) {
   const [loading, setLoading] = useState(false);
@@ -36,28 +36,27 @@ function Invite({ visible, setVisible, toast}) {
   const handleSendInvite = async () => {
     setLoading(true);
     try {
-      const response = await axios.post("http://localhost:8000/invite/send-invite", {
+      await api.post("/invite/send-invite", {
         email: email || null,
         expiry_date: expiryDate ? expiryDate.toISOString() : null,
-      });
-      
-      if(response.data.success == "invalid"){
+      }).then(res => {
+        if(res.data.success == "invalid"){
         setEmailError(true);
         setDateError(false);
         setEmailValid(false);
 
-      } else if (response.data.success == "trust") {
+      } else if (res.data.success == "trust") {
         setDateError(false);
         setEmailError(false);
         setEmailValid(true);
         setEmailTrust(true)
 
-      } else if (response.data.success == "expiry") {
+      } else if (res.data.success == "expiry") {
         setDateError(true);
         setEmailError(false);
         setEmailValid(true)
         
-      } else if (response.data.success == true) {
+      } else if (res.data.success == true) {
         showMessage();
         setDateError(false);
         setEmailError(false);
@@ -67,6 +66,7 @@ function Invite({ visible, setVisible, toast}) {
         setExpiryDate(null);
         setEmailValid(false);
       }
+      });
  
     } catch (error) {
       console.log(error);
