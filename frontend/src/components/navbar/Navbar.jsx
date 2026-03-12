@@ -13,17 +13,19 @@ function Navbar() {
   return (
     <div className="navbar-base">
         {/* "/" placeholder for whatever page ends up being home/main page */}
-        <Link to="/">
+        <Link to="/dashboard">
             <div className="navbar-logo">
                 <img src={logo} alt="CIH Logo"/>
             </div>
         </Link>
         <div className="navbar-list">
             <ul className="navbar-items">
-                {/* Add navbar items here, specifying the url and the text you want displayed on the navbar */}
+                {/* Add navbar items here, specifying the URL and the text you want displayed on the navbar */}
                 <NavbarItem url="/files" text="Files"/>
                 <NavbarItem url="/scans" text="Scans"/>
+                <NavbarItem url="/access-map" text="Access Map"/>
                 <NavbarItem url="/roles" text="Roles"/>
+                
             </ul>
         </div>
         {/* future use with accounts and potentially settings */}

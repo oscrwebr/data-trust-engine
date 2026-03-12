@@ -136,3 +136,9 @@ def create_test_file(db: Session, graph_file_id: str, file_name: str, hash: str)
     db.commit()
     db.refresh(file)
     return file
+
+def get_all_scans(db: Session):
+    return db.query(Scan).all()
+
+def get_scan_file_count(db: Session, scan_id: int):
+    return db.query(ScanFile).filter(ScanFile.scan_id == scan_id).count()
