@@ -4,6 +4,7 @@ import arrow
 from app.invites import repository as invite_repository
 from app.authentication import repository as user_repository
 from app.authentication import service
+from app.workspaces.repository import get_workspace_by_user_id
 from app.core.database import get_database
 from sqlalchemy.orm import Session
 from datetime import datetime
@@ -30,6 +31,7 @@ async def send_invite(db: Annotated[Session, Depends(get_database)], current_use
         expiry = expiry.format("Do MMMM YYYY")
 
         user = service.test_route(current_user.user_id, db=db)
+        workspace = get_workspace_by_user_id(db, current_user.user_id)
 
         #Send invite
         await send_invite_service(db, invite.email, expiry, token, user)
@@ -39,7 +41,7 @@ async def send_invite(db: Annotated[Session, Depends(get_database)], current_use
         if not user:
             user = user_repository.add_user(db, invite.email)
         
-        invite_repository.add_invite(db, datetime.now(), invite.expiry_date.date(), user.user_id, token)
+        invite_repository.add_invite(db, datetime.now(), invite.expiry_date.date(), user.user_id, token, workspace)
 
     return {"success": result}
 

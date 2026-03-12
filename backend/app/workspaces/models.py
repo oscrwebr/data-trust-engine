@@ -11,3 +11,5 @@ class Workspace(Base):
     image = Column(MEDIUMBLOB, nullable=False)
     user_id = Column(Integer, ForeignKey("user.user_id"), nullable=False)
     user = relationship("User", backref="workspaces")
+
+    invites = relationship("Invite", back_populates="workspace", cascade="all, delete-orphan")

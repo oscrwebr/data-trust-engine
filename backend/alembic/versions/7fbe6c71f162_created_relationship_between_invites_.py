@@ -1,8 +1,8 @@
-"""Rebuilt database after recent merge with development
+"""Created relationship between invites and workspaces
 
-Revision ID: 45c0ae9dbec8
+Revision ID: 7fbe6c71f162
 Revises: 
-Create Date: 2026-03-11 17:15:21.158806
+Create Date: 2026-03-12 16:35:33.963096
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision: str = '45c0ae9dbec8'
+revision: str = '7fbe6c71f162'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -76,16 +76,6 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_user_oid'), 'user', ['oid'], unique=True)
     op.create_index(op.f('ix_user_user_id'), 'user', ['user_id'], unique=False)
-    op.create_table('invites',
-    sa.Column('invite_id', sa.Integer(), nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=True),
-    sa.Column('expiry_date', sa.Date(), nullable=True),
-    sa.Column('token', sa.String(length=250), nullable=True),
-    sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['user_id'], ['pending_users.user_id'], ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('invite_id')
-    )
-    op.create_index(op.f('ix_invites_invite_id'), 'invites', ['invite_id'], unique=False)
     op.create_table('refresh',
     sa.Column('refresh_id', sa.Integer(), nullable=False),
     sa.Column('token', sa.Text(), nullable=False),
@@ -138,6 +128,18 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_workspaces_id'), 'workspaces', ['id'], unique=False)
+    op.create_table('invites',
+    sa.Column('invite_id', sa.Integer(), nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
+    sa.Column('expiry_date', sa.Date(), nullable=True),
+    sa.Column('token', sa.String(length=250), nullable=True),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('workspace_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['user_id'], ['pending_users.user_id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['workspace_id'], ['workspaces.id'], ),
+    sa.PrimaryKeyConstraint('invite_id')
+    )
+    op.create_index(op.f('ix_invites_invite_id'), 'invites', ['invite_id'], unique=False)
     op.create_table('naming_convention_scan_result',
     sa.Column('naming_convention_scan_result_id', sa.Integer(), nullable=False),
     sa.Column('scan_file_id', sa.Integer(), nullable=False),
@@ -180,6 +182,8 @@ def downgrade() -> None:
     op.drop_table('role_permission')
     op.drop_index(op.f('ix_naming_convention_scan_result_naming_convention_scan_result_id'), table_name='naming_convention_scan_result')
     op.drop_table('naming_convention_scan_result')
+    op.drop_index(op.f('ix_invites_invite_id'), table_name='invites')
+    op.drop_table('invites')
     op.drop_index(op.f('ix_workspaces_id'), table_name='workspaces')
     op.drop_table('workspaces')
     op.drop_index(op.f('ix_sensitivity_subcategory_sensitivity_subcategory_id'), table_name='sensitivity_subcategory')
@@ -192,8 +196,6 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_refresh_refresh_id'), table_name='refresh')
     op.drop_index(op.f('ix_refresh_refresh_family_id'), table_name='refresh')
     op.drop_table('refresh')
-    op.drop_index(op.f('ix_invites_invite_id'), table_name='invites')
-    op.drop_table('invites')
     op.drop_index(op.f('ix_user_user_id'), table_name='user')
     op.drop_index(op.f('ix_user_oid'), table_name='user')
     op.drop_table('user')
