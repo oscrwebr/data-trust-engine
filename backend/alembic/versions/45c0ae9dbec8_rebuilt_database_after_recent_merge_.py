@@ -1,8 +1,8 @@
-"""Removed redundant column status from invites table
+"""Rebuilt database after recent merge with development
 
-Revision ID: 8e2cc1821299
+Revision ID: 45c0ae9dbec8
 Revises: 
-Create Date: 2026-03-11 10:34:07.328539
+Create Date: 2026-03-11 17:15:21.158806
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision: str = '8e2cc1821299'
+revision: str = '45c0ae9dbec8'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -80,7 +80,6 @@ def upgrade() -> None:
     sa.Column('invite_id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('expiry_date', sa.Date(), nullable=True),
-    sa.Column('used', sa.Boolean(), nullable=True),
     sa.Column('token', sa.String(length=250), nullable=True),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['pending_users.user_id'], ondelete='CASCADE'),
