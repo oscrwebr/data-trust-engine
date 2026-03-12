@@ -4,10 +4,12 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 from app.scanning.models import File, NamingConvention, Scan, ScanNamingConvention, NamingConventionScanResult, Scan, ScanFile, ScanFileDetection
 from datetime import datetime, timezone
+from app.scanning.scan_type import ScanType
 
 
-def create_scan(db: Session):
+def create_scan(db: Session, scan_type: ScanType):
     scan = Scan(
+        scan_type = scan_type,
         started_at = datetime.now(timezone.utc),
         finished_at = None
     )
@@ -87,13 +89,6 @@ def set_naming_convention_scan_result(db: Session, scan_file_id: int, scan_namin
     db.commit()
     db.refresh(naming_convention_scan_result)
     return naming_convention_scan_result
-
-def create_scan(db: Session):
-    scan = Scan(started_at=datetime.now())
-    db.add(scan)
-    db.commit()
-    db.refresh(scan)
-    return scan
 
 def end_scan(db: Session, scan: Scan):
     scan.finished_at = datetime.now()

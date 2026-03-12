@@ -10,9 +10,7 @@ import { PiScan } from "react-icons/pi";
 import { PiFolder } from "react-icons/pi";
 import { PiMapTrifold } from "react-icons/pi";
 import { PiUsersThree } from "react-icons/pi";
-
-
-
+import { PiDiamondsFourLight } from "react-icons/pi";
 
 function Navbar() {
 
@@ -27,6 +25,7 @@ function Navbar() {
         <div className="navbar-list">
             <ul className="navbar-items">
                 {/* Add navbar items here, specifying the URL, text and icon you want displayed on the navbar */}
+                <NavbarItem url="/dashboard" text="Dashboard" icon={<PiDiamondsFourLight/>}/>
                 <NavbarItem url="/files" text="Files" icon={<PiFolder/>}/>
                 <NavbarItem url="/scans" text="Scans" icon={<PiScan/>}/>
                 <NavbarItem url="/access-map" text="Access Map" icon={<PiMapTrifold/>}/>

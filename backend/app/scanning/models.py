@@ -15,6 +15,7 @@ class Scan(Base):
     __tablename__ = 'scans'
 
     scan_id = Column(Integer, primary_key=True, index=True)
+    scan_type = Column(String(64), nullable=False)
     started_at = Column(DateTime)
     finished_at = Column(DateTime, nullable=True)
 

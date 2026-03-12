@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.scanning import repository
 from app.scanning.models import File, Scan
 from app.scanning.regex_patterns import *
+from app.scanning.scan_type import ScanType
 
 # Load the spacy NLP model 
 nlp = spacy.load("en_core_web_sm")
@@ -301,7 +302,7 @@ def perform_organisation_scan(db: Session, naming_convention_ids: list[int]):
         if naming_convention_id not in valid_naming_convention_ids:
             raise ValueError(f"Invalid naming convention id: {naming_convention_id}")
 
-    scan = repository.create_scan(db=db)
+    scan = repository.create_scan(db=db, scan_type=ScanType.ORGANISATION)
     # Scan all files for now (potentially in future can be selectable)
     files = repository.get_all_files(db=db)
 
