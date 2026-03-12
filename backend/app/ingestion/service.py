@@ -1,8 +1,15 @@
 from msal import ConfidentialClientApplication
+import requests, json
+
 from ..core.security import decrypt_refresh
 from ..core.config import SCOPES
 from . import repository
 from ..authentication import service as auth_service
+
+
+INIT_GRAPH_GET = "https://graph.microsoft.com/v1.0/me/drive/root/delta"
+
+
 
 def get_user_access(application: ConfidentialClientApplication, user, db) -> str | None:
     # This is to get the access token for users - THAT ARE ALREADY LOGGED IN!
@@ -11,7 +18,7 @@ def get_user_access(application: ConfidentialClientApplication, user, db) -> str
     
     if user_details:
         print(user_details.email)
-        account = application.get_accounts()
+        account = application.get_accounts(username=user_details.username)
         print(f"This is the account: {account}\n\n")
         if account:
             access_token = application.acquire_token_silent(scopes=SCOPES, account=account[0])["access_token"]
@@ -24,6 +31,16 @@ def get_user_access(application: ConfidentialClientApplication, user, db) -> str
     
     return access_token
 
-# def get_all_files(token)
+def get_all_files(access_token: str) -> str:
+    '''
+    This function will run as soon as a user accepts the invite request/after a workspace has been created.
+    It will get all the files for the user using delta, to ensure a delta link is returned
+    '''
+    response = requests.get(
+        url=INIT_GRAPH_GET,
+        headers={
+            "Authorization": f"Bearer {access_token}"
+        }
+    )
 
-
+    return response.json()
