@@ -21,6 +21,10 @@
     height: auto;
 }
 
+.navbar-logo:hover {
+    background-color: #313131;
+}
+
 .navbar-list {
     list-style-type: none;
     padding: 0;
@@ -38,7 +42,7 @@
     flex-direction: column;
     gap: 5px;
 
-    font-size: 1.4em;
+    font-size: 1.2em;
     
 }
 
@@ -49,11 +53,14 @@
     cursor: pointer;
 }
 
-.navbar-items li a {
-    display: block;
+.navbar-items li a.navbar-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     width: 100%;
     color: white;
     text-decoration: none;
+    font-weight: 500;
 }
 
 .navbar-items li:hover {
@@ -66,6 +73,29 @@
     font-weight: 500;
 }
 
+.navbar-list-item {
+    list-style: none;
+}
+
+.navbar-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+}
+
+.navbar-icon {
+    display: flex;
+    align-items: center;
+}
+
+.navbar-icon svg {
+    font-size: 30px;
+}
+
+.navbar-text {
+    line-height: 1;
+}
 .navbar-bottom {
     margin-top: auto;
     padding: 12px 14px;

@@ -6,6 +6,12 @@ import NavbarItem from "./NavbarItem";
 import { PiGear } from "react-icons/pi";
 import { PiUserCircleLight } from "react-icons/pi";
 import { PiSignOutFill } from "react-icons/pi";
+import { PiScan } from "react-icons/pi";
+import { PiFolder } from "react-icons/pi";
+import { PiMapTrifold } from "react-icons/pi";
+import { PiUsersThree } from "react-icons/pi";
+
+
 
 
 function Navbar() {
@@ -20,12 +26,12 @@ function Navbar() {
         </Link>
         <div className="navbar-list">
             <ul className="navbar-items">
-                {/* Add navbar items here, specifying the URL and the text you want displayed on the navbar */}
-                <NavbarItem url="/files" text="Files"/>
-                <NavbarItem url="/scans" text="Scans"/>
-                <NavbarItem url="/access-map" text="Access Map"/>
-                <NavbarItem url="/roles" text="Roles"/>
-                
+                {/* Add navbar items here, specifying the URL, text and icon you want displayed on the navbar */}
+                <NavbarItem url="/files" text="Files" icon={<PiFolder/>}/>
+                <NavbarItem url="/scans" text="Scans" icon={<PiScan/>}/>
+                <NavbarItem url="/access-map" text="Access Map" icon={<PiMapTrifold/>}/>
+                <NavbarItem url="/roles" text="Roles" icon={<PiUsersThree/>}/>
+
             </ul>
         </div>
         {/* future use with accounts and potentially settings */}

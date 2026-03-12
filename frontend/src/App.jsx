@@ -8,6 +8,7 @@ import Roles from "./roles/roles";
 import CreateWorkspace from "./workspace/CreateWorkspace";
 import Home from "./home/home.jsx"
 import { Toast } from 'primereact/toast';
+import Scans from "./scans/Scans.jsx";
 
 import Test from "./Test/Test.jsx";
 import Navbar from "./components/navbar/Navbar.jsx";
@@ -38,6 +39,7 @@ function App() {
         <Route path="/error/422" element={<Unprocessable422/>}/>
         <Route path="/error/403" element={<Forbidden403/>}/>
         <Route path="/invite-error/:type" element={<EmployeeInviteError />} />
+        <Route path="/scans" element={<Scans />} />
       </Routes>
     </div>
     </>
