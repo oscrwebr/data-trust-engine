@@ -1,10 +1,9 @@
 from app.workspaces import models as workspace_model
 from app.authentication import models as auth_model, repository, service
 from sqlalchemy import insert, select, desc
+
 from io import BytesIO
 from PIL import Image
-import base64
-
 
 # Creating test image 
 def create_test_image():
@@ -19,11 +18,12 @@ def test_add_workspace_record(db):
     image = create_test_image()
 
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    insert_statement = insert(auth_model.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid)
-    res=db.execute(insert_statement)
+    admin = insert(auth_model.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid)
+    res=db.execute(admin)
 
-    insert_statement = insert(workspace_model.Workspace).values(name="Test Workspace", image=image, user_id=res.inserted_primary_key[0])
-    db.execute(insert_statement)
+    workspace = insert(workspace_model.Workspace).values(name="Test Workspace", image=image, user_id=res.inserted_primary_key[0])
+    db.execute(workspace)
+
     assert db.query(workspace_model.Workspace).count() == 1 
 
 # Testing /create-workspace endpoint with null name

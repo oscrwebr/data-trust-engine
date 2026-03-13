@@ -3,7 +3,18 @@ import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import Dashboard from "./Dashboard.jsx";
 
-vi.mock("axios");
+vi.mock("../api/axiosConfig.js", () => ({
+  default: {
+    get: vi.fn().mockResolvedValue({ data: [] }),
+    post: vi.fn().mockResolvedValue({ data: { success: true } }), 
+    interceptors: {
+      request: { use: vi.fn() },
+      response: { use: vi.fn() },
+    },
+  },
+}));
+
+import api from "../api/axiosConfig.js";
 describe("Dashboard Component", () => {
     afterEach(() => {
         vi.clearAllMocks();
