@@ -10,13 +10,20 @@ class Invite(Base):
     expiry_date = Column(Date)
     token = Column(String(250))
 
-    # relations
+    # Relationship to user
     user_id = Column(
         Integer,
         ForeignKey("pending_users.user_id", ondelete="CASCADE"),  # <- cascade here
         nullable=False
     )
-
     pending_user = relationship("PendingUser", back_populates="invites")
 
-    # Must also link to the workspace table
+    #Relationship to workspace
+    workspace_id = Column(
+        Integer,
+        ForeignKey("workspaces.id"),
+        nullable=False
+    )
+    workspace = relationship("Workspace", back_populates="invites")
+
+    

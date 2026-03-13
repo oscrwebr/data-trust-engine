@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import api from "../api/axiosConfig.js";
 import { useNavigate } from "react-router-dom";
 
@@ -9,8 +9,6 @@ import { Dialog } from "primereact/dialog";
 
 import FileUpload from "./FileUpload.jsx";
 import styles from "./CreateWorkspace.module.css";
-
-
 
 function CreateWorkspace({toast}) {
   const visible = true;

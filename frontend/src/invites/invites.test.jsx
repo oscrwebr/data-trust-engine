@@ -1,6 +1,5 @@
 import { cleanup, fireEvent, render, screen, within, waitFor } from "@testing-library/react";
 import { MemoryRouter, redirect, Route, Routes } from "react-router-dom";
-import axios from 'axios';
 import { afterEach, describe, expect, test, vi } from "vitest";
 import EmployeeInviteError from "./error.jsx";
 import Dashboard from "../dashboard/Dashboard.jsx";
@@ -18,13 +17,23 @@ vi.mock("primereact/calendar", () => ({
 
 import EmployeeInvite from "./invites.jsx";
 
-vi.mock("axios");
+vi.mock("../api/axiosConfig.js", () => ({
+  default: {
+    get: vi.fn().mockResolvedValue({ data: [] }),
+    post: vi.fn().mockResolvedValue({ data: { success: true } }), 
+    interceptors: {
+      request: { use: vi.fn() },
+      response: { use: vi.fn() },
+    },
+  },
+}));
+
+import api from "../api/axiosConfig.js";
 describe("Invite Component", () => {
     afterEach(() => {
         vi.clearAllMocks();
         cleanup();
     });
-
 
     // Test 1
     test("Test all content in modal loads correctly", async () => {
@@ -45,7 +54,7 @@ describe("Invite Component", () => {
 
     // Test 2
     test("Test error message when no email is given", async () => {
-        axios.post.mockResolvedValueOnce({
+        api.post.mockResolvedValueOnce({
             data: { success: "invalid" }
         });
 
@@ -60,8 +69,8 @@ describe("Invite Component", () => {
         fireEvent.click(submitButton);
 
         await waitFor(() => {
-            expect(axios.post).toHaveBeenCalledWith(
-                'http://localhost:8000/invite/send-invite',
+            expect(api.post).toHaveBeenCalledWith(
+                '/invite/send-invite',
                 {
                     email: null,
                     expiry_date: null,
@@ -79,7 +88,7 @@ describe("Invite Component", () => {
 
     // Test 3
     test("Test error message when an invalid email is given", async () => {
-        axios.post.mockResolvedValueOnce({
+        api.post.mockResolvedValueOnce({
             data: { success: "invalid" }
         });
 
@@ -97,8 +106,8 @@ describe("Invite Component", () => {
         fireEvent.click(submitButton);
 
         await waitFor(() => {
-            expect(axios.post).toHaveBeenCalledWith(
-                'http://localhost:8000/invite/send-invite',
+            expect(api.post).toHaveBeenCalledWith(
+                '/invite/send-invite',
                 {
                     email: 'invalid@example.com',
                     expiry_date: null,
@@ -117,7 +126,7 @@ describe("Invite Component", () => {
 
     // Test 4
     test("Test error message when no expiry date is given", async () => {
-        axios.post.mockResolvedValueOnce({
+        api.post.mockResolvedValueOnce({
             data: { success: "expiry" }
         });
 
@@ -135,8 +144,8 @@ describe("Invite Component", () => {
         fireEvent.click(submitButton);
 
         await waitFor(() => {
-            expect(axios.post).toHaveBeenCalledWith(
-                'http://localhost:8000/invite/send-invite',
+            expect(api.post).toHaveBeenCalledWith(
+                '/invite/send-invite',
                 {
                     email: 'valid@example.com',
                     expiry_date: null,
@@ -156,7 +165,7 @@ describe("Invite Component", () => {
 
     // Test 5
     test("Test success message when both inputs are valid", async () => {
-        axios.post.mockResolvedValueOnce({
+        api.post.mockResolvedValueOnce({
             data: { success: true }
         });
 
@@ -191,8 +200,8 @@ describe("Invite Component", () => {
         fireEvent.click(submitButton);
 
         await waitFor(() => {
-            expect(axios.post).toHaveBeenCalledWith(
-                'http://localhost:8000/invite/send-invite',
+            expect(api.post).toHaveBeenCalledWith(
+                '/invite/send-invite',
                 {
                     email: 'valid@example.com',
                     expiry_date: new Date("2030-04-01").toISOString(),
@@ -309,6 +318,58 @@ describe("Invite Component", () => {
             
             if (
                 !toastCalled.detail.includes("You have joined your workspace!")
+            ) {
+                throw new Error("Toast called with wrong arguments");
+            }
+        })
+    })
+
+    // Test 10
+    test("Test that sending 2 back to back invites will throw an error toast message on screen", async() => {
+        api.post.mockResolvedValueOnce({
+            data: { success: "cooldown" }
+        });
+
+        let toastCalled = null;
+        const mockToast = {
+            current: {
+                show: (args) => {
+                    toastCalled = args;
+                    console.log("Toast triggered:", args);
+                },
+            },
+        };
+
+        render(
+            <MemoryRouter>
+                <Dashboard toast={mockToast} />
+            </MemoryRouter>
+        );
+
+        const inviteButton = screen.getByRole("button", { name: /invite employee/i });
+        fireEvent.click(inviteButton);
+
+        const modal = screen.getByRole("dialog");
+
+        const emailInput = within(modal).getByPlaceholderText("Email address");
+        fireEvent.change(emailInput, { target: { value: "valid@example.com" } });
+
+        const calendarInput = within(modal).getByTestId("calendar-input");
+        fireEvent.change(calendarInput, { target: { value: "2030-04-01" } });
+
+        const submitButton = within(modal).getByRole("button", { name: /send invite/i });
+
+        // Click the button twice
+        fireEvent.click(submitButton);
+        fireEvent.click(submitButton);
+
+        await waitFor(() => {
+            if (!toastCalled) {
+                throw new Error("Toast was not triggered");
+            }
+            
+            if (
+                !toastCalled.detail.includes("You are sending this employee too many invites, please try again tomorrow.")
             ) {
                 throw new Error("Toast called with wrong arguments");
             }
