@@ -157,19 +157,19 @@ def test_legal_case_report_1_contains_citations_and_acts_and_case_names():
     assert len(case_name_detections) == 24
 
     # Ensure specific piece of information are picked up as citation detections
-    assert {"sensitivity_subcategory": "CITATION", "page_number": 1} in citation_detections
-    assert {"sensitivity_subcategory": "CITATION", "page_number": 13} in citation_detections
-    assert {"sensitivity_subcategory": "CITATION", "page_number": 18} in citation_detections
+    assert {"sensitivity_subcategory": "CITATION", "page_number": 1, "matched_text": "[2026] EWCA Civ 19"} in citation_detections
+    assert {"sensitivity_subcategory": "CITATION", "page_number": 13, "matched_text": "[2021] UKSC 16"} in citation_detections
+    assert {"sensitivity_subcategory": "CITATION", "page_number": 18, "matched_text": "[2016] EWHC 1370"} in citation_detections
 
     # Ensure specific piece of information are picked up as act detections
-    assert {"sensitivity_subcategory": "ACT", "page_number": 2} in act_detections
-    assert {"sensitivity_subcategory": "ACT", "page_number": 7} in act_detections
-    assert {"sensitivity_subcategory": "ACT", "page_number": 13} in act_detections
+    assert {"sensitivity_subcategory": "ACT", "page_number": 2, "matched_text": "Welfare Reform Act 2007"} in act_detections
+    assert {"sensitivity_subcategory": "ACT", "page_number": 7, "matched_text": "Benefits Act 1992"} in act_detections
+    assert {"sensitivity_subcategory": "ACT", "page_number": 13, "matched_text": "Welfare Reform Act 2007"} in act_detections
 
     # Ensure specific piece of information are picked up as case name detections
-    assert {"sensitivity_subcategory": "CASE_NAME", "page_number": 4} in case_name_detections
-    assert {"sensitivity_subcategory": "CASE_NAME", "page_number": 11} in case_name_detections
-    assert {"sensitivity_subcategory": "CASE_NAME", "page_number": 13} in case_name_detections
+    assert {"sensitivity_subcategory": "CASE_NAME", "page_number": 4, "matched_text": "Allen v Secretary"} in case_name_detections
+    assert {"sensitivity_subcategory": "CASE_NAME", "page_number": 11, "matched_text": "Iman Alhashem v The Secretary"} in case_name_detections
+    assert {"sensitivity_subcategory": "CASE_NAME", "page_number": 13, "matched_text": "Rossendale Borough Council v Hurstwood Properties"} in case_name_detections
 
 
 def test_legal_case_report_2_contains_citations_and_acts_and_case_names():
@@ -189,18 +189,18 @@ def test_legal_case_report_2_contains_citations_and_acts_and_case_names():
     assert len(case_name_detections) == 3
 
     # Ensure specific piece of information are picked up as citation detections
-    assert {"sensitivity_subcategory": "CITATION", "page_number": 1} in citation_detections
-    assert {"sensitivity_subcategory": "CITATION", "page_number": 11} in citation_detections
-    assert {"sensitivity_subcategory": "CITATION", "page_number": 27} in citation_detections
+    assert {"sensitivity_subcategory": "CITATION", "page_number": 1, "matched_text": "[2020] EWCA Civ 1"} in citation_detections
+    assert {"sensitivity_subcategory": "CITATION", "page_number": 11, "matched_text": "[2018] UKSC 61"} in citation_detections
+    assert {"sensitivity_subcategory": "CITATION", "page_number": 27, "matched_text": "[2018] EWHC 3251"} in citation_detections
 
     # Ensure specific piece of information are picked up as act detections
-    assert {"sensitivity_subcategory": "ACT", "page_number": 3} in act_detections
-    assert {"sensitivity_subcategory": "ACT", "page_number": 14} in act_detections
-    assert {"sensitivity_subcategory": "ACT", "page_number": 27} in act_detections
+    assert {"sensitivity_subcategory": "ACT", "page_number": 3, "matched_text": "Social Security Pensions Act 1975"} in act_detections
+    assert {"sensitivity_subcategory": "ACT", "page_number": 14, "matched_text": "Pensions Act 2014"} in act_detections
+    assert {"sensitivity_subcategory": "ACT", "page_number": 27, "matched_text": "Pension Schemes Act 1993"} in act_detections
 
     # Ensure specific piece of information are picked up as case name detections
-    assert {"sensitivity_subcategory": "CASE_NAME", "page_number": 11} in case_name_detections
-    assert {"sensitivity_subcategory": "CASE_NAME", "page_number": 11} in case_name_detections
-    assert {"sensitivity_subcategory": "CASE_NAME", "page_number": 11} in case_name_detections
+    assert {"sensitivity_subcategory": "CASE_NAME", "page_number": 11, "matched_text": "In Henderson v Foxworth Investments Ltd"} in case_name_detections
+    assert {"sensitivity_subcategory": "CASE_NAME", "page_number": 11, "matched_text": "In Volcafe Ltd v Cia Sud America"} in case_name_detections
+    assert {"sensitivity_subcategory": "CASE_NAME", "page_number": 11, "matched_text": "In Smech Properties Ltd v Runnymede Borough Council"} in case_name_detections
 
 

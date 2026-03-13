@@ -34,7 +34,8 @@ def detect_with_regex(detection_subcategory, detection_regex, text_dict):
         for match in detection_regex.finditer(text):
             detections.append({
                 "sensitivity_subcategory": detection_subcategory,
-                "page_number": page_number
+                "page_number": page_number,
+                "matched_text": match.group()
             })
 
             print(f"{detection_subcategory} detection: {match.group()} | PAGE: {page_number}")
