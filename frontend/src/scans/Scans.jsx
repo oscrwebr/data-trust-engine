@@ -1,14 +1,14 @@
-import { use, useEffect, useState } from "react";
-import axios from "axios";
+import { useEffect, useState } from "react";
+import api from "../api/axiosConfig";
 
 function Scans(){
 
 
     const [scans, setScans] = useState([]);
 
-    // Get scans from /get_scans endpoint
+    // Get scans from /get_all_scans endpoint
     useEffect(() => {
-        axios.get("/api/scanning/get_scans")
+        api.get("/scanning/get_all_scans")
 
         .then(response => {
             setScans(response.data);
@@ -26,7 +26,7 @@ function Scans(){
             <h1>Scans</h1>
                 <ul>
                     {scans.map(scan => (
-                        <li key={scan.id}>{scan.name}</li>
+                        <li key={scan.scan_id}>Scan: {scan.scan_id}</li>
                     ))}
                 </ul>
         </div>
