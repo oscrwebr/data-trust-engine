@@ -1,14 +1,16 @@
 import hashlib
-import pymupdf
-import spacy
 import wordninja
+
+from pathlib import Path
 from sqlalchemy.orm import Session
 from app.scanning import repository
 from app.scanning.models import File, Scan
-from app.scanning.regex_patterns import *
 
-# Load the spacy NLP model 
-nlp = spacy.load("en_core_web_sm")
+from app.scanning.regex_patterns import *
+from app.scanning.detectors import *
+from app.scanning.extractors import *
+
+BASE_DIRECTORY = Path(__file__).resolve().parent
 
 
 # Perform a scan
@@ -16,12 +18,16 @@ def perform_scan(db: Session, graph_file_ids: list[str]):
     # Initialise the Scan record
     scan = repository.create_scan(db=db)
     
+    # Call scan file method for every graph_file_id received (scan_file method will call a method to pull the files)
     for graph_file_id in graph_file_ids:
         try:
             scan_file(db=db, graph_file_id=graph_file_id, scan_id=scan.scan_id)
         except Exception as e:
-            print(f"FILE SCAN ERROR: {e}")
+            print(f"FILE SCAN ERROR: {e}") # Change print to logging in future
             continue
+
+    # Set scan finish time
+    repository.end_scan(db=db, scan=scan)
 
     return {
         "scan_id": scan.scan_id,
@@ -32,15 +38,17 @@ def perform_scan(db: Session, graph_file_ids: list[str]):
 # Scan one individual file
 def scan_file(db: Session, graph_file_id: str, scan_id: int):
 
-    # Fetch file (for now a hardcoded file path) using its graph_file_id (ingestion component will be integrated here later)
+    # Fetch file (for now using the testing method) using its graph_file_id (ingestion component will be integrated here later)
     file_path = fetch_graph_file(graph_file_id=graph_file_id)
 
     # Create scan_file record
     file = repository.get_file_by_graph_id(db=db, graph_file_id=graph_file_id)
 
+    # Throw error if file with provided graph file id could not bne found
     if file is None:
         raise ValueError(f"File with graph_file_id '{graph_file_id}' not found")
 
+    # Create a scan_file record, linking the file to be scanned with the scan record
     scan_file_record = repository.create_scan_file(
         db=db, 
         scan_id=scan_id, 
@@ -53,13 +61,22 @@ def scan_file(db: Session, graph_file_id: str, scan_id: int):
     # Detect sensitive data in file's extracted text
     detections = []
 
+    # Detection of PII (Personally Identifiable Information) information
     detections.extend(detect_named_entities(file_extracted_text))
     detections.extend(detect_phone_numbers(file_extracted_text))
     detections.extend(detect_emails(file_extracted_text))
     detections.extend(detect_addresses(file_extracted_text))
     detections.extend(detect_postcodes(file_extracted_text))
+
+    # Detection of financial information
     detections.extend(detect_ibans(file_extracted_text))
     detections.extend(detect_vats(file_extracted_text))
+
+    # Detection of legal case information
+    detections.extend(detect_citations(file_extracted_text))
+    detections.extend(detect_acts(file_extracted_text))
+    detections.extend(detect_regulations(file_extracted_text))
+    detections.extend(detect_case_names(file_extracted_text))
 
     # Create scan_file_detection records for every detection
     for detection in detections:
@@ -71,153 +88,25 @@ def scan_file(db: Session, graph_file_id: str, scan_id: int):
         )
 
 
-# Extract text from PDF into dict
-def extract_text_from_pdf(filepath: str) -> dict:
-    file = pymupdf.open(filepath)
-    extracted_text = {}
-
-    # Make page numbers 1 indexed, because user think in page 1, 2, 3 not 0, 1, 2
-    for page_number in range(len(file)):
-        page = file.load_page(page_number)
-        text = page.get_text("text")
-        
-        # Normalisation to remove line breaks
-        text = text.replace("\n", " ")
-        text = re.sub(r"\s+", " ", text).strip()
-
-        extracted_text[page_number + 1] = text
-
-    file.close()
-    return extracted_text
-
-
-# Named entity recognition detection (names, organisations) using spacy nlp model
-def detect_named_entities(text_dict):
-    detections = []
-
-    for page_number, text in text_dict.items():
-        doc = nlp(text)
-
-        for entity in doc.ents:
-            if entity.label_ == "PERSON":
-                detections.append({
-                    "sensitivity_subcategory": "NAME",
-                    "page_number": page_number
-                })
-
-                print(f'PERSON detection: {entity} | PAGE: {page_number}')
-
-    return detections
-
-
-# Phone number detection using regex
-def detect_phone_numbers(text_dict):
-    detections = []
-
-    for page_number, text in text_dict.items():
-        for match in UK_PHONE_REGEX.finditer(text):
-            detections.append({
-                "sensitivity_subcategory": "PHONE",
-                "page_number": page_number
-            })
-
-            print(f'PHONE detection: {match.group()} | PAGE: {page_number}')
-
-    return detections
-
-
-# Email detection using regex
-def detect_emails(text_dict):
-    detections = []
-
-    for page_number, text in text_dict.items():
-        for match in EMAIL_REGEX.finditer(text):
-            detections.append({
-                "sensitivity_subcategory": "EMAIL",
-                "page_number": page_number
-            })
-
-            print(f'EMAIL detection: {match.group()} | PAGE: {page_number}')
-
-    return detections
-
-
-# Address detection using regex
-def detect_addresses(text_dict):
-    detections = []
-
-    for page_number, text in text_dict.items():
-        for match in ADDRESS_REGEX.finditer(text):
-            detections.append({
-                "sensitivity_subcategory": "ADDRESS",
-                "page_number": page_number
-            })
-
-            print(f'ADDRESS detection: {match.group()} | PAGE: {page_number}')
-
-    return detections
-
-
-# Postcode detection using regex
-def detect_postcodes(text_dict):
-    detections = []
-
-    for page_number, text in text_dict.items():
-        for match in UK_POSTCODE_REGEX.finditer(text):
-            detections.append({
-                "sensitivity_subcategory": "POSTCODE",
-                "page_number": page_number
-            })
-
-            print(f'POSTCODE detection: {match.group()} | PAGE: {page_number}')
-
-    return detections
-
-
-# IBAN detection using regex
-def detect_ibans(text_dict):
-    detections = []
-
-    for page_number, text in text_dict.items():
-        for match in IBAN_REGEX.finditer(text):
-            detections.append({
-                "sensitivity_subcategory": "IBAN",
-                "page_number": page_number
-            })
-
-            print(f'IBAN detection: {match.group()} | PAGE: {page_number}')
-
-    return detections
-
-
-# VAT detection using regex
-def detect_vats(text_dict):
-    detections = []
-
-    for page_number, text in text_dict.items():
-        for match in UK_VAT_REGEX.finditer(text):
-            detections.append({
-                "sensitivity_subcategory": "VAT",
-                "page_number": page_number
-            })
-
-            print(f'VAT detection: {match.group()} | PAGE: {page_number}')
-    
-    return detections
-
-
-# Placeholder for dev purposes, returns hard coded test files' paths for testing
+# Method returns hard coded test files' paths to be used for testing, DO NOT DELETE
 def fetch_graph_file(graph_file_id: str):
+    test_files_directory = BASE_DIRECTORY / "test_files"
+
     match graph_file_id:
         case "abc123":
-            return "app/scanning/test_files/operational_report_document.pdf"
+            return test_files_directory / "operational_report_document.pdf"
         case "def456":
-            return "app/scanning/test_files/realistic_contract_document.pdf"
+            return test_files_directory / "realistic_contract_document.pdf"
         case "ghi789":
-            return "app/scanning/test_files/supplier_agreement_document.pdf"
+            return test_files_directory / "supplier_agreement_document.pdf"
+        case "lc111":
+            return test_files_directory / "legal_case_report_1.pdf"
+        case "lc222":
+            return test_files_directory / "legal_case_report_2.pdf"
         
 
-def get_file_hash(file: File):
+# Get hash of a file
+def get_file_hash(file):
     # Create hash object
     hash = hashlib.sha256()
 
@@ -245,10 +134,12 @@ def update_file_hash(db: Session, graph_file_id: str):
 
     repository.set_file_hash(db=db, file=file, new_hash=new_hash)
 
+
 # All naming convention methods use the Word Ninja library to split file names into English words
 # https://github.com/keredson/wordninja
 def split_file_name(file_name):
     return wordninja.split(file_name)
+
 
 def to_camel_case(file_name):
     words = split_file_name(file_name)
@@ -256,11 +147,13 @@ def to_camel_case(file_name):
     camel_case_name = words[0].lower() + ''.join(word.capitalize() for word in words[1:])
     return camel_case_name
 
+
 def to_snake_case(file_name):
     words = split_file_name(file_name)
     # Keep all words lowercase and join with underscores
     snake_case_name = '_'.join(word.lower() for word in words)
     return snake_case_name
+
 
 def to_pascal_case(file_name):
     words = split_file_name(file_name)
@@ -268,27 +161,34 @@ def to_pascal_case(file_name):
     pascal_case_name = ''.join(word.capitalize() for word in words)
     return pascal_case_name
 
+
 def to_kebab_case(file_name):
     words = split_file_name(file_name)
     # Keep all words lowercase and join with hyphens
     kebab_case_name = '-'.join(word.lower() for word in words)
     return kebab_case_name
 
+
 # Checks for each naming convention
 def is_camel_case(file_name):
     return file_name == to_camel_case(file_name)
 
+
 def is_snake_case(file_name):
     return file_name == to_snake_case(file_name)
+
 
 def is_pascal_case(file_name):
     return file_name == to_pascal_case(file_name)
 
+
 def is_kebab_case(file_name):
     return file_name == to_kebab_case(file_name)
 
+
 def remove_file_extension(file_name):
     return file_name.rsplit('.', 1)[0]
+
 
 def perform_organisation_scan(db: Session, naming_convention_ids: list[int]):
 
