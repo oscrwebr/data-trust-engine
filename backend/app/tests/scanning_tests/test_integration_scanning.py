@@ -138,3 +138,69 @@ def test_realistic_contract_contains_address_and_postcode_detections_across_page
     assert {"sensitivity_subcategory": "POSTCODE", "page_number": 2} in postcode_detections
     assert {"sensitivity_subcategory": "ADDRESS", "page_number": 5} in address_detections
     assert {"sensitivity_subcategory": "POSTCODE", "page_number": 5} in postcode_detections
+
+
+def test_legal_case_report_1_contains_citations_and_acts_and_case_names():
+    extracted_text = extract_text_from_pdf("tests/scanning_tests/fixtures/legal_case_report_1.pdf")
+
+    citation_detections = detect_citations(extracted_text)
+    act_detections = detect_acts(extracted_text)
+    case_name_detections = detect_case_names(extracted_text)
+
+    # This PDF file should have exactly 9 citation detections
+    assert len(citation_detections) == 9
+
+    # This PDF file should have exactly 3 act detections
+    assert len(act_detections) == 3
+
+    # This PDF file should have exactly 24 case name detections
+    assert len(case_name_detections) == 24
+
+    # Ensure specific piece of information are picked up as citation detections
+    assert {"sensitivity_subcategory": "CITATION", "page_number": 1} in citation_detections
+    assert {"sensitivity_subcategory": "CITATION", "page_number": 13} in citation_detections
+    assert {"sensitivity_subcategory": "CITATION", "page_number": 18} in citation_detections
+
+    # Ensure specific piece of information are picked up as act detections
+    assert {"sensitivity_subcategory": "ACT", "page_number": 2} in act_detections
+    assert {"sensitivity_subcategory": "ACT", "page_number": 7} in act_detections
+    assert {"sensitivity_subcategory": "ACT", "page_number": 13} in act_detections
+
+    # Ensure specific piece of information are picked up as case name detections
+    assert {"sensitivity_subcategory": "CASE_NAME", "page_number": 4} in case_name_detections
+    assert {"sensitivity_subcategory": "CASE_NAME", "page_number": 11} in case_name_detections
+    assert {"sensitivity_subcategory": "CASE_NAME", "page_number": 13} in case_name_detections
+
+
+def test_legal_case_report_2_contains_citations_and_acts_and_case_names():
+    extracted_text = extract_text_from_pdf("tests/scanning_tests/fixtures/legal_case_report_2.pdf")
+
+    citation_detections = detect_citations(extracted_text)
+    act_detections = detect_acts(extracted_text)
+    case_name_detections = detect_case_names(extracted_text)
+
+    # This PDF file should have exactly 7 citation detections
+    assert len(citation_detections) == 7
+
+    # This PDF file should have exactly 15 act detections
+    assert len(act_detections) == 15
+
+    # This PDF file should have exactly 3 case name detections
+    assert len(case_name_detections) == 3
+
+    # Ensure specific piece of information are picked up as citation detections
+    assert {"sensitivity_subcategory": "CITATION", "page_number": 1} in citation_detections
+    assert {"sensitivity_subcategory": "CITATION", "page_number": 11} in citation_detections
+    assert {"sensitivity_subcategory": "CITATION", "page_number": 27} in citation_detections
+
+    # Ensure specific piece of information are picked up as act detections
+    assert {"sensitivity_subcategory": "ACT", "page_number": 3} in act_detections
+    assert {"sensitivity_subcategory": "ACT", "page_number": 14} in act_detections
+    assert {"sensitivity_subcategory": "ACT", "page_number": 27} in act_detections
+
+    # Ensure specific piece of information are picked up as case name detections
+    assert {"sensitivity_subcategory": "CASE_NAME", "page_number": 11} in case_name_detections
+    assert {"sensitivity_subcategory": "CASE_NAME", "page_number": 11} in case_name_detections
+    assert {"sensitivity_subcategory": "CASE_NAME", "page_number": 11} in case_name_detections
+
+
