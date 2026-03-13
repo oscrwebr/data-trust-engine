@@ -323,4 +323,56 @@ describe("Invite Component", () => {
             }
         })
     })
+
+    // Test 10
+    test("Test that sending 2 back to back invites will throw an error toast message on screen", async() => {
+        api.post.mockResolvedValueOnce({
+            data: { success: "cooldown" }
+        });
+
+        let toastCalled = null;
+        const mockToast = {
+            current: {
+                show: (args) => {
+                    toastCalled = args;
+                    console.log("Toast triggered:", args);
+                },
+            },
+        };
+
+        render(
+            <MemoryRouter>
+                <Dashboard toast={mockToast} />
+            </MemoryRouter>
+        );
+
+        const inviteButton = screen.getByRole("button", { name: /invite employee/i });
+        fireEvent.click(inviteButton);
+
+        const modal = screen.getByRole("dialog");
+
+        const emailInput = within(modal).getByPlaceholderText("Email address");
+        fireEvent.change(emailInput, { target: { value: "valid@example.com" } });
+
+        const calendarInput = within(modal).getByTestId("calendar-input");
+        fireEvent.change(calendarInput, { target: { value: "2030-04-01" } });
+
+        const submitButton = within(modal).getByRole("button", { name: /send invite/i });
+
+        // Click the button twice
+        fireEvent.click(submitButton);
+        fireEvent.click(submitButton);
+
+        await waitFor(() => {
+            if (!toastCalled) {
+                throw new Error("Toast was not triggered");
+            }
+            
+            if (
+                !toastCalled.detail.includes("You are sending this employee too many invites, please try again tomorrow.")
+            ) {
+                throw new Error("Toast called with wrong arguments");
+            }
+        })
+    })
 })
