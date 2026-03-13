@@ -40,8 +40,8 @@ def test_operational_report_contains_multiple_phone_detections_across_pages():
     detections = detect_phone_numbers(extracted_text)
 
     assert len(detections) > 1
-    assert {"sensitivity_subcategory": "PHONE", "page_number": 1} in detections
-    assert {"sensitivity_subcategory": "PHONE", "page_number": 2} in detections
+    assert {"sensitivity_subcategory": "PHONE", "page_number": 1, "matched_text": "+44 7700 90305"} in detections
+    assert {"sensitivity_subcategory": "PHONE", "page_number": 2, "matched_text": "+44 7700 90267"} in detections
 
 
 def test_operational_report_contains_multiple_email_detections_across_pages():
@@ -49,8 +49,8 @@ def test_operational_report_contains_multiple_email_detections_across_pages():
     detections = detect_emails(extracted_text)
 
     assert len(detections) > 1
-    assert {"sensitivity_subcategory": "EMAIL", "page_number": 1} in detections
-    assert {"sensitivity_subcategory": "EMAIL", "page_number": 2} in detections
+    assert {"sensitivity_subcategory": "EMAIL", "page_number": 1, "matched_text": "oliver.hughes@example.co.uk"} in detections
+    assert {"sensitivity_subcategory": "EMAIL", "page_number": 2, "matched_text": "james.walker@northbridge-consulting.co.uk"} in detections
 
 
 def test_operational_report_contains_postcode_detections_on_multiple_pages():
@@ -58,9 +58,9 @@ def test_operational_report_contains_postcode_detections_on_multiple_pages():
     detections = detect_postcodes(extracted_text)
 
     assert len(detections) > 1
-    assert {"sensitivity_subcategory": "POSTCODE", "page_number": 1} in detections
-    assert {"sensitivity_subcategory": "POSTCODE", "page_number": 3} in detections
-    assert {"sensitivity_subcategory": "POSTCODE", "page_number": 4} in detections
+    assert {"sensitivity_subcategory": "POSTCODE", "page_number": 1, "matched_text": "CF10 3AT"} in detections
+    assert {"sensitivity_subcategory": "POSTCODE", "page_number": 3, "matched_text": "NW1 6XE"} in detections
+    assert {"sensitivity_subcategory": "POSTCODE", "page_number": 4, "matched_text": "SW1A 2AA"} in detections
 
 
 def test_supplier_agreement_contains_iban_and_vat_detections():
@@ -121,8 +121,8 @@ def test_realistic_contract_contains_detections_on_last_page():
     phone_detections = detect_phone_numbers(extracted_text)
     email_detections = detect_emails(extracted_text)
 
-    assert {"sensitivity_subcategory": "PHONE", "page_number": 5} in phone_detections
-    assert {"sensitivity_subcategory": "EMAIL", "page_number": 5} in email_detections
+    assert {"sensitivity_subcategory": "PHONE", "page_number": 5, "matched_text": "+44 7700 90532"} in phone_detections
+    assert {"sensitivity_subcategory": "EMAIL", "page_number": 5, "matched_text": "sophia.patel@finance-demo.co.uk"} in email_detections
 
 
 def test_realistic_contract_contains_address_and_postcode_detections_across_pages():
@@ -134,10 +134,10 @@ def test_realistic_contract_contains_address_and_postcode_detections_across_page
     assert len(address_detections) > 1
     assert len(postcode_detections) > 1
 
-    assert {"sensitivity_subcategory": "ADDRESS", "page_number": 2} in address_detections
-    assert {"sensitivity_subcategory": "POSTCODE", "page_number": 2} in postcode_detections
-    assert {"sensitivity_subcategory": "ADDRESS", "page_number": 5} in address_detections
-    assert {"sensitivity_subcategory": "POSTCODE", "page_number": 5} in postcode_detections
+    assert {"sensitivity_subcategory": "ADDRESS", "page_number": 2, "matched_text": "18 Station Road"} in address_detections
+    assert {"sensitivity_subcategory": "POSTCODE", "page_number": 2, "matched_text": "SW1A 2AA"} in postcode_detections
+    assert {"sensitivity_subcategory": "ADDRESS", "page_number": 5, "matched_text": "14 King Street"} in address_detections
+    assert {"sensitivity_subcategory": "POSTCODE", "page_number": 5, "matched_text": "B1 1AA"} in postcode_detections
 
 
 def test_legal_case_report_1_contains_citations_and_acts_and_case_names():
