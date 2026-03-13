@@ -1,5 +1,9 @@
-## Front-End
+## User Story
+- As a..., I want..., So that...
 
-## Back-End
+### Front-End
 
-## Acceptance Criteria
+### Back-End
+
+### Acceptance Criteria
+- Given..., When..., Then...
