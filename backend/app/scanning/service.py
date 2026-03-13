@@ -14,11 +14,12 @@ def perform_scan(db: Session, graph_file_ids: list[str]):
     # Initialise the Scan record
     scan = repository.create_scan(db=db)
     
+    # Call scan file method for every graph_file_id received (scan_file method will call a method to pull the files)
     for graph_file_id in graph_file_ids:
         try:
             scan_file(db=db, graph_file_id=graph_file_id, scan_id=scan.scan_id)
         except Exception as e:
-            print(f"FILE SCAN ERROR: {e}")
+            print(f"FILE SCAN ERROR: {e}") # Change print to logging in future
             continue
 
     # Set scan finish time
@@ -33,15 +34,17 @@ def perform_scan(db: Session, graph_file_ids: list[str]):
 # Scan one individual file
 def scan_file(db: Session, graph_file_id: str, scan_id: int):
 
-    # Fetch file (for now a hardcoded file path) using its graph_file_id (ingestion component will be integrated here later)
+    # Fetch file (for now using the testing method) using its graph_file_id (ingestion component will be integrated here later)
     file_path = fetch_graph_file(graph_file_id=graph_file_id)
 
     # Create scan_file record
     file = repository.get_file_by_graph_id(db=db, graph_file_id=graph_file_id)
 
+    # Throw error if file with provided graph file id could not bne found
     if file is None:
         raise ValueError(f"File with graph_file_id '{graph_file_id}' not found")
 
+    # Create a scan_file record, linking the file to be scanned with the scan record
     scan_file_record = repository.create_scan_file(
         db=db, 
         scan_id=scan_id, 
@@ -81,7 +84,7 @@ def scan_file(db: Session, graph_file_id: str, scan_id: int):
         )
 
 
-# Placeholder for dev purposes, returns hard coded test files' paths for testing
+# Method returns hard coded test files' paths to be used for testing, DO NOT DELETE
 def fetch_graph_file(graph_file_id: str):
     match graph_file_id:
         case "abc123":
