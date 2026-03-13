@@ -1,9 +1,9 @@
 ## User Story
-- As a..., I want..., So that...
+As a..., I want..., So that...
 
 ### Front-End
 
 ### Back-End
 
 ### Acceptance Criteria
-- Given..., When..., Then...
+Given [scenario], When [something happens], Then [expected outcome]
