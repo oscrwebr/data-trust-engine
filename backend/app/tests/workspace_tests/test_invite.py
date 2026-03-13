@@ -1,12 +1,12 @@
 import secrets
 from app.invites.models import Invite
-from app.invites.repository import add_invite, get_invite
+from app.invites.repository import add_invite, get_invite, get_invite_for_cooldown
 from app.authentication.repository import delete_pending_user, get_pending_user_by_id
 from app.authentication.models import PendingUser, User
 from app.authentication import repository, service
 from app.workspaces import models
 from app.workspaces.repository import add_workspace
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from sqlalchemy import insert
 from urllib.parse import quote
 from io import BytesIO
@@ -199,6 +199,74 @@ def test_delete_pending_user_by_getting_id(db):
     user = get_pending_user_by_id(db, res.inserted_primary_key[0])
     delete_pending_user(db, user)
     assert db.query(PendingUser).first() is None
+
+
+# Test that the latest invite gets pulled based on the workspace and the user
+def test_method_get_invite_for_cooldown(db):
+    image = create_test_image()
+    token = str(secrets.token_hex(16))
+    time = datetime.now().replace(microsecond=0)
+    latest_time = time + timedelta(days=3)
+
+    oid = "000000-7sdf77-88asdf8-9sdiy99"
+    admin = insert(User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid)
+    admin_instance=db.execute(admin)
+
+    pending_user_instance = PendingUser(email="JohnSmith1@hotmail.com")
+    db.add(pending_user_instance)
+    db.flush()
+
+    workspace = add_workspace(db, "Test Workspace", image=image, user_id=admin_instance.inserted_primary_key[0])
+    add_invite(db, time, date(2030, 3, 3), pending_user_instance.user_id, token, workspace)
+    add_invite(db, time + timedelta(days=2), date(2030, 3, 3), pending_user_instance.user_id, token, workspace)
+    add_invite(db, latest_time, date(2030, 3, 3), pending_user_instance.user_id, token, workspace)
+
+    invite = get_invite_for_cooldown(db, workspace, pending_user_instance)
+
+    assert invite.created_at == latest_time
+    assert invite.user_id == pending_user_instance.user_id
+    assert invite.workspace_id == workspace.id
+
+# Test return statement when sending 2 invites back-to-back
+def test_return_statement_with_invalid_cooldown(db, client):
+    image = create_test_image()
+
+    oid = "000000-7sdf77-88asdf8-9sdiy99"
+    insert_statement = insert(User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid)
+    res=db.execute(insert_statement)
+
+    workspace = insert(models.Workspace).values(name="Test Workspace", image=image, user_id=res.inserted_primary_key[0])
+    db.execute(workspace)
+
+    refresh_family = repository.create_refresh_family(db)
+
+    access, refresh, _ = service.create_access_refresh(db, data={"userId": res.inserted_primary_key[0]}, refresh_family_id=refresh_family.refresh_family_id)
+
+    # invite 1
+    invite_1 = client.build_request(
+        method="post",
+        url="/invite/send-invite",
+        headers={"Authorization": f"Bearer {access}"}, 
+        json={"email":"valid@example.com", "expiry_date":"2026-03-01T14:35:10.123456"},
+    )
+    response = client.send(request = invite_1)
+
+    # invite 2
+    invite_2 = client.build_request(
+        method="post",
+        url="/invite/send-invite",
+        headers={"Authorization": f"Bearer {access}"}, 
+        json={"email":"valid@example.com", "expiry_date":"2026-03-01T14:35:10.123456"},
+    )
+    response = client.send(request = invite_2)
+
+    assert response.json().get("success") == "cooldown"
+    assert db.query(Invite).count() == 1
+    assert db.query(PendingUser).count() == 1
+
+
+
+
 
 
     
