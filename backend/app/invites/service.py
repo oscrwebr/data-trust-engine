@@ -55,6 +55,9 @@ def validate_invite(db, email: str, expiry_date: datetime | None, workspace: Wor
     user = get_pending_user_by_email(db, email)
     if user is not None:
         latest_invite = get_invite_for_cooldown(db, workspace, user)
+        if latest_invite is None:
+            return True
+        
         time_difference = time_now - latest_invite.created_at
         if(time_difference < cooldown):
             return "cooldown"
