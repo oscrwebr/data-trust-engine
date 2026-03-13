@@ -46,8 +46,10 @@ def test_perform_scan_sets_started_and_finished_timestamps(db):
 
 
 def test_scan_file_method_creates_scan_file_record_for_each_file(db):
+    # Create a test scan record
     scan = repository.create_scan(db=db)
 
+    # Create a test file record
     test_file = repository.create_file(
         db=db,
         graph_file_id="lc111",
@@ -55,21 +57,49 @@ def test_scan_file_method_creates_scan_file_record_for_each_file(db):
         file_hash="dummyhash"
     )
 
+    # Scan the test file (has graph_file_id lc111)
     scan_file(db=db, graph_file_id="lc111", scan_id=scan.scan_id)
 
+    # Fetch the scan_file_record which should be created
+    scan_file_record = repository.get_scan_file_by_scan_id_and_file_id(
+        db=db, 
+        scan_id=scan.scan_id, 
+        file_id=test_file.file_id
+    )
+
+    # Ensure scan_file_record has been created
+    assert scan_file_record is not None
+    assert scan_file_record.scan_id == scan.scan_id
+    assert scan_file_record.file_id == test_file.file_id
+
+
+def test_scan_file_method_creates_scan_file_detections_for_scan_file(db):
+    # Create a test scan record
+    scan = repository.create_scan(db=db)
+
+    # Create a test file record
+    test_file = repository.create_file(
+        db=db,
+        graph_file_id="lc111",
+        file_name="legal_case_report_1",
+        file_hash="dummyhash"
+    )
+
+    # Scan the test file (has graph_file_id lc111)
+    scan_file(db=db, graph_file_id="lc111", scan_id=scan.scan_id)
+
+    # Fetch the scan_file_record which should be created
     scan_file_record = repository.get_scan_file_by_scan_id_and_file_id(
         db=db, 
         scan_id=scan.scan_id, 
         file_id=test_file.file_id
     )
     
+    # Fetch the scan_file_detection records which should be created
     detection_records = repository.get_scan_file_detections_by_scan_file_id(
         db=db,
         scan_file_id=scan_file_record.scan_file_id
     )
 
-    assert scan_file_record is not None
-    assert scan_file_record.scan_id == scan.scan_id
-    assert scan_file_record.file_id == test_file.file_id
-    assert len(detection_records) > 0
-                                                                       
+    # Ensure that it has created detection records
+    assert len(detection_records) > 0                          
