@@ -19,6 +19,14 @@ def create_scan(db: Session):
     return scan
 
 
+def get_scan_by_id(db: Session, scan_id: int):
+    return db.query(Scan).filter(Scan.scan_id).first()
+
+
+def get_all_scans(db: Session):
+    return db.query(Scan).all()
+
+
 def create_scan_file(db: Session, scan_id: int, file_id: int):
     scan_file = ScanFile(
         scan_id = scan_id,
