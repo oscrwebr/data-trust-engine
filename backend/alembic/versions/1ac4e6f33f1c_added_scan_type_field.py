@@ -1,8 +1,8 @@
-"""Removed redundant column status from invites table
+"""added scan_type field
 
-Revision ID: 8e2cc1821299
+Revision ID: 1ac4e6f33f1c
 Revises: 
-Create Date: 2026-03-11 10:34:07.328539
+Create Date: 2026-03-12 20:09:11.697900
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision: str = '8e2cc1821299'
+revision: str = '1ac4e6f33f1c'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -55,6 +55,7 @@ def upgrade() -> None:
     op.create_index(op.f('ix_role_role_id'), 'role', ['role_id'], unique=False)
     op.create_table('scans',
     sa.Column('scan_id', sa.Integer(), nullable=False),
+    sa.Column('scan_type', sa.String(length=64), nullable=False),
     sa.Column('started_at', sa.DateTime(), nullable=True),
     sa.Column('finished_at', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('scan_id')
@@ -80,7 +81,6 @@ def upgrade() -> None:
     sa.Column('invite_id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('expiry_date', sa.Date(), nullable=True),
-    sa.Column('used', sa.Boolean(), nullable=True),
     sa.Column('token', sa.String(length=250), nullable=True),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['pending_users.user_id'], ondelete='CASCADE'),
