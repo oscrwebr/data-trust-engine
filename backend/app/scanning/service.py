@@ -1,5 +1,7 @@
 import hashlib
 import wordninja
+
+from pathlib import Path
 from sqlalchemy.orm import Session
 from app.scanning import repository
 from app.scanning.models import File, Scan
@@ -7,6 +9,8 @@ from app.scanning.models import File, Scan
 from app.scanning.regex_patterns import *
 from app.scanning.detectors import *
 from app.scanning.extractors import *
+
+BASE_DIRECTORY = Path(__file__).resolve().parent
 
 
 # Perform a scan
@@ -86,17 +90,19 @@ def scan_file(db: Session, graph_file_id: str, scan_id: int):
 
 # Method returns hard coded test files' paths to be used for testing, DO NOT DELETE
 def fetch_graph_file(graph_file_id: str):
+    test_files_directory = BASE_DIRECTORY / "test_files"
+
     match graph_file_id:
         case "abc123":
-            return "app/scanning/test_files/operational_report_document.pdf"
+            return test_files_directory / "operational_report_document.pdf"
         case "def456":
-            return "app/scanning/test_files/realistic_contract_document.pdf"
+            return test_files_directory / "realistic_contract_document.pdf"
         case "ghi789":
-            return "app/scanning/test_files/supplier_agreement_document.pdf"
+            return test_files_directory / "supplier_agreement_document.pdf"
         case "lc111":
-            return "app/scanning/test_files/legal_case_report_1.pdf"
+            return test_files_directory / "legal_case_report_1.pdf"
         case "lc222":
-            return "app/scanning/test_files/legal_case_report_2.pdf"
+            return test_files_directory / "legal_case_report_2.pdf"
         
 
 # Get hash of a file
