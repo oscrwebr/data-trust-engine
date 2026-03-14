@@ -3,6 +3,7 @@ import { MemoryRouter, redirect, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import EmployeeInviteError from "./error.jsx";
 import Dashboard from "../dashboard/Dashboard.jsx";
+import WorkspaceJoinedError from "./WorkspaceJoined.jsx";
 import Home from "../home/home.jsx"
 
 vi.mock("primereact/calendar", () => ({
@@ -245,19 +246,19 @@ describe("Invite Component", () => {
     })
 
     // Test 7
-    test("Test correct information displayed when user redirected to invite used error page", async () => {
+    test("Test correct information displayed when user redirected to workspace already joined modal", async () => {
         render(
-            <MemoryRouter initialEntries={["/invite-error/used"]}>
+            <MemoryRouter initialEntries={["/workspace-joined"]}>
                 <Routes>
-                    <Route path="/invite-error/:type" element={<EmployeeInviteError />} />
+                    <Route path="/workspace-joined" element={<WorkspaceJoinedError />} />
                 </Routes>
             </MemoryRouter>
         )
-        expect(screen.getByText("This invite link is no longer valid")).toBeInTheDocument();
+        expect(screen.getByText("You've already joined a workspace")).toBeInTheDocument();
         expect(screen.getByText("Return to home")).toBeInTheDocument();
-        expect(screen.getByText("Request to join workspace")).toBeInTheDocument();
+        expect(screen.getByText("Go to my workspace")).toBeInTheDocument();
         expect(screen.getByText("The Data Trust Engine")).toBeInTheDocument();
-        expect(screen.getByText("This invite that your supervisor sent you has already been used. To access your workspace, please ask your supervisor to send a new invite link.")).toBeInTheDocument();
+        expect(screen.getByText("It looks like you’ve already joined this workspace. Click “Go to my workspace” to log in and access it. If this seems incorrect, contact your workspace administrator.")).toBeInTheDocument();
     })
 
 
@@ -275,9 +276,9 @@ describe("Invite Component", () => {
         };
 
         render(
-            <MemoryRouter initialEntries={["/invite-error/used"]}>
+            <MemoryRouter initialEntries={["/workspace-joined"]}>
                 <Routes>
-                    <Route path="/invite-error/:type" element={<EmployeeInviteError />} />
+                    <Route path="/workspace-joined" element={<WorkspaceJoinedError />} />
                     <Route path="/" element={<Home toast={mockToast}/>} />
                 </Routes>
             </MemoryRouter>

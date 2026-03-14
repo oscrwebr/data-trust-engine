@@ -41,7 +41,7 @@ async def send_invite(db: Annotated[Session, Depends(get_database)], current_use
         if not user:
             user = user_repository.add_user(db, invite.email)
         
-        invite_repository.add_invite(db, time_now, invite.expiry_date.date(), user.user_id, token, workspace)
+        invite_repository.add_invite(db, time_now, invite.expiry_date.date(), token, False, user.user_id, workspace)
 
     return {"success": result}
 
@@ -50,23 +50,21 @@ async def process_invite(token: str = Query(...), db: Session = Depends(get_data
     
     invite = invite_repository.get_invite(db, token)
 
-    if not invite:
-        return RedirectResponse(f"http://localhost:5173/invite-error/used")
-
+    # If no invite then redirect the user to you have already joined a workspace with this invite
+    if not invite or invite.used == True:
+        return RedirectResponse(f"http://localhost:5173/workspace-joined")
+    
     # Get the pending_user based on the invite
     user = user_repository.get_pending_user_by_id(db, invite.user_id)
 
-    # Check the expiry date
+    # Check the invite
     result = check_invite(invite, db)
-    
+
+    # Check wether the invite expiry date
     if(result == "expired"):
         expiry = invite.expiry_date
-        user_repository.delete_pending_user(db, user)
         return RedirectResponse(f"http://localhost:5173/invite-error/expired?date={expiry}")
     
-    # Remove the user from the pending_users table
-    user_repository.delete_pending_user(db, user)
-
     next_url = "/?toast=signup"
     redirect_url = f"http://localhost:8000/auth/sign-in?next={quote(next_url)}&signup=true"
 

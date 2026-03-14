@@ -1,8 +1,8 @@
-"""Created relationship between invites and workspaces
+"""Re-created database after new branch created from development
 
-Revision ID: 7fbe6c71f162
+Revision ID: 339562edb311
 Revises: 
-Create Date: 2026-03-12 16:35:33.963096
+Create Date: 2026-03-13 17:13:12.861939
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision: str = '7fbe6c71f162'
+revision: str = '339562edb311'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None

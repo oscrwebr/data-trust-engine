@@ -134,7 +134,7 @@ def test_retrieval_invite_record(db):
     pending_user_instance=db.execute(pending_user)
 
     workspace = add_workspace(db, "Test Workspace", image=image, user_id=admin_instance.inserted_primary_key[0])
-    add_invite(db, datetime.now(), datetime.today(), pending_user_instance.inserted_primary_key[0], token, workspace)
+    add_invite(db, datetime.now(), datetime.today(), token, False, pending_user_instance.inserted_primary_key[0], workspace)
 
     invite = get_invite(db, token)
     assert invite is not None
@@ -153,19 +153,36 @@ def test_expired_invite_record(db, client):
     pending_user_instance=db.execute(pending_user)
 
     workspace = add_workspace(db, "Test Workspace", image=image, user_id=admin_instance.inserted_primary_key[0])
-    add_invite(db, datetime.now(), date(2025, 3, 3), pending_user_instance.inserted_primary_key[0], token, workspace)
+    add_invite(db, datetime.now(), date(2025, 3, 3), token, False, pending_user_instance.inserted_primary_key[0], workspace)
     response = client.get("/invite/invite-processing", params={"token": token}, follow_redirects=False)
 
     assert response.headers["location"] == "http://localhost:5173/invite-error/expired?date=2025-03-03"
-    assert db.query(PendingUser).first() is None
-    assert db.query(Invite).first() is None 
+    assert db.query(PendingUser).count() == 1
+    assert db.query(Invite).count() == 1
 
 
 # Test if invite is clicked when the invite is not present in database
 def test_invite_clicked_when_not_in_database(client):
     token = str(secrets.token_hex(16))
     response = client.get("/invite/invite-processing", params={"token": token}, follow_redirects=False)
-    assert response.headers["location"] == "http://localhost:5173/invite-error/used"
+    assert response.headers["location"] == "http://localhost:5173/workspace-joined"
+
+# Test if invite is clicked when the invite used is true
+def test_invite_clicked_when_used_is_true(db, client):
+    image = create_test_image()
+    token = str(secrets.token_hex(16))
+
+    oid = "000000-7sdf77-88asdf8-9sdiy99"
+    admin = insert(User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid)
+    admin_instance=db.execute(admin)
+
+    pending_user = insert(PendingUser).values(email="JohnSmith1@hotmail.com")
+    pending_user_instance=db.execute(pending_user)
+
+    workspace = add_workspace(db, "Test Workspace", image=image, user_id=admin_instance.inserted_primary_key[0])
+    add_invite(db, datetime.now(), date(2025, 3, 3), token, True, pending_user_instance.inserted_primary_key[0], workspace)
+    response = client.get("/invite/invite-processing", params={"token": token}, follow_redirects=False)
+    assert response.headers["location"] == "http://localhost:5173/workspace-joined"
 
 
 # Test return statement with valid invite
@@ -181,15 +198,15 @@ def test_valid_invite(db, client):
     pending_user_instance=db.execute(pending_user)
 
     workspace = add_workspace(db, "Test Workspace", image=image, user_id=admin_instance.inserted_primary_key[0])
-    add_invite(db, datetime.now(), date(2030, 3, 3), pending_user_instance.inserted_primary_key[0], token, workspace)
+    add_invite(db, datetime.now(), date(2030, 3, 3), token, False, pending_user_instance.inserted_primary_key[0], workspace)
 
     response = client.get("/invite/invite-processing", params={"token": token}, follow_redirects=False)
     next_url = "/?toast=signup"
     redirect_url = f"http://localhost:8000/auth/sign-in?next={quote(next_url)}&signup=true"
     assert response.headers["location"] == redirect_url
     assert response.status_code == 302
-    assert db.query(PendingUser).first() is None
-    assert db.query(Invite).first() is None
+    assert db.query(PendingUser).count() == 1
+    assert db.query(Invite).count() == 1
 
 
 # Test getting pending user by their id and deleting pending user method
@@ -217,9 +234,9 @@ def test_method_get_invite_for_cooldown(db):
     db.flush()
 
     workspace = add_workspace(db, "Test Workspace", image=image, user_id=admin_instance.inserted_primary_key[0])
-    add_invite(db, time, date(2030, 3, 3), pending_user_instance.user_id, token, workspace)
-    add_invite(db, time + timedelta(days=2), date(2030, 3, 3), pending_user_instance.user_id, token, workspace)
-    add_invite(db, latest_time, date(2030, 3, 3), pending_user_instance.user_id, token, workspace)
+    add_invite(db, time, date(2030, 3, 3), token, False, pending_user_instance.user_id, workspace)
+    add_invite(db, time + timedelta(days=2), date(2030, 3, 3), token, False, pending_user_instance.user_id, workspace)
+    add_invite(db, latest_time, date(2030, 3, 3), token, False, pending_user_instance.user_id, workspace)
 
     invite = get_invite_for_cooldown(db, workspace, pending_user_instance)
 

@@ -12,6 +12,7 @@ import { Toast } from 'primereact/toast';
 import Test from "./Test/Test.jsx";
 import Navbar from "./components/navbar/Navbar.jsx";
 import Unprocessable422 from "./Errors/unprocessable422.jsx";
+import WorkspaceJoinedError from "./invites/workspaceJoined.jsx";
 import Forbidden403 from "./Errors/Forbidden403.jsx";
 
 function App() {
@@ -35,6 +36,7 @@ function App() {
         <Route path="/error/422" element={<Unprocessable422/>}/>
         <Route path="/error/403" element={<Forbidden403/>}/>
         <Route path="/invite-error/:type" element={<EmployeeInviteError />} />
+        <Route path="/workspace-joined" element={<WorkspaceJoinedError />} />
       </Routes>
     </div>
     </>
