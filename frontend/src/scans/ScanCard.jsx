@@ -88,7 +88,7 @@ function ScanCard({ scan }) {
                 </div>
             </div>
             {/* From PrimeReact: https://primereact.org/divider/ */}
-            <Divider/>
+            <Divider className="scan-card-divider"/>
             <div className="scan-card-dates">
                 <div className="scan-card-date-block">
                     <span className="scan-card-id-heading">Total Files</span>

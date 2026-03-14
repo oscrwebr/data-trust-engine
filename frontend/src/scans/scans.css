@@ -5,6 +5,10 @@
     /* outline: 1px solid red; */
 }
 
+.scan-heading {
+    margin-bottom: 0;
+}
+
 .scan-card {
     width: 360px;
     height: 320px;
@@ -148,9 +152,15 @@
 
 .scan-card-total-files {
     font-size: 26px;
+    font-weight: 1200px;
 }
 
 .scan-card-issue-files {
     color: #E7000B;
     font-size: 26px;
+    font-weight: 1200px;
+}
+
+.scan-card-divider {
+    margin: 8px 0;
 }
