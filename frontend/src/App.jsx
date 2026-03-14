@@ -35,7 +35,7 @@ function App() {
         <Route path="/test" element={<Test/>} />
         <Route path="/error/422" element={<Unprocessable422/>}/>
         <Route path="/error/403" element={<Forbidden403/>}/>
-        <Route path="/invite-error/:type" element={<EmployeeInviteError />} />
+        <Route path="/invite-error/:type" element={<EmployeeInviteError toast={toast}/>} />
         <Route path="/workspace-joined" element={<WorkspaceJoinedError />} />
       </Routes>
     </div>

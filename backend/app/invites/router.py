@@ -63,7 +63,8 @@ async def process_invite(token: str = Query(...), db: Session = Depends(get_data
     # Check wether the invite expiry date
     if(result == "expired"):
         expiry = invite.expiry_date
-        return RedirectResponse(f"http://localhost:5173/invite-error/expired?date={expiry}")
+        workspace_id = invite.workspace_id
+        return RedirectResponse(f"http://localhost:5173/invite-error/expired?date={expiry}&workspace={workspace_id}")
     
     next_url = "/?toast=signup"
     redirect_url = f"http://localhost:8000/auth/sign-in?next={quote(next_url)}&signup=true"
