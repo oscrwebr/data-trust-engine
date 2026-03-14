@@ -15,12 +15,93 @@
     box-sizing: border-box;
 }
 
+.scan-card:hover {
+    /* filter: brightness(1.02); */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);   
+}
+
+
+
 .scan-type-organisation {
-  border-color: #3b82f6;
+    background: #F4F8FD;
+    border-color: #BEDBFF;
 }
 
 .scan-type-sensitivity {
-  border-color: #9333ea;
+    background: #FAF8FD;
+    border-color: #E9D4FF;
 }
 
+.scan-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.scan-card-top-left {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.scan-type-icon {
+    display: flex;
+    align-items: center;
+    font-size: 30px;
+}
+
+.scan-type-text {
+    color: white;
+    padding: 4px 10px;
+    border-radius: 15px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.scan-type-icon-organisation {
+    color: #2563eb;
+}
+
+.scan-type-text-organisation {
+    background: #2563eb;
+}
+
+.scan-type-icon-sensitivity {
+    color: #9810FA;
+}
+
+.scan-type-text-sensitivity {
+    background: #9810FA;
+}
+
+.scan-card-top-right {
+    display: flex;
+    align-items: center;
+}
+
+.scan-status-text {
+    display: inline-flex;
+    align-items: center;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 15px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+
+.scan-status-completed {
+    background: #d9f5df;
+    color: #11823b;
+}
+
+.scan-status-ongoing {
+    background: #fde68a;
+    color: #b45309;
+}
+
+.scan-status-text svg {
+    font-size: 20px;
+    margin-right: 5px;
+}
 
