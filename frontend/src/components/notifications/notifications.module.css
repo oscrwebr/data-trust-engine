@@ -1,0 +1,9 @@
+.n_text {
+    font-size: 12px;
+}
+
+.n_date {
+    font-size: 12px;
+    text-align: right;
+    margin-top: 5px;
+}

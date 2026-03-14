@@ -5,6 +5,7 @@ import api from "../api/axiosConfig.js";
 import styles from "./dashboard.module.css"
 import { Badge } from "primereact/badge"
 import { Toast } from "primereact/toast"
+import { ScrollPanel } from "primereact/scrollpanel"
 import Notification from "../components/notifications/Notification.jsx";
 
 function Dashboard({toast}) {
@@ -12,7 +13,7 @@ function Dashboard({toast}) {
   const [user, setUser] = useState({});
   const [notifications, setNotifications] = useState([])
   const toastNotifications = useRef(null);
-
+  const [isNotificationsVisible, setIsNotificationsVisible] = useState(false); // State to track visibility
   const notificationCount = notifications.length;
 
   let displayValue = '';
@@ -43,11 +44,12 @@ function Dashboard({toast}) {
   }, []);
 
   function handleNotifications(){
-    notifications.forEach(notification => {
+
+    setIsNotificationsVisible((prev) => !prev);
+    if (!isNotificationsVisible) {
+      notifications.forEach(notification => {
       toastNotifications.current.show({
         severity: 'info', 
-        summary: notification.title, 
-        detail: notification.body,  
         sticky: true, 
         content: (props) => (
           <Notification 
@@ -59,6 +61,9 @@ function Dashboard({toast}) {
         )
       });
     });
+    } else {
+      toastNotifications.current.clear();
+    }
   }
 
   return (
@@ -71,7 +76,7 @@ function Dashboard({toast}) {
         </div>
         <Button onClick={() => setVisible(true)}>Invite Employee</Button>
         <Invite visible={visible} setVisible={setVisible} toast={toast}/>
-        <Toast ref={toastNotifications} position="bottom-center" onRemove={() => toastRef.current.clear()} />
+        <Toast className={styles.d_toast} ref={toastNotifications} position="top-right" onRemove={() => toastRef.current.clear()} />
     </div>
   );
 }

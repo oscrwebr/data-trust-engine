@@ -1,13 +1,22 @@
 import { Button } from "primereact/button";
+import styles from "../notifications/notifications.module.css"
 
 function Notification({id, title, body, date}) {
+    const dateObj = new Date(date);
+    const formattedDate = dateObj.toLocaleDateString('en-GB');
+    const formattedTime = dateObj.toLocaleTimeString('en-GB', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false, 
+    });
+
     return (
         <div className="flex flex-column align-items-left" style={{ flex: '1' }}>
             <div className="flex align-items-center gap-2">
-                <span className="font-bold text-900">{title}</span>
+                <strong>{title}</strong>
             </div>
-            <div className="font-medium text-lg my-3 text-900">{body}</div>
-            <div className="font-medium text-lg my-3 text-900">{date}</div>
+            <div className={styles.n_text}>{body}</div>
+            <div className={styles.n_date}>{formattedDate} at {formattedTime}</div>
         </div>
     )
 }
