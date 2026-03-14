@@ -4,6 +4,9 @@ import api from "../api/axiosConfig";
 // import { Column } from 'primereact/column';
 import Table from '@mui/joy/Table';
 import Sheet from '@mui/joy/Sheet';
+import { Link } from "react-router-dom";
+import ScanCard from "./ScanCard";
+import "./scans.css";
 
 
 function Scans(){
@@ -25,43 +28,18 @@ function Scans(){
 
     }, []);
 
-    const formatDateTime = (dateTimeString) => {
-        const date = new Date(dateTimeString);
-        const formattedDate = date.toLocaleDateString();
-        const formattedTime = date.toLocaleTimeString();
-        return `${formattedDate} ${formattedTime}`;
-    }
-
 
     return (
-        <div>
+        <>
+        <div className="scan-heading">
             <h1>Scans</h1>
-            <Sheet>
-                {/* Table component from MUI Joy: https://mui.com/joy-ui/react-table/ */}
-                <Table stickyFooter={false} stickyHeader stripe="even" variant="plain" aria-label="Scans table" hoverRow>
-                    <thead>
-                        <tr>
-                            <th>Scan ID</th>
-                            <th>Started At</th>
-                            <th>Finished At</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {scans.map((scan) => (
-                            <tr key={scan.scan_id}>
-                                <td>{scan.scan_id}</td>
-                                <td>{formatDateTime(scan.started_at)}</td>
-                                <td>{formatDateTime(scan.finished_at)}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-
-
-                </Table>
-                
-
-            </Sheet>
         </div>
+        <div className="scan-grid">
+            {scans.map(scan => (
+                <ScanCard key={scan.scan_id} scan={scan}/>
+            ))}
+        </div>
+        </>
     );
 }
 
