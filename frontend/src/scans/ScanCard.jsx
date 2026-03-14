@@ -93,12 +93,13 @@ function ScanCard({ scan }) {
                 <div className="scan-card-date-block">
                     <span className="scan-card-id-heading">Total Files</span>
                     <span className="scan-card-value scan-card-total-files">
-                        5
+                        <span>{scan.file_count}</span>
                     </span>
                 </div>
                 <div className="scan-card-date-block">
                     <span className="scan-card-id-heading">Files with Issues</span>
                     <span className="scan-card-value scan-card-issue-files">
+                        {/* Hardcoded for now */}
                         2
                     </span>
                 </div>

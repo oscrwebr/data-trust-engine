@@ -13,9 +13,9 @@ function Scans(){
 
     const [scans, setScans] = useState([]);
 
-    // Get scans from /get_all_scans endpoint
+    // Get scans with file count from endpoint
     useEffect(() => {
-        api.get("/scanning/get_all_scans")
+        api.get("/scanning/get_scans_with_file_count")
 
         .then(response => {
             setScans(response.data);

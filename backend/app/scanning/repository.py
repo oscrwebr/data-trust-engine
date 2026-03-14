@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 from app.scanning.models import File, NamingConvention, Scan, ScanNamingConvention, NamingConventionScanResult, Scan, ScanFile, ScanFileDetection
 from datetime import datetime, timezone
@@ -137,3 +137,6 @@ def get_all_scans(db: Session):
 
 def get_scan_file_count(db: Session, scan_id: int):
     return db.query(ScanFile).filter(ScanFile.scan_id == scan_id).count()
+
+def get_scans_with_file_count(db: Session):
+    return db.query(Scan, func.count(ScanFile.scan_file_id)).outerjoin(ScanFile, Scan.scan_id == ScanFile.scan_id).group_by(Scan.scan_id).all()
