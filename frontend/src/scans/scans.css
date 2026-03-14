@@ -2,7 +2,7 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, 360px);
     gap: 20px;
-    outline: 1px solid red;
+    /* outline: 1px solid red; */
 }
 
 .scan-card {
@@ -14,3 +14,13 @@
     padding: 20px;
     box-sizing: border-box;
 }
+
+.scan-type-organisation {
+  border-color: #3b82f6;
+}
+
+.scan-type-sensitivity {
+  border-color: #9333ea;
+}
+
+
