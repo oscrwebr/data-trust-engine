@@ -3,7 +3,7 @@ from app.authentication import repository
 from ..core.security import create_refresh_token, create_access_token, hash_user_refresh_token
 from datetime import datetime, timezone, timedelta
 
-def create_user(db, details: dict):
+def create_user(db, details: dict, role: str):
     split_name = details["name"].split()
     firstname, surname = split_name[0], split_name[-1]
 
@@ -12,7 +12,8 @@ def create_user(db, details: dict):
         firstname=firstname,
         surname=surname,
         email=details["email"],
-        oid=details["oid"]
+        oid=details["oid"],
+        role=role
     )
     print(user)
     return user
