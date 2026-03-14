@@ -5,7 +5,7 @@ class Folder(BaseModel):
     graph_id: str
     name: str
     web_url: str
-    parent_id: str
+    parent_graph_id: str
 
 class File(BaseModel):
     graph_id: str
@@ -16,4 +16,4 @@ class File(BaseModel):
     last_scanned: datetime | None=None
     last_modified: datetime
     web_url: str
-    parent_id: str
+    parent_graph_id: str

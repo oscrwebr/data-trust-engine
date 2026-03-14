@@ -23,7 +23,7 @@ async def test_ingest(application: Annotated[ConfidentialClientApplication, Depe
     print(user)
     access_token = service.get_user_access(application=application, user=user, db=db)
     if access_token:
-        output = service.get_all_files(access_token)
+        output = service.get_all_files(access_token=access_token, db=db)
         return output
     
     return {"message": None}
