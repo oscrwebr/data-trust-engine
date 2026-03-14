@@ -8,7 +8,7 @@ def test_create_user_service_adds_user_correctly(db):
         "oid": "00000000-0000-0000-476j-987sdf88se" # This is random
     }
 
-    user = create_user(db=db, details=dummy_user)
+    user = create_user(db=db, details=dummy_user, role="employee")
 
     # assertions
     assert user # Check that there is a user object returned
@@ -16,3 +16,4 @@ def test_create_user_service_adds_user_correctly(db):
     assert user.surname == "Smith"
     assert user.email == dummy_user["email"]
     assert user.oid == dummy_user["oid"]
+    assert user.role == "employee"
