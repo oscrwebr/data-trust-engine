@@ -19,8 +19,8 @@ def add_notification(db: Session, title: str, body: str, datetime: datetime, use
     db.refresh(notification)
     return notification
 
-def get_all_notifications(db: Session):
-    return db.query(Notification).all()
+def get_all_notifications(db: Session, user_id: int):
+    return db.query(Notification).filter(Notification.user_id == user_id).all()
 
 def delete_notification(db: Session, id: int):
-    return db.query(Notification).filter(Notification.id == id).first()
+    return 

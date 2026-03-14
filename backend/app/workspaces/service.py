@@ -13,7 +13,11 @@ def workspace(user_id:int, name:str, image: bytes, db: Session):
     repository.add_workspace(db, name, image_bytes, user_id)
     return True
 
-# Checking workspace creation inputs
+# Add a notification to database
 def add_notification(db: Session, title: str, body: str, datetime: datetime, user_id: int):
     repository.add_notification(db, title, body, datetime, user_id)
     return True
+
+# Get all notifications for a user
+def get_user_notifications(db: Session, user_id: int):
+    return repository.get_all_notifications(db, user_id)
