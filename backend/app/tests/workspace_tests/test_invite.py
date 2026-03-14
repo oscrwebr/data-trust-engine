@@ -282,6 +282,34 @@ def test_return_statement_with_invalid_cooldown(db, client):
     assert db.query(PendingUser).count() == 1
 
 
+# Test return statement when sending an invite to the same email as the admin sending the email
+def test_return_statement_with_same_email_as_admin(db, client):
+    image = create_test_image()
+
+    oid = "000000-7sdf77-88asdf8-9sdiy99"
+    insert_statement = insert(User).values(firstname="John", surname="Smith", email="valid@example.com", oid=oid)
+    res=db.execute(insert_statement)
+
+    workspace = insert(models.Workspace).values(name="Test Workspace", image=image, user_id=res.inserted_primary_key[0])
+    db.execute(workspace)
+
+    refresh_family = repository.create_refresh_family(db)
+
+    access, refresh, _ = service.create_access_refresh(db, data={"userId": res.inserted_primary_key[0]}, refresh_family_id=refresh_family.refresh_family_id)
+
+    req = client.build_request(
+        method="post",
+        url="/invite/send-invite",
+        headers={"Authorization": f"Bearer {access}"}, 
+        json={"email":"valid@example.com", "expiry_date":"2030-03-01T14:35:10.123456"},
+    )
+    response = client.send(request = req)
+
+    assert response.json().get("success") == "admin"
+    assert db.query(Invite).count() == 0
+    assert db.query(PendingUser).count() == 0
+
+
 
 
 

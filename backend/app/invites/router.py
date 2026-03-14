@@ -25,7 +25,7 @@ async def send_invite(db: Annotated[Session, Depends(get_database)], current_use
     user = service.test_route(current_user.user_id, db=db)
     workspace = get_workspace_by_user_id(db, current_user.user_id)
     time_now = datetime.now()
-    result = await create_invite(db, invite, workspace, time_now)
+    result = await create_invite(db, invite, workspace, time_now, user.email)
     if(result == True):
 
         # Generate parameters

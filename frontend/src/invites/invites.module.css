@@ -6,8 +6,7 @@
 
 .d_container {
   display: flex;
-  justify-content: center;
-  width: 100%;
+  justify-content: center;  
 }
 
 .d_input_container small {
@@ -22,7 +21,8 @@
 }
 
 .d_dialog {
-  width: 30vw;
+  max-width: 45vw;
+  max-height: 100vh;
 }
 
 .d_dialog_header {
@@ -30,7 +30,7 @@
 }
 
 #d_email_address, #d_date_input {
-  width: 17vw;
+  width: 25vw;
   margin-top: 5px;
 }
 
@@ -40,7 +40,7 @@
 }
 
 .d_error {
-  width: 17vw;
+  width: 25vw;
   padding: 12px 0px;
   margin-top: 10px;
 }

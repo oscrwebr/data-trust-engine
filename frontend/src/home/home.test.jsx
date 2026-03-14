@@ -31,7 +31,7 @@ describe("Invite Component", () => {
     });
 
     // Test 1
-    test("Test that signup button is on home screen and that when clicked, correct api request is called", async () => {
+    test("Test that signup button is on home screen and that when clicked, correct navigate is called", async () => {
         render(
             <MemoryRouter>
                 <Home/>

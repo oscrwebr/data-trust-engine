@@ -18,6 +18,15 @@ vi.mock("primereact/calendar", () => ({
 
 import EmployeeInvite from "./invites.jsx";
 
+const mockNavigate = vi.fn();
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual("react-router-dom");
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate
+  };
+});
+
 vi.mock("../api/axiosConfig.js", () => ({
   default: {
     get: vi.fn().mockResolvedValue({ data: [] }),
@@ -30,6 +39,7 @@ vi.mock("../api/axiosConfig.js", () => ({
 }));
 
 import api from "../api/axiosConfig.js";
+import Invite from "./invites.jsx";
 describe("Invite Component", () => {
     afterEach(() => {
         vi.clearAllMocks();
@@ -375,5 +385,68 @@ describe("Invite Component", () => {
                 throw new Error("Toast called with wrong arguments");
             }
         })
+    })
+
+    // Test 11
+    test("Test error message when an admin sends an invite to themselves", async () => {
+        api.post.mockResolvedValueOnce({
+            data: { success: "admin" }
+        });
+
+        let toastCalled = null;
+        const mockToast = {
+            current: {
+            show: (args) => {
+                toastCalled = args;
+                console.log("Toast triggered:", args);
+            },
+            },
+        };
+
+        render(
+            <MemoryRouter>
+                <Dashboard toast={mockToast}/>
+            </MemoryRouter>
+        );
+
+        const inviteButton = screen.getByRole("button", { name: /invite employee/i });
+        fireEvent.click(inviteButton);
+
+        const modal = screen.getByRole("dialog");
+
+        const emailInput = within(modal).getByPlaceholderText("Email address");
+        fireEvent.change(emailInput, { target: { value: "valid@example.com" } });
+
+        const calendarInput = within(modal).getByTestId("calendar-input");
+        fireEvent.change(calendarInput, { target: { value: "2030-04-01" } });
+
+        const submitButton = within(modal).getByRole("button", { name: /send invite/i });
+        fireEvent.click(submitButton);
+
+        await waitFor(() => {
+            if (!toastCalled) {
+                throw new Error("Toast was not triggered");
+            }
+            
+            if (
+                !toastCalled.detail.includes("You cannot send an invite to yourself.")
+            ) {
+                throw new Error("Toast called with wrong arguments");
+            }
+        })
+    })
+
+    // Test 12
+    test("Test that clicking go to my workspace button correctly navigates user to dashboard", async () => {
+        render(
+            <MemoryRouter>
+                <WorkspaceJoinedError />
+            </MemoryRouter>
+        );
+
+        const button = screen.getByText("Go to my workspace");
+        fireEvent.click(button);
+        
+        expect(mockNavigate).toHaveBeenCalledWith("/dashboard");
     })
 })

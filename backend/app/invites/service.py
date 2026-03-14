@@ -21,10 +21,10 @@ load_dotenv()
 ZEROBOUNCE_API_KEY = os.getenv("ZEROBOUNCE_API_KEY")
 
 #Creating, sending and logging invite
-async def create_invite(db, invite, workspace, time_now):
+async def create_invite(db, invite, workspace, time_now, email):
 
     # Validate inputs
-    is_invite_valid = validate_invite(db, invite.email, invite.expiry_date, workspace, time_now)
+    is_invite_valid = validate_invite(db, invite.email, invite.expiry_date, workspace, time_now, email)
     if(is_invite_valid == True):
         return True
     else:
@@ -32,7 +32,7 @@ async def create_invite(db, invite, workspace, time_now):
     
 
 # Validating the invite
-def validate_invite(db, email: str, expiry_date: datetime | None, workspace: Workspace, time_now:datetime):
+def validate_invite(db, email: str, expiry_date: datetime | None, workspace: Workspace, time_now:datetime, admin_email: str):
     cooldown = timedelta(minutes=1)
 
     if email is None:
@@ -50,6 +50,10 @@ def validate_invite(db, email: str, expiry_date: datetime | None, workspace: Wor
     # Check whether expiry date is not null
     if(expiry_date == None and is_email_valid == "valid"):
         return "expiry"
+    
+    # Check that admin isn't sending an invite to themselves
+    if(email == admin_email):
+        return "admin"
     
     # Check to see if admin is able to send an invite (cooldown)
     user = get_pending_user_by_email(db, email)

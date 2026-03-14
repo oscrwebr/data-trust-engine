@@ -12,7 +12,7 @@ import { Toast } from 'primereact/toast';
 import Test from "./Test/Test.jsx";
 import Navbar from "./components/navbar/Navbar.jsx";
 import Unprocessable422 from "./Errors/unprocessable422.jsx";
-import WorkspaceJoinedError from "./invites/workspaceJoined.jsx";
+import WorkspaceJoinedError from "./invites/WorkspaceJoined.jsx";
 import Forbidden403 from "./Errors/Forbidden403.jsx";
 
 function App() {
@@ -25,7 +25,7 @@ function App() {
   return (
     <>
     <Toast ref={toast} position="top-right"/>
-    {location.pathname !== "/" && <Navbar />}
+    {location.pathname == "/dashboard" && <Navbar />}
     <div className={location.pathname !== "/" ? "content-frame" : ""}>
       <Routes>
         <Route path="/" element={<Home toast={toast}/>} />

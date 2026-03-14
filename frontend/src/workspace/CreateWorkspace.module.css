@@ -9,7 +9,8 @@
 }
 
 .cw_dialog {
-  width: 30vw;
+  min-width: 50vw;
+  max-height: 100vh;
 }
 
 .cw_dialog_header {
@@ -22,13 +23,13 @@
 }
 
 .cw_label_image {
-  margin-top: 25px;
+  margin-top: 20px;
   margin-bottom: 5px;
   font-weight:700;
 }
 
 #cw_workspace_name {
-  width: 17vw;
+  width: 25vw;
 }
 
 .cw_file_input {
@@ -53,7 +54,7 @@
 }
 
 #cw_create_workspace {
-  margin-top: 25px;
+  margin-top: 20px;
   padding: 15px;
 }
 
@@ -98,7 +99,7 @@
 }
 
 .cw_error {
-  width: 17vw;
+  width: 25vw;
   padding: 12px 0px;
   margin-top: 10px;
 }
