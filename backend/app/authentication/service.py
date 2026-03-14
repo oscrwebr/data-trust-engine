@@ -93,7 +93,8 @@ def refresh_flow(db, client_refresh: str, current_time: datetime):
         return return_dict
     # ISSUING NEW ACCESS TOKEN AND REFRESH TOKEN
     uid = repository.get_uid_from_refresh_id(db=db, refresh_id = refresh_details.refresh_id)
-    access_token, refresh_token, new_entry_details = create_access_refresh(db=db, data={"userId": uid}, refresh_family_id=refresh_details.refresh_family_id)
+    user = repository.get_by_id(user_id=uid, db=db)
+    access_token, refresh_token, new_entry_details = create_access_refresh(db=db, data={"userId": uid, "role": user.role}, refresh_family_id=refresh_details.refresh_family_id)
     # UPDATING PREVIOUS REFRESH TOKEN
     repository.update_prev_refresh_entry(db=db, prev_id=refresh_details.refresh_id, new_id=new_entry_details.refresh_id)
     return_dict = {
