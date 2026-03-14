@@ -2,6 +2,7 @@ import "./scans.css";
 import { PiFileMagnifyingGlass, PiFolders } from "react-icons/pi";
 import { PiCheckCircle } from "react-icons/pi";
 import { PiClockClockwise } from "react-icons/pi";
+import { Divider } from 'primereact/divider';
 
 
 
@@ -54,7 +55,11 @@ function ScanCard({ scan }) {
                     </span>
                 </div>
             </div>
-            <span>{scan.scan_id}</span>
+            <div className="scan-card-id-section">
+                <span className="scan-card-id-heading">Scan ID</span>
+                <span className="scan-card-id">{scan.scan_id}</span>
+            </div>
+            
             <span>{formatDateTime(scan.started_at)}</span>
             <span>{formatDateTime(scan.finished_at)}</span>
         </div>

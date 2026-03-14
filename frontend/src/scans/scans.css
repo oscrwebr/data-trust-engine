@@ -7,7 +7,7 @@
 
 .scan-card {
     width: 360px;
-    height: 220px;
+    height: 300px;
     background: white;
     border: 1px solid #d9e3f0;
     border-radius: 14px;
@@ -17,7 +17,8 @@
 
 .scan-card:hover {
     /* filter: brightness(1.02); */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);   
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    cursor: pointer;   
 }
 
 
@@ -86,7 +87,7 @@
     padding: 4px 10px;
     border-radius: 15px;
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 500;
 }
 
 
@@ -96,12 +97,31 @@
 }
 
 .scan-status-ongoing {
-    background: #fde68a;
-    color: #b45309;
+    background: #FEF3C6;
+    color: #BB4D00;
 }
 
 .scan-status-text svg {
     font-size: 20px;
     margin-right: 5px;
+}
+
+.scan-card-id-section {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.scan-card-id {
+    font-size: 25px;
+    font-family: "Lucida Console", "Courier New", monospace;
+    color: #111827;
+    margin: 0;
+}
+
+.scan-card-id-heading {
+    font-size: 16px;
+    color: #6B7280;
 }
 
