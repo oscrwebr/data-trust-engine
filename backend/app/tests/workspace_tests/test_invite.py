@@ -203,7 +203,7 @@ def test_valid_invite(db, client):
 
     response = client.get("/invite/invite-processing", params={"token": token}, follow_redirects=False)
     next_url = "/?toast=signup"
-    redirect_url = f"http://localhost:8000/auth/sign-in?next={quote(next_url)}&signup=true&role=2"
+    redirect_url = f"http://localhost:8000/auth/sign-in?next={quote(next_url)}&signup=true&role=2&workspace_id={workspace.id}"
     assert response.headers["location"] == redirect_url
     assert response.status_code == 302
     assert db.query(PendingUser).count() == 1
