@@ -69,3 +69,12 @@ def revoke_refresh_family(db: Session, refresh_family_id: int) -> None:
     db.execute(update_statement)
     db.commit()
 
+def update_ms_refresh(id: int, refresh_token: str, db: Session) -> None:
+    update_statement = update(User).where(User.user_id == id).values(refresh = refresh_token)
+    db.execute(update_statement)
+    db.commit()
+
+def update_delta_link(id: int, delta_link: str, db: Session) -> None:
+    update_statement = update(User).where(User.user_id == id).values(deltaLink = delta_link)
+    db.execute(update_statement)
+    db.commit()

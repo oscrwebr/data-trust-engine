@@ -2,7 +2,7 @@ from msal import ConfidentialClientApplication
 import requests
 from datetime import datetime
 
-from ..core.security import decrypt_refresh
+from ..core.security import decrypt_refresh, encrypt_refresh
 from ..core.config import SCOPES
 from . import repository
 from ..authentication import service as auth_service
@@ -20,11 +20,21 @@ def get_user_access(application: ConfidentialClientApplication, user, db) -> str
     if user_details:
         account = application.get_accounts(username=user_details.username)
         if account:
-            access_token = application.acquire_token_silent(scopes=SCOPES, account=account[0])["access_token"]
+            tokens = application.acquire_token_silent(scopes=SCOPES, account=account[0])
+            access_token = tokens["access_token"]
+            # Rotate the refresh token in the DB
+            enc_refresh = encrypt_refresh(tokens["refresh_token"])
+            auth_service.rotate_ms_refresh(user.user_id, enc_refresh, db)
+
         else:
             account = application.acquire_token_by_refresh_token(refresh_token=decrypt_refresh(user_details.refresh), scopes=SCOPES)
             access_token = account["access_token"]
-    
+            # Rotate the refresh token in the DB
+            enc_refresh = encrypt_refresh(account["refresh_token"])
+            auth_service.rotate_ms_refresh(user.user_id, enc_refresh, db)
+    else:
+        return None
+
     return access_token
 
 
@@ -79,7 +89,7 @@ def get_values_data(folders: dict, files: dict, values: list[dict]):
 
     return folders, files
 
-def get_all_files(access_token: str, db) -> str:
+def get_all_files(access_token: str, id: int, db) -> str:
     '''
     This function will run as soon as a user accepts the invite request/after a workspace has been created.
     It will get all the files for the user using delta, to ensure a delta link is returned
@@ -106,7 +116,18 @@ def get_all_files(access_token: str, db) -> str:
             headers=headers
         )
 
-    # Final data fetch from graph
+    # FINAL DATA FETCH FROM GRAPH API
+    # Get the delta link for the user
+    try:
+        print(res["@odata.deltaLink"])
+        # auth_service.update_delta_link(id=id, delta_link=response.json())
+    except Exception as e:
+        return {
+            "status_code": 400,
+            "error": f"{type(e).__name__} - {e}"
+        }
+
+    # Final update for folder and file data before database write
     folder_data, file_data = get_values_data(folders=folder_data, files=file_data, values=response.json()["value"])
     
     # Insert into DB

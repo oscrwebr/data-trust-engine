@@ -107,3 +107,9 @@ def refresh_flow(db, client_refresh: str, current_time: datetime):
         "refresh_token": refresh_token
     }
     return return_dict
+
+def rotate_ms_refresh(id: int, refresh_token: str, db:Session):
+    repository.update_ms_refresh(id, refresh_token, db)
+
+def update_delta_link(id: int, delta_link: str, db:Session):
+    repository.update_delta_link(id, delta_link, db)
