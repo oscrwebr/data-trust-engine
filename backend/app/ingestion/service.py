@@ -1,6 +1,7 @@
 from msal import ConfidentialClientApplication
 import requests
 from datetime import datetime
+from sqlalchemy.orm import Session
 
 from ..core.security import decrypt_refresh, encrypt_refresh
 from ..core.config import SCOPES
@@ -8,13 +9,13 @@ from . import repository
 from ..authentication import service as auth_service
 
 
-INIT_GRAPH_GET = "https://graph.microsoft.com/v1.0/me/drive/root/delta?$select=id,name,lastModifiedDateTime,parentReference,file,folder,webUrl,shared"
+INIT_GRAPH_GET = "https://graph.microsoft.com/v1.0/me/drive/root/delta?$select=id,name,lastModifiedDateTime,parentReference,file,folder,webUrl,content.downloadUrl,shared"
+DOWNLOAD_URL_GET = "https://graph.microsoft.com/v1.0/me/drive/items/{graph_id}?select=content.downloadUrl"
 
 
-
-def get_user_access(application: ConfidentialClientApplication, user, db) -> str | None:
+def get_user_access(application: ConfidentialClientApplication, user_id, db:Session) -> str | None:
     # This is to get the access token for users - THAT ARE ALREADY LOGGED IN!
-    user_details = auth_service.check_get_by_id(user.user_id, db)
+    user_details = auth_service.check_get_by_id(user_id, db)
     access_token = None
     
     if user_details:
@@ -24,14 +25,14 @@ def get_user_access(application: ConfidentialClientApplication, user, db) -> str
             access_token = tokens["access_token"]
             # Rotate the refresh token in the DB
             enc_refresh = encrypt_refresh(tokens["refresh_token"])
-            auth_service.rotate_ms_refresh(user.user_id, enc_refresh, db)
+            auth_service.rotate_ms_refresh(user_id, enc_refresh, db)
 
         else:
             account = application.acquire_token_by_refresh_token(refresh_token=decrypt_refresh(user_details.refresh), scopes=SCOPES)
             access_token = account["access_token"]
             # Rotate the refresh token in the DB
             enc_refresh = encrypt_refresh(account["refresh_token"])
-            auth_service.rotate_ms_refresh(user.user_id, enc_refresh, db)
+            auth_service.rotate_ms_refresh(user_id, enc_refresh, db)
     else:
         return None
 
@@ -89,7 +90,7 @@ def get_values_data(folders: dict, files: dict, values: list[dict]):
 
     return folders, files
 
-def get_all_files(access_token: str, id: int, db) -> str:
+def get_all_files(access_token: str, id: int, db:Session) -> str:
     '''
     This function will run as soon as a user accepts the invite request/after a workspace has been created.
     It will get all the files for the user using delta, to ensure a delta link is returned
@@ -109,7 +110,7 @@ def get_all_files(access_token: str, id: int, db) -> str:
 
     folder_data, file_data = {}, {}
     while "@odata.nextLink" in (res := response.json()):
-        folder_data, file_data = get_values_data(folders=folder_data, files=file_data, values=response.json()["value"])
+        folder_data, file_data = get_values_data(folders=folder_data, files=file_data, values=res["value"])
         
         response = requests.get(
             url = res["@odata.nextLink"],
@@ -119,8 +120,8 @@ def get_all_files(access_token: str, id: int, db) -> str:
     # FINAL DATA FETCH FROM GRAPH API
     # Get the delta link for the user
     try:
-        print(res["@odata.deltaLink"])
-        # auth_service.update_delta_link(id=id, delta_link=response.json())
+        delta_link = res["@odata.deltaLink"]
+        auth_service.update_delta_link(id=id, delta_link=delta_link, db=db)
     except Exception as e:
         return {
             "status_code": 400,
@@ -128,11 +129,20 @@ def get_all_files(access_token: str, id: int, db) -> str:
         }
 
     # Final update for folder and file data before database write
-    folder_data, file_data = get_values_data(folders=folder_data, files=file_data, values=response.json()["value"])
+    folder_data, file_data = get_values_data(folders=folder_data, files=file_data, values=res["value"])
     
     # Insert into DB
     folder_file_response = repository.create_folders_files(folders=folder_data, files=file_data, db=db)
     
     return folder_file_response
 
-
+def get_download_link_by_graph_id(graph_id: str, access_token: str):
+    headers = {"Authorization": f"Bearer {access_token}"}
+    response = requests.get(
+        url=DOWNLOAD_URL_GET.format(graph_id=graph_id),
+        headers=headers
+    )
+    if response.status_code == 200:
+        return response.json()["@microsoft.graph.downloadUrl"]
+    else:
+        return None
