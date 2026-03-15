@@ -100,7 +100,8 @@ function ScanCard({ scan }) {
                     <span className="scan-card-id-heading">Files with Issues</span>
                     <span className="scan-card-value scan-card-issue-files">
                         {/* Hardcoded for now */}
-                        2
+                        <span>2</span>
+                        <PiWarningCircle/>
                     </span>
                 </div>
             </div>
