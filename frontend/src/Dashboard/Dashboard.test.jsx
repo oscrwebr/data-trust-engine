@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import Dashboard from "./Dashboard.jsx";
@@ -15,6 +15,7 @@ vi.mock("../api/axiosConfig.js", () => ({
 }));
 
 import api from "../api/axiosConfig.js";
+import EmployeeInviteError from "../invites/error.jsx";
 describe("Dashboard Component", () => {
     afterEach(() => {
         vi.clearAllMocks();

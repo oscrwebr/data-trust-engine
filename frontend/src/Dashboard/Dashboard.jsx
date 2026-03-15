@@ -85,9 +85,9 @@ function Dashboard({toast}) {
     <div>
         <div className={styles.header}>
           <h1>Dashboard</h1>
-          <Button id={styles.bell_btn} onClick={handleNotifications} text 
+          <Button data-testid="notification-button" id={styles.bell_btn} onClick={handleNotifications} text 
             style={{marginRight: 50, background: "transparent", border: "none", boxShadow: "none", outline: "none"}}
-          ><i className="pi pi-bell p-overlay-badge" style={{ fontSize: 21}}>{notificationCount > 0 && <Badge value={displayValue} severity="danger" />}</i></Button>
+          ><i data-testid="badge" className="pi pi-bell p-overlay-badge" style={{ fontSize: 21}}>{notificationCount > 0 && <Badge value={displayValue} severity="danger" />}</i></Button>
         </div>
         <Button onClick={() => setVisible(true)}>Invite Employee</Button>
         <Invite visible={visible} setVisible={setVisible} toast={toast}/>

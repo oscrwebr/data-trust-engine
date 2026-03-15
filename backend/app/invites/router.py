@@ -34,14 +34,14 @@ async def send_invite(db: Annotated[Session, Depends(get_database)], current_use
         expiry = expiry.format("Do MMMM YYYY")
 
         #Send invite
-        await send_invite_service(db, invite.email, "2023-03-03", token, workspace, user)
+        await send_invite_service(db, invite.email, expiry, token, workspace, user)
 
         # Record invite and new user in database (if user doesn't already exist)
         user = user_repository.get_pending_user_by_email(db, invite.email)
         if not user:
             user = user_repository.add_user(db, invite.email)
         
-        invite_repository.add_invite(db, time_now, "2023-03-03", token, False, user.user_id, workspace)
+        invite_repository.add_invite(db, time_now, invite.expiry_date.date(), token, False, user.user_id, workspace)
 
     return {"success": result}
 

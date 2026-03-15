@@ -449,4 +449,59 @@ describe("Invite Component", () => {
         
         expect(mockNavigate).toHaveBeenCalledWith("/dashboard");
     })
+
+    // Test 13
+    test("Test request to join workspace button functions correctly", async () => {
+        api.post.mockResolvedValueOnce({
+            data: { success: true }
+        });
+
+        const title = "New Invite Request";
+        const body = "An employee has requested join your workspace. You can review this request in Manage Employees.";
+
+        let toastCalled = null;
+        const mockToast = {
+            current: {
+            show: (args) => {
+                toastCalled = args;
+                console.log("Toast triggered:", args);
+            },
+            },
+        };
+
+        render(
+            <MemoryRouter initialEntries={["/invite-error/expired?date=2026-03-03&workspace=1"]}>
+                <Routes>
+                    <Route path="/invite-error/:type" element={<EmployeeInviteError toast={mockToast}/>} />
+                </Routes>
+            </MemoryRouter>
+        )
+
+        const request_button = screen.getByRole("button", { name: /Request to join workspace/i });
+        fireEvent.click(request_button);
+
+        expect(request_button).toBeDisabled();
+
+        await waitFor(() => {
+            expect(api.post).toHaveBeenCalledWith("/workspace/request-join-workspace",
+                {
+                    title: title,
+                    body: body,
+                    workspace_id: "1",
+                }
+            );
+        });
+
+        await waitFor(() => {
+            if (!toastCalled) {
+                throw new Error("Toast was not triggered");
+            }
+            
+            if (
+                !toastCalled.detail.includes("Invite request sent!")
+            ) {
+                throw new Error("Toast called with wrong arguments");
+            }
+        })
+    })
 })
