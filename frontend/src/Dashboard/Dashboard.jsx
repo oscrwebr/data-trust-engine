@@ -47,16 +47,16 @@ function Dashboard({toast}) {
     if (!isNotificationsVisible) {
       notifications.forEach(notification => {
       toastNotifications.current.show({
+        id: notification.id,
         severity: 'info', 
         sticky: true, 
-        closable: false,
+        closable: true,
         content: (props) => (
           <Notification 
             key={notification.id}
             title={notification.title}
             body={notification.body}
             date={notification.datetime}
-            removeNotification={() => handleRemove(notification.id)}
           />
         ),
       });
@@ -69,12 +69,12 @@ function Dashboard({toast}) {
   const handleRemove = async (id) => {
     console.log(id)
     try {
-      toastNotifications.current.clear({ id: id });
       await api.post("/workspace/delete-notification", {
         notification_id: id, 
-      }).then(res => {
-        setNotifications(res.data)
       })
+      
+      setNotifications((prev) => prev.filter(n => n.id !== id));
+
     } catch (error){
       console.log(error)
     }
@@ -90,7 +90,7 @@ function Dashboard({toast}) {
         </div>
         <Button onClick={() => setVisible(true)}>Invite Employee</Button>
         <Invite visible={visible} setVisible={setVisible} toast={toast}/>
-        <Toast className={styles.d_toast} ref={toastNotifications} position="top-right" />
+        <Toast className={styles.d_toast} ref={toastNotifications} onRemove={(message) => handleRemove(message.id)} position="top-right" />
     </div>
   );
 }
