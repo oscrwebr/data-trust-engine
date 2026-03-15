@@ -22,7 +22,7 @@ function Home({toast}) {
   }, [toastParam]);
 
   function handleCreateWorkspace(){
-    window.location.href = "http://localhost:8000/auth/sign-in?next=/create-workspace&signup=true"
+    window.location.href = "http://localhost:8000/auth/sign-in?next=/create-workspace&signup=true&role=1"
   }
 
   function handleSignIn(){

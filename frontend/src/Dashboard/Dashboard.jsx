@@ -5,7 +5,6 @@ import api from "../api/axiosConfig.js";
 import styles from "./dashboard.module.css"
 import { Badge } from "primereact/badge"
 import { Toast } from "primereact/toast"
-import { ScrollPanel } from "primereact/scrollpanel"
 import Notification from "../components/notifications/Notification.jsx";
 
 function Dashboard({toast}) {
@@ -44,25 +43,40 @@ function Dashboard({toast}) {
   }, []);
 
   function handleNotifications(){
-
     setIsNotificationsVisible((prev) => !prev);
     if (!isNotificationsVisible) {
       notifications.forEach(notification => {
       toastNotifications.current.show({
         severity: 'info', 
         sticky: true, 
+        closable: false,
         content: (props) => (
           <Notification 
             key={notification.id}
             title={notification.title}
             body={notification.body}
             date={notification.datetime}
+            removeNotification={() => handleRemove(notification.id)}
           />
-        )
+        ),
       });
     });
     } else {
       toastNotifications.current.clear();
+    }
+  }
+
+  const handleRemove = async (id) => {
+    console.log(id)
+    try {
+      toastNotifications.current.clear({ id: id });
+      await api.post("/workspace/delete-notification", {
+        notification_id: id, 
+      }).then(res => {
+        setNotifications(res.data)
+      })
+    } catch (error){
+      console.log(error)
     }
   }
 
@@ -72,11 +86,11 @@ function Dashboard({toast}) {
           <h1>Dashboard</h1>
           <Button id={styles.bell_btn} onClick={handleNotifications} text 
             style={{marginRight: 50, background: "transparent", border: "none", boxShadow: "none", outline: "none"}}
-          ><i className="pi pi-bell p-overlay-badge" style={{ fontSize: 21}}><Badge value={displayValue} severity="danger"></Badge></i></Button>
+          ><i className="pi pi-bell p-overlay-badge" style={{ fontSize: 21}}>{notificationCount > 0 && <Badge value={displayValue} severity="danger" />}</i></Button>
         </div>
         <Button onClick={() => setVisible(true)}>Invite Employee</Button>
         <Invite visible={visible} setVisible={setVisible} toast={toast}/>
-        <Toast className={styles.d_toast} ref={toastNotifications} position="top-right" onRemove={() => toastRef.current.clear()} />
+        <Toast className={styles.d_toast} ref={toastNotifications} position="top-right" />
     </div>
   );
 }

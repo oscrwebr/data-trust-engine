@@ -7,3 +7,22 @@
     text-align: right;
     margin-top: 5px;
 }
+
+.n_header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.n_dismiss {
+  background: transparent !important; 
+  border: none !important;            
+  padding: 0 !important;             
+  box-shadow: none !important;  
+  outline: none !important;      
+  color: inherit !important;           
+  cursor: pointer; 
+  font-size: 13px;
+  margin-bottom: 15px;
+  text-decoration: underline;
+}

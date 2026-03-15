@@ -28,10 +28,10 @@ function EmployeeInviteError({toast}){
             setErrorDesc(<>This invite that your supervisor sent you has already been used. To access your workspace, please ask your supervisor to send a new invite link.</>);
         }
 
-        const storedState = localStorage.getItem('buttonDisabled');
-        if (storedState === 'true') {
-            setIsDisabled(true); 
-        }
+        // const storedState = localStorage.getItem('buttonDisabled');
+        // if (storedState === 'true') {
+        //     setIsDisabled(true); 
+        // }
     }, []);
 
     const showRequestSentSuccess = () => {
@@ -39,7 +39,7 @@ function EmployeeInviteError({toast}){
     };
 
     const handleRequestJoinWorkspace = async () => {
-        setIsDisabled(true);
+        //setIsDisabled(true);
         localStorage.setItem('buttonDisabled', 'true'); 
         try {
             await api.post("/workspace/request-join-workspace", {

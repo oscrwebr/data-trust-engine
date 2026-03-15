@@ -67,7 +67,7 @@ async def process_invite(token: str = Query(...), db: Session = Depends(get_data
         return RedirectResponse(f"http://localhost:5173/invite-error/expired?date={expiry}&workspace={workspace_id}")
     
     next_url = "/?toast=signup"
-    redirect_url = f"http://localhost:8000/auth/sign-in?next={quote(next_url)}&signup=true"
+    redirect_url = f"http://localhost:8000/auth/sign-in?next={quote(next_url)}&signup=true&role=2"
 
     return RedirectResponse(redirect_url, status_code=302)
 

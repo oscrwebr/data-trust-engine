@@ -1,7 +1,7 @@
 import { Button } from "primereact/button";
 import styles from "../notifications/notifications.module.css"
 
-function Notification({id, title, body, date}) {
+function Notification({title, body, date, removeNotification}) {
     const dateObj = new Date(date);
     const formattedDate = dateObj.toLocaleDateString('en-GB');
     const formattedTime = dateObj.toLocaleTimeString('en-GB', {
@@ -12,8 +12,9 @@ function Notification({id, title, body, date}) {
 
     return (
         <div className="flex flex-column align-items-left" style={{ flex: '1' }}>
-            <div className="flex align-items-center gap-2">
+            <div className={styles.n_header}>
                 <strong>{title}</strong>
+                <Button className={styles.n_dismiss} onClick={removeNotification}>Dismiss</Button>
             </div>
             <div className={styles.n_text}>{body}</div>
             <div className={styles.n_date}>{formattedDate} at {formattedTime}</div>
