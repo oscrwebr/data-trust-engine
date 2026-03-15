@@ -24,7 +24,7 @@ vi.mock("react-router-dom", async () => {
 });
 
 import api from "../api/axiosConfig.js";
-describe("Invite Component", () => {
+describe("Home Component", () => {
     afterEach(() => {
         vi.clearAllMocks();
         cleanup();
@@ -62,7 +62,7 @@ describe("Invite Component", () => {
         fireEvent.click(button);
         
         expect(window.location.href).toBe(
-            "http://localhost:8000/auth/sign-in?next=/create-workspace&signup=true"
+            "http://localhost:8000/auth/sign-in?next=/create-workspace&signup=true&role=1"
         );
         window.location = originalLocation
 

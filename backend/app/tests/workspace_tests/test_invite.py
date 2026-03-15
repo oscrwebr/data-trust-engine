@@ -156,7 +156,7 @@ def test_expired_invite_record(db, client):
     add_invite(db, datetime.now(), date(2025, 3, 3), token, False, pending_user_instance.inserted_primary_key[0], workspace)
     response = client.get("/invite/invite-processing", params={"token": token}, follow_redirects=False)
 
-    assert response.headers["location"] == "http://localhost:5173/invite-error/expired?date=2025-03-03"
+    assert response.headers["location"] == f"http://localhost:5173/invite-error/expired?date=2025-03-03&workspace={workspace.id}"
     assert db.query(PendingUser).count() == 1
     assert db.query(Invite).count() == 1
 
@@ -167,13 +167,14 @@ def test_invite_clicked_when_not_in_database(client):
     response = client.get("/invite/invite-processing", params={"token": token}, follow_redirects=False)
     assert response.headers["location"] == "http://localhost:5173/workspace-joined"
 
+
 # Test if invite is clicked when the invite used is true
 def test_invite_clicked_when_used_is_true(db, client):
     image = create_test_image()
     token = str(secrets.token_hex(16))
 
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    admin = insert(User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid)
+    admin = insert(User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="admin")
     admin_instance=db.execute(admin)
 
     pending_user = insert(PendingUser).values(email="JohnSmith1@hotmail.com")
@@ -191,7 +192,7 @@ def test_valid_invite(db, client):
     token = str(secrets.token_hex(16))
     
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    admin = insert(User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="employee")
+    admin = insert(User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="admin")
     admin_instance=db.execute(admin)
 
     pending_user = insert(PendingUser).values(email="JohnSmith1@hotmail.com")
@@ -202,7 +203,7 @@ def test_valid_invite(db, client):
 
     response = client.get("/invite/invite-processing", params={"token": token}, follow_redirects=False)
     next_url = "/?toast=signup"
-    redirect_url = f"http://localhost:8000/auth/sign-in?next={quote(next_url)}&signup=true"
+    redirect_url = f"http://localhost:8000/auth/sign-in?next={quote(next_url)}&signup=true&role=2"
     assert response.headers["location"] == redirect_url
     assert response.status_code == 302
     assert db.query(PendingUser).count() == 1
@@ -226,7 +227,7 @@ def test_method_get_invite_for_cooldown(db):
     latest_time = time + timedelta(days=3)
 
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    admin = insert(User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="employee")
+    admin = insert(User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="admin")
     admin_instance=db.execute(admin)
 
     pending_user_instance = PendingUser(email="JohnSmith1@hotmail.com")
@@ -287,7 +288,7 @@ def test_return_statement_with_same_email_as_admin(db, client):
     image = create_test_image()
 
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    insert_statement = insert(User).values(firstname="John", surname="Smith", email="valid@example.com", oid=oid)
+    insert_statement = insert(User).values(firstname="John", surname="Smith", email="valid@example.com", oid=oid, role="admin")
     res=db.execute(insert_statement)
 
     workspace = insert(models.Workspace).values(name="Test Workspace", image=image, user_id=res.inserted_primary_key[0])
@@ -295,7 +296,7 @@ def test_return_statement_with_same_email_as_admin(db, client):
 
     refresh_family = repository.create_refresh_family(db)
 
-    access, refresh, _ = service.create_access_refresh(db, data={"userId": res.inserted_primary_key[0]}, refresh_family_id=refresh_family.refresh_family_id)
+    access, refresh, _ = service.create_access_refresh(db, data={"userId": res.inserted_primary_key[0], "role": "admin"}, refresh_family_id=refresh_family.refresh_family_id)
 
     req = client.build_request(
         method="post",
