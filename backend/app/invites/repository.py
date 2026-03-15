@@ -27,3 +27,13 @@ def get_invite_for_cooldown(db: Session, workspace: Workspace, user: PendingUser
         .order_by(desc(Invite.created_at))
         .first() 
     )
+
+def get_invite_by_workspace_id(db: Session, workspace_id: int):
+    invite = db.query(Invite).filter(Invite.workspace_id == workspace_id).first()
+    return invite
+
+def update_invite_used_value(db: Session, invite_id: int):
+    invite = db.query(Invite).filter(Invite.invite_id == invite_id).first()
+    invite.used = True
+    db.commit()
+    return invite

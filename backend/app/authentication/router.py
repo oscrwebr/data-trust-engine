@@ -30,7 +30,7 @@ roles_dict = {
 }
 
 @router.get("/sign-in")
-async def sign_in(application: Annotated[ConfidentialClientApplication, Depends(application)], request: Request, next: str, signup: bool | None=None, role: int | None=None):
+async def sign_in(application: Annotated[ConfidentialClientApplication, Depends(application)], request: Request, next: str, signup: bool | None=None, role: int | None=None, workspace_id: int | None=None):
     # Protect against url manipulation!
     if not next.startswith("/"):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
@@ -46,6 +46,7 @@ async def sign_in(application: Annotated[ConfidentialClientApplication, Depends(
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
         request.session["role"] = roles_dict[role]
         request.session["signup"] = signup
+        request.session["workspace_id"] = workspace_id
         print("It has been added!")
     elif signup and not role:
         print("Need both!")
@@ -74,8 +75,11 @@ async def login_redirect(application: Annotated[ConfidentialClientApplication, D
     # getting the role from the session
     role = request.session["role"] if "role" in request.session else None
 
+    # getting the role from the session
+    workspace_id = request.session["workspace_id"] if "workspace_id" in request.session else None
+
     # Either create user or check if the user exists
-    user = service.create_user(db=db, details=result["id_token_claims"], role=role) if "signup" in request.session else service.check_exists(result['id_token_claims']['oid'], db)
+    user = service.create_user(db=db, details=result["id_token_claims"], role=role, workspace_id=workspace_id) if "signup" in request.session else service.check_exists(result['id_token_claims']['oid'], db)
     request.session.clear()
     response.delete_cookie("session") # This is to remove the cookie from the user's browser
 

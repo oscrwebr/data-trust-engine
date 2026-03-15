@@ -2,8 +2,10 @@ from sqlalchemy.orm import Session
 from app.authentication import repository
 from ..core.security import create_refresh_token, create_access_token, hash_user_refresh_token
 from datetime import datetime, timezone, timedelta
+from app.workspaces.repository import add_notification, get_workspace_by_workspace_id
+from app.invites.repository import get_invite_by_workspace_id, update_invite_used_value
 
-def create_user(db, details: dict, role: str):
+def create_user(db, details: dict, role: str, workspace_id: int):
     split_name = details["name"].split()
     firstname, surname = split_name[0], split_name[-1]
 
@@ -15,7 +17,13 @@ def create_user(db, details: dict, role: str):
         oid=details["oid"],
         role=role
     )
-    print(user)
+    
+    if(workspace_id != None):
+        invite = get_invite_by_workspace_id(db, workspace_id)
+        update_invite_used_value(db, invite.invite_id)
+        workspace = get_workspace_by_workspace_id(db, workspace_id)
+        add_notification(db, "Employee Accepted Invite", f"{firstname} {surname} accepted their invite request to join your workspace.", datetime.now(), workspace.user_id)
+
     return user
 
 def check_exists(oid: str, db):
