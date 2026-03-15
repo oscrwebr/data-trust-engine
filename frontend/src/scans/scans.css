@@ -167,3 +167,8 @@
 .scan-card-divider {
     margin: 8px 0;
 }
+
+.scan-loading {
+    color: #6B7280;
+    font-size: 18px;
+}

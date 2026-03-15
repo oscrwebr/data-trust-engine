@@ -10,7 +10,8 @@ import "./scans.css";
 
 function Scans(){
 
-
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState(null)
     const [scans, setScans] = useState([]);
 
     // Get scans with file count from endpoint
@@ -19,10 +20,13 @@ function Scans(){
 
         .then(response => {
             setScans(response.data);
+            setLoading(false);
         })
 
         .catch(error => {
         console.error("Error fetching scans:", error);
+        setError(error);
+        setLoading(false);
         });
 
     }, []);
@@ -36,9 +40,19 @@ function Scans(){
             </div>
             
             <div className="scan-grid">
-                {scans.map(scan => (
-                    <ScanCard key={scan.scan_id} scan={scan}/>
-                ))}
+                {/* Validation checks and message displays for loading/errors before finally loading the scans */}
+                {loading ? (
+                    <p className="scan-loading">Loading scans...</p>
+                ) : error ? (
+                    <p className="scan-loading">Error loading scans.</p>
+                ) : scans.length === 0 ? (
+                    <p className="scan-loading">No scans found.</p>
+                ) : (
+                    // Map scans to a ScanCard component
+                    scans.map(scan => (
+                        <ScanCard key={scan.scan_id} scan={scan}/>
+                    ))
+                )}
             </div>
         </div>
     );

@@ -10,7 +10,10 @@ import { PiWarningCircle } from "react-icons/pi";
 
 function ScanCard({ scan }) {
 
-
+    // Extra layer of validation
+    if (!scan) {
+        return null;
+    }
     // Format date into dd/mm/yyyy, hh:mm:ss
         const formatDateTime = (dateTimeString) => {
             // For ongoing scans... Display "-" as the Finished At time
