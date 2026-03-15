@@ -30,14 +30,15 @@ function Dashboard({toast}) {
       .then(res => {
           console.log(res)
           if (res.data.user) {
-              setUser(res.data.user);
+            setUser(res.data.user);
           }
       })
       .catch(error => console.log(error))
 
       api.get("/workspace/get-notifications")
       .then(res => {
-          setNotifications(res.data)
+        console.log(res)
+        setNotifications(res.data)
       })
       .catch(error => console.log(error))
   }, []);

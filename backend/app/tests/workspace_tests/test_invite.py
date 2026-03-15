@@ -5,7 +5,7 @@ from app.authentication.repository import delete_pending_user, get_pending_user_
 from app.authentication.models import PendingUser, User
 from app.authentication import repository, service
 from app.workspaces import models
-from app.workspaces.repository import add_workspace
+from app.workspaces.repository import add_workspace, add_notification
 from datetime import datetime, date, timedelta
 from sqlalchemy import insert
 from urllib.parse import quote
@@ -309,6 +309,115 @@ def test_return_statement_with_same_email_as_admin(db, client):
     assert response.json().get("success") == "admin"
     assert db.query(Invite).count() == 0
     assert db.query(PendingUser).count() == 0
+
+
+# Testing the create notification route
+def test_create_notification_route(db, client):
+    image = create_test_image()
+
+    oid = "000000-7sdf77-88asdf8-9sdiy99"
+    insert_statement = insert(User).values(firstname="John", surname="Smith", email="valid@example.com", oid=oid, role="admin")
+    res=db.execute(insert_statement)
+    
+    workspace = insert(models.Workspace).values(name="Test Workspace", image=image, user_id=res.inserted_primary_key[0])
+    workspace_instance = db.execute(workspace)
+
+    refresh_family = repository.create_refresh_family(db)
+
+    access, refresh, _ = service.create_access_refresh(db, data={"userId": res.inserted_primary_key[0], "role": "admin"}, refresh_family_id=refresh_family.refresh_family_id)
+
+    req = client.build_request(
+        method="post",
+        url="/workspace/request-join-workspace",
+        headers={"Authorization": f"Bearer {access}"}, 
+        json={"title":"Test title", "body":"Test body", "workspace_id":workspace_instance.inserted_primary_key[0]},
+    )
+    response = client.send(request = req)
+
+    assert response.status_code == 200
+    assert response.json() == True
+    assert db.query(models.Notification).count() == 1
+
+
+# Testing the route to get all notifications for a user
+def test_get_all_notifications_route(db, client):
+    image = create_test_image()
+
+    oid = "000000-7sdf77-88asdf8-9sdiy99"
+    insert_statement = insert(User).values(firstname="John", surname="Smith", email="valid@example.com", oid=oid, role="admin")
+    res=db.execute(insert_statement)
+    
+    workspace = insert(models.Workspace).values(name="Test Workspace", image=image, user_id=res.inserted_primary_key[0])
+    workspace_instance = db.execute(workspace)
+
+    refresh_family = repository.create_refresh_family(db)
+
+    access, refresh, _ = service.create_access_refresh(db, data={"userId": res.inserted_primary_key[0], "role": "admin"}, refresh_family_id=refresh_family.refresh_family_id)
+
+    # Notifications
+    n_1 = add_notification(db, "title", "body", datetime.now(), res.inserted_primary_key[0])
+    n_2 = add_notification(db, "title", "body", datetime.now(), res.inserted_primary_key[0])
+    n_3 = add_notification(db, "title", "body", datetime.now(), res.inserted_primary_key[0])
+
+    req = client.build_request(
+        method="get",
+        url="/workspace/get-notifications",
+        headers={"Authorization": f"Bearer {access}"}, 
+    )
+
+    expected_notifications = [
+    {
+        "title": n.title,
+        "body": n.body,
+        "datetime": n.datetime.isoformat(),
+        "id": n.id,
+        "user_id": n.user_id,
+    }
+    for n in [n_1, n_2, n_3]
+    ]
+
+    response = client.send(request = req)
+    data = response.json()
+    assert db.query(models.Notification).count() == 3
+    assert data == expected_notifications
+
+
+# Testing deleting a user's notification 
+def test_delete_notification_route(db, client):
+
+    oid = "000000-7sdf77-88asdf8-9sdiy99"
+    insert_statement = insert(User).values(firstname="John", surname="Smith", email="valid@example.com", oid=oid, role="admin")
+    res=db.execute(insert_statement)
+
+    refresh_family = repository.create_refresh_family(db)
+
+    access, refresh, _ = service.create_access_refresh(db, data={"userId": res.inserted_primary_key[0], "role": "admin"}, refresh_family_id=refresh_family.refresh_family_id)
+
+    # Notifications
+    n_1 = add_notification(db, "title", "body", datetime.now(), res.inserted_primary_key[0])
+    n_2 = add_notification(db, "title", "body", datetime.now(), res.inserted_primary_key[0])
+    n_3 = add_notification(db, "title", "body", datetime.now(), res.inserted_primary_key[0])
+
+    response = client.post(
+        "/workspace/delete-notification",
+        headers={"Authorization": f"Bearer {access}"},
+        json={"notification_id": n_1.id}
+    )
+
+    expected_notifications = [
+    {
+        "title": n.title,
+        "body": n.body,
+        "datetime": n.datetime.isoformat(),
+        "id": n.id,
+        "user_id": n.user_id,
+    }
+    for n in [n_2, n_3]
+    ]
+
+    assert db.query(models.Notification).count() == 2
+    assert response.json() == expected_notifications
+
 
 
 
