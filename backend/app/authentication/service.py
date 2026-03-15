@@ -18,11 +18,12 @@ def create_user(db, details: dict, role: str, workspace_id: int):
         role=role
     )
     
-    if(workspace_id != None):
+    if(workspace_id != None and role == "employee"):
         invite = get_invite_by_workspace_id(db, workspace_id)
-        update_invite_used_value(db, invite.invite_id)
-        workspace = get_workspace_by_workspace_id(db, workspace_id)
-        add_notification(db, "Employee Accepted Invite", f"{firstname} {surname} accepted their invite request to join your workspace.", datetime.now(), workspace.user_id)
+        if invite:
+            update_invite_used_value(db, invite.invite_id)
+            workspace = get_workspace_by_workspace_id(db, workspace_id)
+            add_notification(db, "Employee Accepted Invite", f"{firstname} {surname} accepted their invite request to join your workspace.", datetime.now(), workspace.user_id)
 
     return user
 

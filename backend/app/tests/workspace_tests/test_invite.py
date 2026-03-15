@@ -1,6 +1,6 @@
 import secrets
 from app.invites.models import Invite
-from app.invites.repository import add_invite, get_invite, get_invite_for_cooldown
+from app.invites.repository import add_invite, get_invite, get_invite_for_cooldown, get_invite_by_workspace_id, update_invite_used_value
 from app.authentication.repository import delete_pending_user, get_pending_user_by_id
 from app.authentication.models import PendingUser, User
 from app.authentication import repository, service
@@ -417,6 +417,49 @@ def test_delete_notification_route(db, client):
 
     assert db.query(models.Notification).count() == 2
     assert response.json() == expected_notifications
+
+
+# Get invite by workspace id
+def test_get_invite_by_workspace_id(db):
+    image = create_test_image()
+    token = str(secrets.token_hex(16))
+    time = datetime.now().replace(microsecond=0)
+
+    oid = "000000-7sdf77-88asdf8-9sdiy99"
+    insert_statement = insert(User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="employee")
+    res=db.execute(insert_statement)
+
+    workspace = add_workspace(db, "Test Workspace", image=image, user_id=res.inserted_primary_key[0])
+    
+    pending_user = insert(PendingUser).values(email="JohnSmith1@hotmail.com")
+    pending_user_instance=db.execute(pending_user)
+
+    add_invite(db, time, date(2030, 3, 3), token, False, pending_user_instance.inserted_primary_key[0], workspace)
+    invite = get_invite_by_workspace_id(db, workspace.id)
+
+    assert invite is not None
+
+
+# Update invite used value
+def test_update_invite_used_value(db):
+    image = create_test_image()
+    token = str(secrets.token_hex(16))
+    time = datetime.now().replace(microsecond=0)
+
+    oid = "000000-7sdf77-88asdf8-9sdiy99"
+    insert_statement = insert(User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="employee")
+    res=db.execute(insert_statement)
+
+    workspace = add_workspace(db, "Test Workspace", image=image, user_id=res.inserted_primary_key[0])
+
+    pending_user = insert(PendingUser).values(email="JohnSmith1@hotmail.com")
+    pending_user_instance=db.execute(pending_user)
+
+    invite = add_invite(db, time, date(2030, 3, 3), token, False, pending_user_instance.inserted_primary_key[0], workspace)
+    update_invite_used_value(db, invite.invite_id)
+
+    assert invite.used == True
+
 
 
 
