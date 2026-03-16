@@ -11,6 +11,8 @@ from ..authentication import service as auth_service
 
 INIT_GRAPH_GET = "https://graph.microsoft.com/v1.0/me/drive/root/delta?$select=id,name,lastModifiedDateTime,parentReference,file,folder,webUrl,content.downloadUrl,shared"
 DOWNLOAD_URL_GET = "https://graph.microsoft.com/v1.0/me/drive/items/{graph_id}?select=content.downloadUrl"
+GET_PERMISSIONS = "me/drive/items/{graph_id}/permissions"
+GRAHP_BATCH_URL = "https://graph.microsoft.com/v1.0/$batch"
 
 
 def get_user_access(application: ConfidentialClientApplication, user_id, db:Session) -> str | None:
@@ -38,13 +40,13 @@ def get_user_access(application: ConfidentialClientApplication, user_id, db:Sess
 
     return access_token
 
-
-def get_values_data(folders: dict, files: dict, values: list[dict]):
+def get_values_data(folders: dict, files: dict, shared_folder_files: dict, values: list[dict]):
     '''
-    Function that will take in two dictionaries that containing retrieved data for both folders and files as well as a list of dictionaries returned by the json response from Graph API.
-    It will then return two dictionaries 'folders' and 'files'.
+    Function that will take in three dictionaries containing retrieved data for both folders and files, and a dictionary of shared folders and files. It will also take in a list of dictionaries returned by the json response from Graph API.
+    It will then return two dictionaries 'folders' and 'files' and a list of dictionaries 'shared_folder_files'.
     - 'folders' - Entries will consist of a key made from the graph_id and value that is an instance of the Folder class from the related schema
     - 'files' - Entries will consist of a key made from the graph_id and value that is an instance of the File class from the related schema
+    - 'shared_folder_files' - Entries will consist of a 'graph_id' and 'type' that will specify what file should be used in the permissions batch query and later what database table should be updated (user-file or user-folder)
     '''
 
     for item in values:
@@ -54,8 +56,13 @@ def get_values_data(folders: dict, files: dict, values: list[dict]):
                 parent_id = item["parentReference"]["id"]
             else:
                 parent_id = None # This is the root directory!
-
+            
             id = item["id"]
+
+            # Checking if the folder is shared
+            if "shared" in item:
+                shared_folder_files[id] = "folder"
+
             folders[id] = {
                 "graph_id": id,
                 "name": item["name"],
@@ -75,6 +82,10 @@ def get_values_data(folders: dict, files: dict, values: list[dict]):
             else:
                 item_hash = (None, None)
 
+            # Checking if the file is shared
+            if "shared" in item:
+                shared_folder_files[id] = "file"
+
             files[id] = {
                 "graph_id": id,
                 "name": item_name,
@@ -88,7 +99,51 @@ def get_values_data(folders: dict, files: dict, values: list[dict]):
         else:
             print("Something went terrible wrong in the 'get_values_data' function!")
 
-    return folders, files
+    return folders, files, shared_folder_files
+
+def get_permissions(shared_folders_files: dict, user_id: int, access_token: str, db:Session):
+    '''
+    Function that will accept a list of dictionaries, user_id and instance of a session from sqlalchemy.
+    It will create batches of 20 requests (upper limit) and make post requests to the graph '$batch' endpoint to get all the permissions for files. 
+    '''
+    headers = {"Authorization": f"Bearer {access_token}"}
+
+    # Get the user email to only check our database for emails that don't belong to the user whose access token is being used
+    user = auth_service.check_get_by_id(id=user_id, db=db) # Maybe this isn't necessary here?
+
+    # Create nested list consisting of 20 request bodies each
+    request_body_list = []
+    body_len = 0
+    batch_request = []
+    for graph_id in shared_folders_files.keys():
+        if body_len == 20:
+            request_body_list.append(batch_request)
+            batch_request = []
+        batch_request.append({
+            "id": graph_id,
+            "method": "GET",
+            "url": GET_PERMISSIONS.format(graph_id=graph_id)
+        })
+        body_len += 1
+    request_body_list.append(batch_request) if batch_request else None
+    
+    # print(request_body_list)
+    # print(batch_request)
+
+    # Iterate through the list of request_body_list and make post requests to the permsissions endpoint for each request_body
+    
+    for request_body in request_body_list:
+        response = requests.post(
+            url=GRAHP_BATCH_URL,
+            json={"requests": request_body},
+            headers=headers
+        )
+        print(response.json())
+        print(request_body)
+
+
+
+
 
 def get_all_files(access_token: str, id: int, db:Session) -> str:
     '''
@@ -108,9 +163,9 @@ def get_all_files(access_token: str, id: int, db:Session) -> str:
             "error": "no data!"
         }
 
-    folder_data, file_data = {}, {}
+    folder_data, file_data, shared_folders_files = {}, {}, {}
     while "@odata.nextLink" in (res := response.json()):
-        folder_data, file_data = get_values_data(folders=folder_data, files=file_data, values=res["value"])
+        folder_data, file_data, shared_folders_files = get_values_data(folders=folder_data, files=file_data, shared_folder_files=shared_folders_files, values=res["value"])
         
         response = requests.get(
             url = res["@odata.nextLink"],
@@ -129,11 +184,15 @@ def get_all_files(access_token: str, id: int, db:Session) -> str:
         }
 
     # Final update for folder and file data before database write
-    folder_data, file_data = get_values_data(folders=folder_data, files=file_data, values=res["value"])
+    folder_data, file_data, shared_folders_files = get_values_data(folders=folder_data, shared_folder_files=shared_folders_files, files=file_data, values=res["value"])
     
     # Insert into DB
     folder_file_response = repository.create_folders_files(folders=folder_data, files=file_data, db=db)
-    
+    # Insert into user-file and user-folder here for the current user_id - ensure that the above returns the id's of the files and folders created, so that an entry can be made for each in the next table!
+
+    # Get all the users that have access to the folders and files for this user
+    get_permissions(shared_folders_files=shared_folders_files, user_id=id, access_token=access_token, db=db)
+
     return folder_file_response
 
 def get_download_link_by_graph_id(graph_id: str, access_token: str):

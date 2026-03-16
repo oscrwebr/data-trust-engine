@@ -8,7 +8,7 @@ class User(Base):
     firstname = Column(String(50), nullable=False)
     surname = Column(String(50), nullable=False)
     username = Column(String(254), nullable=False)
-    email = Column(String(254), nullable=False)
+    email = Column(String(254), nullable=False, index=True)
     oid = Column(String(40), unique=True, index=True, nullable=False)
     refresh = Column(BLOB(), nullable=False)
     deltaLink = Column(Text(), nullable=True)
