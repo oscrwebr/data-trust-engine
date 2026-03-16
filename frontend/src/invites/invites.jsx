@@ -33,6 +33,10 @@ function Invite({ visible, setVisible, toast}) {
       toast.current.show({ severity: 'error', summary: 'Error', detail: 'You are sending this employee too many invites, please try again tomorrow.', life: 4000});
   };
 
+  const showAdminMessage = () => {
+      toast.current.show({ severity: 'error', summary: 'Error', detail: 'You cannot send an invite to yourself.', life: 4000});
+  };
+
   const today = new Date();
   const maxDay = new Date();
   maxDay.setMonth(maxDay.getMonth() + 1);
@@ -62,6 +66,9 @@ function Invite({ visible, setVisible, toast}) {
 
       } else if (res.data.success == "cooldown") {
         showCooldownMessage();
+
+      } else if (res.data.success == "admin") {
+        showAdminMessage();
         
       } else if (res.data.success == true) {
         showSuccessMessage();

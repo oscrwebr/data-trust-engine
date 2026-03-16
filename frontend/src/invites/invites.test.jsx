@@ -3,6 +3,7 @@ import { MemoryRouter, redirect, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import EmployeeInviteError from "./error.jsx";
 import Dashboard from "../dashboard/Dashboard.jsx";
+import WorkspaceJoinedError from "./WorkspaceJoined.jsx";
 import Home from "../home/home.jsx"
 
 vi.mock("primereact/calendar", () => ({
@@ -17,6 +18,15 @@ vi.mock("primereact/calendar", () => ({
 
 import EmployeeInvite from "./invites.jsx";
 
+const mockNavigate = vi.fn();
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual("react-router-dom");
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate
+  };
+});
+
 vi.mock("../api/axiosConfig.js", () => ({
   default: {
     get: vi.fn().mockResolvedValue({ data: [] }),
@@ -29,6 +39,7 @@ vi.mock("../api/axiosConfig.js", () => ({
 }));
 
 import api from "../api/axiosConfig.js";
+import Invite from "./invites.jsx";
 describe("Invite Component", () => {
     afterEach(() => {
         vi.clearAllMocks();
@@ -245,19 +256,19 @@ describe("Invite Component", () => {
     })
 
     // Test 7
-    test("Test correct information displayed when user redirected to invite used error page", async () => {
+    test("Test correct information displayed when user redirected to workspace already joined modal", async () => {
         render(
-            <MemoryRouter initialEntries={["/invite-error/used"]}>
+            <MemoryRouter initialEntries={["/workspace-joined"]}>
                 <Routes>
-                    <Route path="/invite-error/:type" element={<EmployeeInviteError />} />
+                    <Route path="/workspace-joined" element={<WorkspaceJoinedError />} />
                 </Routes>
             </MemoryRouter>
         )
-        expect(screen.getByText("This invite link is no longer valid")).toBeInTheDocument();
+        expect(screen.getByText("You've already joined a workspace")).toBeInTheDocument();
         expect(screen.getByText("Return to home")).toBeInTheDocument();
-        expect(screen.getByText("Request to join workspace")).toBeInTheDocument();
+        expect(screen.getByText("Go to my workspace")).toBeInTheDocument();
         expect(screen.getByText("The Data Trust Engine")).toBeInTheDocument();
-        expect(screen.getByText("This invite that your supervisor sent you has already been used. To access your workspace, please ask your supervisor to send a new invite link.")).toBeInTheDocument();
+        expect(screen.getByText("It looks like you’ve already joined this workspace. Click “Go to my workspace” to log in and access it. If this seems incorrect, contact your workspace administrator.")).toBeInTheDocument();
     })
 
 
@@ -275,9 +286,9 @@ describe("Invite Component", () => {
         };
 
         render(
-            <MemoryRouter initialEntries={["/invite-error/used"]}>
+            <MemoryRouter initialEntries={["/workspace-joined"]}>
                 <Routes>
-                    <Route path="/invite-error/:type" element={<EmployeeInviteError />} />
+                    <Route path="/workspace-joined" element={<WorkspaceJoinedError />} />
                     <Route path="/" element={<Home toast={mockToast}/>} />
                 </Routes>
             </MemoryRouter>
@@ -370,6 +381,124 @@ describe("Invite Component", () => {
             
             if (
                 !toastCalled.detail.includes("You are sending this employee too many invites, please try again tomorrow.")
+            ) {
+                throw new Error("Toast called with wrong arguments");
+            }
+        })
+    })
+
+    // Test 11
+    test("Test error message when an admin sends an invite to themselves", async () => {
+        api.post.mockResolvedValueOnce({
+            data: { success: "admin" }
+        });
+
+        let toastCalled = null;
+        const mockToast = {
+            current: {
+            show: (args) => {
+                toastCalled = args;
+                console.log("Toast triggered:", args);
+            },
+            },
+        };
+
+        render(
+            <MemoryRouter>
+                <Dashboard toast={mockToast}/>
+            </MemoryRouter>
+        );
+
+        const inviteButton = screen.getByRole("button", { name: /invite employee/i });
+        fireEvent.click(inviteButton);
+
+        const modal = screen.getByRole("dialog");
+
+        const emailInput = within(modal).getByPlaceholderText("Email address");
+        fireEvent.change(emailInput, { target: { value: "valid@example.com" } });
+
+        const calendarInput = within(modal).getByTestId("calendar-input");
+        fireEvent.change(calendarInput, { target: { value: "2030-04-01" } });
+
+        const submitButton = within(modal).getByRole("button", { name: /send invite/i });
+        fireEvent.click(submitButton);
+
+        await waitFor(() => {
+            if (!toastCalled) {
+                throw new Error("Toast was not triggered");
+            }
+            
+            if (
+                !toastCalled.detail.includes("You cannot send an invite to yourself.")
+            ) {
+                throw new Error("Toast called with wrong arguments");
+            }
+        })
+    })
+
+    // Test 12
+    test("Test that clicking go to my workspace button correctly navigates user to dashboard", async () => {
+        render(
+            <MemoryRouter>
+                <WorkspaceJoinedError />
+            </MemoryRouter>
+        );
+
+        const button = screen.getByText("Go to my workspace");
+        fireEvent.click(button);
+        
+        expect(mockNavigate).toHaveBeenCalledWith("/dashboard");
+    })
+
+    // Test 13
+    test("Test request to join workspace button functions correctly", async () => {
+        api.post.mockResolvedValueOnce({
+            data: { success: true }
+        });
+
+        const title = "New Invite Request";
+        const body = "An employee has requested join your workspace. You can review this request in Manage Employees.";
+
+        let toastCalled = null;
+        const mockToast = {
+            current: {
+            show: (args) => {
+                toastCalled = args;
+                console.log("Toast triggered:", args);
+            },
+            },
+        };
+
+        render(
+            <MemoryRouter initialEntries={["/invite-error/expired?date=2026-03-03&workspace=1"]}>
+                <Routes>
+                    <Route path="/invite-error/:type" element={<EmployeeInviteError toast={mockToast}/>} />
+                </Routes>
+            </MemoryRouter>
+        )
+
+        const request_button = screen.getByRole("button", { name: /Request to join workspace/i });
+        fireEvent.click(request_button);
+
+        expect(request_button).toBeDisabled();
+
+        await waitFor(() => {
+            expect(api.post).toHaveBeenCalledWith("/workspace/request-join-workspace",
+                {
+                    title: title,
+                    body: body,
+                    workspace_id: "1",
+                }
+            );
+        });
+
+        await waitFor(() => {
+            if (!toastCalled) {
+                throw new Error("Toast was not triggered");
+            }
+            
+            if (
+                !toastCalled.detail.includes("Invite request sent!")
             ) {
                 throw new Error("Toast called with wrong arguments");
             }

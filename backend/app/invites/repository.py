@@ -6,8 +6,8 @@ from sqlalchemy import desc
 
 from datetime import datetime, date
 
-def add_invite(db: Session, createdAt:datetime, expiryDate:date, user_id:int, token:str, workspace: Workspace):
-    invite = Invite(created_at=createdAt, expiry_date=expiryDate, user_id=user_id, token=token, workspace=workspace)
+def add_invite(db: Session, createdAt:datetime, expiryDate:date, token:str, used: str, user_id:int, workspace: Workspace):
+    invite = Invite(created_at=createdAt, expiry_date=expiryDate, token=token, used=used, user_id=user_id, workspace=workspace)
     db.add(invite)
     db.commit()
     db.refresh(invite)
@@ -27,3 +27,13 @@ def get_invite_for_cooldown(db: Session, workspace: Workspace, user: PendingUser
         .order_by(desc(Invite.created_at))
         .first() 
     )
+
+def get_invite_by_workspace_id(db: Session, workspace_id: int):
+    invite = db.query(Invite).filter(Invite.workspace_id == workspace_id).first()
+    return invite
+
+def update_invite_used_value(db: Session, invite_id: int):
+    invite = db.query(Invite).filter(Invite.invite_id == invite_id).first()
+    invite.used = True
+    db.commit()
+    return invite

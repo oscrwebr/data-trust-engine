@@ -58,6 +58,7 @@ describe("Workspace Component", () => {
         
     });
 
+
     // Test 2
     test("Test error message for null name", async () => {
 
@@ -85,6 +86,7 @@ describe("Workspace Component", () => {
         const errorMessage = await screen.findByText(/You must give your workspace a name\./i);
         expect(errorMessage).toBeInTheDocument();
     });
+
 
     // Test 3
     test("Test error message for null image", async () => {
@@ -117,6 +119,7 @@ describe("Workspace Component", () => {
         expect(errorMessage).toBeInTheDocument();
     });
 
+
     // Test 4
     test("Check file displays when an image file is added", async () => {
         render(<FileUploadWrapper />);
@@ -128,6 +131,7 @@ describe("Workspace Component", () => {
         const fileName = await screen.findByText("workspace.png");
             expect(fileName).toBeInTheDocument();
         });
+
 
     // Test 5
     test("Check file is removed when remove button is clicked from preview", async () => {
@@ -144,6 +148,7 @@ describe("Workspace Component", () => {
         expect(screen.queryByText("workspace.png")).not.toBeInTheDocument();
     });
 
+    
     // Test 6
     test("Test success message and redirect with all valid inputs", async () => {
 

@@ -1,8 +1,8 @@
-"""Created relationship between invites and workspaces
+"""Added the notifications table and linked it to users
 
-Revision ID: 7fbe6c71f162
+Revision ID: f5067e8d5ce5
 Revises: 
-Create Date: 2026-03-12 16:35:33.963096
+Create Date: 2026-03-14 23:20:21.130311
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision: str = '7fbe6c71f162'
+revision: str = 'f5067e8d5ce5'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -72,10 +72,21 @@ def upgrade() -> None:
     sa.Column('surname', sa.String(length=50), nullable=False),
     sa.Column('email', sa.String(length=254), nullable=False),
     sa.Column('oid', sa.String(length=40), nullable=False),
+    sa.Column('role', sa.String(length=11), nullable=False),
     sa.PrimaryKeyConstraint('user_id')
     )
     op.create_index(op.f('ix_user_oid'), 'user', ['oid'], unique=True)
     op.create_index(op.f('ix_user_user_id'), 'user', ['user_id'], unique=False)
+    op.create_table('notifications',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('title', sa.String(length=100), nullable=False),
+    sa.Column('body', sa.String(length=200), nullable=False),
+    sa.Column('datetime', sa.DATETIME(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['user_id'], ['user.user_id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_notifications_id'), 'notifications', ['id'], unique=False)
     op.create_table('refresh',
     sa.Column('refresh_id', sa.Integer(), nullable=False),
     sa.Column('token', sa.Text(), nullable=False),
@@ -130,9 +141,10 @@ def upgrade() -> None:
     op.create_index(op.f('ix_workspaces_id'), 'workspaces', ['id'], unique=False)
     op.create_table('invites',
     sa.Column('invite_id', sa.Integer(), nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=True),
-    sa.Column('expiry_date', sa.Date(), nullable=True),
-    sa.Column('token', sa.String(length=250), nullable=True),
+    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.Column('expiry_date', sa.Date(), nullable=False),
+    sa.Column('token', sa.String(length=250), nullable=False),
+    sa.Column('used', sa.Boolean(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('workspace_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['pending_users.user_id'], ondelete='CASCADE'),
@@ -196,6 +208,8 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_refresh_refresh_id'), table_name='refresh')
     op.drop_index(op.f('ix_refresh_refresh_family_id'), table_name='refresh')
     op.drop_table('refresh')
+    op.drop_index(op.f('ix_notifications_id'), table_name='notifications')
+    op.drop_table('notifications')
     op.drop_index(op.f('ix_user_user_id'), table_name='user')
     op.drop_index(op.f('ix_user_oid'), table_name='user')
     op.drop_table('user')

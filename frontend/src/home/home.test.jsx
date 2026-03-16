@@ -24,14 +24,14 @@ vi.mock("react-router-dom", async () => {
 });
 
 import api from "../api/axiosConfig.js";
-describe("Invite Component", () => {
+describe("Home Component", () => {
     afterEach(() => {
         vi.clearAllMocks();
         cleanup();
     });
 
     // Test 1
-    test("Test that signup button is on home screen and that when clicked, correct api request is called", async () => {
+    test("Test that signup button is on home screen and that when clicked, correct navigate is called", async () => {
         render(
             <MemoryRouter>
                 <Home/>
@@ -62,7 +62,7 @@ describe("Invite Component", () => {
         fireEvent.click(button);
         
         expect(window.location.href).toBe(
-            "http://localhost:8000/auth/sign-in?next=/create-workspace&signup=true"
+            "http://localhost:8000/auth/sign-in?next=/create-workspace&signup=true&role=1"
         );
         window.location = originalLocation
 
