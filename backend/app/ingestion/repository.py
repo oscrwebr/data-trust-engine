@@ -15,27 +15,5 @@ def create_folders_files(folders: dict, files: dict, db: Session) -> int:
     except Exception as e:
         status["description"] = f"An error ocurred: {type(e).__name__} - {e}"
         status["status"] = 403
-
-    # try:
-    #     db.add_all(folders)
-    #     db.commit()
-    # except Exception as e:
-    #     status["description"] = f"An error ocurred: {type(e).__name__} - {e}"
-    #     status["status"] = 403
+        
     return status
-
-# def create_files(files: dict, db: Session) -> int:
-#     files = list(files.values())
-#     status = {"status": 200}
-#     try:
-#         db.execute(insert(IngestionFile), files)
-#     except Exception as e:
-#         status["description"] = f"An error ocurred: {type(e).__name__} - {e}"
-#         status["status"] = 403
-#     # try:
-#     #     db.add_all(files)
-#     #     db.commit()
-#     # except Exception as e:
-#     #     status["description"] = f"An error ocurred: {type(e).__name__} - {e}"
-#     #     status["status"] = 403
-#     return status
