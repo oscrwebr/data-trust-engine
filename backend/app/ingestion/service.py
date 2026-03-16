@@ -101,15 +101,12 @@ def get_values_data(folders: dict, files: dict, shared_folder_files: dict, value
 
     return folders, files, shared_folder_files
 
-def get_permissions(shared_folders_files: dict, user_id: int, access_token: str, db:Session):
+def get_permissions(shared_folders_files: dict, access_token: str) -> dict:
     '''
     Function that will accept a list of dictionaries, user_id and instance of a session from sqlalchemy.
     It will create batches of 20 requests (upper limit) and make post requests to the graph '$batch' endpoint to get all the permissions for files. 
     '''
     headers = {"Authorization": f"Bearer {access_token}"}
-
-    # Get the user email to only check our database for emails that don't belong to the user whose access token is being used
-    user = auth_service.check_get_by_id(id=user_id, db=db) # Maybe this isn't necessary here?
 
     # Create nested list consisting of 20 request bodies each
     request_body_list = []
@@ -131,16 +128,35 @@ def get_permissions(shared_folders_files: dict, user_id: int, access_token: str,
     # print(batch_request)
 
     # Iterate through the list of request_body_list and make post requests to the permsissions endpoint for each request_body
-    
+    all_permissions = []
     for request_body in request_body_list:
         response = requests.post(
             url=GRAHP_BATCH_URL,
             json={"requests": request_body},
             headers=headers
         )
-        print(response.json())
-        print(request_body)
+        # print(response.json())
+        # print(request_body)
+        all_permissions += response.json()["responses"] # adding responses to the permissions
+    
+    # Create a dictionary where the key is the graph_id and values are a set of emails that need to be checked in the db
+    id_permissions_dict = {}
+    for item in all_permissions:
+        item_id = item["id"]
+        # Get 'grantedToPermissionsV2' for each item
+        granted = set()
+        for value in item["body"]["value"]:
+            if "grantedToIdentitiesV2" in value:
+                for gti in value["grantedToIdentitiesV2"]:
+                    granted.add(gti["siteUser"]["email"])
+        
+        # Update the dictionary
+        id_permissions_dict[item_id] = {
+            "granted_permission": granted,
+            "type": shared_folders_files[item_id]
+        }
 
+    return id_permissions_dict
 
 
 
@@ -191,7 +207,7 @@ def get_all_files(access_token: str, id: int, db:Session) -> str:
     # Insert into user-file and user-folder here for the current user_id - ensure that the above returns the id's of the files and folders created, so that an entry can be made for each in the next table!
 
     # Get all the users that have access to the folders and files for this user
-    get_permissions(shared_folders_files=shared_folders_files, user_id=id, access_token=access_token, db=db)
+    permissions_dict = get_permissions(shared_folders_files=shared_folders_files, user_id=id, access_token=access_token, db=db)
 
     return folder_file_response
 
