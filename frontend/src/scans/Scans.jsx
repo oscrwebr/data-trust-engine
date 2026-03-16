@@ -1,8 +1,5 @@
 import { useEffect, useState } from "react";
 import api from "../api/axiosConfig";
-// import { DataTable } from 'primereact/datatable';
-// import { Column } from 'primereact/column';
-import { Link } from "react-router-dom";
 import ScanCard from "./ScanCard";
 import { Divider } from 'primereact/divider';
 import "./scans.css";
