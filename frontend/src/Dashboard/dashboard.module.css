@@ -1,9 +1,3 @@
-.header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
 .d_toast {
     width: 27vw;
     margin-top: 70px;
@@ -13,3 +7,6 @@
     scroll-behavior: smooth;
 }
 
+.d_container {
+    padding-left: 20px;
+}

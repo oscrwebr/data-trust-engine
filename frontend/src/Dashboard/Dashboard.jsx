@@ -3,13 +3,14 @@ import { Button } from "primereact/button";
 import { useState, useEffect, useRef } from "react";
 import api from "../api/axiosConfig.js";
 import styles from "./dashboard.module.css"
-import { Badge } from "primereact/badge"
 import { Toast } from "primereact/toast"
 import Notification from "../components/notifications/Notification.jsx";
+import Header from "../components/header/header.jsx";
 
 function Dashboard({toast}) {
   const [visible, setVisible] = useState(false);
   const [user, setUser] = useState({});
+  const [workspace, setWorkspace] = useState(null)
   const [notifications, setNotifications] = useState([])
   const toastNotifications = useRef(null);
   const [isNotificationsVisible, setIsNotificationsVisible] = useState(false); // State to track visibility
@@ -28,16 +29,17 @@ function Dashboard({toast}) {
   useEffect(() => {
       api.get("/workspace/dashboard")
       .then(res => {
-          console.log(res)
           if (res.data.user) {
             setUser(res.data.user);
+            setWorkspace(res.data.workspace);
+            console.log(res.data.user)
+            console.log(res.data.workspace)
           }
       })
       .catch(error => console.log(error))
 
       api.get("/workspace/get-notifications")
       .then(res => {
-        console.log(res)
         setNotifications(res.data)
       })
       .catch(error => console.log(error))
@@ -83,16 +85,14 @@ function Dashboard({toast}) {
 
   return (
     <div>
-        <div className={styles.header}>
-          <h1>Dashboard</h1>
-          <Button data-testid="notification-button" id={styles.bell_btn} onClick={handleNotifications} text 
-            style={{marginRight: 50, background: "transparent", border: "none", boxShadow: "none", outline: "none"}}
-          ><i data-testid="badge" className="pi pi-bell p-overlay-badge" style={{ fontSize: 21}}>{notificationCount > 0 && <Badge value={displayValue} severity="danger" />}</i></Button>
-        </div>
+      <Header firstname={user.firstname} lastname={user.surname} workspace={workspace} />
+      <div className={styles.d_container}>
+        <h1>Dashboard</h1>
         <Button onClick={() => setVisible(true)}>Invite Employee</Button>
         <Invite visible={visible} setVisible={setVisible} toast={toast}/>
         <Toast className={styles.d_toast} ref={toastNotifications} onRemove={(message) => handleRemove(message.id)} position="top-right" />
-    </div>
+        </div>
+      </div>
   );
 }
 

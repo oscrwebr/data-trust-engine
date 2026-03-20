@@ -24,3 +24,6 @@ def get_user_notifications(db: Session, user_id: int):
 
 def del_notification(db: Session, notification_id: int, user_id: int):
     return repository.delete_notification(db, notification_id, user_id)
+
+def workspace_by_user_id(db: Session, user_id: int):
+    return repository.get_workspace_by_user_id(db, user_id)
