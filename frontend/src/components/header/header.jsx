@@ -2,19 +2,23 @@ import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
 import styles from "./header.module.css"
+import { FiSidebar } from "react-icons/fi";
 
 import { Button } from "primereact/button";
-function Header({firstname, lastname, workspace}){
+function Header({firstname, lastname, workspace, sidebarVisible, setSidebarVisible}){
     return(
         <div className={styles.container}>
             <div className={styles.header}>
                 <div className={styles.topRow}>
-                    <span>{firstname} {lastname} / {workspace}</span>
+                    <div className={styles.sidebar_icon_text}>
+                        {!sidebarVisible &&(<FiSidebar onClick={() => setSidebarVisible(true)} className={styles.sidebar_toggle_icon} size={20} color="black"/>)}
+                        <span>{firstname} {lastname} / {workspace}</span>
+                    </div>             
                     <Button 
                         data-testid="notification-button"
                         className={styles.notification_button}
                         text 
-                        style={{marginRight: 50, background: "transparent", border: "none", boxShadow: "none", outline: "none"}}>
+                        style={{marginRight: 30, background: "transparent", border: "none", boxShadow: "none", outline: "none"}}>
                             <i data-testid="badge" className="pi pi-bell p-overlay-badge" style={{ fontSize: 21}}></i>
                     </Button>
                 </div>

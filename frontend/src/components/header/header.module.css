@@ -22,3 +22,18 @@
 .header {
     width: 100%;
 }
+
+.sidebar_toggle_icon {
+  margin-left: 5px;
+  margin-right: 15px;
+}
+
+.sidebar_toggle_icon:hover {
+    cursor: pointer;
+}
+
+.sidebar_icon_text {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}

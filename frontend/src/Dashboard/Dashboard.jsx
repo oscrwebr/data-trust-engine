@@ -6,9 +6,11 @@ import styles from "./dashboard.module.css"
 import { Toast } from "primereact/toast"
 import Notification from "../components/notifications/Notification.jsx";
 import Header from "../components/header/header.jsx";
+import AdminNavbar from "../components/navbar/AdminNavbar.jsx";
 
 function Dashboard({toast}) {
   const [visible, setVisible] = useState(false);
+  const [sidebarVisible, setSidebarVisible] = useState(true)
   const [user, setUser] = useState({});
   const [workspace, setWorkspace] = useState(null)
   const [notifications, setNotifications] = useState([])
@@ -84,15 +86,20 @@ function Dashboard({toast}) {
   }
 
   return (
-    <div>
-      <Header firstname={user.firstname} lastname={user.surname} workspace={workspace} />
-      <div className={styles.d_container}>
-        <h1>Dashboard</h1>
-        <Button onClick={() => setVisible(true)}>Invite Employee</Button>
-        <Invite visible={visible} setVisible={setVisible} toast={toast}/>
-        <Toast className={styles.d_toast} ref={toastNotifications} onRemove={(message) => handleRemove(message.id)} position="top-right" />
+    <div className={styles.container}>
+        {sidebarVisible &&(<div className={styles.navbar_container}>
+          <AdminNavbar setSidebarVisible={setSidebarVisible}/>
+        </div>)}
+        <div className={styles.main}>
+          <Header firstname={user.firstname} lastname={user.surname} workspace={workspace} sidebarVisible={sidebarVisible} setSidebarVisible={setSidebarVisible}/>
+          <div className={styles.content}>
+            <h1>Dashboard</h1>
+            <Button onClick={() => setVisible(true)}>Invite Employee</Button>
+            <Invite visible={visible} setVisible={setVisible} toast={toast}/>
+            <Toast className={styles.d_toast} ref={toastNotifications} onRemove={(message) => handleRemove(message.id)} position="top-right" />
+          </div>
         </div>
-      </div>
+    </div>
   );
 }
 
