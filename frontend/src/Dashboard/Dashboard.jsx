@@ -88,7 +88,7 @@ function Dashboard({toast}) {
   return (
     <div className={styles.container}>
         {sidebarVisible &&(<div className={styles.navbar_container}>
-          <AdminNavbar setSidebarVisible={setSidebarVisible}/>
+          <AdminNavbar setSidebarVisible={setSidebarVisible} firstname={user.firstname} surname={user.surname}/>
         </div>)}
         <div className={styles.main}>
           <Header firstname={user.firstname} lastname={user.surname} workspace={workspace} sidebarVisible={sidebarVisible} setSidebarVisible={setSidebarVisible}/>

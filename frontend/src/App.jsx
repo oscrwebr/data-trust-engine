@@ -10,11 +10,10 @@ import Home from "./home/home.jsx"
 import { Toast } from 'primereact/toast';
 
 import Test from "./Test/Test.jsx";
-import Navbar from "./components/navbar/Navbar.jsx";
 import Unprocessable422 from "./Errors/unprocessable422.jsx";
 import WorkspaceJoinedError from "./invites/WorkspaceJoined.jsx";
 import Forbidden403 from "./Errors/Forbidden403.jsx";
-import AdminNavbar from "./components/navbar/AdminNavbar.jsx";
+
 
 function App() {
   const toast = useRef(null);

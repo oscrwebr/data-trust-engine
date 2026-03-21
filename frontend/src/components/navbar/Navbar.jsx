@@ -4,7 +4,6 @@ import pfp_placeholder from "../../assets/CIH_logo.jpg";
 import { Link } from "react-router-dom";
 import NavbarItem from "./NavbarItem";
 import { PiSignOutFill } from "react-icons/pi";
-import { FiSidebar } from "react-icons/fi";
 
 
 function Navbar() {
