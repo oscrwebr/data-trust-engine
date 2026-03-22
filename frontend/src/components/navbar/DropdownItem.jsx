@@ -1,10 +1,10 @@
 import { Link } from "react-router-dom";
 import styles from "./navbar.module.css"
 
-function NavbarItem({ url, text, icon, onClick}) {
+function DropdownItem({ url, text, icon, onClick}) {
     return (
         <li>
-            <Link to={url} className={styles.navbar_link} onClick={onClick}>
+            <Link to={url} className={styles.dropdown_item_link} onClick={onClick}>
                 <i className={icon}/>
                 <span>{text}</span>
             </Link>
@@ -12,4 +12,4 @@ function NavbarItem({ url, text, icon, onClick}) {
     )
 }
 
-export default NavbarItem
+export default DropdownItem;

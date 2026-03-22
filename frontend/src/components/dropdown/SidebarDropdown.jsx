@@ -1,19 +1,29 @@
 import { useState } from "react";
+import styles from "../navbar/navbar.module.css"
 
-function SidebarDropdown({icon, label, children}){
-    const [open, setOpen] = useState(false)
+function SidebarDropdown({icon, label, children, openDropdown, setOpenDropdown}){
+
+    const isOpen = openDropdown === label;
+
+    const toggle = () => {
+      if (isOpen) {
+        setOpenDropdown(null);
+      } else {
+        setOpenDropdown(label); 
+      }
+    };
 
     return (
-        <div>
-            <div onClick={() => setOpen(!open)}>
-              <i className={icon} />
-                <span>{label}</span>
-              <i className={open ? "pi pi-angle-down" : "pi pi-angle-right"}/>
+        <div className={styles.dropdown_container}>
+            <div className={styles.dropdown_button} tabIndex={0} onClick={toggle}>
+              <i id={styles.dropdown_icon} className={icon} />
+              <span>{label}</span>
+              <i id={styles.dropdown_chevron} className={isOpen ? "pi pi-angle-down" : "pi pi-angle-right"}/>
             </div>
 
-            {open && (
+            {isOpen && (
               <div>
-                {children}
+                <div>{children}</div>
               </div>
             )}
         </div>

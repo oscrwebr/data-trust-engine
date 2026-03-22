@@ -15,7 +15,7 @@ function Dashboard({toast}) {
   const [workspace, setWorkspace] = useState(null)
   const [notifications, setNotifications] = useState([])
   const toastNotifications = useRef(null);
-  const [isNotificationsVisible, setIsNotificationsVisible] = useState(false); // State to track visibility
+  const [isNotificationsVisible, setIsNotificationsVisible] = useState(false);
   const notificationCount = notifications.length;
 
   let displayValue = '';
@@ -88,14 +88,14 @@ function Dashboard({toast}) {
   return (
     <div className={styles.container}>
         {sidebarVisible &&(<div className={styles.navbar_container}>
-          <AdminNavbar setSidebarVisible={setSidebarVisible} firstname={user.firstname} surname={user.surname}/>
+          <AdminNavbar setSidebarVisible={setSidebarVisible} firstname={user.firstname} surname={user.surname} setVisible={setVisible}/>
         </div>)}
+        
         <div className={styles.main}>
           <Header firstname={user.firstname} lastname={user.surname} workspace={workspace} sidebarVisible={sidebarVisible} setSidebarVisible={setSidebarVisible}/>
           <div className={styles.content}>
             <h1>Dashboard</h1>
-            <Button onClick={() => setVisible(true)}>Invite Employee</Button>
-            <Invite visible={visible} setVisible={setVisible} toast={toast}/>
+            <Invite className={styles.d_invite_dialog} visible={visible} setVisible={setVisible} toast={toast}/>
             <Toast className={styles.d_toast} ref={toastNotifications} onRemove={(message) => handleRemove(message.id)} position="top-right" />
           </div>
         </div>

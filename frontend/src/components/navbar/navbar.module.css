@@ -6,6 +6,14 @@
     height: 65px;     
 }
 
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow-y: auto;  
+  scrollbar-width: none;  
+}
+
 .navbar_logo img {
     width: 20vw;
     height: auto;
@@ -30,4 +38,51 @@
   width: 100%;
   height: 1px;
   background-color: #ccc;
+  margin-bottom: 10px;
+}
+
+.navbar_title {
+    color: white;
+    font-weight: 700;
+    margin: 15px;
+}
+
+.navbar_link span, .navbar_link i, .dropdown_container div span, #dropdown_icon, #dropdown_chevron, .dropdown_item_link span, .dropdown_item_link i {
+    color: white;
+}
+
+#dropdown_chevron {
+  margin-left: auto;
+}
+
+.navbar_link i, #dropdown_icon, .dropdown_item_link i{
+    margin-right: 10px;
+}
+
+.navbar_link, .dropdown_button, .dropdown_item_link {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    text-decoration: none;
+    margin: 5px;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.navbar_link:hover, .dropdown_button:hover {
+    cursor: pointer;
+    background-color: rgb(94, 93, 93);
+}
+
+.navbar_link:focus, .dropdown_button:focus {
+    background-color: rgb(94, 93, 93);
+}
+
+.dropdown_item_link:hover {
+    cursor: pointer;
+    background-color:rgb(52, 50, 50);
+}
+
+.dropdown_item_link:focus {
+    background-color: rgb(52, 50, 50);
 }
