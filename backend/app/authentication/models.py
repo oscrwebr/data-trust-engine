@@ -12,6 +12,12 @@ class User(Base):
     oid = Column(String(40), unique=True, index=True, nullable=False)
     role = Column(String(11), nullable=False)
 
+    workspaces = relationship(
+        "Workspace",
+        secondary="user_workspace",
+        back_populates="user"
+    )
+
 class PendingUser(Base):
     __tablename__ = 'pending_users'
 

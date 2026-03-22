@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, UploadFile, File, Form, Response
 from app.core.database import get_database
 from sqlalchemy.orm import Session
-from app.workspaces.service import workspace, add_notification, get_user_notifications, del_notification, workspace_by_user_id
+from app.workspaces.service import workspace, add_notification, get_user_notifications, del_notification, get_workspace_by_id
 from typing import Annotated
 from ..core.security_schemas import User
 from ..core.security import get_user_from_access_token
@@ -24,21 +24,26 @@ async def create_workspace(db: Annotated[Session, Depends(get_database)], curren
         return "image"
 
     image_bytes = await image.read()
-    result = workspace(current_user.user_id, name, image_bytes, db)
+    result = workspace(name, image_bytes, db, current_user.user_id)
 
     return result
 
 @router.get("/dashboard")
 async def dashboard(db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)]):
     user = service.test_route(current_user.user_id, db=db)
-    workspace = workspace_by_user_id(db, current_user.user_id)
+    print("RESPONSE", user.workspaces)
+    if not user.workspaces[0].name:
+        return {"user": {
+        "firstname": user.firstname,
+        "surname": user.surname,
+        "email": user.email,
+        "role": user.role}, "workspace":"You have not joined a workspace yet"} if user else {"message": "no user"}
     
-    if workspace is None:
-        print(user)
-        return {"user": user, "workspace":"You have not joined a workspace yet"} if user else {"message": "no user"}
-    
-    print(user)
-    return {"user": user, "workspace":workspace.name} if user else {"message": "no user"}
+    return {"user": {
+        "firstname": user.firstname,
+        "surname": user.surname,
+        "email": user.email,
+        "role": user.role}, "workspace":user.workspaces[0].name} if user else {"message": "no user"}
 
 
 @router.post("/request-join-workspace")
@@ -58,5 +63,5 @@ async def delete_notification(db: Annotated[Session, Depends(get_database)], cur
 
 @router.get("/get-workspace-image")
 async def get_workspace_image(db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)]):
-    workspace = workspace_by_user_id(db, current_user.user_id)
-    return Response(content=workspace.image)
+    user = service.test_route(current_user.user_id, db=db)
+    return Response(content=user.workspaces[0].image)

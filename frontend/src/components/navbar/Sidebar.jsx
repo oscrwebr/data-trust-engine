@@ -24,7 +24,7 @@ function Sidebar({setSidebarVisible, firstname, surname, setVisible, role}){
 
     return(
         <div className={styles.container}>
-        {role === "Admin" ? (
+        {role === "admin" ? (
             <>
                 <div className={styles.header_container}>
                     <Link>

@@ -4,7 +4,7 @@ import arrow
 from app.invites import repository as invite_repository
 from app.authentication import repository as user_repository
 from app.authentication import service
-from app.workspaces.repository import get_workspace_by_user_id
+from app.workspaces.repository import get_workspace_by_workspace_id
 from app.core.database import get_database
 from sqlalchemy.orm import Session
 from datetime import datetime
@@ -23,7 +23,7 @@ router = APIRouter(prefix="/invite", tags=["invite"])
 @router.post("/send-invite")
 async def send_invite(db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)], invite: InviteRequest):
     user = service.test_route(current_user.user_id, db=db)
-    workspace = get_workspace_by_user_id(db, current_user.user_id)
+    workspace = user.workspaces[0]
     time_now = datetime.now()
     result = await create_invite(db, invite, workspace, time_now, user.email)
     if(result == True):
@@ -67,7 +67,7 @@ async def process_invite(token: str = Query(...), db: Session = Depends(get_data
         return RedirectResponse(f"http://localhost:5173/invite-error/expired?date={expiry}&workspace={workspace_id}")
     
     invite_repository.update_invite_used_value(db, invite.invite_id)
-    next_url = "/?toast=signup"
+    next_url = "/dashboard?toast=signup"
     redirect_url = f"http://localhost:8000/auth/sign-in?next={quote(next_url)}&signup=true&role=2&workspace_id={workspace_id}"
 
     return RedirectResponse(redirect_url, status_code=302)
