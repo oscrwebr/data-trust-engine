@@ -1,5 +1,4 @@
 import Invite from "../invites/invites";
-import { Button } from "primereact/button";
 import { useState, useEffect, useRef } from "react";
 import api from "../api/axiosConfig.js";
 import styles from "./dashboard.module.css"

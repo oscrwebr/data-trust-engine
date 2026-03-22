@@ -7,10 +7,7 @@ from datetime import datetime
 
 # Checking workspace creation inputs
 def workspace(user_id:int, name:str, image: bytes, db: Session):
-
-    # Add workspace to database
-    image_bytes = base64.b64decode(image)
-    repository.add_workspace(db, name, image_bytes, user_id)
+    repository.add_workspace(db, name, image, user_id)
     return True
 
 # Add a notification to database

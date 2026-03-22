@@ -37,3 +37,7 @@
   flex-direction: row;
   align-items: center;
 }
+
+.workspace_text {
+  text-decoration: underline;
+}

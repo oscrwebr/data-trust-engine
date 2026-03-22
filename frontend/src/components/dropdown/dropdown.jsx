@@ -1,5 +1,5 @@
 import { useState } from "react";
-import styles from "../navbar/navbar.module.css"
+import styles from "./dropdown.module.css"
 
 function SidebarDropdown({icon, label, children, openDropdown, setOpenDropdown}){
 

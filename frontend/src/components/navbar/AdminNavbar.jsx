@@ -1,14 +1,24 @@
 import { FiSidebar } from "react-icons/fi";
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import logo from "../../assets/CIH_long_logo.png";
 import styles from "./navbar.module.css"
-import SidebarDropdown from "../dropdown/SidebarDropdown";
+import SidebarDropdown from "../dropdown/dropdown";
 import NavbarItem from "./NavbarItem";
 import DropdownItem from "./DropdownItem";
-
+import api from "../../api/axiosConfig";
+        
 function AdminNavbar({setSidebarVisible, firstname, surname, setVisible}){
     const [openDropdown, setOpenDropdown] = useState(null);
+    const [imageSrc, setImageSrc] = useState("");
+
+    useEffect(() => {
+        api.get("/workspace/get-workspace-image", {responseType: "blob"})
+        .then(res => {
+            const url = URL.createObjectURL(res.data);
+            setImageSrc(url);
+        });
+    }, []);
 
     return(
         <div className={styles.container}>
@@ -22,7 +32,10 @@ function AdminNavbar({setSidebarVisible, firstname, surname, setVisible}){
             </div>
             <div className={styles.line}/>
             <div className={styles.navbar_content}>
-                <span className={styles.navbar_title}>Workspace</span>
+                <div className={styles.user_role_container}>
+                    <span className={styles.navbar_title}>Workspace</span>
+                    <span className={styles.user_role_card}>Admin</span>
+                </div>
                 <NavbarItem className={styles.navbar_item} url="/dashboard" text="Dashboard" icon="pi pi-th-large"/>
                 <div className={styles.line}/>
                 <SidebarDropdown className={styles.dropdown} icon="pi pi-folder" label="Scanning" openDropdown={openDropdown} setOpenDropdown={setOpenDropdown}>
@@ -43,10 +56,10 @@ function AdminNavbar({setSidebarVisible, firstname, surname, setVisible}){
                 <NavbarItem url="/settings" text="Settings" icon="pi pi-cog"/>
                 <NavbarItem text="Sign-out" icon="pi pi-sign-out"/>
                 <div className={styles.line}/>
-            </div>
-            <div>
-                <div>PFP goes here</div>
-                <div>{firstname} {surname}</div>
+            </div> 
+            <div className={styles.user_info_container}>
+                <img className={styles.user_logo} src={imageSrc} alt="Workspace Logo"/>
+                <div className={styles.user_name}>{firstname} {surname}</div>
             </div>
         </div>
     )
