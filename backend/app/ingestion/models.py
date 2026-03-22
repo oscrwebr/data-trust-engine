@@ -30,7 +30,7 @@ class IngestionFile(Base):
 class UserFolders(Base):
     __tablename__ = 'user_folders'
 
-    folder_id = Column(Integer(), primary_key=True)
+    folder_id = Column(ForeignKey(Folder.folder_id), primary_key=True)
     user_id = Column(ForeignKey(User.user_id), primary_key=True)
     Index("rev_idx_user_folders", user_id, folder_id)
 
