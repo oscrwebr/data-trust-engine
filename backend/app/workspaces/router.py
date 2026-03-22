@@ -32,7 +32,14 @@ async def create_workspace(db: Annotated[Session, Depends(get_database)], curren
 async def dashboard(db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)]):
     user = service.test_route(current_user.user_id, db=db)
     workspace = workspace_by_user_id(db, current_user.user_id)
+    
+    if workspace is None:
+        print(user)
+        return {"user": user, "workspace":"You have not joined a workspace yet"} if user else {"message": "no user"}
+    
+    print(user)
     return {"user": user, "workspace":workspace.name} if user else {"message": "no user"}
+
 
 @router.post("/request-join-workspace")
 async def create_notification(db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)], notification: NotificationSchema):

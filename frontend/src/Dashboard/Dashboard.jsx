@@ -5,7 +5,7 @@ import styles from "./dashboard.module.css"
 import { Toast } from "primereact/toast"
 import Notification from "../components/notifications/Notification.jsx";
 import Header from "../components/header/header.jsx";
-import AdminNavbar from "../components/navbar/AdminNavbar.jsx";
+import Sidebar from "../components/navbar/Sidebar.jsx";
 
 function Dashboard({toast}) {
   const [visible, setVisible] = useState(false);
@@ -33,8 +33,6 @@ function Dashboard({toast}) {
           if (res.data.user) {
             setUser(res.data.user);
             setWorkspace(res.data.workspace);
-            console.log(res.data.user)
-            console.log(res.data.workspace)
           }
       })
       .catch(error => console.log(error))
@@ -46,6 +44,7 @@ function Dashboard({toast}) {
       .catch(error => console.log(error))
   }, []);
 
+  
   function handleNotifications(){
     setIsNotificationsVisible((prev) => !prev);
     if (!isNotificationsVisible) {
@@ -87,7 +86,7 @@ function Dashboard({toast}) {
   return (
     <div className={styles.container}>
         {sidebarVisible &&(<div className={styles.navbar_container}>
-          <AdminNavbar setSidebarVisible={setSidebarVisible} firstname={user.firstname} surname={user.surname} setVisible={setVisible}/>
+          <Sidebar setSidebarVisible={setSidebarVisible} firstname={user.firstname} surname={user.surname} setVisible={setVisible} role={user.role}/>
         </div>)}
         
         <div className={styles.main}>
