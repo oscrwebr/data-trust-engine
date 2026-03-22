@@ -2,6 +2,7 @@ from msal import ConfidentialClientApplication
 import requests
 from datetime import datetime
 from sqlalchemy.orm import Session
+from collections import defaultdict
 
 from ..core.security import decrypt_refresh, encrypt_refresh
 from ..core.config import SCOPES
@@ -140,25 +141,53 @@ def get_permissions(shared_folders_files: dict, access_token: str) -> dict:
         all_permissions += response.json()["responses"] # adding responses to the permissions
     
     # Create a dictionary where the key is the graph_id and values are a set of emails that need to be checked in the db
-    id_permissions_dict = {}
-    for item in all_permissions:
-        item_id = item["id"]
-        # Get 'grantedToPermissionsV2' for each item
-        granted = set()
-        for value in item["body"]["value"]:
-            if "grantedToIdentitiesV2" in value:
-                for gti in value["grantedToIdentitiesV2"]:
-                    granted.add(gti["siteUser"]["email"])
-        
-        # Update the dictionary
-        id_permissions_dict[item_id] = {
-            "granted_permission": granted,
-            "type": shared_folders_files[item_id]
-        }
+    id_permissions_dict = defaultdict(dict)
+    try:    
+        for item in all_permissions:
+            item_id = item["id"]
+            # Get 'grantedToPermissionsV2' for each item
+            granted = set()
+            for value in item["body"]["value"]:
+                if "grantedToIdentitiesV2" in value:
+                    for gti in value["grantedToIdentitiesV2"]:
+                        granted.add(gti["siteUser"]["email"])
+            
+            # Update the dictionary
+            id_permissions_dict[shared_folders_files[item_id]][item_id] = {
+                "granted_permission": granted
+                # "type": shared_folders_files[item_id]
+            }
+            print("\n\nThere were no issues with the get_permissions function")
+    except:
+        print("\nThere were issues with the get_permissions function!!")
+        print(shared_folders_files)
+        # print(all_permissions) # ENSURE THAT ERRORS HERE ARE HANDLED!!!!
 
     return id_permissions_dict
 
 
+def clean_folders_files_with_permissions(folder_file_data: dict, permissions: dict, id: int, db: Session):
+    '''
+    Function that will take in file and folder data in a dictionary, along with the permissions dictionary.
+    It will then return two lists of dictionaries that can be directly fed into the repository functions that handle insertion into the user_files and user_folders table
+    It requires the 'db', for calls to the db to retrieve the user_id's linked to the granted users (if they exist) and will add to a dict for rapid lookup and reduce redundant DB calls
+    '''
+    user_id_dict = {}
+    folder_list = []
+    file_list = []
+
+    # HANDLING FOLDERS FIRST
+    try:
+        # Iterate through the list of tuples for folder data
+        for folder in folder_file_data["folder"]:
+            # check whether the graph_id matches any in the permissions dictionary
+            if (graph_id := folder[1]) in permissions:
+                print(True)
+                print(graph_id)
+
+
+    except: print("Something went terribly wrong trying to prep for the user_folder table :/")
+    
 
 
 def get_all_files(access_token: str, id: int, db:Session) -> str:
@@ -202,14 +231,20 @@ def get_all_files(access_token: str, id: int, db:Session) -> str:
     # Final update for folder and file data before database write
     folder_data, file_data, shared_folders_files = get_values_data(folders=folder_data, shared_folder_files=shared_folders_files, files=file_data, values=res["value"])
     
-    # Insert into DB
+    # Insert into DB - HANDLE THE ERROR RESPONSE!!
     folder_file_response = repository.create_folders_files(folders=folder_data, files=file_data, db=db)
     # Insert into user-file and user-folder here for the current user_id - ensure that the above returns the id's of the files and folders created, so that an entry can be made for each in the next table!
 
     # Get all the users that have access to the folders and files for this user
-    permissions_dict = get_permissions(shared_folders_files=shared_folders_files, user_id=id, access_token=access_token, db=db)
+    permissions_dict = get_permissions(shared_folders_files=shared_folders_files, access_token=access_token)
 
-    return folder_file_response
+    # Go through folder and files and add them to the correct tables
+    clean_folders_files_with_permissions(folder_file_data=folder_file_response["data"], permissions=permissions_dict, id=id, db=db)
+    # repository.insert_user_folders(folders=folder_file_response["data"]["folder"], permissions_dict=permissions_dict, user_id=id, db=db)
+    # repository.insert_user_files(files=folder_file_response["data"]["file"], permissions_dict=permissions_dict, db=db)
+
+    return {"permissions_dict": permissions_dict}
+    return {"status": folder_file_response["details"]}
 
 def get_download_link_by_graph_id(graph_id: str, access_token: str):
     headers = {"Authorization": f"Bearer {access_token}"}
