@@ -102,6 +102,7 @@ def test_create_workspace_valid(db, client):
     assert response.json() == True
     assert db.query(workspace_model.Workspace).count() == 1 
 
+
 # Testing that a workspace can be retrieved through a user
 def test_method_get_workspace_by_user_id(db):
     image = create_test_image()
@@ -121,6 +122,7 @@ def test_method_get_workspace_by_user_id(db):
     assert workspace is not None
     assert workspace.name == "Test Workspace"
     assert workspace.image == image
+
 
 # Testing the delete notifications route
 def test_delete_notification_route(db, client):
@@ -155,6 +157,7 @@ def test_delete_notification_route(db, client):
     assert db.query(workspace_model.Notification).count() == 1 
     assert remaining_notifications[0].id == n_2.id
     
+
 # Testing the get all notifications route
 def test_get_all_notifications_route(db, client):
     image = create_test_image()
@@ -238,6 +241,7 @@ def test_dashboard_route_without_workspace(db, client):
         assert data["user"]["email"] == user.email
         assert data["user"]["role"] == user.role
         assert data["workspace"] == "You have not joined a workspace yet"
+
 
 # Testing the /dashboard route with workspace
 def test_dashboard_route_with_workspace(db, client):

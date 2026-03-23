@@ -33,7 +33,7 @@ function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role
                             <img src={logo} alt="CIH Logo"/>
                         </div>
                     </Link>
-                    <FiSidebar onClick={() => setSidebarVisible(false)} className={styles.sidebar_toggle_icon}/>
+                    <FiSidebar data-testid="close-button" onClick={() => setSidebarVisible(false)} className={styles.sidebar_toggle_icon}/>
                 </div>
                 <div className={styles.line}/>
                 <div className={styles.navbar_content}>
@@ -79,7 +79,7 @@ function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role
                             <img src={logo} alt="CIH Logo"/>
                         </div>
                     </Link>
-                    <FiSidebar onClick={() => setSidebarVisible(false)} className={styles.sidebar_toggle_icon} size={27} color="#fff"/>
+                    <FiSidebar data-testid="close-button" onClick={() => setSidebarVisible(false)} className={styles.sidebar_toggle_icon} size={27} color="#fff"/>
                 </div>
                 <div className={styles.line}/>
                 <div className={styles.navbar_content}>

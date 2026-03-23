@@ -48,6 +48,6 @@ describe("Dashboard Component", () => {
             </MemoryRouter>
         );
 
-        expect(await screen.getByTestId("dashboard-h1")).toBeInTheDocument();
+        expect(screen.getByTestId("dashboard-h1")).toBeInTheDocument();
     })
 })
