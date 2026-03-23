@@ -9,7 +9,7 @@ import DropdownItem from "./DropdownItem";
 import api from "../../api/axiosConfig";
 import { Avatar } from "primereact/Avatar";
         
-function Sidebar({setSidebarVisible, firstname, surname, setVisible, role}){
+function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role}){
     const [openDropdown, setOpenDropdown] = useState(null);
     const [imageSrc, setImageSrc] = useState("");
     const user_initials = (firstname?.[0]?.toUpperCase() || "?") + (surname?.[0]?.toUpperCase() || "?");
@@ -63,7 +63,11 @@ function Sidebar({setSidebarVisible, firstname, surname, setVisible, role}){
                 </div> 
                 <div className={styles.user_info_container}>
                     <img className={styles.user_logo} src={imageSrc} alt="Workspace Logo"/>
-                    <div className={styles.user_name}>{firstname} {surname}</div>
+                    <div>
+                        <div className={styles.user_name}>{firstname} {surname}</div>
+                        <div className={styles.user_email}>{email}</div>
+                    </div>
+                    
                 </div>
             </>
         ) : (
@@ -90,7 +94,10 @@ function Sidebar({setSidebarVisible, firstname, surname, setVisible, role}){
                 </div> 
                 <div className={styles.user_info_container}>
                     <Avatar label={user_initials} size="large" shape="circle" />
-                    <div className={styles.user_name}>{firstname} {surname}</div>
+                    <div>
+                        <div className={styles.user_name}>{firstname} {surname}</div>
+                        <div className={styles.user_email}>{email}</div>
+                    </div>
                 </div>
             </>
         )}

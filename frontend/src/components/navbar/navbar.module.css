@@ -124,3 +124,10 @@
   height: 45px;
   object-fit: cover;
 }
+
+.user_email {
+    color: white;
+    margin-left: 15px;
+    font-size: 10px;
+    margin-top: 3px;
+}

@@ -47,7 +47,7 @@ function Dashboard({toast}) {
   return (
     <div className={styles.container}>
         {sidebarVisible &&(<div className={styles.navbar_container}>
-          <Sidebar setSidebarVisible={setSidebarVisible} firstname={user.firstname} surname={user.surname} setVisible={setVisible} role={user.role}/>
+          <Sidebar setSidebarVisible={setSidebarVisible} firstname={user.firstname} surname={user.surname} email={user.email} setVisible={setVisible} role={user.role}/>
         </div>)}
         
         <div className={styles.main}>
