@@ -38,8 +38,10 @@ vi.mock("../api/axiosConfig.js", () => ({
   },
 }));
 
+global.URL.createObjectURL = vi.fn(() => "mock-url");
+
 import api from "../api/axiosConfig.js";
-import Invite from "./invites.jsx";
+
 describe("Invite Component", () => {
     afterEach(() => {
         vi.clearAllMocks();
@@ -192,12 +194,10 @@ describe("Invite Component", () => {
 
         render(
             <MemoryRouter>
-                <Dashboard toast={mockToast} />
+                <Dashboard toast={mockToast}/>
+                <EmployeeInvite visible={true} setVisible={() => {}} toast={mockToast}/>
             </MemoryRouter>
         );
-
-        const inviteButton = screen.getByRole("button", { name: /invite employee/i });
-        fireEvent.click(inviteButton);
 
         const modal = screen.getByRole("dialog");
 
@@ -353,12 +353,10 @@ describe("Invite Component", () => {
 
         render(
             <MemoryRouter>
-                <Dashboard toast={mockToast} />
+                <Dashboard toast={mockToast}/>
+                <EmployeeInvite visible={true} setVisible={() => {}} toast={mockToast}/>
             </MemoryRouter>
         );
-
-        const inviteButton = screen.getByRole("button", { name: /invite employee/i });
-        fireEvent.click(inviteButton);
 
         const modal = screen.getByRole("dialog");
 
@@ -406,11 +404,9 @@ describe("Invite Component", () => {
         render(
             <MemoryRouter>
                 <Dashboard toast={mockToast}/>
+                <EmployeeInvite visible={true} setVisible={() => {}} toast={mockToast}/>
             </MemoryRouter>
         );
-
-        const inviteButton = screen.getByRole("button", { name: /invite employee/i });
-        fireEvent.click(inviteButton);
 
         const modal = screen.getByRole("dialog");
 

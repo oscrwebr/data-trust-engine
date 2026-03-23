@@ -17,7 +17,8 @@ function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role
     useEffect(() => {
         api.get("/workspace/get-workspace-image", {responseType: "blob"})
         .then(res => {
-            const url = URL.createObjectURL(res.data);
+            const blob = new Blob([res.data]);
+            const url = URL.createObjectURL(blob);
             setImageSrc(url);
         });
     }, []);

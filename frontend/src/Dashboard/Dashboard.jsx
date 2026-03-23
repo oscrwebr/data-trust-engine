@@ -53,7 +53,7 @@ function Dashboard({toast}) {
         <div className={styles.main}>
           <Header firstname={user.firstname} lastname={user.surname} workspace={workspace} sidebarVisible={sidebarVisible} setSidebarVisible={setSidebarVisible} toastRef={toastNotifications} notifications={notifications} setNotifications={setNotifications}/>
           <div className={styles.content}>
-            <h1>Dashboard</h1>
+            <h1 data-testid="dashboard-h1">Dashboard</h1>
             <Invite className={styles.d_invite_dialog} visible={visible} setVisible={setVisible} toast={toast}/>
             <Toast className={styles.d_toast} ref={toastNotifications} onRemove={(message) => handleRemove(message.id)} position="top-right" />
           </div>

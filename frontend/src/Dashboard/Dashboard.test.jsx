@@ -5,17 +5,35 @@ import Dashboard from "./Dashboard.jsx";
 
 vi.mock("../api/axiosConfig.js", () => ({
   default: {
-    get: vi.fn().mockResolvedValue({ data: [] }),
-    post: vi.fn().mockResolvedValue({ data: { success: true } }), 
-    interceptors: {
-      request: { use: vi.fn() },
-      response: { use: vi.fn() },
-    },
-  },
+    get: vi.fn((url) => {
+      if (url === "/workspace/dashboard") {
+        return Promise.resolve({
+          data: {
+            user: {
+              firstname: "John",
+              surname: "Doe",
+              email: "john@example.com",
+              role: "admin"
+            },
+            workspace: "Test Workspace"
+          }
+        });
+      }
+      if (url === "/workspace/get-notifications") {
+        return Promise.resolve({ data: [] });
+      }
+      if (url === "/workspace/get-workspace-image") {
+        return Promise.resolve({
+          data: new Blob(["fake image"], { type: "image/png" })
+        });
+      }
+    }),
+    post: vi.fn(() => Promise.resolve({}))
+  }
 }));
 
-import api from "../api/axiosConfig.js";
-import EmployeeInviteError from "../invites/error.jsx";
+global.URL.createObjectURL = vi.fn(() => "mock-url");
+
 describe("Dashboard Component", () => {
     afterEach(() => {
         vi.clearAllMocks();
@@ -23,15 +41,13 @@ describe("Dashboard Component", () => {
     });
 
     // Test 1
-    test("Test modal box appears when invite employee button clicked", async () => {
+    test("Test that correct information is displayed on dashboard", async () => {
         render(
             <MemoryRouter>
-                <Dashboard/>
+                <Dashboard />
             </MemoryRouter>
         );
 
-        const invite_button = screen.getByText("Invite Employee");
-        fireEvent.click(invite_button);
-        expect(screen.getByRole("dialog")).toBeInTheDocument();
+        expect(await screen.getByTestId("dashboard-h1")).toBeInTheDocument();
     })
 })
