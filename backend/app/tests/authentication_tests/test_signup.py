@@ -31,7 +31,7 @@ def test_create_user_service_adds_employee_correctly(db):
     admin = insert(User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="employee")
     admin_instance=db.execute(admin)
 
-    workspace = add_workspace(db=db, name="Test Workspace", image=image, user_id=admin_instance.inserted_primary_key[0])
+    workspace = add_workspace(db=db, name="Test Workspace", image=image)
     user = create_user(db=db, details=dummy_user, role="employee", workspace_id=workspace.id)
 
     # assertions

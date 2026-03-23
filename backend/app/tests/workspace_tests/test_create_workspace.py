@@ -1,6 +1,6 @@
 from app.workspaces import models as workspace_model
-from app.workspaces.repository import get_workspace_by_user_id
 from app.authentication import models as auth_model, repository, service
+from app.workspaces.repository import add_user_workspace
 from sqlalchemy import insert, select, desc
 
 from io import BytesIO
@@ -22,7 +22,7 @@ def test_add_workspace_record(db):
     admin = insert(auth_model.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="employee")
     res=db.execute(admin)
 
-    workspace = insert(workspace_model.Workspace).values(name="Test Workspace", image=image, user_id=res.inserted_primary_key[0])
+    workspace = insert(workspace_model.Workspace).values(name="Test Workspace", image=image)
     db.execute(workspace)
 
     assert db.query(workspace_model.Workspace).count() == 1 
@@ -101,7 +101,7 @@ def test_create_workspace_valid(db, client):
     assert response.json() == True
     assert db.query(workspace_model.Workspace).count() == 1 
 
-# Testing that a workspace can be retrieved with a user's id
+# Testing that a workspace can be retrieved through a user
 def test_method_get_workspace_by_user_id(db):
     image = create_test_image()
 
@@ -109,10 +109,13 @@ def test_method_get_workspace_by_user_id(db):
     admin_insert = insert(auth_model.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="employee")
     res = db.execute(admin_insert)
 
-    workspace_insert = insert(workspace_model.Workspace).values(name="Test Workspace", image=image, user_id=res.inserted_primary_key[0])
-    db.execute(workspace_insert)
+    workspace_insert = insert(workspace_model.Workspace).values(name="Test Workspace", image=image)
+    workspace_insert = db.execute(workspace_insert)
 
-    workspace = get_workspace_by_user_id(db, res.inserted_primary_key[0])
+    add_user_workspace(db, workspace_insert.inserted_primary_key[0], res.inserted_primary_key[0])
+    user = repository.get_by_id(res.inserted_primary_key[0], db)
+
+    workspace = user.workspaces[0]
 
     assert workspace is not None
     assert workspace.name == "Test Workspace"

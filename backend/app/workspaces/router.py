@@ -31,7 +31,6 @@ async def create_workspace(db: Annotated[Session, Depends(get_database)], curren
 @router.get("/dashboard")
 async def dashboard(db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)]):
     user = service.test_route(current_user.user_id, db=db)
-    print("RESPONSE", user.workspaces)
     if not user.workspaces[0].name:
         return {"user": {
         "firstname": user.firstname,
