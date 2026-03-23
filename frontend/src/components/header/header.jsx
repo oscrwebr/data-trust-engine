@@ -1,8 +1,49 @@
+import {useState, useEffect, useRef} from "react"
 import styles from "./header.module.css"
 import { FiSidebar } from "react-icons/fi";
-
+import Notification from "../notifications/Notification.jsx";
 import { Button } from "primereact/button";
-function Header({firstname, lastname, workspace, sidebarVisible, setSidebarVisible}){
+import { Badge } from "primereact/badge"
+
+function Header({firstname, lastname, workspace, sidebarVisible, setSidebarVisible, toastRef}){
+    const [notifications, setNotifications] = useState([])
+    const [isNotificationsVisible, setIsNotificationsVisible] = useState(false);
+    const notificationCount = notifications.length;
+
+    let displayValue = '';
+
+    if (notificationCount === 0) {
+        displayValue = ''; 
+    } else if (notificationCount > 5) {
+        displayValue = '5+'; 
+    } else {
+        displayValue = notificationCount;
+    }
+    
+    function handleNotifications(){
+        setIsNotificationsVisible((prev) => !prev);
+        if (!isNotificationsVisible) {
+        notifications.forEach(notification => {
+        toastRef.current.show({
+            id: notification.id,
+            severity: 'info', 
+            sticky: true, 
+            closable: true,
+            content: (props) => (
+            <Notification 
+                key={notification.id}
+                title={notification.title}
+                body={notification.body}
+                date={notification.datetime}
+            />
+            ),
+        });
+        });
+        } else {
+            toastRef.current.clear();
+        }
+    }
+    console.log("Notifications", notifications)
     return(
         <div className={styles.container}>
             <div className={styles.header}>
@@ -14,9 +55,10 @@ function Header({firstname, lastname, workspace, sidebarVisible, setSidebarVisib
                     <Button 
                         data-testid="notification-button"
                         className={styles.notification_button}
+                        onClick={handleNotifications}
                         text 
                         style={{marginRight: 30, background: "transparent", border: "none", boxShadow: "none", outline: "none"}}>
-                            <i data-testid="badge" className="pi pi-bell p-overlay-badge" style={{ fontSize: 21}}></i>
+                            <i data-testid="badge" className="pi pi-bell p-overlay-badge" style={{ fontSize: 21}}>{notificationCount > 0 && <Badge value={displayValue} severity="danger" />}</i>
                     </Button>
                 </div>
                 <div className={styles.line}/>

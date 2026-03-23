@@ -32,7 +32,7 @@ function Sidebar({setSidebarVisible, firstname, surname, setVisible, role}){
                             <img src={logo} alt="CIH Logo"/>
                         </div>
                     </Link>
-                    <FiSidebar onClick={() => setSidebarVisible(false)} className={styles.sidebar_toggle_icon} size={27} color="#fff"/>
+                    <FiSidebar onClick={() => setSidebarVisible(false)} className={styles.sidebar_toggle_icon}/>
                 </div>
                 <div className={styles.line}/>
                 <div className={styles.navbar_content}>

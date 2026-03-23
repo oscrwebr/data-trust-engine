@@ -26,15 +26,15 @@
 }
 
 .sidebar_toggle_icon {
+    color: white;
     margin-left: 15px;
     margin-right: 15px;
-    border-radius: 5px;
-    
+    font-size: 27px;        
 }
 
 .sidebar_toggle_icon:hover {
     cursor: pointer;
-    color: #868686;
+    color: #a4a1a1;
 }
 
 .line {
