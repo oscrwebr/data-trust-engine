@@ -30,6 +30,10 @@ def check_get_by_oid(oid: str, db):
     # print(f"User details:\nFirstname: {res.firstname}\nSurname: {res.surname}\nemail: {res.email}") if res else print("There is nothing there!")
     return user if user else None
 
+def check_get_by_email(email: str, db: Session):
+    user = repository.get_by_email(email, db)
+    return user if user else None
+
 def test_route(id: int, db):
     user = repository.get_by_id(user_id=id, db=db)
     return user if user else None

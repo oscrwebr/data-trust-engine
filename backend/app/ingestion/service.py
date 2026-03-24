@@ -175,18 +175,83 @@ def clean_folders_files_with_permissions(folder_file_data: dict, permissions: di
     user_id_dict = {}
     folder_list = []
     file_list = []
+    # Setting the user first
+    current_user = auth_service.check_get_by_id(id, db)
+    user_id_dict[current_user.email] = id
 
     # HANDLING FOLDERS FIRST
     try:
         # Iterate through the list of tuples for folder data
         for folder in folder_file_data["folder"]:
-            # check whether the graph_id matches any in the permissions dictionary
-            if (graph_id := folder[1]) in permissions:
-                print(True)
-                print(graph_id)
+            # This will add the user and folder regardless of if they are in the permissions dictionary
+            folder_list.append({
+                "folder_id": folder[0],
+                "user_id": id
+            })
 
+            # check whether the graph_id matches any in the 'folder' permissions dictionary
+            if (graph_id := folder[1]) in permissions["folder"]:
+                # Add it to the folder list for each user that is included in the granted permission
+                for user_email in permissions["folder"][graph_id]["granted_permission"]:
+                    if user_email == current_user.email:
+                        continue
+                    # check if the user exists in the user_id_dict
+                    if user_email in user_id_dict:
+                        folder_list.append({
+                            "folder_id": folder[0],
+                            "user_id": user_id_dict[user_email]
+                        })
+                    else: # If not, we add the user to the dict as well as adding them to the dict
+                        user = auth_service.check_get_by_email(user_email, db)
+                        if not user: # This is a case where the user doesn't exist!
+                            # Need to decide how to handle this
+                            continue
+                        else:
+                            user_id_dict[user.email] = user.user_id
+                            # Add the user to the folder_list
+                            folder_list.append({
+                                "folder_id": folder[0],
+                                "user_id": user.user_id
+                            })
 
-    except: print("Something went terribly wrong trying to prep for the user_folder table :/")
+        # Iterate through the list of tuples for file data
+        for file in folder_file_data["file"]:
+            # This will add the user and file regardless of if they are in the permissions dictionary
+            file_list.append({
+                "file_id": file[0],
+                "user_id": id
+            })
+
+            # check whether the graph_id matches any in the 'file' permissions dictionary
+            if (graph_id := file[1]) in permissions["file"]:
+                # Add it to the file list for each user that is included in the granted permission
+                for user_email in permissions["file"][graph_id]["granted_permission"]:
+                    if user_email == current_user.email:
+                        continue
+                    # check if the user exists in the user_id_dict
+                    if user_email in user_id_dict:
+                        file_list.append({
+                            "file_id": file[0],
+                            "user_id": user_id_dict[user_email]
+                        })
+                    else: # If not, we add the user to the dict as well as adding them to the dict
+                        user = auth_service.check_get_by_email(user_email, db)
+                        if not user: # This is a case where the user doesn't exist!
+                            # Need to decide how to handle this
+                            continue
+                        else:
+                            user_id_dict[user.email] = user.user_id
+                            # Add the user to the file_list
+                            file_list.append({
+                                "file_id": file[0],
+                                "user_id": user.user_id
+                            })
+                            
+        return folder_list, file_list
+    except Exception as e: 
+        print("Something went terribly wrong trying to prep for the user_folder or user_file table :/")
+        print(f"{type(e).__name__} - {e}")
+        return e
     
 
 
@@ -239,11 +304,16 @@ def get_all_files(access_token: str, id: int, db:Session) -> str:
     permissions_dict = get_permissions(shared_folders_files=shared_folders_files, access_token=access_token)
 
     # Go through folder and files and add them to the correct tables
-    clean_folders_files_with_permissions(folder_file_data=folder_file_response["data"], permissions=permissions_dict, id=id, db=db)
+    folder_list, file_list = clean_folders_files_with_permissions(folder_file_data=folder_file_response["data"], permissions=permissions_dict, id=id, db=db)
+    
     # repository.insert_user_folders(folders=folder_file_response["data"]["folder"], permissions_dict=permissions_dict, user_id=id, db=db)
     # repository.insert_user_files(files=folder_file_response["data"]["file"], permissions_dict=permissions_dict, db=db)
-
-    return {"permissions_dict": permissions_dict}
+    print(permissions_dict)
+    return {
+        "permissions_dict": permissions_dict,
+        "folder_list": folder_list,
+        "file_list": file_list
+            }
     return {"status": folder_file_response["details"]}
 
 def get_download_link_by_graph_id(graph_id: str, access_token: str):

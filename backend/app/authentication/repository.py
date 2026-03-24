@@ -12,6 +12,9 @@ def get_by_id(user_id: int, db: Session):
 def get_by_oid(oid: str, db: Session):
     return db.query(User).filter(User.oid == oid).first()
 
+def get_by_email(email: str, db: Session):
+    return db.query(User).filter(User.email == email).first()
+
 def add_user(db: Session, email: str):
     user = PendingUser(email=email)
     db.add(user)
