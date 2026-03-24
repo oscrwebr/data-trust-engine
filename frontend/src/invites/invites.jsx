@@ -97,6 +97,7 @@ function Invite({ visible, setVisible, toast}) {
         header={<h2 className={styles.d_dialog_header}>Send your employee an invite</h2>}
         draggable={false}
         dismissableMask
+        closable={false}
         >
         <p className={styles.d_description}>Send an invite to an employee by specifying the recipient's email address. You can also set an expiry date for the invitation.</p>
         

@@ -5,7 +5,7 @@ from app.authentication.repository import delete_pending_user, get_pending_user_
 from app.authentication.models import PendingUser, User
 from app.authentication import repository, service
 from app.workspaces import models
-from app.workspaces.repository import add_workspace, add_notification
+from app.workspaces.repository import add_workspace, add_notification, add_user_workspace
 from datetime import datetime, date, timedelta
 from sqlalchemy import insert
 from urllib.parse import quote
@@ -22,10 +22,15 @@ def create_test_image():
 
 # Test a null email input
 def test_null_email_input(db, client):
-
+    image = create_test_image()
     oid = "000000-7sdf77-88asdf8-9sdiy99"
     insert_statement = insert(User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="employee")
     res=db.execute(insert_statement)
+
+    workspace_insert = insert(models.Workspace).values(name="Test Workspace", image=image)
+    workspace_insert = db.execute(workspace_insert)
+
+    add_user_workspace(db, workspace_insert.inserted_primary_key[0], res.inserted_primary_key[0])
 
     refresh_family = repository.create_refresh_family(db)
 
@@ -46,10 +51,15 @@ def test_null_email_input(db, client):
 
 # Test an invalid email input
 def test_invalid_email_input(db, client):
-    
+    image = create_test_image()
     oid = "000000-7sdf77-88asdf8-9sdiy99"
     insert_statement = insert(User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="employee")
     res=db.execute(insert_statement)
+
+    workspace_insert = insert(models.Workspace).values(name="Test Workspace", image=image)
+    workspace_insert = db.execute(workspace_insert)
+
+    add_user_workspace(db, workspace_insert.inserted_primary_key[0], res.inserted_primary_key[0])
 
     refresh_family = repository.create_refresh_family(db)
 
@@ -70,10 +80,15 @@ def test_invalid_email_input(db, client):
 
 # Test a valid email input (with no expiry date selected)
 def test_valid_email_input(db, client):
-
+    image = create_test_image()
     oid = "000000-7sdf77-88asdf8-9sdiy99"
     insert_statement = insert(User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="employee")
     res=db.execute(insert_statement)
+    
+    workspace_insert = insert(models.Workspace).values(name="Test Workspace", image=image)
+    workspace_insert = db.execute(workspace_insert)
+
+    add_user_workspace(db, workspace_insert.inserted_primary_key[0], res.inserted_primary_key[0])
 
     refresh_family = repository.create_refresh_family(db)
 
@@ -100,8 +115,10 @@ def test_valid_invite_request(db, client):
     insert_statement = insert(User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="employee")
     res=db.execute(insert_statement)
 
-    workspace = insert(models.Workspace).values(name="Test Workspace", image=image, user_id=res.inserted_primary_key[0])
-    db.execute(workspace)
+    workspace = insert(models.Workspace).values(name="Test Workspace", image=image)
+    workspace_insert=db.execute(workspace)
+    
+    add_user_workspace(db, workspace_insert.inserted_primary_key[0], res.inserted_primary_key[0])
 
     refresh_family = repository.create_refresh_family(db)
 
@@ -133,7 +150,7 @@ def test_retrieval_invite_record(db):
     pending_user = insert(PendingUser).values(email="JohnSmith1@hotmail.com")
     pending_user_instance=db.execute(pending_user)
 
-    workspace = add_workspace(db, "Test Workspace", image=image, user_id=admin_instance.inserted_primary_key[0])
+    workspace = add_workspace(db, "Test Workspace", image=image)
     add_invite(db, datetime.now(), datetime.today(), token, False, pending_user_instance.inserted_primary_key[0], workspace)
 
     invite = get_invite(db, token)
@@ -152,7 +169,7 @@ def test_expired_invite_record(db, client):
     pending_user = insert(PendingUser).values(email="JohnSmith1@hotmail.com")
     pending_user_instance=db.execute(pending_user)
 
-    workspace = add_workspace(db, "Test Workspace", image=image, user_id=admin_instance.inserted_primary_key[0])
+    workspace = add_workspace(db, "Test Workspace", image=image)
     add_invite(db, datetime.now(), date(2025, 3, 3), token, False, pending_user_instance.inserted_primary_key[0], workspace)
     response = client.get("/invite/invite-processing", params={"token": token}, follow_redirects=False)
 
@@ -180,7 +197,7 @@ def test_invite_clicked_when_used_is_true(db, client):
     pending_user = insert(PendingUser).values(email="JohnSmith1@hotmail.com")
     pending_user_instance=db.execute(pending_user)
 
-    workspace = add_workspace(db, "Test Workspace", image=image, user_id=admin_instance.inserted_primary_key[0])
+    workspace = add_workspace(db, "Test Workspace", image=image)
     add_invite(db, datetime.now(), date(2025, 3, 3), token, True, pending_user_instance.inserted_primary_key[0], workspace)
     response = client.get("/invite/invite-processing", params={"token": token}, follow_redirects=False)
     assert response.headers["location"] == "http://localhost:5173/workspace-joined"
@@ -198,11 +215,11 @@ def test_valid_invite(db, client):
     pending_user = insert(PendingUser).values(email="JohnSmith1@hotmail.com")
     pending_user_instance=db.execute(pending_user)
 
-    workspace = add_workspace(db, "Test Workspace", image=image, user_id=admin_instance.inserted_primary_key[0])
+    workspace = add_workspace(db, "Test Workspace", image=image)
     add_invite(db, datetime.now(), date(2030, 3, 3), token, False, pending_user_instance.inserted_primary_key[0], workspace)
 
     response = client.get("/invite/invite-processing", params={"token": token}, follow_redirects=False)
-    next_url = "/?toast=signup"
+    next_url = "/dashboard?toast=signup"
     redirect_url = f"http://localhost:8000/auth/sign-in?next={quote(next_url)}&signup=true&role=2&workspace_id={workspace.id}"
     assert response.headers["location"] == redirect_url
     assert response.status_code == 302
@@ -234,7 +251,7 @@ def test_method_get_invite_for_cooldown(db):
     db.add(pending_user_instance)
     db.flush()
 
-    workspace = add_workspace(db, "Test Workspace", image=image, user_id=admin_instance.inserted_primary_key[0])
+    workspace = add_workspace(db, "Test Workspace", image=image)
     add_invite(db, time, date(2030, 3, 3), token, False, pending_user_instance.user_id, workspace)
     add_invite(db, time + timedelta(days=2), date(2030, 3, 3), token, False, pending_user_instance.user_id, workspace)
     add_invite(db, latest_time, date(2030, 3, 3), token, False, pending_user_instance.user_id, workspace)
@@ -253,8 +270,10 @@ def test_return_statement_with_invalid_cooldown(db, client):
     insert_statement = insert(User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="employee")
     res=db.execute(insert_statement)
 
-    workspace = insert(models.Workspace).values(name="Test Workspace", image=image, user_id=res.inserted_primary_key[0])
-    db.execute(workspace)
+    workspace = insert(models.Workspace).values(name="Test Workspace", image=image)
+    workspace_insert=db.execute(workspace)
+
+    add_user_workspace(db, workspace_insert.inserted_primary_key[0], res.inserted_primary_key[0])
 
     refresh_family = repository.create_refresh_family(db)
 
@@ -291,8 +310,10 @@ def test_return_statement_with_same_email_as_admin(db, client):
     insert_statement = insert(User).values(firstname="John", surname="Smith", email="valid@example.com", oid=oid, role="admin")
     res=db.execute(insert_statement)
 
-    workspace = insert(models.Workspace).values(name="Test Workspace", image=image, user_id=res.inserted_primary_key[0])
-    db.execute(workspace)
+    workspace = insert(models.Workspace).values(name="Test Workspace", image=image)
+    workspace_insert=db.execute(workspace)
+
+    add_user_workspace(db, workspace_insert.inserted_primary_key[0], res.inserted_primary_key[0])
 
     refresh_family = repository.create_refresh_family(db)
 
@@ -319,7 +340,7 @@ def test_create_notification_route(db, client):
     insert_statement = insert(User).values(firstname="John", surname="Smith", email="valid@example.com", oid=oid, role="admin")
     res=db.execute(insert_statement)
     
-    workspace = insert(models.Workspace).values(name="Test Workspace", image=image, user_id=res.inserted_primary_key[0])
+    workspace = insert(models.Workspace).values(name="Test Workspace", image=image)
     workspace_instance = db.execute(workspace)
 
     refresh_family = repository.create_refresh_family(db)
@@ -347,7 +368,7 @@ def test_get_all_notifications_route(db, client):
     insert_statement = insert(User).values(firstname="John", surname="Smith", email="valid@example.com", oid=oid, role="admin")
     res=db.execute(insert_statement)
     
-    workspace = insert(models.Workspace).values(name="Test Workspace", image=image, user_id=res.inserted_primary_key[0])
+    workspace = insert(models.Workspace).values(name="Test Workspace", image=image)
     workspace_instance = db.execute(workspace)
 
     refresh_family = repository.create_refresh_family(db)
@@ -429,7 +450,7 @@ def test_get_invite_by_workspace_id(db):
     insert_statement = insert(User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="employee")
     res=db.execute(insert_statement)
 
-    workspace = add_workspace(db, "Test Workspace", image=image, user_id=res.inserted_primary_key[0])
+    workspace = add_workspace(db, "Test Workspace", image=image)
     
     pending_user = insert(PendingUser).values(email="JohnSmith1@hotmail.com")
     pending_user_instance=db.execute(pending_user)
@@ -450,7 +471,7 @@ def test_update_invite_used_value(db):
     insert_statement = insert(User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="employee")
     res=db.execute(insert_statement)
 
-    workspace = add_workspace(db, "Test Workspace", image=image, user_id=res.inserted_primary_key[0])
+    workspace = add_workspace(db, "Test Workspace", image=image)
 
     pending_user = insert(PendingUser).values(email="JohnSmith1@hotmail.com")
     pending_user_instance=db.execute(pending_user)

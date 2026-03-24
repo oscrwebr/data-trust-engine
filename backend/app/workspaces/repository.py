@@ -1,17 +1,14 @@
 from sqlalchemy.orm import Session
-from app.workspaces.models import Workspace, Notification
+from app.workspaces.models import Workspace, Notification, user_workspace
 from datetime import datetime
-from sqlalchemy import desc
+from sqlalchemy import desc, insert
 
-def add_workspace(db: Session, name:str, image:bytes, user_id:int):
-    workspace = Workspace(name=name, image=image, user_id=user_id)
+def add_workspace(db: Session, name:str, image:bytes):
+    workspace = Workspace(name=name, image=image)
     db.add(workspace)
     db.commit()
     db.refresh(workspace)
     return workspace
-
-def get_workspace_by_user_id(db: Session, user_id: int):
-    return db.query(Workspace).filter(Workspace.user_id == user_id).first()
 
 def get_workspace_by_workspace_id(db: Session, workspace_id: int):
     return db.query(Workspace).filter(Workspace.id == workspace_id).first()
@@ -31,3 +28,12 @@ def delete_notification(db: Session, notification_id: int, user_id: int):
     db.delete(notification)
     db.commit()
     return db.query(Notification).filter(Notification.user_id == user_id).all()
+
+def add_user_workspace(db: Session, workspace_id: int, user_id: int):
+    record = insert(user_workspace).values(
+        user_id=user_id,
+        workspace_id=workspace_id
+    )
+    db.execute(record)
+    db.commit()
+    return record

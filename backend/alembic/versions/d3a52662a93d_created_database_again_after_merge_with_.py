@@ -1,8 +1,8 @@
-"""user roles
+"""Created database again after merge with development
 
-Revision ID: 171c192f523f
-Revises: f5067e8d5ce5
-Create Date: 2026-03-24 11:35:02.386168
+Revision ID: d3a52662a93d
+Revises: 
+Create Date: 2026-03-24 20:24:50.628267
 
 """
 from typing import Sequence, Union
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision: str = '171c192f523f'
-down_revision: Union[str, Sequence[str], None] = 'f5067e8d5ce5'
+revision: str = 'd3a52662a93d'
+down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -49,6 +49,7 @@ def upgrade() -> None:
     op.create_index(op.f('ix_refresh_family_refresh_family_id'), 'refresh_family', ['refresh_family_id'], unique=False)
     op.create_table('scans',
     sa.Column('scan_id', sa.Integer(), nullable=False),
+    sa.Column('scan_type', sa.String(length=64), nullable=False),
     sa.Column('started_at', sa.DateTime(), nullable=True),
     sa.Column('finished_at', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('scan_id')
@@ -71,6 +72,26 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_user_oid'), 'user', ['oid'], unique=True)
     op.create_index(op.f('ix_user_user_id'), 'user', ['user_id'], unique=False)
+    op.create_table('workspaces',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(length=255), nullable=False),
+    sa.Column('image', mysql.MEDIUMBLOB(), nullable=False),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_workspaces_id'), 'workspaces', ['id'], unique=False)
+    op.create_table('invites',
+    sa.Column('invite_id', sa.Integer(), nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.Column('expiry_date', sa.Date(), nullable=False),
+    sa.Column('token', sa.String(length=250), nullable=False),
+    sa.Column('used', sa.Boolean(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('workspace_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['user_id'], ['pending_users.user_id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['workspace_id'], ['workspaces.id'], ),
+    sa.PrimaryKeyConstraint('invite_id')
+    )
+    op.create_index(op.f('ix_invites_invite_id'), 'invites', ['invite_id'], unique=False)
     op.create_table('notifications',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('title', sa.String(length=100), nullable=False),
@@ -98,6 +119,14 @@ def upgrade() -> None:
     op.create_index(op.f('ix_refresh_refresh_family_id'), 'refresh', ['refresh_family_id'], unique=False)
     op.create_index(op.f('ix_refresh_refresh_id'), 'refresh', ['refresh_id'], unique=False)
     op.create_index(op.f('ix_refresh_token'), 'refresh', ['token'], unique=True)
+    op.create_table('role',
+    sa.Column('role_id', sa.Integer(), nullable=False),
+    sa.Column('workspace_id', sa.Integer(), nullable=True),
+    sa.Column('name', sa.String(length=128), nullable=False),
+    sa.ForeignKeyConstraint(['workspace_id'], ['workspaces.id'], ),
+    sa.PrimaryKeyConstraint('role_id')
+    )
+    op.create_index(op.f('ix_role_role_id'), 'role', ['role_id'], unique=False)
     op.create_table('scan_file',
     sa.Column('scan_file_id', sa.Integer(), nullable=False),
     sa.Column('scan_id', sa.Integer(), nullable=False),
@@ -124,28 +153,13 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('sensitivity_subcategory_id')
     )
     op.create_index(op.f('ix_sensitivity_subcategory_sensitivity_subcategory_id'), 'sensitivity_subcategory', ['sensitivity_subcategory_id'], unique=False)
-    op.create_table('workspaces',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.String(length=255), nullable=False),
-    sa.Column('image', mysql.MEDIUMBLOB(), nullable=False),
-    sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['user_id'], ['user.user_id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_workspaces_id'), 'workspaces', ['id'], unique=False)
-    op.create_table('invites',
-    sa.Column('invite_id', sa.Integer(), nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=False),
-    sa.Column('expiry_date', sa.Date(), nullable=False),
-    sa.Column('token', sa.String(length=250), nullable=False),
-    sa.Column('used', sa.Boolean(), nullable=False),
+    op.create_table('user_workspace',
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('workspace_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['user_id'], ['pending_users.user_id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['user_id'], ['user.user_id'], ),
     sa.ForeignKeyConstraint(['workspace_id'], ['workspaces.id'], ),
-    sa.PrimaryKeyConstraint('invite_id')
+    sa.PrimaryKeyConstraint('user_id', 'workspace_id')
     )
-    op.create_index(op.f('ix_invites_invite_id'), 'invites', ['invite_id'], unique=False)
     op.create_table('naming_convention_scan_result',
     sa.Column('naming_convention_scan_result_id', sa.Integer(), nullable=False),
     sa.Column('scan_file_id', sa.Integer(), nullable=False),
@@ -157,23 +171,6 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('naming_convention_scan_result_id')
     )
     op.create_index(op.f('ix_naming_convention_scan_result_naming_convention_scan_result_id'), 'naming_convention_scan_result', ['naming_convention_scan_result_id'], unique=False)
-    op.create_table('role',
-    sa.Column('role_id', sa.Integer(), nullable=False),
-    sa.Column('workspace_id', sa.Integer(), nullable=True),
-    sa.Column('name', sa.String(length=128), nullable=False),
-    sa.ForeignKeyConstraint(['workspace_id'], ['workspaces.id'], ),
-    sa.PrimaryKeyConstraint('role_id')
-    )
-    op.create_index(op.f('ix_role_role_id'), 'role', ['role_id'], unique=False)
-    op.create_table('scan_file_detection',
-    sa.Column('scan_file_detection_id', sa.Integer(), nullable=False),
-    sa.Column('scan_file_id', sa.Integer(), nullable=True),
-    sa.Column('sensitivity_subcategory', sa.String(length=64), nullable=True),
-    sa.Column('page_number', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['scan_file_id'], ['scan_file.scan_file_id'], ),
-    sa.PrimaryKeyConstraint('scan_file_detection_id')
-    )
-    op.create_index(op.f('ix_scan_file_detection_scan_file_detection_id'), 'scan_file_detection', ['scan_file_detection_id'], unique=False)
     op.create_table('role_permission',
     sa.Column('role_permission_id', sa.Integer(), nullable=False),
     sa.Column('role_id', sa.Integer(), nullable=True),
@@ -184,6 +181,15 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('role_permission_id')
     )
     op.create_index(op.f('ix_role_permission_role_permission_id'), 'role_permission', ['role_permission_id'], unique=False)
+    op.create_table('scan_file_detection',
+    sa.Column('scan_file_detection_id', sa.Integer(), nullable=False),
+    sa.Column('scan_file_id', sa.Integer(), nullable=True),
+    sa.Column('sensitivity_subcategory', sa.String(length=64), nullable=True),
+    sa.Column('page_number', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['scan_file_id'], ['scan_file.scan_file_id'], ),
+    sa.PrimaryKeyConstraint('scan_file_detection_id')
+    )
+    op.create_index(op.f('ix_scan_file_detection_scan_file_detection_id'), 'scan_file_detection', ['scan_file_detection_id'], unique=False)
     op.create_table('user_role',
     sa.Column('user_role_id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
@@ -201,30 +207,31 @@ def downgrade() -> None:
     # ### commands auto generated by Alembic - please adjust! ###
     op.drop_index(op.f('ix_user_role_user_role_id'), table_name='user_role')
     op.drop_table('user_role')
-    op.drop_index(op.f('ix_role_permission_role_permission_id'), table_name='role_permission')
-    op.drop_table('role_permission')
     op.drop_index(op.f('ix_scan_file_detection_scan_file_detection_id'), table_name='scan_file_detection')
     op.drop_table('scan_file_detection')
-    op.drop_index(op.f('ix_role_role_id'), table_name='role')
-    op.drop_table('role')
+    op.drop_index(op.f('ix_role_permission_role_permission_id'), table_name='role_permission')
+    op.drop_table('role_permission')
     op.drop_index(op.f('ix_naming_convention_scan_result_naming_convention_scan_result_id'), table_name='naming_convention_scan_result')
     op.drop_table('naming_convention_scan_result')
-    op.drop_index(op.f('ix_invites_invite_id'), table_name='invites')
-    op.drop_table('invites')
-    op.drop_index(op.f('ix_workspaces_id'), table_name='workspaces')
-    op.drop_table('workspaces')
+    op.drop_table('user_workspace')
     op.drop_index(op.f('ix_sensitivity_subcategory_sensitivity_subcategory_id'), table_name='sensitivity_subcategory')
     op.drop_table('sensitivity_subcategory')
     op.drop_index(op.f('ix_scan_naming_convention_scan_naming_convention_id'), table_name='scan_naming_convention')
     op.drop_table('scan_naming_convention')
     op.drop_index(op.f('ix_scan_file_scan_file_id'), table_name='scan_file')
     op.drop_table('scan_file')
+    op.drop_index(op.f('ix_role_role_id'), table_name='role')
+    op.drop_table('role')
     op.drop_index(op.f('ix_refresh_token'), table_name='refresh')
     op.drop_index(op.f('ix_refresh_refresh_id'), table_name='refresh')
     op.drop_index(op.f('ix_refresh_refresh_family_id'), table_name='refresh')
     op.drop_table('refresh')
     op.drop_index(op.f('ix_notifications_id'), table_name='notifications')
     op.drop_table('notifications')
+    op.drop_index(op.f('ix_invites_invite_id'), table_name='invites')
+    op.drop_table('invites')
+    op.drop_index(op.f('ix_workspaces_id'), table_name='workspaces')
+    op.drop_table('workspaces')
     op.drop_index(op.f('ix_user_user_id'), table_name='user')
     op.drop_index(op.f('ix_user_oid'), table_name='user')
     op.drop_table('user')
