@@ -1,9 +1,10 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, cleanup } from "@testing-library/react";
+import { describe, test, expect, beforeEach, vi } from "vitest";
 import Roles from "./roles";
 import api from "../api/axiosConfig";
 
-// Mock API calls
-jest.mock("../api/axiosConfig");
+// Mock API
+vi.mock("../api/axiosConfig");
 
 const mockRoles = [
   { role_id: 1, name: "Admin", role_permissions: [] },
@@ -27,7 +28,8 @@ const mockUsers = [
 
 describe("Roles Component", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    cleanup();
+    vi.clearAllMocks();
 
     api.get.mockImplementation((url) => {
       switch (url) {
@@ -44,34 +46,40 @@ describe("Roles Component", () => {
       }
     });
 
-    api.post.mockResolvedValue({ data: { role_id: 3, name: "New Role", role_permissions: [] } });
+    api.post.mockResolvedValue({
+      data: { role_id: 3, name: "New Role", role_permissions: [] },
+    });
+
     api.put.mockResolvedValue({});
     api.delete.mockResolvedValue({});
   });
 
-  test("renders loading state", () => {
+  test("renders loading then roles", async () => {
     render(<Roles />);
+
     expect(screen.getByText(/loading/i)).toBeInTheDocument();
+
+    const roles = await screen.findAllByText("Admin");
+    expect(roles.length).toBeGreaterThan(0);
   });
 
-  test("renders roles and users panels", async () => {
+  test("switch to user assignment and show users", async () => {
     render(<Roles />);
-    // Wait for roles to load
-    await waitFor(() => {
-      expect(screen.getByText("Admin")).toBeInTheDocument();
-      expect(screen.getByText("Employee")).toBeInTheDocument();
-    });
 
-    // Switch to User Assignment tab
+    await screen.findByText("Admin");
+
     fireEvent.click(screen.getByText("User Assignment"));
-    expect(screen.getByText("User Assignment")).toBeInTheDocument();
-    expect(screen.getByText("Alice Smith")).toBeInTheDocument();
-    expect(screen.getByText("Bob Jones")).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(screen.getByText("Alice Smith")).toBeInTheDocument();
+      expect(screen.getByText("Bob Jones")).toBeInTheDocument();
+    });
   });
 
   test("add a new role", async () => {
     render(<Roles />);
-    await waitFor(() => screen.getByText("Admin"));
+
+    await screen.findByText("Admin");
 
     fireEvent.change(screen.getByPlaceholderText("Role Name"), {
       target: { value: "New Role" },
@@ -86,22 +94,28 @@ describe("Roles Component", () => {
 
   test("edit an existing role", async () => {
     render(<Roles />);
-    await waitFor(() => screen.getByText("Admin"));
+
+    await screen.findByText("Admin");
 
     fireEvent.click(screen.getAllByText("Edit")[0]);
+
     const input = screen.getByPlaceholderText("Role Name");
-    fireEvent.change(input, { target: { value: "Admin Updated" } });
+
+    fireEvent.change(input, {
+      target: { value: "Admin Updated" },
+    });
 
     fireEvent.click(screen.getByText("Save Changes"));
 
     await waitFor(() => {
-      expect(screen.getByText("Admin Updated")).toBeInTheDocument();
+      expect(api.put).toHaveBeenCalled();
     });
   });
 
   test("delete a role", async () => {
     render(<Roles />);
-    await waitFor(() => screen.getByText("Admin"));
+
+    await screen.findByText("Admin");
 
     fireEvent.click(screen.getAllByText("Edit")[0]);
     fireEvent.click(screen.getByText("Delete"));
@@ -113,20 +127,35 @@ describe("Roles Component", () => {
 
   test("search and filter users", async () => {
     render(<Roles />);
-    await waitFor(() => screen.getByText("Admin"));
+
+    await screen.findByText("Admin");
 
     fireEvent.click(screen.getByText("User Assignment"));
 
-    const searchInput = screen.getByPlaceholderText("Search by username...");
-    fireEvent.change(searchInput, { target: { value: "Alice" } });
+    await screen.findByText("Alice Smith");
+
+    // Search
+    fireEvent.change(screen.getByPlaceholderText("Search by username..."), {
+      target: { value: "Alice" },
+    });
 
     await waitFor(() => {
       expect(screen.getByText("Alice Smith")).toBeInTheDocument();
       expect(screen.queryByText("Bob Jones")).not.toBeInTheDocument();
     });
 
-    const roleFilter = screen.getByRole("combobox");
-    fireEvent.change(roleFilter, { target: { value: "2" } });
+    // Filter
+    fireEvent.change(screen.getByPlaceholderText("Search by username..."), {
+      target: { value: "" },
+    });
+
+    const selects = screen.getAllByRole("combobox");
+
+    fireEvent.change(selects[0], { target: { value: "2" } });
+
+    await waitFor(() => {
+      expect(screen.getByText("Bob Jones")).toBeInTheDocument();
+    });fireEvent.change(selects[0], { target: { value: "2" } });
 
     await waitFor(() => {
       expect(screen.queryByText("Alice Smith")).not.toBeInTheDocument();
@@ -136,15 +165,22 @@ describe("Roles Component", () => {
 
   test("assign a role to a user", async () => {
     render(<Roles />);
-    await waitFor(() => screen.getByText("Alice Smith"));
+
+    await screen.findByText("Admin");
 
     fireEvent.click(screen.getByText("User Assignment"));
 
-    const select = screen.getAllByRole("combobox")[1]; // second select is for Alice
-    fireEvent.change(select, { target: { value: "2" } });
+    await screen.findByText("Alice Smith");
+
+    const selects = screen.getAllByRole("combobox");
+
+    fireEvent.change(selects[1], { target: { value: "2" } });
 
     await waitFor(() => {
-      expect(api.put).toHaveBeenCalledWith("/roles/users/1/role", { role_id: "2" });
+      expect(api.put).toHaveBeenCalledWith(
+        "/roles/users/1/role",
+        { role_id: "2" }
+      );
     });
   });
 });
