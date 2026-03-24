@@ -26,7 +26,7 @@ function App() {
   return (
     <>
     <Toast ref={toast} position="top-right"/>
-    {location.pathname == "/" && <Navbar />}
+    {location.pathname !== "/" && <Navbar />}
     <div className={location.pathname !== "/" ? "content-frame" : ""}>
       <Routes>
         <Route path="/" element={<Home toast={toast}/>} />
