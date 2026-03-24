@@ -1,7 +1,18 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Outlet, Routes, Route} from "react-router-dom";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import Dashboard from "./Dashboard.jsx";
+
+// Provide Outlet context so useOutletContext works
+function DashboardWithContext({ contextValue }) {
+  return (
+    <Routes>
+      <Route path="/" element={<Outlet context={contextValue} />}>
+        <Route index element={<Dashboard toast={() => {}} />} />
+      </Route>
+    </Routes>
+  );
+}
 
 vi.mock("../api/axiosConfig.js", () => ({
   default: {
@@ -42,9 +53,17 @@ describe("Dashboard Component", () => {
 
     // Test 1
     test("Test that correct information is displayed on dashboard", async () => {
+
+      // Define contextValue here!
+      const contextValue = {
+        toastNotifications: { current: { show: () => {} } }, // mimic Toast ref
+        visible: true,
+        setVisible: () => {},
+        setNotifications: () => {},
+      };
         render(
             <MemoryRouter>
-                <Dashboard />
+                <DashboardWithContext contextValue={contextValue} />
             </MemoryRouter>
         );
 
