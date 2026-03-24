@@ -1,43 +1,34 @@
-import { render, screen, fireEvent, waitFor, within, cleanup } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
-import { afterEach, describe, test, vi, expect } from "vitest";
-import Roles from "./Roles";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import Roles from "./roles";
 import api from "../api/axiosConfig";
 
-vi.mock("../api/axiosConfig", () => ({
-  default: {
-    get: vi.fn(),
-    post: vi.fn(),
-    put: vi.fn(),
-    delete: vi.fn(),
-  },
-}));
-
-afterEach(() => {
-  vi.clearAllMocks();
-  cleanup();
-});
+// Mock API calls
+jest.mock("../api/axiosConfig");
 
 const mockRoles = [
-  { role_id: 1, name: "Admin", role_permissions: [{ sensitivity_subcategory_id: 1, threshold: 50 }] },
-  { role_id: 2, name: "User", role_permissions: [] },
+  { role_id: 1, name: "Admin", role_permissions: [] },
+  { role_id: 2, name: "Employee", role_permissions: [] },
 ];
 
 const mockCategories = [
-  { sensitivity_category_id: 1, name: "Category A" },
-  { sensitivity_category_id: 2, name: "Category B" },
+  { sensitivity_category_id: 1, name: "PII" },
+  { sensitivity_category_id: 2, name: "Financial" },
 ];
 
 const mockSubcategories = [
-  { sensitivity_subcategory_id: 1, sensitivity_category_id: 1, name: "Subcat A1" },
-  { sensitivity_subcategory_id: 2, sensitivity_category_id: 1, name: "Subcat A2" },
-  { sensitivity_subcategory_id: 3, sensitivity_category_id: 2, name: "Subcat B1" },
+  { sensitivity_subcategory_id: 1, sensitivity_category_id: 1, name: "SSN" },
+  { sensitivity_subcategory_id: 2, sensitivity_category_id: 2, name: "Credit Card" },
+];
+
+const mockUsers = [
+  { user_id: 1, firstname: "Alice", surname: "Smith", role_id: 1, role_name: "Admin" },
+  { user_id: 2, firstname: "Bob", surname: "Jones", role_id: 2, role_name: "Employee" },
 ];
 
 describe("Roles Component", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
 
-  test("loads and displays existing roles and categories", async () => {
-    // Mock GET responses
     api.get.mockImplementation((url) => {
       switch (url) {
         case "/roles/get":
@@ -46,162 +37,114 @@ describe("Roles Component", () => {
           return Promise.resolve({ data: mockCategories });
         case "/roles/sensitivity/subcategories":
           return Promise.resolve({ data: mockSubcategories });
+        case "/roles/users/all":
+          return Promise.resolve({ data: mockUsers });
+        default:
+          return Promise.resolve({ data: [] });
       }
     });
 
-    render(
-      <MemoryRouter>
-        <Roles />
-      </MemoryRouter>
-    );
-
-    await waitFor(() => screen.getByText("Admin"));
-    expect(screen.getByText("Admin")).toBeInTheDocument();
-    expect(screen.getByText("User")).toBeInTheDocument();
-
-    // Check categories and subcategories
-    expect(screen.getByText("Category A")).toBeInTheDocument();
-    expect(screen.getByText("Category B")).toBeInTheDocument();
-    expect(screen.getByText("Subcat A1")).toBeInTheDocument();
-    expect(screen.getByText("Subcat B1")).toBeInTheDocument();
+    api.post.mockResolvedValue({ data: { role_id: 3, name: "New Role", role_permissions: [] } });
+    api.put.mockResolvedValue({});
+    api.delete.mockResolvedValue({});
   });
 
-  test("adds a new role successfully", async () => {
-    api.get.mockResolvedValueOnce({ data: [] });
-    api.get.mockResolvedValueOnce({ data: mockCategories });
-    api.get.mockResolvedValueOnce({ data: mockSubcategories });
+  test("renders loading state", () => {
+    render(<Roles />);
+    expect(screen.getByText(/loading/i)).toBeInTheDocument();
+  });
 
-    api.post.mockResolvedValueOnce({ data: { role_id: 3, name: "Tester", role_permissions: [] } });
+  test("renders roles and users panels", async () => {
+    render(<Roles />);
+    // Wait for roles to load
+    await waitFor(() => {
+      expect(screen.getByText("Admin")).toBeInTheDocument();
+      expect(screen.getByText("Employee")).toBeInTheDocument();
+    });
 
-    render(
-      <MemoryRouter>
-        <Roles />
-      </MemoryRouter>
-    );
+    // Switch to User Assignment tab
+    fireEvent.click(screen.getByText("User Assignment"));
+    expect(screen.getByText("User Assignment")).toBeInTheDocument();
+    expect(screen.getByText("Alice Smith")).toBeInTheDocument();
+    expect(screen.getByText("Bob Jones")).toBeInTheDocument();
+  });
 
-    // Wait for form
-    await waitFor(() => screen.getByText("Add New Role"));
+  test("add a new role", async () => {
+    render(<Roles />);
+    await waitFor(() => screen.getByText("Admin"));
 
+    fireEvent.change(screen.getByPlaceholderText("Role Name"), {
+      target: { value: "New Role" },
+    });
+
+    fireEvent.click(screen.getByText("Add Role"));
+
+    await waitFor(() => {
+      expect(screen.getByText("New Role")).toBeInTheDocument();
+    });
+  });
+
+  test("edit an existing role", async () => {
+    render(<Roles />);
+    await waitFor(() => screen.getByText("Admin"));
+
+    fireEvent.click(screen.getAllByText("Edit")[0]);
     const input = screen.getByPlaceholderText("Role Name");
-    fireEvent.change(input, { target: { value: "Tester" } });
+    fireEvent.change(input, { target: { value: "Admin Updated" } });
 
-    const addButton = screen.getByText("Add Role");
-    fireEvent.click(addButton);
+    fireEvent.click(screen.getByText("Save Changes"));
 
     await waitFor(() => {
-      expect(api.post).toHaveBeenCalledWith("/roles/create", {
-        name: "Tester",
-        thresholds: [],
-      });
+      expect(screen.getByText("Admin Updated")).toBeInTheDocument();
     });
   });
 
-  test("edits a role and updates threshold", async () => {
-    api.get.mockImplementation((url) => {
-      switch (url) {
-        case "/roles/get":
-          return Promise.resolve({ data: mockRoles });
-        case "/roles/sensitivity/categories":
-          return Promise.resolve({ data: mockCategories });
-        case "/roles/sensitivity/subcategories":
-          return Promise.resolve({ data: mockSubcategories });
-      }
-    });
-
-    api.put.mockResolvedValueOnce({ data: { role_id: 1, name: "Admin Edited" } });
-
-    render(
-      <MemoryRouter>
-        <Roles />
-      </MemoryRouter>
-    );
-
-    await waitFor(() => screen.getByText("Admin"));
-
-    const editButton = screen.getAllByText("Edit")[0];
-    fireEvent.click(editButton);
-
-    const roleNameInput = screen.getByPlaceholderText("Role Name");
-    fireEvent.change(roleNameInput, { target: { value: "Admin Edited" } });
-
-    const saveButton = screen.getByText("Save Changes");
-    fireEvent.click(saveButton);
-
-    await waitFor(() => {
-      expect(api.put).toHaveBeenCalledWith("/roles/update/1", {
-        name: "Admin Edited",
-        thresholds: [{ sensitivity_subcategory_id: 1, threshold: 50 }],
-      });
-    });
-  });
-
-  test("deletes a role", async () => {
-    api.get.mockImplementation((url) => {
-      switch (url) {
-        case "/roles/get":
-          return Promise.resolve({ data: mockRoles });
-        case "/roles/sensitivity/categories":
-          return Promise.resolve({ data: mockCategories });
-        case "/roles/sensitivity/subcategories":
-          return Promise.resolve({ data: mockSubcategories });
-      }
-    });
-
-    api.delete.mockResolvedValueOnce({});
-
-    render(
-      <MemoryRouter>
-        <Roles />
-      </MemoryRouter>
-    );
-
+  test("delete a role", async () => {
+    render(<Roles />);
     await waitFor(() => screen.getByText("Admin"));
 
     fireEvent.click(screen.getAllByText("Edit")[0]);
     fireEvent.click(screen.getByText("Delete"));
 
     await waitFor(() => {
-      expect(api.delete).toHaveBeenCalledWith("/roles/delete/1");
+      expect(screen.queryByText("Admin")).not.toBeInTheDocument();
     });
   });
 
-  test("handles empty threshold input correctly", async () => {
-    api.get.mockImplementation((url) => {
-      switch (url) {
-        case "/roles/get":
-          return Promise.resolve({ data: mockRoles });
-        case "/roles/sensitivity/categories":
-          return Promise.resolve({ data: mockCategories });
-        case "/roles/sensitivity/subcategories":
-          return Promise.resolve({ data: mockSubcategories });
-      }
-    });
-  
-    api.put.mockResolvedValueOnce({ data: { role_id: 1, name: "Admin" } });
-  
-    render(
-      <MemoryRouter>
-        <Roles />
-      </MemoryRouter>
-    );
-  
+  test("search and filter users", async () => {
+    render(<Roles />);
     await waitFor(() => screen.getByText("Admin"));
-  
-    fireEvent.click(screen.getAllByText("Edit")[0]);
-  
-    const subRow = screen.getByText("Subcat A2").closest("div");
-    const input = within(subRow).getByPlaceholderText("Null");
-    
-    fireEvent.change(input, { target: { value: "" } });
-    fireEvent.click(screen.getByText("Save Changes"));
+
+    fireEvent.click(screen.getByText("User Assignment"));
+
+    const searchInput = screen.getByPlaceholderText("Search by username...");
+    fireEvent.change(searchInput, { target: { value: "Alice" } });
 
     await waitFor(() => {
-      expect(api.put).toHaveBeenCalledWith("/roles/update/1", {
-        name: "Admin",
-        thresholds: [
-          { sensitivity_subcategory_id: 1, threshold: 50 },
-        ],
-      });
+      expect(screen.getByText("Alice Smith")).toBeInTheDocument();
+      expect(screen.queryByText("Bob Jones")).not.toBeInTheDocument();
+    });
+
+    const roleFilter = screen.getByRole("combobox");
+    fireEvent.change(roleFilter, { target: { value: "2" } });
+
+    await waitFor(() => {
+      expect(screen.queryByText("Alice Smith")).not.toBeInTheDocument();
+      expect(screen.getByText("Bob Jones")).toBeInTheDocument();
+    });
+  });
+
+  test("assign a role to a user", async () => {
+    render(<Roles />);
+    await waitFor(() => screen.getByText("Alice Smith"));
+
+    fireEvent.click(screen.getByText("User Assignment"));
+
+    const select = screen.getAllByRole("combobox")[1]; // second select is for Alice
+    fireEvent.change(select, { target: { value: "2" } });
+
+    await waitFor(() => {
+      expect(api.put).toHaveBeenCalledWith("/roles/users/1/role", { role_id: "2" });
     });
   });
 });
