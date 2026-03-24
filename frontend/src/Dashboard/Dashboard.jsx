@@ -1,38 +1,12 @@
 import Invite from "../invites/invites";
-import { useState, useEffect, useRef } from "react";
 import api from "../api/axiosConfig.js";
 import styles from "./dashboard.module.css"
-import { Toast } from "primereact/toast"
-import Notification from "../components/notifications/Notification.jsx";
-import Header from "../components/header/header.jsx";
-import Sidebar from "../components/navbar/Sidebar.jsx";
+import { Toast } from "primereact/toast";
+import { useOutletContext } from "react-router-dom";
 
 function Dashboard({toast}) {
-  const [visible, setVisible] = useState(false);
-  const [sidebarVisible, setSidebarVisible] = useState(true)
-  const [user, setUser] = useState({});
-  const [workspace, setWorkspace] = useState(null)
-  const [notifications, setNotifications] = useState([])
-  const toastNotifications = useRef(null);
 
-  // Getting user information and all their notifications on loading
-  useEffect(() => {
-      api.get("/workspace/dashboard")
-      .then(res => {
-          if (res.data.user) {
-            setUser(res.data.user);
-            console.log(res.data.user)
-            setWorkspace(res.data.workspace);
-          }
-      })
-      .catch(error => console.log(error))
-
-      api.get("/workspace/get-notifications")
-        .then(res => {
-            setNotifications(res.data)
-        })
-        .catch(error => console.log(error))
-  }, []);
+  const { toastNotifications, visible, setVisible, setNotifications } = useOutletContext();
 
   // Function to handle removing notifications
   const handleRemove = async (id) => {
@@ -48,12 +22,7 @@ function Dashboard({toast}) {
 
   return (
     <div className={styles.container}>
-        {sidebarVisible &&(<div className={styles.navbar_container}>
-          <Sidebar setSidebarVisible={setSidebarVisible} firstname={user.firstname} surname={user.surname} email={user.email} setVisible={setVisible} role={user.role}/>
-        </div>)}
-        
         <div className={styles.main}>
-          <Header firstname={user.firstname} lastname={user.surname} workspace={workspace} sidebarVisible={sidebarVisible} setSidebarVisible={setSidebarVisible} toastRef={toastNotifications} notifications={notifications} setNotifications={setNotifications}/>
           <div className={styles.content}>
             <h1 data-testid="dashboard-h1">Dashboard</h1>
             <Invite className={styles.d_invite_dialog} visible={visible} setVisible={setVisible} toast={toast}/>

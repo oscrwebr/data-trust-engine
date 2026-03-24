@@ -1,7 +1,7 @@
 import "./App.css"
 import { useRef } from "react";
 
-import { BrowserRouter, Routes, Route , useLocation} from "react-router-dom";
+import { BrowserRouter, Routes, Router, Route , useLocation} from "react-router-dom";
 import Dashboard from './dashboard/Dashboard';
 import EmployeeInviteError from './invites/error.jsx';
 import Roles from "./roles/roles";
@@ -13,6 +13,7 @@ import Test from "./Test/Test.jsx";
 import Unprocessable422 from "./Errors/unprocessable422.jsx";
 import WorkspaceJoinedError from "./invites/WorkspaceJoined.jsx";
 import Forbidden403 from "./Errors/Forbidden403.jsx";
+import Layout from "./components/layout/layout.jsx";
 
 
 function App() {
@@ -25,11 +26,21 @@ function App() {
   return (
     <>
     <Toast ref={toast} position="top-right"/>
-    <div>
+
       <Routes>
+        <Route element={<Layout />}>
+
+          {/* Elements in here will inherit the sidebar  */}
+          <Route path="/roles" element={<Roles />} />
+          <Route path="/view-employees" element={null} />
+          <Route path="/manage-employees" element={null} />
+          <Route path="/upload-org-chart" element={null} />
+          <Route path="/settings" element={null} />
+          <Route path="/dashboard" element={<Dashboard toast={toast}/>} />
+        </Route>
+
+        {/* Elements in here will not inherit the sidebar */}
         <Route path="/" element={<Home toast={toast}/>} />
-        <Route path="/roles" element={<Roles />} />
-        <Route path="/dashboard" element={<Dashboard toast={toast}/>} />
         <Route path="/create-workspace" element={<CreateWorkspace  toast={toast}/>} />
         <Route path="/test" element={<Test/>} />
         <Route path="/error/422" element={<Unprocessable422/>}/>
@@ -37,7 +48,7 @@ function App() {
         <Route path="/invite-error/:type" element={<EmployeeInviteError toast={toast}/>} />
         <Route path="/workspace-joined" element={<WorkspaceJoinedError />} />
       </Routes>
-    </div>
+
     </>
   );
 }
