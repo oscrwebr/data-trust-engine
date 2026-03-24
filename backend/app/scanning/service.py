@@ -103,7 +103,11 @@ def fetch_graph_file(graph_file_id: str):
             return test_files_directory / "legal_case_report_1.pdf"
         case "lc222":
             return test_files_directory / "legal_case_report_2.pdf"
-        
+    
+
+def get_file(db: Session, file_id: int):
+    return repository.get_file_by_id(db, file_id)
+
 
 # Get hash of a file
 def get_file_hash(file):

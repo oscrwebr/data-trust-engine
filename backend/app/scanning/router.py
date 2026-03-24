@@ -36,9 +36,15 @@ def create_file(graph_file_id: str, file_name: str, db: Session = Depends(get_da
     repository.create_file(db, graph_file_id, file_name, hash_result)
 
 
+@router.get("/get_file/{file_id}")
+def get_file(file_id: int, db: Session = Depends(get_database)):
+    return service.get_file(db, file_id)
+
+
 @router.get("/get_all_files")
 def get_all_files(db: Session = Depends(get_database)):
     return repository.get_all_files(db=db)
+
 
 @router.post("/organisation_scan")
 def organisation_scan(organisation_scan_request: OrganisationScanRequest, db: Session = Depends(get_database)):
