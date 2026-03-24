@@ -7,6 +7,7 @@ import EmployeeInviteError from './invites/error.jsx';
 import Roles from "./roles/roles";
 import CreateWorkspace from "./workspace/CreateWorkspace";
 import Home from "./home/home.jsx"
+import FileOverviewPage from "./FileOverview/FileOverviewPage.jsx";
 import { Toast } from 'primereact/toast';
 
 import Test from "./Test/Test.jsx";
@@ -32,6 +33,7 @@ function App() {
         <Route path="/roles" element={<Roles />} />
         <Route path="/dashboard" element={<Dashboard toast={toast}/>} />
         <Route path="/create-workspace" element={<CreateWorkspace  toast={toast}/>} />
+        <Route path="/files/:file_id" element={<FileOverviewPage />} />
         <Route path="/test" element={<Test/>} />
         <Route path="/error/422" element={<Unprocessable422/>}/>
         <Route path="/error/403" element={<Forbidden403/>}/>
