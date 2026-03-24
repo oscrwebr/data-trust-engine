@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.core.database import get_database
 from app.scanning import service, repository
 from pydantic import BaseModel
-from app.scanning.schemas import OrganisationScanRequest
+from app.scanning.schemas import OrganisationScanRequest, FileResponse
 
 router = APIRouter(prefix="/scanning", tags=["scanning"])
 
@@ -36,9 +36,14 @@ def create_file(graph_file_id: str, file_name: str, db: Session = Depends(get_da
     repository.create_file(db, graph_file_id, file_name, hash_result)
 
 
-@router.get("/get_file/{file_id}")
+@router.get("/get_file/{file_id}", response_model=FileResponse)
 def get_file(file_id: int, db: Session = Depends(get_database)):
-    return service.get_file(db, file_id)
+    file = service.get_file(db, file_id)
+
+    if not file:
+        raise HTTPException(status_code=404, detail="File not found")
+    
+    return file 
 
 
 @router.get("/get_all_files")

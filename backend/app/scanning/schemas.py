@@ -9,5 +9,15 @@ from pydantic import BaseModel
 #     scan_id: int
 #     status: str
 
+
+class FileResponse(BaseModel):
+    file_id: int
+    file_name: str
+    hash: str
+
+    class Config:
+        from_attributes = True
+
+
 class OrganisationScanRequest(BaseModel):
     naming_convention_ids: list[int]
