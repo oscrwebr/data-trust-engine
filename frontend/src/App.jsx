@@ -49,7 +49,6 @@ function App() {
         <Route path="/dashboard" element={<Dashboard toast={toast}/>} />
         <Route path="/create-workspace" element={<CreateWorkspace  toast={toast}/>} />
         <Route path="/files/:file_id" element={<FileOverviewPage />} />
-        <Route path="/create-workspace" element={<CreateWorkspace toast={toast}/>} />
         <Route path="/test" element={<Test/>} />
         <Route path="/error/422" element={<Unprocessable422/>}/>
         <Route path="/error/403" element={<Forbidden403/>}/>
