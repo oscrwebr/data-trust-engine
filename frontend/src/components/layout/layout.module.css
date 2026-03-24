@@ -1,0 +1,22 @@
+.navbar_container {
+  flex: 0 0 18%;  
+  background-color: #191919;
+  display: flex;
+  flex-direction: column;
+  position: relative; 
+  min-width: 200px;
+}
+
+.container {
+  display: flex;
+  height: 100vh;
+}
+
+.main {
+  flex: 1;
+  overflow-y: auto;
+}   
+
+.content {
+    padding-left: 20px;
+}

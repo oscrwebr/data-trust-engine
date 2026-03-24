@@ -1,6 +1,6 @@
 from app.authentication.service import create_user
 from app.workspaces.models import Notification
-from app.workspaces.repository import add_workspace
+from app.workspaces.repository import add_workspace, add_user_workspace
 from app.invites.repository import add_invite
 from sqlalchemy import insert
 from app.authentication.models import User
@@ -29,12 +29,13 @@ def test_create_user_service_to_add_employee_creates_notification(db):
     }
 
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    admin = insert(User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="employee")
+    admin = insert(User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="admin")
     admin_instance=db.execute(admin)
 
     pending_user = add_user(db, "SandraGhost1@hotmail.com")
 
-    workspace = add_workspace(db=db, name="Test Workspace", image=image, user_id=admin_instance.inserted_primary_key[0])
+    workspace = add_workspace(db=db, name="Test Workspace", image=image)
+    add_user_workspace(db, workspace.id, admin_instance.inserted_primary_key[0])
     add_invite(db=db, createdAt=datetime.now(), expiryDate="2030-03-03", token=token, used=False, user_id=pending_user.user_id, workspace=workspace)
     create_user(db=db, details=dummy_user, role="employee", workspace_id=workspace.id)
 

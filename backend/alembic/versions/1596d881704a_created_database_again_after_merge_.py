@@ -1,8 +1,8 @@
-"""generate
+"""Created database again after merge conflicts
 
-Revision ID: ea079acd41ad
+Revision ID: 1596d881704a
 Revises: 
-Create Date: 2026-03-24 11:39:26.547465
+Create Date: 2026-03-24 13:40:10.110958
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision: str = 'ea079acd41ad'
+revision: str = '1596d881704a'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -78,6 +78,26 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_user_oid'), 'user', ['oid'], unique=True)
     op.create_index(op.f('ix_user_user_id'), 'user', ['user_id'], unique=False)
+    op.create_table('workspaces',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(length=255), nullable=False),
+    sa.Column('image', mysql.MEDIUMBLOB(), nullable=False),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_workspaces_id'), 'workspaces', ['id'], unique=False)
+    op.create_table('invites',
+    sa.Column('invite_id', sa.Integer(), nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.Column('expiry_date', sa.Date(), nullable=False),
+    sa.Column('token', sa.String(length=250), nullable=False),
+    sa.Column('used', sa.Boolean(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('workspace_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['user_id'], ['pending_users.user_id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['workspace_id'], ['workspaces.id'], ),
+    sa.PrimaryKeyConstraint('invite_id')
+    )
+    op.create_index(op.f('ix_invites_invite_id'), 'invites', ['invite_id'], unique=False)
     op.create_table('notifications',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('title', sa.String(length=100), nullable=False),
@@ -131,28 +151,13 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('sensitivity_subcategory_id')
     )
     op.create_index(op.f('ix_sensitivity_subcategory_sensitivity_subcategory_id'), 'sensitivity_subcategory', ['sensitivity_subcategory_id'], unique=False)
-    op.create_table('workspaces',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.String(length=255), nullable=False),
-    sa.Column('image', mysql.MEDIUMBLOB(), nullable=False),
-    sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['user_id'], ['user.user_id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_workspaces_id'), 'workspaces', ['id'], unique=False)
-    op.create_table('invites',
-    sa.Column('invite_id', sa.Integer(), nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=False),
-    sa.Column('expiry_date', sa.Date(), nullable=False),
-    sa.Column('token', sa.String(length=250), nullable=False),
-    sa.Column('used', sa.Boolean(), nullable=False),
+    op.create_table('user_workspace',
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('workspace_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['user_id'], ['pending_users.user_id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['user_id'], ['user.user_id'], ),
     sa.ForeignKeyConstraint(['workspace_id'], ['workspaces.id'], ),
-    sa.PrimaryKeyConstraint('invite_id')
+    sa.PrimaryKeyConstraint('user_id', 'workspace_id')
     )
-    op.create_index(op.f('ix_invites_invite_id'), 'invites', ['invite_id'], unique=False)
     op.create_table('naming_convention_scan_result',
     sa.Column('naming_convention_scan_result_id', sa.Integer(), nullable=False),
     sa.Column('scan_file_id', sa.Integer(), nullable=False),
@@ -195,10 +200,7 @@ def downgrade() -> None:
     op.drop_table('role_permission')
     op.drop_index(op.f('ix_naming_convention_scan_result_naming_convention_scan_result_id'), table_name='naming_convention_scan_result')
     op.drop_table('naming_convention_scan_result')
-    op.drop_index(op.f('ix_invites_invite_id'), table_name='invites')
-    op.drop_table('invites')
-    op.drop_index(op.f('ix_workspaces_id'), table_name='workspaces')
-    op.drop_table('workspaces')
+    op.drop_table('user_workspace')
     op.drop_index(op.f('ix_sensitivity_subcategory_sensitivity_subcategory_id'), table_name='sensitivity_subcategory')
     op.drop_table('sensitivity_subcategory')
     op.drop_index(op.f('ix_scan_naming_convention_scan_naming_convention_id'), table_name='scan_naming_convention')
@@ -211,6 +213,10 @@ def downgrade() -> None:
     op.drop_table('refresh')
     op.drop_index(op.f('ix_notifications_id'), table_name='notifications')
     op.drop_table('notifications')
+    op.drop_index(op.f('ix_invites_invite_id'), table_name='invites')
+    op.drop_table('invites')
+    op.drop_index(op.f('ix_workspaces_id'), table_name='workspaces')
+    op.drop_table('workspaces')
     op.drop_index(op.f('ix_user_user_id'), table_name='user')
     op.drop_index(op.f('ix_user_oid'), table_name='user')
     op.drop_table('user')

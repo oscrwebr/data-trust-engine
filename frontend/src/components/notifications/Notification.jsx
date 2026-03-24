@@ -11,6 +11,8 @@ function Notification({title, body, date}) {
     });
 
     return (
+
+        // Component for holding notifications which uses PrimeReact toasts as templates
         <div className="flex flex-column align-items-left" style={{ flex: '1' }}>
             <div className={styles.n_header}>
                 <strong>{title}</strong>
