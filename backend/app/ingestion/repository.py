@@ -22,13 +22,24 @@ def create_folders_files(folders: dict, files: dict, db: Session) -> int:
     
     return status
 
-def insert_user_folders(folders: list, permissions_dict: dict, user_id: int, db: Session):
-    status = {}
-    # going through the folders in the list and adding their id to a list of folder_id
-    print(f"\n\npermissions_dict:\n{permissions_dict}\n\n")
-
+def insert_user_folders(user_folders: list, db: Session):
+    status = {
+        "status": 200
+    }
     try:
-        db.execute(insert(UserFolders), folders)
+        db.execute(insert(UserFolders), user_folders)
+        db.commit()
+    except Exception as e:
+        status["description"] = f"An error ocurred: {type(e).__name__} - {e}"
+        status["status"] = 403
+    return status
+
+def insert_user_files(user_files: list, db: Session):
+    status = {
+        "status": 200
+    }
+    try:
+        db.execute(insert(UserFiles), user_files)
         db.commit()
     except Exception as e:
         status["description"] = f"An error ocurred: {type(e).__name__} - {e}"

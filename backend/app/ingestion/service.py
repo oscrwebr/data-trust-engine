@@ -304,15 +304,19 @@ def get_all_files(access_token: str, id: int, db:Session) -> str:
     permissions_dict = get_permissions(shared_folders_files=shared_folders_files, access_token=access_token)
 
     # Go through folder and files and add them to the correct tables
-    folder_list, file_list = clean_folders_files_with_permissions(folder_file_data=folder_file_response["data"], permissions=permissions_dict, id=id, db=db)
+    ## Get two list[dict] for files and folders with the linked user that has to be added 
+    user_folders, user_files = clean_folders_files_with_permissions(folder_file_data=folder_file_response["data"], permissions=permissions_dict, id=id, db=db)
     
-    # repository.insert_user_folders(folders=folder_file_response["data"]["folder"], permissions_dict=permissions_dict, user_id=id, db=db)
-    # repository.insert_user_files(files=folder_file_response["data"]["file"], permissions_dict=permissions_dict, db=db)
+    iu_folders = repository.insert_user_folders(user_folders=user_folders, db=db)
+    iu_files = repository.insert_user_files(user_files=user_files, db=db)
+    
     print(permissions_dict)
     return {
+        "repo_response_u_folders": iu_folders,
+        "repo_response_u_files": iu_files,
         "permissions_dict": permissions_dict,
-        "folder_list": folder_list,
-        "file_list": file_list
+        "folder_list": user_folders,
+        "file_list": user_files
             }
     return {"status": folder_file_response["details"]}
 
