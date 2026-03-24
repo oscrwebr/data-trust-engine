@@ -2,8 +2,10 @@ from sqlalchemy.orm import Session
 from app.authentication import repository
 from ..core.security import create_refresh_token, create_access_token, hash_user_refresh_token
 from datetime import datetime, timezone, timedelta
+from app.workspaces.repository import add_notification, get_workspace_by_workspace_id
+from app.invites.repository import get_invite_by_workspace_id, update_invite_used_value
 
-def create_user(db, details: dict):
+def create_user(db, details: dict, role: str, workspace_id: int):
     split_name = details["name"].split()
     firstname, surname = split_name[0], split_name[-1]
 
@@ -12,9 +14,17 @@ def create_user(db, details: dict):
         firstname=firstname,
         surname=surname,
         email=details["email"],
-        oid=details["oid"]
+        oid=details["oid"],
+        role=role
     )
-    print(user)
+    
+    if(workspace_id != None and role == "employee"):
+        invite = get_invite_by_workspace_id(db, workspace_id)
+        if invite:
+            update_invite_used_value(db, invite.invite_id)
+            workspace = get_workspace_by_workspace_id(db, workspace_id)
+            add_notification(db, "Employee Accepted Invite", f"{firstname} {surname} accepted their invite request to join your workspace.", datetime.now(), workspace.user_id)
+
     return user
 
 def check_exists(oid: str, db):
@@ -92,7 +102,8 @@ def refresh_flow(db, client_refresh: str, current_time: datetime):
         return return_dict
     # ISSUING NEW ACCESS TOKEN AND REFRESH TOKEN
     uid = repository.get_uid_from_refresh_id(db=db, refresh_id = refresh_details.refresh_id)
-    access_token, refresh_token, new_entry_details = create_access_refresh(db=db, data={"userId": uid}, refresh_family_id=refresh_details.refresh_family_id)
+    user = repository.get_by_id(user_id=uid, db=db)
+    access_token, refresh_token, new_entry_details = create_access_refresh(db=db, data={"userId": uid, "role": user.role}, refresh_family_id=refresh_details.refresh_family_id)
     # UPDATING PREVIOUS REFRESH TOKEN
     repository.update_prev_refresh_entry(db=db, prev_id=refresh_details.refresh_id, new_id=new_entry_details.refresh_id)
     return_dict = {

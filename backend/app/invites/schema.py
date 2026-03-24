@@ -18,8 +18,8 @@ class EmailSchema(BaseModel):
    email: List[EmailStr]
 
 class InviteRequest(BaseModel):
-    email: Optional[str] = None
-    expiry_date: Optional[datetime] = None
+   email: Optional[str] = None
+   expiry_date: Optional[datetime] = None
 
 conf = ConnectionConfig(
    MAIL_FROM="datatrustengine@gmail.com",

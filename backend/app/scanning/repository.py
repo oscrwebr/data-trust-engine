@@ -21,6 +21,14 @@ def create_scan(db: Session, scan_type: ScanType):
     return scan
 
 
+def get_scan_by_id(db: Session, scan_id: int):
+    return db.query(Scan).filter(Scan.scan_id == scan_id).first()
+
+
+def get_all_scans(db: Session):
+    return db.query(Scan).all()
+
+
 def create_scan_file(db: Session, scan_id: int, file_id: int):
     scan_file = ScanFile(
         scan_id = scan_id,
@@ -32,6 +40,13 @@ def create_scan_file(db: Session, scan_id: int, file_id: int):
     db.refresh(scan_file)
 
     return scan_file
+
+
+def get_scan_file_by_scan_id_and_file_id(db: Session, scan_id: int, file_id: int):
+    return db.query(ScanFile).filter(
+        ScanFile.scan_id == scan_id, 
+        ScanFile.file_id == file_id
+    ).first()
 
 
 def create_scan_file_detection(db: Session, scan_file_id: int, sensitivity_subcategory: str, page_number: int):
@@ -48,8 +63,12 @@ def create_scan_file_detection(db: Session, scan_file_id: int, sensitivity_subca
     return scan_file_detection
 
 
-def create_file(db: Session, graph_file_id: str, name: str, extension: str, file_hash: str):
-    file = File(graph_file_id=graph_file_id, file_name=name, file_extension=extension, hash=file_hash)
+def get_scan_file_detections_by_scan_file_id(db: Session, scan_file_id: int):
+    return db.query(ScanFileDetection).filter(ScanFileDetection.scan_file_id == scan_file_id).all()
+
+
+def create_file(db: Session, graph_file_id: str, file_name: str, file_hash: str):
+    file = File(graph_file_id=graph_file_id, file_name=file_name, hash=file_hash)
     db.add(file)
     db.commit()
     db.refresh(file)

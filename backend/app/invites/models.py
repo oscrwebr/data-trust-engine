@@ -6,17 +6,25 @@ class Invite(Base):
     __tablename__ = 'invites'
 
     invite_id = Column(Integer, primary_key=True, index=True)
-    created_at = Column(DateTime)
-    expiry_date = Column(Date)
-    token = Column(String(250))
+    created_at = Column(DateTime, nullable=False)
+    expiry_date = Column(Date, nullable=False)
+    token = Column(String(250), nullable=False)
+    used = Column(Boolean, nullable=False)
 
-    # relations
+    # Relationship to user
     user_id = Column(
         Integer,
         ForeignKey("pending_users.user_id", ondelete="CASCADE"),  # <- cascade here
         nullable=False
     )
-
     pending_user = relationship("PendingUser", back_populates="invites")
 
-    # Must also link to the workspace table
+    # Relationship to workspace
+    workspace_id = Column(
+        Integer,
+        ForeignKey("workspaces.id"),
+        nullable=False
+    )
+    workspace = relationship("Workspace", back_populates="invites")
+
+    

@@ -1,12 +1,13 @@
 import { useRef, useEffect } from "react";
 import { Button } from "primereact/button";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 function Home({toast}) {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const toastParam = params.get("toast");
   const shownRef = useRef(false);
+  const nav = useNavigate();
 
   useEffect(() => {
     if (toastParam && toast.current && !shownRef.current) {
@@ -21,11 +22,16 @@ function Home({toast}) {
   }, [toastParam]);
 
   function handleCreateWorkspace(){
-    window.location.href = "http://localhost:8000/auth/sign-in?next=/test&signup=true"
+    window.location.href = "http://localhost:8000/auth/sign-in?next=/create-workspace&signup=true&role=1"
+  }
+
+  function handleSignIn(){
+    nav("/dashboard")
   }
 
   return (
     <div>
+      <Button onClick={handleSignIn}>Sign in</Button>
       <Button onClick={handleCreateWorkspace}>Create a workspace</Button>
     </div>
   );
