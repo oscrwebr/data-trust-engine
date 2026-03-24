@@ -1,8 +1,8 @@
-"""Created database again for merge review
+"""Created database again
 
-Revision ID: 477d539d7ce0
+Revision ID: 77f7e669dc4b
 Revises: 
-Create Date: 2026-03-24 10:05:18.989784
+Create Date: 2026-03-24 11:48:07.046379
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision: str = '477d539d7ce0'
+revision: str = '77f7e669dc4b'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
