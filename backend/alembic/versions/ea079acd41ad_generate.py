@@ -1,8 +1,8 @@
-"""Added the notifications table and linked it to users
+"""generate
 
-Revision ID: f5067e8d5ce5
+Revision ID: ea079acd41ad
 Revises: 
-Create Date: 2026-03-14 23:20:21.130311
+Create Date: 2026-03-24 11:39:26.547465
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision: str = 'f5067e8d5ce5'
+revision: str = 'ea079acd41ad'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -55,6 +55,7 @@ def upgrade() -> None:
     op.create_index(op.f('ix_role_role_id'), 'role', ['role_id'], unique=False)
     op.create_table('scans',
     sa.Column('scan_id', sa.Integer(), nullable=False),
+    sa.Column('scan_type', sa.String(length=64), nullable=False),
     sa.Column('started_at', sa.DateTime(), nullable=True),
     sa.Column('finished_at', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('scan_id')

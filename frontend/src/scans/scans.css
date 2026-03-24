@@ -1,0 +1,174 @@
+.scan-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 360px);
+    gap: 20px;
+    /* outline: 1px solid red; */
+}
+
+.scan-heading {
+    margin-bottom: 0;
+}
+
+.scan-card {
+    width: 360px;
+    height: 320px;
+    background: white;
+    border: 1px solid #d9e3f0;
+    border-radius: 14px;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.scan-card:hover {
+    /* filter: brightness(1.02); */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    cursor: pointer;   
+}
+
+
+
+.scan-type-organisation {
+    background: #F4F8FD;
+    border-color: #BEDBFF;
+}
+
+.scan-type-sensitivity {
+    background: #FAF8FD;
+    border-color: #E9D4FF;
+}
+
+.scan-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.scan-card-top-left {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.scan-type-icon {
+    display: flex;
+    align-items: center;
+    font-size: 30px;
+}
+
+.scan-type-text {
+    color: white;
+    padding: 4px 10px;
+    border-radius: 15px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.scan-type-icon-organisation {
+    color: #2563eb;
+}
+
+.scan-type-text-organisation {
+    background: #2563eb;
+}
+
+.scan-type-icon-sensitivity {
+    color: #9810FA;
+}
+
+.scan-type-text-sensitivity {
+    background: #9810FA;
+}
+
+.scan-card-top-right {
+    display: flex;
+    align-items: center;
+}
+
+.scan-status-text {
+    display: inline-flex;
+    align-items: center;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 15px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+
+.scan-status-completed {
+    background: #d9f5df;
+    color: #11823b;
+}
+
+.scan-status-ongoing {
+    background: #FEF3C6;
+    color: #BB4D00;
+}
+
+.scan-status-text svg {
+    font-size: 20px;
+    margin-right: 5px;
+}
+
+.scan-card-id-section {
+    margin-top: 10px;
+    margin-bottom: 0px;
+    display: flex;
+    flex-direction: column;
+}
+
+.scan-card-id {
+    font-size: 25px;
+    font-family: "Lucida Console", "Courier New", monospace;
+    color: #111827;
+    margin: 0;
+}
+
+.scan-card-id-heading {
+    font-size: 16px;
+    color: #6B7280;
+}
+
+.scan-card-dates {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    margin-bottom: 18px;
+}
+
+.scan-card-date-block {
+    display: flex;
+    flex-direction: column;
+}
+
+.scan-card-value {
+    margin: 0;
+    margin-top: 5px;
+    font-size: 18px;
+    font-weight: 400;
+    color: #111827;
+    line-height: 1.3;
+}
+
+.scan-card-total-files {
+    font-size: 26px;
+    font-weight: 1200px;
+}
+
+.scan-card-issue-files {
+    display: flex;
+    align-items: center;
+    color: #E7000B;
+    font-size: 26px;
+    gap: 5px;
+    font-weight: 1200px;
+}
+
+.scan-card-divider {
+    margin: 8px 0;
+}
+
+.scan-loading {
+    color: #6B7280;
+    font-size: 18px;
+}
