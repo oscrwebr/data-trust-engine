@@ -8,6 +8,7 @@ import Roles from "./roles/roles";
 import CreateWorkspace from "./workspace/CreateWorkspace";
 import Home from "./home/home.jsx"
 import { Toast } from 'primereact/toast';
+import Scans from "./scans/Scans.jsx";
 
 import Test from "./Test/Test.jsx";
 import Unprocessable422 from "./Errors/unprocessable422.jsx";
@@ -26,7 +27,6 @@ function App() {
   return (
     <>
     <Toast ref={toast} position="top-right"/>
-
       <Routes>
         <Route element={<Layout />}>
 
@@ -47,6 +47,7 @@ function App() {
         <Route path="/error/403" element={<Forbidden403/>}/>
         <Route path="/invite-error/:type" element={<EmployeeInviteError toast={toast}/>} />
         <Route path="/workspace-joined" element={<WorkspaceJoinedError />} />
+        <Route path="/scans" element={<Scans />} />
       </Routes>
 
     </>

@@ -9,7 +9,7 @@ function NavbarItem({ url, text, icon, onClick}) {
                 <span>{text}</span>
             </Link>
         </li>
-    )
+    );
 }
 
 export default NavbarItem
