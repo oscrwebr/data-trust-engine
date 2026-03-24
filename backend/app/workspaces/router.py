@@ -44,7 +44,6 @@ async def dashboard(db: Annotated[Session, Depends(get_database)], current_user:
         "email": user.email,
         "role": user.role}, "workspace":user.workspaces[0].name} if user else {"message": "no user"}
 
-
 @router.post("/request-join-workspace")
 async def create_notification(db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)], notification: NotificationSchema):
     result = add_notification(db, notification.title, notification.body, datetime.now(), current_user.user_id)

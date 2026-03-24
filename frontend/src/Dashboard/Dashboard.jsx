@@ -15,6 +15,7 @@ function Dashboard({toast}) {
   const [notifications, setNotifications] = useState([])
   const toastNotifications = useRef(null);
 
+  // Getting user information and all their notifications on loading
   useEffect(() => {
       api.get("/workspace/dashboard")
       .then(res => {
@@ -33,6 +34,7 @@ function Dashboard({toast}) {
         .catch(error => console.log(error))
   }, []);
 
+  // Function to handle removing notifications
   const handleRemove = async (id) => {
     try {
       await api.post("/workspace/delete-notification", {
@@ -55,6 +57,8 @@ function Dashboard({toast}) {
           <div className={styles.content}>
             <h1 data-testid="dashboard-h1">Dashboard</h1>
             <Invite className={styles.d_invite_dialog} visible={visible} setVisible={setVisible} toast={toast}/>
+
+            {/* This is how and where the notifications are loaded */}
             <Toast className={styles.d_toast} ref={toastNotifications} onRemove={(message) => handleRemove(message.id)} position="top-right" />
           </div>
         </div>

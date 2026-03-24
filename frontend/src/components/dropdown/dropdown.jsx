@@ -5,6 +5,7 @@ function SidebarDropdown({icon, label, children, openDropdown, setOpenDropdown})
 
     const isOpen = openDropdown === label;
 
+    // Logic to determine whether the dropdown is opened or closed
     const toggle = () => {
       if (isOpen) {
         setOpenDropdown(null);

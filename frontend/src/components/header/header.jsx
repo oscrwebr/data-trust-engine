@@ -9,6 +9,7 @@ function Header({firstname, lastname, workspace, sidebarVisible, setSidebarVisib
     const [isNotificationsVisible, setIsNotificationsVisible] = useState(false);
     const notificationCount = notifications.length;
 
+    // Display value for the badge component
     let displayValue = '';
 
     if (notificationCount === 0) {
@@ -19,6 +20,7 @@ function Header({firstname, lastname, workspace, sidebarVisible, setSidebarVisib
         displayValue = notificationCount;
     }
     
+    // Function to handle clicking on the notification icon to make notifications appear
     function handleNotifications(){
         setIsNotificationsVisible((prev) => !prev);
         if (!isNotificationsVisible) {
@@ -42,7 +44,7 @@ function Header({firstname, lastname, workspace, sidebarVisible, setSidebarVisib
             toastRef.current.clear();
         }
     }
-    console.log("Notifications", notifications)
+
     return(
         <div className={styles.container}>
             <div className={styles.header}>
@@ -50,7 +52,9 @@ function Header({firstname, lastname, workspace, sidebarVisible, setSidebarVisib
                     <div className={styles.sidebar_icon_text}>
                         {!sidebarVisible &&(<FiSidebar onClick={() => setSidebarVisible(true)} className={styles.sidebar_toggle_icon} size={20} color="black"/>)}
                         <span>{firstname} {lastname} / <span className={styles.workspace_text}>{workspace}</span></span>
-                    </div>             
+                    </div>
+
+                    {/* Notification button icon */}
                     <Button 
                         data-testid="notification-button"
                         className={styles.notification_button}

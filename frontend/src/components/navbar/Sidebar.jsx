@@ -28,11 +28,13 @@ function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role
         {role === "admin" ? (
             <>
                 <div className={styles.header_container}>
-                    <Link>
+                    <Link to="/">
                         <div className={styles.navbar_logo}>
                             <img src={logo} alt="CIH Logo"/>
                         </div>
                     </Link>
+
+                    {/* Close sidebar icon */}
                     <FiSidebar data-testid="close-button" onClick={() => setSidebarVisible(false)} className={styles.sidebar_toggle_icon}/>
                 </div>
                 <div className={styles.line}/>
@@ -43,11 +45,16 @@ function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role
                     </div>
                     <NavbarItem className={styles.navbar_item} url="/dashboard" text="Dashboard" icon="pi pi-th-large"/>
                     <div className={styles.line}/>
+
+                    {/* Add a dropdown menu item using SidebarDropdown - choose your own label, an icon from PrimeReact and everything else can be kept the same*/}
                     <SidebarDropdown className={styles.dropdown} icon="pi pi-folder" label="Scanning" openDropdown={openDropdown} setOpenDropdown={setOpenDropdown}>
+
                         {/* Add your scanning pages here */}
                     </SidebarDropdown>
 
                     <SidebarDropdown className={styles.dropdown} icon="pi pi-users" label="My Employees" openDropdown={openDropdown} setOpenDropdown={setOpenDropdown}>
+
+                        {/* SidebarDropdowns have their own children for styling purposes - specify the url and text displayed */}
                         <DropdownItem url="/view-employees" text="View Employees"/>
                         <DropdownItem url="/manage-employees" text="Manage Employees"/>
                         <DropdownItem onClick={() => setVisible(true)} text="Send Invite"/>
@@ -57,7 +64,10 @@ function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role
                         <DropdownItem url="/roles" text="Create Roles"/>
                         <DropdownItem url="/upload-org-chart" text="Upload Org Chart"/>
                     </SidebarDropdown>
+
                     <div className={styles.line}/>
+
+                    {/* Add regular navbar items here, specifying the url and the text you want displayed on the navbar */}
                     <NavbarItem url="/settings" text="Settings" icon="pi pi-cog"/>
                     <NavbarItem text="Sign-out" icon="pi pi-sign-out"/>
                     <div className={styles.line}/>
@@ -74,11 +84,13 @@ function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role
         ) : (
             <>
                 <div className={styles.header_container}>
-                    <Link>
+                    <Link to="/">
                         <div className={styles.navbar_logo}>
                             <img src={logo} alt="CIH Logo"/>
                         </div>
                     </Link>
+
+                    {/* Close sidebar icon */}
                     <FiSidebar data-testid="close-button" onClick={() => setSidebarVisible(false)} className={styles.sidebar_toggle_icon} size={27} color="#fff"/>
                 </div>
                 <div className={styles.line}/>
@@ -87,6 +99,8 @@ function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role
                         <span className={styles.navbar_title}>Workspace</span>
                         <span className={styles.user_role_card}>Employee</span>
                     </div>
+
+                    {/* Add regular navbar items like this, specifying the url and the text you want displayed on the navbar */}
                     <NavbarItem className={styles.navbar_item} url="/dashboard" text="Dashboard" icon="pi pi-th-large"/>
                     <div className={styles.line}/>
                     <NavbarItem url="/settings" text="Settings" icon="pi pi-cog"/>
