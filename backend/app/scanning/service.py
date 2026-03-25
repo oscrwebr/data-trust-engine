@@ -270,3 +270,6 @@ def get_scans_with_file_count(db: Session):
         # Gets the number of scan_file records associated with a scan
         "file_count": file_count} 
         for scan, file_count in scans]
+
+def get_scan_by_id(db: Session, scan_id: int):
+    return repository.get_scan_by_id(db=db, scan_id=scan_id)
