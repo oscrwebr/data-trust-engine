@@ -14,9 +14,9 @@ import { Message } from 'primereact/message';
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 
-import axios from 'axios';
+import api from "../api/axiosConfig.js";
 
-function EmployeeInvite({ visible, setVisible, toast}) {
+function Invite({ visible, setVisible, toast}) {
   const [loading, setLoading] = useState(false);
   const [expiryDate, setExpiryDate] = useState(null);
   const [email, setEmail] = useState(null);
@@ -25,8 +25,16 @@ function EmployeeInvite({ visible, setVisible, toast}) {
   const [date_error, setDateError] = useState(false);
   const [email_valid, setEmailValid] = useState(false);
 
-  const showMessage = () => {
+  const showSuccessMessage = () => {
       toast.current.show({ severity: 'success', summary: 'Success', detail: 'Invite successfully sent!', life: 4000});
+  };
+
+  const showCooldownMessage = () => {
+      toast.current.show({ severity: 'error', summary: 'Error', detail: 'You are sending this employee too many invites, please try again tomorrow.', life: 4000});
+  };
+
+  const showAdminMessage = () => {
+      toast.current.show({ severity: 'error', summary: 'Error', detail: 'You cannot send an invite to yourself.', life: 4000});
   };
 
   const today = new Date();
@@ -36,29 +44,34 @@ function EmployeeInvite({ visible, setVisible, toast}) {
   const handleSendInvite = async () => {
     setLoading(true);
     try {
-      const response = await axios.post("http://localhost:8000/invite/send-invite", {
+      await api.post("/invite/send-invite", {
         email: email || null,
         expiry_date: expiryDate ? expiryDate.toISOString() : null,
-      });
-      
-      if(response.data.success == "invalid"){
+      }).then(res => {
+        if(res.data.success == "invalid"){
         setEmailError(true);
         setDateError(false);
         setEmailValid(false);
 
-      } else if (response.data.success == "trust") {
+      } else if (res.data.success == "trust") {
         setDateError(false);
         setEmailError(false);
         setEmailValid(true);
         setEmailTrust(true)
 
-      } else if (response.data.success == "expiry") {
+      } else if (res.data.success == "expiry") {
         setDateError(true);
         setEmailError(false);
-        setEmailValid(true)
+        setEmailValid(true);
+
+      } else if (res.data.success == "cooldown") {
+        showCooldownMessage();
+
+      } else if (res.data.success == "admin") {
+        showAdminMessage();
         
-      } else if (response.data.success == true) {
-        showMessage();
+      } else if (res.data.success == true) {
+        showSuccessMessage();
         setDateError(false);
         setEmailError(false);
         setEmailValid(true);
@@ -67,6 +80,7 @@ function EmployeeInvite({ visible, setVisible, toast}) {
         setExpiryDate(null);
         setEmailValid(false);
       }
+      });
  
     } catch (error) {
       console.log(error);
@@ -83,6 +97,7 @@ function EmployeeInvite({ visible, setVisible, toast}) {
         header={<h2 className={styles.d_dialog_header}>Send your employee an invite</h2>}
         draggable={false}
         dismissableMask
+        closable={false}
         >
         <p className={styles.d_description}>Send an invite to an employee by specifying the recipient's email address. You can also set an expiry date for the invitation.</p>
         
@@ -123,4 +138,4 @@ function EmployeeInvite({ visible, setVisible, toast}) {
   );
 }
 
-export default EmployeeInvite;
+export default Invite;

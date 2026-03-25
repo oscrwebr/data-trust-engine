@@ -1,18 +1,14 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import api from "../api/axiosConfig.js";
 import { useNavigate } from "react-router-dom";
 
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { Message } from "primereact/message";
-import { Toast } from 'primereact/toast';
-import axios from 'axios';
 import { Dialog } from "primereact/dialog";
 
 import FileUpload from "./FileUpload.jsx";
 import styles from "./CreateWorkspace.module.css";
-
-
 
 function CreateWorkspace({toast}) {
   const visible = true;
@@ -22,7 +18,6 @@ function CreateWorkspace({toast}) {
   const formData = new FormData();
   const [nameError, setNameError] = useState(false);
   const [imageError, setImageError] = useState(false);
-  const hasRedirected = useRef(false);
 
   useEffect(() => {
     if (file){
@@ -45,9 +40,6 @@ function CreateWorkspace({toast}) {
         formData.append("image", file[0]);
       }
 
-      console.log(name)
-      console.log(file[0])
-      
       const response = await api.post("/workspace/create-workspace", formData);
 
       if(response.data == "name"){

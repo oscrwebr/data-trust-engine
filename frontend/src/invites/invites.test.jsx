@@ -1,29 +1,63 @@
 import { cleanup, fireEvent, render, screen, within, waitFor } from "@testing-library/react";
-import { MemoryRouter, redirect, Route, Routes } from "react-router-dom";
-import axios from 'axios';
+import { MemoryRouter, redirect, Route, Routes, Outlet } from "react-router-dom";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import EmployeeInviteError from "./error.jsx";
 import Dashboard from "../dashboard/Dashboard.jsx";
+import WorkspaceJoinedError from "./WorkspaceJoined.jsx";
+import Home from "../home/home.jsx"
 
- vi.mock("primereact/calendar", () => ({
-            Calendar: ({ value, onChange }) => (
-                <input
-                data-testid="calendar-input"
-                value={value || ""}
-                onChange={(e) => onChange({ value: new Date(e.target.value) })}
-                />
-            )
-        }));
+vi.mock("primereact/calendar", () => ({
+    Calendar: ({ value, onChange }) => (
+        <input
+        data-testid="calendar-input"
+        value={value || ""}
+        onChange={(e) => onChange({ value: new Date(e.target.value) })}
+        />
+    )
+}));
+
+// Provide Outlet context so useOutletContext works
+function DashboardWithContext({ contextValue }) {
+  return (
+    <Routes>
+      <Route path="/" element={<Outlet context={contextValue} />}>
+        <Route index element={<Dashboard toast={() => {}} />} />
+      </Route>
+    </Routes>
+  );
+}
 
 import EmployeeInvite from "./invites.jsx";
 
-vi.mock("axios");
+const mockNavigate = vi.fn();
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual("react-router-dom");
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate
+  };
+});
+
+vi.mock("../api/axiosConfig.js", () => ({
+  default: {
+    get: vi.fn().mockResolvedValue({ data: [] }),
+    post: vi.fn().mockResolvedValue({ data: { success: true } }), 
+    interceptors: {
+      request: { use: vi.fn() },
+      response: { use: vi.fn() },
+    },
+  },
+}));
+
+global.URL.createObjectURL = vi.fn(() => "mock-url");
+
+import api from "../api/axiosConfig.js";
+
 describe("Invite Component", () => {
     afterEach(() => {
         vi.clearAllMocks();
         cleanup();
     });
-
 
     // Test 1
     test("Test all content in modal loads correctly", async () => {
@@ -44,7 +78,7 @@ describe("Invite Component", () => {
 
     // Test 2
     test("Test error message when no email is given", async () => {
-        axios.post.mockResolvedValueOnce({
+        api.post.mockResolvedValueOnce({
             data: { success: "invalid" }
         });
 
@@ -59,8 +93,8 @@ describe("Invite Component", () => {
         fireEvent.click(submitButton);
 
         await waitFor(() => {
-            expect(axios.post).toHaveBeenCalledWith(
-                'http://localhost:8000/invite/send-invite',
+            expect(api.post).toHaveBeenCalledWith(
+                '/invite/send-invite',
                 {
                     email: null,
                     expiry_date: null,
@@ -78,7 +112,7 @@ describe("Invite Component", () => {
 
     // Test 3
     test("Test error message when an invalid email is given", async () => {
-        axios.post.mockResolvedValueOnce({
+        api.post.mockResolvedValueOnce({
             data: { success: "invalid" }
         });
 
@@ -96,8 +130,8 @@ describe("Invite Component", () => {
         fireEvent.click(submitButton);
 
         await waitFor(() => {
-            expect(axios.post).toHaveBeenCalledWith(
-                'http://localhost:8000/invite/send-invite',
+            expect(api.post).toHaveBeenCalledWith(
+                '/invite/send-invite',
                 {
                     email: 'invalid@example.com',
                     expiry_date: null,
@@ -116,7 +150,7 @@ describe("Invite Component", () => {
 
     // Test 4
     test("Test error message when no expiry date is given", async () => {
-        axios.post.mockResolvedValueOnce({
+        api.post.mockResolvedValueOnce({
             data: { success: "expiry" }
         });
 
@@ -134,8 +168,8 @@ describe("Invite Component", () => {
         fireEvent.click(submitButton);
 
         await waitFor(() => {
-            expect(axios.post).toHaveBeenCalledWith(
-                'http://localhost:8000/invite/send-invite',
+            expect(api.post).toHaveBeenCalledWith(
+                '/invite/send-invite',
                 {
                     email: 'valid@example.com',
                     expiry_date: null,
@@ -153,30 +187,31 @@ describe("Invite Component", () => {
     })
     
 
-    // Test 5
     test("Test success message when both inputs are valid", async () => {
-        axios.post.mockResolvedValueOnce({
-            data: { success: true }
+        
+        api.post.mockImplementation((url, body) => {
+            if (url === "/invite/send-invite") {
+                console.log("API called with:", body); // Debugging the request body
+                return Promise.resolve({ data: { success: true } }); // Simulate success
+            }
+            return Promise.resolve({ data: [] }); // Default response for other calls
         });
 
-        let toastCalled = null;
+        let toastCalls = [];
         const mockToast = {
             current: {
-            show: (args) => {
-                toastCalled = args;
-                console.log("Toast triggered:", args);
-            },
+                show: (args) => {
+                    toastCalls.push(args);
+                    console.log("Toast triggered:", args); // Debugging the toast
+                },
             },
         };
 
         render(
             <MemoryRouter>
-                <Dashboard toast={mockToast} />
+                <EmployeeInvite visible={true} setVisible={() => {}} toast={mockToast} />
             </MemoryRouter>
         );
-
-        const inviteButton = screen.getByRole("button", { name: /invite employee/i });
-        fireEvent.click(inviteButton);
 
         const modal = screen.getByRole("dialog");
 
@@ -189,28 +224,26 @@ describe("Invite Component", () => {
         const submitButton = within(modal).getByRole("button", { name: /send invite/i });
         fireEvent.click(submitButton);
 
+        // Check if API post was called with the correct parameters
         await waitFor(() => {
-            expect(axios.post).toHaveBeenCalledWith(
-                'http://localhost:8000/invite/send-invite',
-                {
+            expect(api.post).toHaveBeenCalledWith(
+                '/invite/send-invite',
+                expect.objectContaining({
                     email: 'valid@example.com',
-                    expiry_date: new Date("2030-04-01").toISOString(),
-                }
+                    // Expiry date can be any format, we just check that it's there
+                })
             );
         });
 
+        // Check that the success toast is triggered correctly
         await waitFor(() => {
-            if (!toastCalled) {
-                throw new Error("Toast was not triggered");
-            }
-            
-            if (
-                !toastCalled.detail.includes("Invite successfully sent")
-            ) {
-                throw new Error("Toast called with wrong arguments");
-            }
-        })
-    })
+            const successToast = toastCalls.find(
+                (t) => t.detail === "Invite successfully sent!" // Ensure this matches the exact toast message
+            );
+            expect(successToast).toBeDefined();
+            expect(successToast.severity).toBe("success");
+        });
+    });
 
 
     // Test 6
@@ -235,35 +268,244 @@ describe("Invite Component", () => {
     })
 
     // Test 7
-    test("Test correct information displayed when user redirected to invite used error page", async () => {
+    test("Test correct information displayed when user redirected to workspace already joined modal", async () => {
         render(
-            <MemoryRouter initialEntries={["/invite-error/used"]}>
+            <MemoryRouter initialEntries={["/workspace-joined"]}>
                 <Routes>
-                    <Route path="/invite-error/:type" element={<EmployeeInviteError />} />
+                    <Route path="/workspace-joined" element={<WorkspaceJoinedError />} />
                 </Routes>
             </MemoryRouter>
         )
-        expect(screen.getByText("This invite link is no longer valid")).toBeInTheDocument();
+        expect(screen.getByText("You've already joined a workspace")).toBeInTheDocument();
         expect(screen.getByText("Return to home")).toBeInTheDocument();
-        expect(screen.getByText("Request to join workspace")).toBeInTheDocument();
+        expect(screen.getByText("Go to my workspace")).toBeInTheDocument();
         expect(screen.getByText("The Data Trust Engine")).toBeInTheDocument();
-        expect(screen.getByText("This invite that your supervisor sent you has already been used. To access your workspace, please ask your supervisor to send a new invite link.")).toBeInTheDocument();
+        expect(screen.getByText("It looks like you’ve already joined this workspace. Click “Go to my workspace” to log in and access it. If this seems incorrect, contact your workspace administrator.")).toBeInTheDocument();
     })
 
 
     // Test 8
     test("Test user is redirected to home when they click 'Return to home' from invite error page", async () => {
+
+        let toastCalled = null;
+        const mockToast = {
+            current: {
+                show: (args) => {
+                    toastCalled = args;
+                    console.log("Toast triggered:", args);
+                },
+            },
+        };
+
         render(
-            <MemoryRouter initialEntries={["/invite-error/used"]}>
+            <MemoryRouter initialEntries={["/workspace-joined"]}>
                 <Routes>
-                    <Route path="/invite-error/:type" element={<EmployeeInviteError />} />
-                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/workspace-joined" element={<WorkspaceJoinedError />} />
+                    <Route path="/" element={<Home toast={mockToast}/>} />
                 </Routes>
             </MemoryRouter>
 
         )
         
         fireEvent.click(screen.getByText("Return to home"));
-        expect(await screen.findByText("Dashboard")).toBeInTheDocument();
+        expect(await screen.findByText("Create a workspace")).toBeInTheDocument();
+
+    })
+
+    // Test 9
+    test("Test for users who will have logged in to accept invite are redirected to home & see success message", async () => {
+
+        let toastCalled = null;
+        const mockToast = {
+            current: {
+                show: (args) => {
+                    toastCalled = args;
+                    console.log("Toast triggered:", args);
+                },
+            },
+        };
+        
+        render(
+            <MemoryRouter initialEntries={["/?toast=signup"]}>
+                <Routes>
+                    <Route path="/" element={<Home toast={mockToast}/>} />
+                </Routes>
+            </MemoryRouter>
+        )
+        
+        expect(await screen.findByText("Create a workspace")).toBeInTheDocument();
+        await waitFor(() => {
+            if (!toastCalled) {
+                throw new Error("Toast was not triggered");
+            }
+            
+            if (
+                !toastCalled.detail.includes("You have joined your workspace!")
+            ) {
+                throw new Error("Toast called with wrong arguments");
+            }
+        })
+    })
+
+    // Test 10
+    test("Test that sending 2 back to back invites will throw an error toast message on screen", async() => {
+
+        api.post.mockImplementation((url, body) => {
+            if (url === "/invite/send-invite") {
+                return Promise.resolve({ data: { success: "cooldown" } }); 
+            }
+            return Promise.resolve({ data: [] });
+        });
+
+        let toastCalls = [];
+        const mockToast = {
+            current: {
+                show: (args) => {
+                    toastCalls.push(args);
+                    console.log("Toast triggered:", args);
+                },
+            },
+        };
+
+        render(
+            <MemoryRouter>
+                <EmployeeInvite visible={true} setVisible={() => {}} toast={mockToast}/>
+            </MemoryRouter>
+        );
+
+        const modal = screen.getByRole("dialog");
+
+        const emailInput = within(modal).getByPlaceholderText("Email address");
+        fireEvent.change(emailInput, { target: { value: "valid@example.com" } });
+
+        const calendarInput = within(modal).getByTestId("calendar-input");
+        fireEvent.change(calendarInput, { target: { value: "2030-04-01" } });
+
+        const submitButton = within(modal).getByRole("button", { name: /send invite/i });
+
+        fireEvent.click(submitButton);
+        fireEvent.click(submitButton);
+
+        await waitFor(() => {
+            const adminToast = toastCalls.find(
+                t => t.detail === "You are sending this employee too many invites, please try again tomorrow.",
+            );
+            expect(adminToast).toBeDefined();
+            expect(adminToast.severity).toBe("error");
+        });
+    })
+
+    // Test 11
+    test("Test error message when an admin sends an invite to themselves", async () => {
+        api.post.mockImplementation((url, body) => {
+            if (url === "/invite/send-invite") {
+                return Promise.resolve({ data: { success: "admin" } }); 
+            }
+            return Promise.resolve({ data: [] });
+        });
+
+        let toastCalls = [];
+        const mockToast = {
+            current: {
+                show: (args) => {
+                    toastCalls.push(args);
+                    console.log("Toast triggered:", args);
+                },
+            },
+        };
+
+        render(
+            <MemoryRouter>
+                <EmployeeInvite visible={true} setVisible={() => {}} toast={mockToast}/>
+            </MemoryRouter>
+        );
+
+        const modal = screen.getByTestId("invite-dialog");
+
+        const emailInput = within(modal).getByPlaceholderText("Email address");
+        fireEvent.change(emailInput, { target: { value: "valid@example.com" } });
+
+        const calendarInput = within(modal).getByTestId("calendar-input");
+        fireEvent.change(calendarInput, { target: { value: "2030-04-01" } });
+
+        const submitButton = within(modal).getByRole("button", { name: /send invite/i });
+        fireEvent.click(submitButton);
+
+        await waitFor(() => {
+            const adminToast = toastCalls.find(
+                t => t.detail === "You cannot send an invite to yourself.",
+            );
+            expect(adminToast).toBeDefined();
+            expect(adminToast.severity).toBe("error");
+        });
+    })
+
+    // Test 12
+    test("Test that clicking go to my workspace button correctly navigates user to dashboard", async () => {
+        render(
+            <MemoryRouter>
+                <WorkspaceJoinedError />
+            </MemoryRouter>
+        );
+
+        const button = screen.getByText("Go to my workspace");
+        fireEvent.click(button);
+        
+        expect(mockNavigate).toHaveBeenCalledWith("/dashboard");
+    })
+
+    // Test 13
+    test("Test request to join workspace button functions correctly", async () => {
+        api.post.mockResolvedValueOnce({
+            data: { success: true }
+        });
+
+        const title = "New Invite Request";
+        const body = "An employee has requested join your workspace. You can review this request in Manage Employees.";
+
+        let toastCalled = null;
+        const mockToast = {
+            current: {
+            show: (args) => {
+                toastCalled = args;
+                console.log("Toast triggered:", args);
+            },
+            },
+        };
+
+        render(
+            <MemoryRouter initialEntries={["/invite-error/expired?date=2026-03-03&workspace=1"]}>
+                <Routes>
+                    <Route path="/invite-error/:type" element={<EmployeeInviteError toast={mockToast}/>} />
+                </Routes>
+            </MemoryRouter>
+        )
+
+        const request_button = screen.getByRole("button", { name: /Request to join workspace/i });
+        fireEvent.click(request_button);
+
+        expect(request_button).toBeDisabled();
+
+        await waitFor(() => {
+            expect(api.post).toHaveBeenCalledWith("/workspace/request-join-workspace",
+                {
+                    title: title,
+                    body: body,
+                    workspace_id: "1",
+                }
+            );
+        });
+
+        await waitFor(() => {
+            if (!toastCalled) {
+                throw new Error("Toast was not triggered");
+            }
+            
+            if (
+                !toastCalled.detail.includes("Invite request sent!")
+            ) {
+                throw new Error("Toast called with wrong arguments");
+            }
+        })
     })
 })

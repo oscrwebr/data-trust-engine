@@ -22,8 +22,18 @@ def add_user(db: Session, email: str):
     db.refresh(user)
     return user
 
-def create_user(db: Session, firstname: str, surname: str, username: str, email: str, oid: str, refresh: bytes) -> User:
-    user = User(firstname=firstname, surname=surname, username=username, email=email, oid=oid, refresh=refresh)
+def get_pending_user_by_id(db: Session, id: int):
+    return db.query(PendingUser).filter(PendingUser.user_id == id).first()
+
+def get_pending_user_by_email(db: Session, email: str):
+    return db.query(PendingUser).filter(PendingUser.email == email).first()
+
+def delete_pending_user(db: Session, user: PendingUser):
+    db.delete(user)
+    db.commit()
+
+def create_user(db: Session, firstname: str, surname: str, username: str, email: str, oid: str, role: str, refresh: bytes) -> User:
+    user = User(firstname=firstname, surname=surname, username=username, email=email, oid=oid, role=role, refresh=refresh)
     db.add(user)
     db.commit()
     db.refresh(user)

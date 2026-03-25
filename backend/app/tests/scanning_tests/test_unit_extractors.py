@@ -1,8 +1,12 @@
-from app.scanning.service import extract_text_from_pdf
+from pathlib import Path
+
+from app.scanning.extractors import *
+
+FIXTURES_DIRECTORY = Path(__file__).resolve().parent / "fixtures"
 
 
 def test_extract_text_from_pdf_operational_report_document():
-    extracted_text = extract_text_from_pdf("tests/scanning_tests/fixtures/operational_report_document.pdf")
+    extracted_text = extract_text_from_pdf(FIXTURES_DIRECTORY / "operational_report_document.pdf")
     
     # Assert all pages extracted
     assert len(extracted_text) == 4
@@ -19,7 +23,7 @@ def test_extract_text_from_pdf_operational_report_document():
 
 
 def test_extract_text_from_pdf_realistic_contract_document():
-    extracted_text = extract_text_from_pdf("tests/scanning_tests/fixtures/realistic_contract_document.pdf")
+    extracted_text = extract_text_from_pdf(FIXTURES_DIRECTORY / "realistic_contract_document.pdf")
 
     # Assert all pages extracted
     assert len(extracted_text) == 5
@@ -37,7 +41,7 @@ def test_extract_text_from_pdf_realistic_contract_document():
 
 
 def test_extract_text_from_pdf_supplier_agreement_document():
-    extracted_text = extract_text_from_pdf("tests/scanning_tests/fixtures/supplier_agreement_document.pdf")
+    extracted_text = extract_text_from_pdf(FIXTURES_DIRECTORY / "supplier_agreement_document.pdf")
 
     # Assert all pages extracted
     assert len(extracted_text) == 6

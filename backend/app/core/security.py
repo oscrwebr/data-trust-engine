@@ -46,9 +46,10 @@ def get_user_from_access_token(token: Annotated[str, Depends(oauth2_scheme)]):
     try: # automatically checks for time validity with jwt.decode if 'exp' is present (it is)
         payload = jwt.decode(jwt=token, key=ACCESS_TOKEN_SECRET, algorithms=[ALGORITHM])
         user_id = payload.get("userId")
+        role = payload.get("role")
         if user_id is None:
             raise token_credentials_exception
-        user = User(user_id = user_id)
+        user = User(user_id = user_id, role=role)
     except InvalidTokenError:
         raise token_credentials_exception
     return user        

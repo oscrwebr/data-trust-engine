@@ -12,4 +12,4 @@ class RefreshToken(BaseModel):
     
 class User(BaseModel):
     user_id: int
-    # role: # This can be implemented when/if needed easily - ensure to discuss and implement early if required
+    role: str

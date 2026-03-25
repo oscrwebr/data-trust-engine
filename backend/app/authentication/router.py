@@ -24,8 +24,13 @@ router = APIRouter(
     tags = ["auth"]
 )
 
+roles_dict = {
+    1 : "admin",
+    2: "employee"
+}
+
 @router.get("/sign-in")
-async def sign_in(application: Annotated[ConfidentialClientApplication, Depends(application)], request: Request, next: str, signup: bool | None=None):
+async def sign_in(application: Annotated[ConfidentialClientApplication, Depends(application)], request: Request, next: str, signup: bool | None=None, role: int | None=None, workspace_id: int | None=None):
     # Protect against url manipulation!
     if not next.startswith("/"):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
@@ -34,9 +39,19 @@ async def sign_in(application: Annotated[ConfidentialClientApplication, Depends(
     # print(flow)
     request.session["flow"] = flow
     request.session["next"] = next
-    if signup:
-        # print("It has been added!")
+
+    # Ensure that a valid role must be present at signup
+    if signup and role:
+        if role not in roles_dict:
+            print("bad role!")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
+        request.session["role"] = roles_dict[role]
         request.session["signup"] = signup
+        request.session["workspace_id"] = workspace_id
+        print("It has been added!")
+    elif signup and not role:
+        print("Need both!")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
 
     # print(f"\n\n request.session: {request.session}")
     return RedirectResponse(flow['auth_uri'])
@@ -57,19 +72,25 @@ async def login_redirect(application: Annotated[ConfidentialClientApplication, D
         }
     )
     url = request.session["next"]
+    
+    # getting the role from the session
+    role = request.session["role"] if "role" in request.session else None
+
+    # getting the role from the session
+    workspace_id = request.session["workspace_id"] if "workspace_id" in request.session else None
 
     # Either create user or check if the user exists
     # Check if the user exists in the db before creating a new user, incase of repeated request
     user = service.check_get_by_oid(result['id_token_claims']['oid'], db)
     if "signup" in request.session and not user:
-        user = service.create_user(db=db, details=result["id_token_claims"], refresh=result["refresh_token"])
+        user = service.create_user(db=db, details=result["id_token_claims"], refresh=result["refresh_token"], role=role, workspace_id=workspace_id)
         
     request.session.clear()
     response.delete_cookie("session") # This is to remove the cookie from the user's browser
 
     if user:
         # access_token = create_access_token(data={"userId": user.user_id})
-        _, refresh_token, _ = service.create_access_refresh(db=db, data={"userId": user.user_id})
+        _, refresh_token, _ = service.create_access_refresh(db=db, data={"userId": user.user_id, "role": user.role})
         redirect_response = RedirectResponse(f"http://localhost:5173{url}") # This will redirect the user back to the page that they were on originally
         redirect_response.set_cookie(key="dte_refresh_token", value=refresh_token.opaque_token, expires=refresh_token.expiry_date, httponly=True, samesite = None)
         # return {"access_token": access_token} # This is now technically irrelevant - optimised flow to save milliseconds would be to remove this entirely
@@ -106,5 +127,6 @@ async def refresh_access(db: Annotated[Session, Depends(get_database)], response
 @router.get("/test")
 async def test_repo(db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)]):
     print(current_user.user_id)
+    print(current_user.role)
     user = service.test_route(current_user.user_id, db=db)
     return {"user": user} if user else {"message": "no user"}

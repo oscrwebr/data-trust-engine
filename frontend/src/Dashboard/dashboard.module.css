@@ -1,0 +1,23 @@
+.d_toast {
+    width: 27vw;
+    margin-top: 70px;
+    max-height: 500px;
+    overflow-y: auto;
+    scrollbar-width: none;
+    scroll-behavior: smooth;
+}
+
+.content {
+    padding-left: 20px;
+}
+
+.container {
+  display: flex;
+  height: 100vh;
+}
+
+.main {
+  flex: 1;
+  overflow-y: auto;
+}   
+

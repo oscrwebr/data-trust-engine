@@ -1,13 +1,15 @@
 from datetime import datetime
 
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 from app.scanning.models import File, NamingConvention, Scan, ScanNamingConvention, NamingConventionScanResult, Scan, ScanFile, ScanFileDetection
 from datetime import datetime, timezone
+from app.scanning.scan_type import ScanType
 
 
-def create_scan(db: Session):
+def create_scan(db: Session, scan_type: ScanType):
     scan = Scan(
+        scan_type = scan_type,
         started_at = datetime.now(timezone.utc),
         finished_at = None
     )
@@ -17,6 +19,14 @@ def create_scan(db: Session):
     db.refresh(scan)
 
     return scan
+
+
+def get_scan_by_id(db: Session, scan_id: int):
+    return db.query(Scan).filter(Scan.scan_id == scan_id).first()
+
+
+def get_all_scans(db: Session):
+    return db.query(Scan).all()
 
 
 def create_scan_file(db: Session, scan_id: int, file_id: int):
@@ -30,6 +40,13 @@ def create_scan_file(db: Session, scan_id: int, file_id: int):
     db.refresh(scan_file)
 
     return scan_file
+
+
+def get_scan_file_by_scan_id_and_file_id(db: Session, scan_id: int, file_id: int):
+    return db.query(ScanFile).filter(
+        ScanFile.scan_id == scan_id, 
+        ScanFile.file_id == file_id
+    ).first()
 
 
 def create_scan_file_detection(db: Session, scan_file_id: int, sensitivity_subcategory: str, page_number: int):
@@ -46,8 +63,12 @@ def create_scan_file_detection(db: Session, scan_file_id: int, sensitivity_subca
     return scan_file_detection
 
 
-def create_file(db: Session, graph_file_id: str, name: str, extension: str, file_hash: str):
-    file = File(graph_file_id=graph_file_id, file_name=name, file_extension=extension, hash=file_hash)
+def get_scan_file_detections_by_scan_file_id(db: Session, scan_file_id: int):
+    return db.query(ScanFileDetection).filter(ScanFileDetection.scan_file_id == scan_file_id).all()
+
+
+def create_file(db: Session, graph_file_id: str, file_name: str, file_hash: str):
+    file = File(graph_file_id=graph_file_id, file_name=file_name, hash=file_hash)
     db.add(file)
     db.commit()
     db.refresh(file)
@@ -87,13 +108,6 @@ def set_naming_convention_scan_result(db: Session, scan_file_id: int, scan_namin
     db.commit()
     db.refresh(naming_convention_scan_result)
     return naming_convention_scan_result
-
-def create_scan(db: Session):
-    scan = Scan(started_at=datetime.now())
-    db.add(scan)
-    db.commit()
-    db.refresh(scan)
-    return scan
 
 def end_scan(db: Session, scan: Scan):
     scan.finished_at = datetime.now()
@@ -136,3 +150,12 @@ def create_test_file(db: Session, graph_file_id: str, file_name: str, hash: str)
     db.commit()
     db.refresh(file)
     return file
+
+def get_all_scans(db: Session):
+    return db.query(Scan).all()
+
+def get_scan_file_count(db: Session, scan_id: int):
+    return db.query(ScanFile).filter(ScanFile.scan_id == scan_id).count()
+
+def get_scans_with_file_count(db: Session):
+    return db.query(Scan, func.count(ScanFile.scan_file_id)).outerjoin(ScanFile, Scan.scan_id == ScanFile.scan_id).group_by(Scan.scan_id).all()

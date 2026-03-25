@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, ForeignKey, BLOB
 from ..core.database import Base
+from sqlalchemy.orm import relationship
 
 class User(Base):
     __tablename__ = 'user'
@@ -13,12 +14,27 @@ class User(Base):
     refresh = Column(BLOB(), nullable=False)
     deltaLink = Column(Text(), nullable=True)
     driveId = Column(Text(), nullable=True)
+    role = Column(String(11), nullable=False)
+
+    workspaces = relationship(
+        "Workspace",
+        secondary="user_workspace",
+        back_populates="user"
+    )
 
 class PendingUser(Base):
     __tablename__ = 'pending_users'
 
     user_id = Column(Integer, primary_key=True, index=True)
     email = Column(String(254), nullable=False)
+
+    # relation
+    invites = relationship(
+        "Invite",
+        back_populates="pending_user",
+        cascade="all, delete",
+        passive_deletes=True
+    )
 
 class RefreshFamily(Base):
     __tablename__ = 'refresh_family'

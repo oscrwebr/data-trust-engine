@@ -31,7 +31,8 @@ def test_success_with_error_in_query_params(client):
 # This tests whether the 'check_exists' function works correctly in 'authentication/service.py' when the user exists
 def test_user_returned_when_they_exist_in_db(db):
     # Creating the user
-    insert_statement = insert(models.User).values(asdict(dummy_user))
+    oid = "000000-7sdf77-88asdf8-9sdiy99"
+    insert_statement = insert(models.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="admin")
     db.execute(insert_statement)
     assert db.query(models.User).count() == 1 # incase the user doesn't get added
 
@@ -56,14 +57,15 @@ def test_403_if_no_refresh_present(client):
 def test_auth_and_refresh_token_rotated_if_user_has_valid_refresh(db, client):
     ## SETTING UP THE TEST
     # Insert the test user
-    insert_statement = insert(models.User).values(asdict(dummy_user))
+    oid = "000000-7sdf77-88asdf8-9sdiy99"
+    insert_statement = insert(models.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="employee")
     res = db.execute(insert_statement)
 
     # Create test refresh_family entry
     refresh_family = repository.create_refresh_family(db)
 
     # Creating access and refresh tokens for the new user with the 'create_access_refresh()' function
-    access, refresh, _ = service.create_access_refresh(db, data={"userId": res.inserted_primary_key[0]}, refresh_family_id=refresh_family.refresh_family_id)
+    access, refresh, _ = service.create_access_refresh(db, data={"userId": res.inserted_primary_key[0], "role": "admin"}, refresh_family_id=refresh_family.refresh_family_id)
 
     # making a request with the dte_refresh_token 
     req = client.build_request(
@@ -87,14 +89,15 @@ def test_auth_and_refresh_token_rotated_if_user_has_valid_refresh(db, client):
 def test_replaced_by_and_at_updated_if_refresh_token_is_valid(db, client):
     ## SETTING UP THE TEST
     # Insert the test user
-    insert_statement = insert(models.User).values(asdict(dummy_user))
+    oid = "000000-7sdf77-88asdf8-9sdiy99"
+    insert_statement = insert(models.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="admin")
     res = db.execute(insert_statement)
 
     # Create test refresh_family entry
     refresh_family = repository.create_refresh_family(db)
 
     # Creating access and refresh tokens for the new user with the 'create_access_refresh()' function
-    access, refresh, _ = service.create_access_refresh(db, data={"userId": res.inserted_primary_key[0]}, refresh_family_id=refresh_family.refresh_family_id)
+    access, refresh, _ = service.create_access_refresh(db, data={"userId": res.inserted_primary_key[0], "role": "admin"}, refresh_family_id=refresh_family.refresh_family_id)
 
     # get replaced_at and replaced_by values before request is made
     
@@ -133,7 +136,8 @@ def test_replaced_by_and_at_updated_if_refresh_token_is_valid(db, client):
 def test_401_raised_if_refresh_family_is_revoked(db, client):
     ## SETTING UP THE TEST
     # Insert the test user
-    insert_statement = insert(models.User).values(asdict(dummy_user))
+    oid = "000000-7sdf77-88asdf8-9sdiy99"
+    insert_statement = insert(models.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="employee")
     res = db.execute(insert_statement)
 
     # Create test refresh_family entry
@@ -142,7 +146,7 @@ def test_401_raised_if_refresh_family_is_revoked(db, client):
     repository.revoke_refresh_family(db, refresh_family.refresh_family_id)
 
     # Creating access and refresh tokens for the new user with the 'create_access_refresh()' function
-    access, refresh, _ = service.create_access_refresh(db, data={"userId": res.inserted_primary_key[0]}, refresh_family_id=refresh_family.refresh_family_id)
+    access, refresh, _ = service.create_access_refresh(db, data={"userId": res.inserted_primary_key[0], "role": "admin"}, refresh_family_id=refresh_family.refresh_family_id)
 
     # making a request with the dte_refresh_token 
     req = client.build_request(
@@ -158,14 +162,15 @@ def test_401_raised_if_refresh_family_is_revoked(db, client):
 def test_no_rotation_and_same_access_token_returned_if_requests_within_30_seconds(db, client):
     ## SETTING UP THE TEST
     # Insert the test user
-    insert_statement = insert(models.User).values(asdict(dummy_user))
+    oid = "000000-7sdf77-88asdf8-9sdiy99"
+    insert_statement = insert(models.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="admin")
     res = db.execute(insert_statement)
 
     # Create test refresh_family entry
     refresh_family = repository.create_refresh_family(db)
 
     # Creating access and refresh tokens for the new user with the 'create_access_refresh()' function
-    access, refresh, _ = service.create_access_refresh(db, data={"userId": res.inserted_primary_key[0]}, refresh_family_id=refresh_family.refresh_family_id)
+    access, refresh, _ = service.create_access_refresh(db, data={"userId": res.inserted_primary_key[0], "role": "admin"}, refresh_family_id=refresh_family.refresh_family_id)
 
     # making a request with the dte_refresh_token 
     req = client.build_request(
@@ -206,14 +211,15 @@ def test_no_rotation_and_same_access_token_returned_if_requests_within_30_second
 def test_401_returned_if_refresh_expired(db, client):
     ## SETTING UP THE TEST
     # Insert the test user
-    insert_statement = insert(models.User).values(asdict(dummy_user))
+    oid = "000000-7sdf77-88asdf8-9sdiy99"
+    insert_statement = insert(models.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="employee")
     res = db.execute(insert_statement)
 
     # Create test refresh_family entry
     refresh_family = repository.create_refresh_family(db)
 
     # Creating access and refresh tokens for the new user with the 'create_access_refresh()' function
-    access, refresh, _ = service.create_access_refresh(db, data={"userId": res.inserted_primary_key[0]}, refresh_family_id=refresh_family.refresh_family_id)
+    access, refresh, _ = service.create_access_refresh(db, data={"userId": res.inserted_primary_key[0], "role": "admin"}, refresh_family_id=refresh_family.refresh_family_id)
 
     select_statement = select(models.Refresh)
     refresh_id = db.execute(select_statement).scalar().refresh_id
@@ -238,14 +244,15 @@ def test_401_returned_if_refresh_expired(db, client):
 def test_is_revoked_is_true_if_refresh_expired(db, client):
     ## SETTING UP THE TEST
     # Insert the test user
-    insert_statement = insert(models.User).values(asdict(dummy_user))
+    oid = "000000-7sdf77-88asdf8-9sdiy99"
+    insert_statement = insert(models.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="admin")
     res = db.execute(insert_statement)
 
     # Create test refresh_family entry
     refresh_family = repository.create_refresh_family(db)
 
     # Creating access and refresh tokens for the new user with the 'create_access_refresh()' function
-    access, refresh, _ = service.create_access_refresh(db, data={"userId": res.inserted_primary_key[0]}, refresh_family_id=refresh_family.refresh_family_id)
+    access, refresh, _ = service.create_access_refresh(db, data={"userId": res.inserted_primary_key[0], "role": "admin"}, refresh_family_id=refresh_family.refresh_family_id)
 
     select_statement = select(models.Refresh)
     select_statement_res = db.execute(select_statement).scalar()

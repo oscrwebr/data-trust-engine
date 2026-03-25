@@ -1,0 +1,30 @@
+.dropdown_container div span, #dropdown_icon, #dropdown_chevron {
+    color: white;
+}
+
+#dropdown_chevron {
+  margin-left: auto;
+}
+
+#dropdown_icon {
+    margin-right: 10px;
+}
+
+.dropdown_button {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    text-decoration: none;
+    margin: 5px;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.dropdown_button:hover {
+    cursor: pointer;
+    background-color: rgb(94, 93, 93);
+}
+
+.dropdown_button:focus {
+    background-color: rgb(94, 93, 93);
+}
