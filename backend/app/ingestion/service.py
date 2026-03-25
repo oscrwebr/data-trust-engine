@@ -16,30 +16,30 @@ GET_PERMISSIONS = "me/drive/items/{graph_id}/permissions"
 GRAHP_BATCH_URL = "https://graph.microsoft.com/v1.0/$batch"
 
 
-def get_user_access(application: ConfidentialClientApplication, user_id, db:Session) -> str | None:
-    # This is to get the access token for users - THAT ARE ALREADY LOGGED IN!
-    user_details = auth_service.check_get_by_id(user_id, db)
-    access_token = None
+# def get_user_access(application: ConfidentialClientApplication, user_id, db:Session) -> str | None:
+#     # This is to get the access token for users - THAT ARE ALREADY LOGGED IN!
+#     user_details = auth_service.check_get_by_id(user_id, db)
+#     access_token = None
     
-    if user_details:
-        account = application.get_accounts(username=user_details.username)
-        if account:
-            tokens = application.acquire_token_silent(scopes=SCOPES, account=account[0])
-            access_token = tokens["access_token"]
-            # Rotate the refresh token in the DB
-            enc_refresh = encrypt_refresh(tokens["refresh_token"])
-            auth_service.rotate_ms_refresh(user_id, enc_refresh, db)
+#     if user_details:
+#         account = application.get_accounts(username=user_details.username)
+#         if account:
+#             tokens = application.acquire_token_silent(scopes=SCOPES, account=account[0])
+#             access_token = tokens["access_token"]
+#             # Rotate the refresh token in the DB
+#             enc_refresh = encrypt_refresh(tokens["refresh_token"])
+#             auth_service.rotate_ms_refresh(user_id, enc_refresh, db)
 
-        else:
-            account = application.acquire_token_by_refresh_token(refresh_token=decrypt_refresh(user_details.refresh), scopes=SCOPES)
-            access_token = account["access_token"]
-            # Rotate the refresh token in the DB
-            enc_refresh = encrypt_refresh(account["refresh_token"])
-            auth_service.rotate_ms_refresh(user_id, enc_refresh, db)
-    else:
-        return None
+#         else:
+#             account = application.acquire_token_by_refresh_token(refresh_token=decrypt_refresh(user_details.refresh), scopes=SCOPES)
+#             access_token = account["access_token"]
+#             # Rotate the refresh token in the DB
+#             enc_refresh = encrypt_refresh(account["refresh_token"])
+#             auth_service.rotate_ms_refresh(user_id, enc_refresh, db)
+#     else:
+#         return None
 
-    return access_token
+#     return access_token
 
 def get_values_data(folders: dict, files: dict, shared_folder_files: dict, values: list[dict]):
     '''
@@ -124,9 +124,6 @@ def get_permissions(shared_folders_files: dict, access_token: str) -> dict:
         })
         body_len += 1
     request_body_list.append(batch_request) if batch_request else None
-    
-    # print(request_body_list)
-    # print(batch_request)
 
     # Iterate through the list of request_body_list and make post requests to the permsissions endpoint for each request_body
     all_permissions = []
@@ -136,8 +133,6 @@ def get_permissions(shared_folders_files: dict, access_token: str) -> dict:
             json={"requests": request_body},
             headers=headers
         )
-        # print(response.json())
-        # print(request_body)
         all_permissions += response.json()["responses"] # adding responses to the permissions
     
     # Create a dictionary where the key is the graph_id and values are a set of emails that need to be checked in the db
@@ -178,6 +173,7 @@ def clean_folders_files_with_permissions(folder_file_data: dict, permissions: di
     # Setting the user first
     current_user = auth_service.check_get_by_id(id, db)
     user_id_dict[current_user.email] = id
+    current_user_email = current_user.email.lower()
 
     # HANDLING FOLDERS FIRST
     try:
@@ -193,7 +189,7 @@ def clean_folders_files_with_permissions(folder_file_data: dict, permissions: di
             if (graph_id := folder[1]) in permissions["folder"]:
                 # Add it to the folder list for each user that is included in the granted permission
                 for user_email in permissions["folder"][graph_id]["granted_permission"]:
-                    if user_email == current_user.email:
+                    if user_email.lower() == current_user_email:
                         continue
                     # check if the user exists in the user_id_dict
                     if user_email in user_id_dict:
@@ -226,7 +222,7 @@ def clean_folders_files_with_permissions(folder_file_data: dict, permissions: di
             if (graph_id := file[1]) in permissions["file"]:
                 # Add it to the file list for each user that is included in the granted permission
                 for user_email in permissions["file"][graph_id]["granted_permission"]:
-                    if user_email == current_user.email:
+                    if user_email.lower() == current_user_email:
                         continue
                     # check if the user exists in the user_id_dict
                     if user_email in user_id_dict:
@@ -255,7 +251,7 @@ def clean_folders_files_with_permissions(folder_file_data: dict, permissions: di
     
 
 
-def get_all_files(access_token: str, id: int, db:Session) -> str:
+def get_set_all_graph_files(access_token: str, id: int, db:Session) -> str:
     '''
     This function will run as soon as a user accepts the invite request/after a workspace has been created.
     It will get all the files for the user using delta, to ensure a delta link is returned
@@ -299,6 +295,12 @@ def get_all_files(access_token: str, id: int, db:Session) -> str:
     # Insert into DB - HANDLE THE ERROR RESPONSE!!
     folder_file_response = repository.create_folders_files(folders=folder_data, files=file_data, db=db)
     # Insert into user-file and user-folder here for the current user_id - ensure that the above returns the id's of the files and folders created, so that an entry can be made for each in the next table!
+    if "data" not in folder_file_response:
+        return {
+            "message": "There is no 'data' in 'folder_file_response' - line 296",
+            "folder_file_response": folder_file_response
+        }
+
 
     # Get all the users that have access to the folders and files for this user
     permissions_dict = get_permissions(shared_folders_files=shared_folders_files, access_token=access_token)

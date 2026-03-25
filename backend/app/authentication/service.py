@@ -1,7 +1,13 @@
+from msal import ConfidentialClientApplication
 from sqlalchemy.orm import Session
 from app.authentication import repository
-from ..core.security import create_refresh_token, create_access_token, hash_user_refresh_token, encrypt_refresh
 from datetime import datetime, timezone, timedelta
+import requests
+
+from ..core.config import SCOPES
+from ..core.security import create_refresh_token, create_access_token, hash_user_refresh_token, encrypt_refresh, decrypt_refresh
+
+DRIVE_DATA_GRAPH_URL = "https://graph.microsoft.com/v1.0/me/drive?$select=id"
 
 def create_user(db, details: dict, refresh: str):
     split_name = details["name"].split()
@@ -117,3 +123,45 @@ def rotate_ms_refresh(id: int, refresh_token: str, db:Session):
 
 def update_delta_link(id: int, delta_link: str, db:Session):
     repository.update_delta_link(id, delta_link, db)
+
+def get_user_access(application: ConfidentialClientApplication, user_id, db:Session) -> str | None:
+    # This is to get the access token for users - THAT ARE ALREADY LOGGED IN!
+    user_details = check_get_by_id(user_id, db)
+    access_token = None
+    
+    if user_details:
+        account = application.get_accounts(username=user_details.username)
+        if account:
+            tokens = application.acquire_token_silent(scopes=SCOPES, account=account[0])
+            access_token = tokens["access_token"]
+            # Rotate the refresh token in the DB
+            enc_refresh = encrypt_refresh(tokens["refresh_token"])
+            rotate_ms_refresh(user_id, enc_refresh, db)
+
+        else:
+            account = application.acquire_token_by_refresh_token(refresh_token=decrypt_refresh(user_details.refresh), scopes=SCOPES)
+            access_token = account["access_token"]
+            # Rotate the refresh token in the DB
+            enc_refresh = encrypt_refresh(account["refresh_token"])
+            rotate_ms_refresh(user_id, enc_refresh, db)
+    else:
+        return None
+
+    return access_token
+
+def update_drive_id(id: int, access_token: str, db: Session):
+    '''
+    Function that will get the DriveId for the user for reference when trying to get files that are viewable by others, but owned by another user
+    '''
+    # GET request to retrieve the drive data
+    response = requests.get(url=DRIVE_DATA_GRAPH_URL,
+                 headers={"Authorization": f"Bearer {access_token}"})
+    drive_data = response.json()
+
+    # Extracting the driveId from the response and updating user table in the DB
+    if "id" in drive_data:
+        repository.update_user_drive_data(user_id=id, drive_id=drive_data["id"], db=db)
+    else:
+        print("There was an fethching the drive data for the user - driveId not updated for user!")
+    
+    

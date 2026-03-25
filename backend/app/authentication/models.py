@@ -12,7 +12,7 @@ class User(Base):
     oid = Column(String(40), unique=True, index=True, nullable=False)
     refresh = Column(BLOB(), nullable=False)
     deltaLink = Column(Text(), nullable=True)
-    # deltalink = Column(Text()) # Not sure if Text is the best data type - maybe put this into a different table?
+    driveId = Column(Text(), nullable=True)
 
 class PendingUser(Base):
     __tablename__ = 'pending_users'
