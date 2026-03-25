@@ -24,15 +24,16 @@ def test_create_user_service_adds_employee_correctly(db):
     dummy_user = {
         "name": "John Katherine Smith",
         "email": "jkatherinesmith@outlook.com",
+        "preferred_username": "jkatherinesmith@outlook.com",
         "oid": "00000000-0000-0000-476j-987sdf88se", # This is random
     }
 
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    admin = insert(User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="employee")
+    admin = insert(User).values(firstname="John", surname="Smith", username="johnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", refresh="ms-refresh-token".encode(), oid=oid, role="employee")
     admin_instance=db.execute(admin)
 
     workspace = add_workspace(db=db, name="Test Workspace", image=image)
-    user = create_user(db=db, details=dummy_user, role="employee", workspace_id=workspace.id)
+    user = create_user(db=db, details=dummy_user, refresh="ms-refresh-token", ms_access_token="ms-access-token", role="employee", workspace_id=workspace.id)
 
     # assertions
     assert user # Check that there is a user object returned
@@ -48,12 +49,12 @@ def test_create_user_service_adds_admin_correctly(db):
     image = create_test_image()
     dummy_user = {
         "name": "John Katherine Smith",
-        "email": dummy_user.email,
-        "preferred_username": dummy_user.username,
-        "oid": dummy_user.oid
+        "email": "jkatherinesmith@outlook.com",
+        "preferred_username": "jkatherinesmith@outlook.com",
+        "oid": "00000000-0000-0000-476j-987sdf88se", # This is random
     }
 
-    user = create_user(db=db, details=dummy_user, role="admin", workspace_id=None)
+    user = create_user(db=db, details=dummy_user, refresh="ms-refresh-token", ms_access_token="ms-access-token", role="admin", workspace_id=None)
 
     # assertions
     assert user # Check that there is a user object returned
