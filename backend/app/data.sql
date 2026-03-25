@@ -2,15 +2,42 @@
 -- 1. Users
 -- ==========================
 INSERT INTO `user` (`user_id`, `firstname`, `surname`, `email`, `oid`, `role`) VALUES
-(1, 'Alice', 'Smith', 'alice@example.com', 'oid1', 'Employee'),
-(2, 'Bob', 'Johnson', 'bob@example.com', 'oid2', 'Employee'),
-(3, 'Charlie', 'Brown', 'charlie@example.com', 'oid3', 'Employee');
+(1, 'Tom', 'Clapham', 'tomclapham21@outlook.com',  '00000000-0000-0000-3054-4c8d7409054d', 'admin'),
+(2, 'Alice', 'Smith', 'alice@example.com', 'oid1', 'employee'),
+(3, 'Bob', 'Johnson', 'bob@example.com', 'oid2', 'employee'),
+(4, 'Charlie', 'Brown', 'charlie@example.com', 'oid3', 'employee'),
+(5, 'Delia', 'Plain', 'delia@example.com', 'oid4', 'employee'),
+(6, 'Margaret', 'Plums', 'margaret@example.com', 'oid5', 'employee'),
+(7, 'Daiyan', 'Khan', 'daiyan@example.com', 'oid6', 'employee'),
+(8, 'Oscar', 'Webster', 'oscar@example.com', 'oid7', 'employee'),
+(9, 'Sam', 'Carter', 'sam@example.com', 'oid8', 'employee'),
+(10, 'Elizabeth', 'Palmer', 'elizabeth@example.com', 'oid9', 'employee'),
+(11, 'Susan', 'Younger', 'susan@example.com', 'oid10', 'employee');
+
 
 -- ==========================
 -- 2. Workspaces
 -- ==========================
-INSERT INTO `workspaces` (`id`, `name`, `image`, `user_id`) VALUES
-(1, 'Test Workspace', 0x66616B652D696D6167652D6279746573, 1); -- 'fake-image-bytes' as hex
+INSERT INTO `workspaces` (`id`, `name`, `image`) VALUES
+(1, 'Test Workspace', 0x66616B652D696D6167652D6279746573); -- 'fake-image-bytes' as hex
+
+
+-- ==========================
+-- 2. Workspaces
+-- ==========================
+INSERT INTO `user_workspace` (`user_id`, `workspace_id`) VALUES
+(1, 1),
+(2, 1),
+(3, 1),
+(4, 1),
+(5, 1),
+(6, 1),
+(7, 1),
+(8, 1),
+(9, 1),
+(10, 1),
+(11, 1);
+
 
 -- ==========================
 -- 3. Sensitivity Categories
@@ -19,6 +46,7 @@ INSERT INTO `sensitivity_category` (`sensitivity_category_id`, `name`) VALUES
 (1, 'PII'),
 (2, 'Financial'),
 (3, 'Legal');
+
 
 -- ==========================
 -- 4. Sensitivity Subcategories

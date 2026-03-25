@@ -22,3 +22,6 @@ def del_notification(db: Session, notification_id: int, user_id: int):
 
 def get_workspace_by_id(db: Session, workspace_id: int):
     return repository.get_workspace_by_workspace_id(db, workspace_id)
+
+def get_employees(db: Session, user_id: int):
+    return repository.get_all_employees(db, user_id)

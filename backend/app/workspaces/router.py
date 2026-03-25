@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, UploadFile, File, Form, Response
 from app.core.database import get_database
 from sqlalchemy.orm import Session
-from app.workspaces.service import workspace, add_notification, get_user_notifications, del_notification, get_workspace_by_id
+from app.workspaces.service import workspace, add_notification, get_user_notifications, del_notification, get_employees
 from typing import Annotated
 from ..core.security_schemas import User
 from ..core.security import get_user_from_access_token
@@ -63,3 +63,8 @@ async def delete_notification(db: Annotated[Session, Depends(get_database)], cur
 async def get_workspace_image(db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)]):
     user = service.test_route(current_user.user_id, db=db)
     return Response(content=user.workspaces[0].image)
+
+@router.get("/get-employees")
+async def get_all_employees(db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)]):
+    result = get_employees(db, current_user.user_id)
+    return result
