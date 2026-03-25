@@ -130,10 +130,10 @@ def get_permissions(shared_folders_files: dict, access_token: str) -> dict:
                 "granted_permission": granted
                 # "type": shared_folders_files[item_id]
             }
-            print("\n\nThere were no issues with the get_permissions function")
+            # print("\n\nThere were no issues with the get_permissions function")
     except:
         print("\nThere were issues with the get_permissions function!!")
-        print(shared_folders_files)
+        # print(shared_folders_files)
         # print(all_permissions) # ENSURE THAT ERRORS HERE ARE HANDLED!!!!
 
     return id_permissions_dict
@@ -290,15 +290,11 @@ def get_set_all_graph_files(access_token: str, id: int, db:Session) -> str:
     iu_folders = repository.insert_user_folders(user_folders=user_folders, db=db)
     iu_files = repository.insert_user_files(user_files=user_files, db=db)
     
-    print(permissions_dict)
+    # print(permissions_dict)
     return {
         "repo_response_u_folders": iu_folders,
-        "repo_response_u_files": iu_files,
-        "permissions_dict": permissions_dict,
-        "folder_list": user_folders,
-        "file_list": user_files
+        "repo_response_u_files": iu_files
             }
-    return {"status": folder_file_response["details"]}
 
 def get_download_link_by_graph_id(graph_id: str, access_token: str):
     headers = {"Authorization": f"Bearer {access_token}"}

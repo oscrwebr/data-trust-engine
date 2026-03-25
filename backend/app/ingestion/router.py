@@ -18,9 +18,7 @@ router = APIRouter(
 
 @router.get("/test-graph")
 async def test_ingest(application: Annotated[ConfidentialClientApplication, Depends(application)], user: Annotated[User, Depends(get_user_from_access_token)], db: Annotated[Session, Depends(get_database)]):
-    print(user)
     access_token = auth_service.get_user_access(application=application, user_id=user.user_id, db=db)
-    print(f"\n\nThis is the access token {access_token}\n")
     if access_token:
         # get and the set all the files from MS graph
         output = service.get_set_all_graph_files(access_token=access_token, id=user.user_id, db=db)
