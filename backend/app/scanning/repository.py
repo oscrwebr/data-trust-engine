@@ -85,6 +85,16 @@ def get_file_by_graph_id(db: Session, graph_file_id: str):
     return db.query(File).filter(File.graph_file_id == graph_file_id).first()
 
 
+def get_file_scans(db: Session, file_id: int):
+    return (
+        db.query(Scan)
+        .join(ScanFile, Scan.scan_id == ScanFile.scan_id)
+        .filter(ScanFile.file_id == file_id)
+        .order_by(Scan.started_at.desc())
+        .all()
+    )
+
+
 def set_file_hash(db: Session, file: File, new_hash: str):
     file.hash = new_hash
     db.commit()

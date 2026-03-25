@@ -43,7 +43,12 @@ def get_file(file_id: int, db: Session = Depends(get_database)):
     if not file:
         raise HTTPException(status_code=404, detail="File not found")
     
-    return file 
+    return file
+
+
+@router.get("/get_file_scans/{file_id}")
+def get_file_scans(file_id: int, db: Session = Depends(get_database)):
+    return service.get_file_scans(db, file_id)
 
 
 @router.get("/get_all_files")

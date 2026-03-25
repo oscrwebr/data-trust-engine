@@ -105,8 +105,14 @@ def fetch_graph_file(graph_file_id: str):
             return test_files_directory / "legal_case_report_2.pdf"
     
 
+# Get file by id
 def get_file(db: Session, file_id: int):
     return repository.get_file_by_id(db, file_id)
+
+
+# Get all scans a file pertains to
+def get_file_scans(db: Session, file_id: int):
+    return repository.get_file_scans(db, file_id)
 
 
 # Get hash of a file

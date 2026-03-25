@@ -11,8 +11,10 @@ function FileOverviewPage() {
     useEffect(() => {
         const fetch_file = async() => {
             try {
-                const response = await fetch(`http://localhost:8000/scanning/get_file/${file_id}`);
-                const file_data = await response.json()
+                const file_response = await fetch(`http://localhost:8000/scanning/get_file/${file_id}`);
+                const file_data = await file_response.json()
+
+                const scan_history_response = await fetch(`http://localhost:8000/scanning/get_file_scans/${file_id}`)
 
                 set_file(file_data)
             } catch (error) {
@@ -33,6 +35,9 @@ function FileOverviewPage() {
         <div>
             <h1>{file.file_name}</h1>
             <p>Hash: {file.hash}</p>
+
+
+            <h2>Scan History</h2>
         </div>
     );
 } 
