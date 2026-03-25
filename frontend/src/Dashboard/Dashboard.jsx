@@ -22,15 +22,11 @@ function Dashboard({toast}) {
 
   return (
     <div className={styles.container}>
-        <div className={styles.main}>
-          <div className={styles.content}>
-            <h1 data-testid="dashboard-h1">Dashboard</h1>
-            <Invite className={styles.d_invite_dialog} visible={visible} setVisible={setVisible} toast={toast}/>
+        <h1 data-testid="dashboard-h1">Dashboard</h1>
+        <Invite className={styles.d_invite_dialog} visible={visible} setVisible={setVisible} toast={toast}/>
 
-            {/* This is how and where the notifications are loaded */}
-            <Toast className={styles.d_toast} ref={toastNotifications} onRemove={(message) => handleRemove(message.id)} position="top-right" />
-          </div>
-        </div>
+        {/* This is how and where the notifications are loaded */}
+        <Toast className={styles.d_toast} ref={toastNotifications} onRemove={(message) => handleRemove(message.id)} position="top-right" />
     </div>
   );
 }

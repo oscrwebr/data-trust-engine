@@ -15,6 +15,7 @@ import Unprocessable422 from "./Errors/unprocessable422.jsx";
 import WorkspaceJoinedError from "./invites/WorkspaceJoined.jsx";
 import Forbidden403 from "./Errors/Forbidden403.jsx";
 import Layout from "./components/layout/layout.jsx";
+import ViewEmployees from "./employees/ViewEmployees.jsx";
 
 
 function App() {
@@ -32,7 +33,7 @@ function App() {
 
           {/* Elements in here will inherit the sidebar  */}
           <Route path="/roles" element={<Roles />} />
-          <Route path="/view-employees" element={null} />
+          <Route path="/view-employees" element={<ViewEmployees />} />
           <Route path="/manage-employees" element={null} />
           <Route path="/upload-org-chart" element={null} />
           <Route path="/settings" element={null} />

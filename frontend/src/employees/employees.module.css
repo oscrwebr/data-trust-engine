@@ -1,0 +1,24 @@
+.title {
+    font-size: 40px;
+    margin-bottom: 20px;
+}
+
+.header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.search_dropdown_icon_container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-right: 20px;
+}
+
+.view_button {
+  outline: none;
+  box-shadow: none;
+  background: transparent;
+}
