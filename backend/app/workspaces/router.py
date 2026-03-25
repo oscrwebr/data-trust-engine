@@ -8,6 +8,7 @@ from ..core.security import get_user_from_access_token
 from app.authentication import service
 from app.workspaces.schema import NotificationSchema, RemoveSchema
 from datetime import datetime
+from app.roles.models import UserRole, Role
 
 router = APIRouter(prefix="/workspace", tags=["workspace"])
 
@@ -66,5 +67,23 @@ async def get_workspace_image(db: Annotated[Session, Depends(get_database)], cur
 
 @router.get("/get-employees")
 async def get_all_employees(db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)]):
-    result = get_employees(db, current_user.user_id)
+    employees = get_employees(db, current_user.user_id)
+    result = []
+    for e in employees:
+
+        # fetch assigned sensitivity role
+        user_role = db.query(UserRole).filter(UserRole.user_id == e.user_id).first()
+        role_id = user_role.role_id if user_role else None
+
+        # optionally fetch role name
+        role_name = None
+        if role_id:
+            role = db.query(Role).filter(Role.role_id == role_id).first()
+            role_name = role.name if role else None
+
+        result.append({
+            "user": e,
+            "role_name": role_name
+        })
+    
     return result

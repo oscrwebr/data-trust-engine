@@ -49,11 +49,11 @@ function ViewEmployees(){
             (<div className={styles.row_container}>
                 {employees.map((employee) => (
                     <RowCard
-                        initials={(employee.firstname?.[0]?.toUpperCase() || "?") + (employee.surname?.[0]?.toUpperCase() || "?")} 
-                        firstname={employee.firstname}
-                        surname={employee.surname}
-                        email={employee.email}
-                        role={employee.role}
+                        initials={(employee.user.firstname?.[0]?.toUpperCase() || "?") + (employee.user.surname?.[0]?.toUpperCase() || "?")} 
+                        firstname={employee.user.firstname}
+                        surname={employee.user.surname}
+                        email={employee.user.email}
+                        role={employee.role_name || "No Role Assigned"}
                     />
                 ))}
             </div>

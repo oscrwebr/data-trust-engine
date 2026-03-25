@@ -57,7 +57,7 @@
     width: 40px;
     height: 40px;
     margin-left: 5px;
-    margin-right: 20px;
+    margin-right: 25px;
 }
 
 .row_send_button {
@@ -68,10 +68,20 @@
 .row_info {
     display: flex;
     flex: 1;
+    align-items: center;
     justify-content: space-between;
 }
 
 .row_risk {
-    margin-right: 30px;
+    margin-right: 50px;
+}
+
+.row_role {
+    background-color: #868686;
+    border-radius: 5px;
+    color: white;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 5px;
 }
 
