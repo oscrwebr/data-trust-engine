@@ -44,7 +44,8 @@ def get_values_data(folders: dict, files: dict, shared_folder_files: dict, value
                 "graph_id": id,
                 "name": item["name"],
                 "web_url": item["webUrl"],
-                "parent_graph_id":parent_id
+                "parent_graph_id": parent_id,
+                "drive_id": item["parentReference"]["driveId"]
             }
         elif "file" in item:
             id = item["id"]
@@ -71,7 +72,8 @@ def get_values_data(folders: dict, files: dict, shared_folder_files: dict, value
                 "hash": item_hash[1],
                 "last_modified": datetime.fromisoformat(item["lastModifiedDateTime"]),
                 "web_url": item["webUrl"],
-                "parent_graph_id": item["parentReference"]["id"]
+                "parent_graph_id": item["parentReference"]["id"],
+                "drive_id": item["parentReference"]["driveId"]
             }
         else:
             print("Something went terrible wrong in the 'get_values_data' function!")

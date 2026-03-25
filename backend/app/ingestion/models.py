@@ -11,6 +11,7 @@ class Folder(Base):
     name = Column(String(255), nullable=False)
     web_url = Column(Text())
     parent_graph_id = Column(String(100), ForeignKey("folder.graph_id"), index=True)
+    drive_id = Column(Text(), nullable=False, index=True)
 
 
 class IngestionFile(Base):
@@ -26,6 +27,7 @@ class IngestionFile(Base):
     last_modified = Column(DateTime(), nullable=False)
     web_url = Column(Text(), nullable=False)
     parent_graph_id = Column(ForeignKey(Folder.graph_id), index=True)
+    drive_id = Column(Text(), nullable=False, index=True)
 
 class UserFolders(Base):
     __tablename__ = 'user_folders'
