@@ -16,30 +16,6 @@ GET_PERMISSIONS = "me/drive/items/{graph_id}/permissions"
 GRAHP_BATCH_URL = "https://graph.microsoft.com/v1.0/$batch"
 
 
-# def get_user_access(application: ConfidentialClientApplication, user_id, db:Session) -> str | None:
-#     # This is to get the access token for users - THAT ARE ALREADY LOGGED IN!
-#     user_details = auth_service.check_get_by_id(user_id, db)
-#     access_token = None
-    
-#     if user_details:
-#         account = application.get_accounts(username=user_details.username)
-#         if account:
-#             tokens = application.acquire_token_silent(scopes=SCOPES, account=account[0])
-#             access_token = tokens["access_token"]
-#             # Rotate the refresh token in the DB
-#             enc_refresh = encrypt_refresh(tokens["refresh_token"])
-#             auth_service.rotate_ms_refresh(user_id, enc_refresh, db)
-
-#         else:
-#             account = application.acquire_token_by_refresh_token(refresh_token=decrypt_refresh(user_details.refresh), scopes=SCOPES)
-#             access_token = account["access_token"]
-#             # Rotate the refresh token in the DB
-#             enc_refresh = encrypt_refresh(account["refresh_token"])
-#             auth_service.rotate_ms_refresh(user_id, enc_refresh, db)
-#     else:
-#         return None
-
-#     return access_token
 
 def get_values_data(folders: dict, files: dict, shared_folder_files: dict, values: list[dict]):
     '''
