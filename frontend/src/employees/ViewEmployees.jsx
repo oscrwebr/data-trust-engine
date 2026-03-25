@@ -11,8 +11,9 @@ import RowCard from "./RowCard";
 
 function ViewEmployees(){
     const [selectedRole, setSelectedRole] = useState([]);
+    const [selectedRisk, setSelectedRisk] = useState([]);
     const [employees, setEmployees] = useState([])
-    const [view, setView] = useState(false)
+    const [view, setView] = useState(true)
 
      useEffect(() => {
         api.get("/workspace/get-employees")
@@ -27,23 +28,27 @@ function ViewEmployees(){
             <div className={styles.header}>
                 <strong>Employee Count: {employees.length}</strong>
                 <div className={styles.search_dropdown_icon_container}>
-                    <IconField iconPosition="left" style={{ marginRight:"20px" }}>
+                    <div className="card flex justify-content-center" style={{ marginRight:"15px" }}>
+                        <Dropdown value={selectedRole} onChange={(e) => setSelectedRole(e.value)} optionLabel="name" 
+                            placeholder="Filter by Department" className="p-inputtext-sm"/>
+                    </div>
+                    <div className="card flex justify-content-center" style={{ marginRight:"15px" }}>
+                        <Dropdown value={selectedRisk} onChange={(e) => setSelectedRisk(e.value)} optionLabel="name" 
+                            placeholder="Filter by Risk Level" className="p-inputtext-sm"/>
+                    </div>
+                    <IconField iconPosition="left">
                         <InputIcon className="pi pi-search"> </InputIcon>
                         <InputText style={{ width: '23vw'}} placeholder="Search by employee name or email" className="p-inputtext-sm"/>
                     </IconField>
-                    <div className="card flex justify-content-center">
-                        <Dropdown value={selectedRole} onChange={(e) => setSelectedRole(e.value)} optionLabel="name" 
-                            placeholder="Filter by Departments" className="p-inputtext-sm"/>
-                    </div>
                     <Button className={styles.view_button} onClick={() => setView(!view)}><i style={{ color:"black", fontSize:"20px" }} className={view ? "pi pi-list" : "pi pi-table"}/></Button>
                 </div>
             </div>
             {view ? 
 
             // Employees displayed as rows
-            (<div>
+            (<div className={styles.row_container}>
                 {employees.map((employee) => (
-                    <RowCard 
+                    <RowCard
                         initials={(employee.firstname?.[0]?.toUpperCase() || "?") + (employee.surname?.[0]?.toUpperCase() || "?")} 
                         firstname={employee.firstname}
                         surname={employee.surname}
