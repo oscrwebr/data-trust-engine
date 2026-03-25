@@ -4,9 +4,6 @@ from datetime import datetime, timezone, timedelta
 from dataclasses import asdict
 
 from app.authentication import models, service, repository
-from app.tests.authentication_tests.dummy_user import User
-
-dummy_user = User()
 
 # This tests whether an unauthenticated user can access a protected endpoint
 def test_unauthenticated_user_cannot_access_protected_endpoints(client):
@@ -37,9 +34,9 @@ def test_user_returned_when_they_exist_in_db(db):
     assert db.query(models.User).count() == 1 # incase the user doesn't get added
 
     # Checking the service works
-    response = service.check_get_by_oid(oid=dummy_user.oid, db=db)
+    response = service.check_get_by_oid(oid=oid, db=db)
     assert response
-    assert response.oid == dummy_user.oid
+    assert response.oid == oid
 
 # This tests whether the 'check_exists' function works correctly in the 'authentication/service.py' when the user doesn't exist
 def test_none_returned_when_user_does_not_exist(db):
