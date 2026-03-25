@@ -32,8 +32,8 @@ def delete_pending_user(db: Session, user: PendingUser):
     db.delete(user)
     db.commit()
 
-def create_user(db: Session, firstname: str, surname: str, username: str, email: str, oid: str, role: str, refresh: bytes) -> User:
-    user = User(firstname=firstname, surname=surname, username=username, email=email, oid=oid, role=role, refresh=refresh)
+def create_user(db: Session, firstname: str, surname: str, username: str, email: str, oid: str, role: str, driveId: str, refresh: bytes) -> User:
+    user = User(firstname=firstname, surname=surname, username=username, email=email, oid=oid, role=role, driveId=driveId, refresh=refresh)
     db.add(user)
     db.commit()
     db.refresh(user)

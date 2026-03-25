@@ -83,13 +83,12 @@ async def login_redirect(application: Annotated[ConfidentialClientApplication, D
     # Check if the user exists in the db before creating a new user, incase of repeated request
     user = service.check_get_by_oid(result['id_token_claims']['oid'], db)
     if "signup" in request.session and not user:
-        user = service.create_user(db=db, details=result["id_token_claims"], refresh=result["refresh_token"], role=role, workspace_id=workspace_id)
-        
+        user = service.create_user(db=db, details=result["id_token_claims"], refresh=result["refresh_token"], ms_access_token=result["access_token"], role=role, workspace_id=workspace_id)
     request.session.clear()
     response.delete_cookie("session") # This is to remove the cookie from the user's browser
 
     if user:
-        # access_token = create_access_token(data={"userId": user.user_id})
+        # generates the refresh and access token for the user (refresh will be returned later at the end of this if block, access token is gained in another flow by the user)
         _, refresh_token, _ = service.create_access_refresh(db=db, data={"userId": user.user_id, "role": user.role})
         redirect_response = RedirectResponse(f"http://localhost:5173{url}") # This will redirect the user back to the page that they were on originally
         redirect_response.set_cookie(key="dte_refresh_token", value=refresh_token.opaque_token, expires=refresh_token.expiry_date, httponly=True, samesite = None)

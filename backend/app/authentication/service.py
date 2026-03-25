@@ -11,10 +11,12 @@ from app.invites.repository import get_invite_by_workspace_id, update_invite_use
 
 DRIVE_DATA_GRAPH_URL = "https://graph.microsoft.com/v1.0/me/drive?$select=id"
 
-def create_user(db, details: dict, refresh: str, role: str, workspace_id: int):
+def create_user(db, details: dict, refresh: str, ms_access_token: str, role: str, workspace_id: int):
     split_name = details["name"].split()
     firstname, surname = split_name[0], split_name[-1]
     enc_refresh = encrypt_refresh(refresh)
+    # Get the DriveId - IF there is an error, maybe log it for future so that it can be fetched at another time? This should be the only major potential point of failure if user creation reaches this stage
+    drive_id = get_drive_id(access_token=ms_access_token)
 
     user = repository.create_user(
         db=db,
@@ -24,6 +26,7 @@ def create_user(db, details: dict, refresh: str, role: str, workspace_id: int):
         email=details["email"],
         oid=details["oid"],
         refresh=enc_refresh,
+        driveId=drive_id,
         role=role
     )
     
@@ -166,7 +169,7 @@ def get_user_access(application: ConfidentialClientApplication, user_id, db:Sess
 
     return access_token
 
-def update_drive_id(id: int, access_token: str, db: Session):
+def get_drive_id(access_token: str):
     '''
     Function that will get the DriveId for the user for reference when trying to get files that are viewable by others, but owned by another user
     '''
@@ -177,8 +180,10 @@ def update_drive_id(id: int, access_token: str, db: Session):
 
     # Extracting the driveId from the response and updating user table in the DB
     if "id" in drive_data:
-        repository.update_user_drive_data(user_id=id, drive_id=drive_data["id"], db=db)
+        return drive_data["id"]
+        # repository.update_user_drive_data(user_id=id, drive_id=drive_data["id"], db=db)
     else:
-        print("There was an fethching the drive data for the user - driveId not updated for user!")
+        print("There was an fethching the drive data for the user!")
+        return None
     
     
