@@ -27,9 +27,8 @@ async def test_ingest(application: Annotated[ConfidentialClientApplication, Depe
     return {"message": None}
 
 @router.get("/test-download")
-async def test_download(application: Annotated[ConfidentialClientApplication, Depends(application)], user: Annotated[User, Depends(get_user_from_access_token)], db: Annotated[Session, Depends(get_database)]):
-    access_token = auth_service.get_user_access(application=application, user_id=user.user_id, db=db)
-    download_url = service.get_download_link_by_graph_id(graph_id="1C3872D08681F6C4!5784", access_token=access_token)
+async def test_download(application: Annotated[ConfidentialClientApplication, Depends(application)], user: Annotated[User, Depends(get_user_from_access_token)], db: Annotated[Session, Depends(get_database)], graph_id: str):
+    download_url = service.get_download_link_by_graph_id(application=application, graph_id=graph_id, db=db)
     return {
         "download_url": download_url
     }

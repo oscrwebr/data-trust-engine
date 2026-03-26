@@ -45,3 +45,6 @@ def insert_user_files(user_files: list, db: Session):
         status["description"] = f"An error ocurred: {type(e).__name__} - {e}"
         status["status"] = 403
     return status
+
+def get_drive_id_by_graph_id(graph_id: str, db: Session):
+    return db.query(IngestionFile.drive_id).where(IngestionFile.graph_id == graph_id).first()

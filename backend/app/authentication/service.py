@@ -171,7 +171,7 @@ def get_user_access(application: ConfidentialClientApplication, user_id, db:Sess
 
 def get_drive_id(access_token: str):
     '''
-    Function that will get the DriveId for the user for reference when trying to get files that are viewable by others, but owned by another user
+    Function that will get the DriveId for the user
     '''
     # GET request to retrieve the drive data
     response = requests.get(url=DRIVE_DATA_GRAPH_URL,
@@ -186,4 +186,9 @@ def get_drive_id(access_token: str):
         print("There was an fethching the drive data for the user!")
         return None
     
+def get_access_with_drive_id(application: ConfidentialClientApplication, drive_id: str, db) -> str|None:
+    user = repository.get_user_id_by_drive_id(drive_id, db)
+    if not user:
+        return None
+    return get_user_access(application=application, user_id=user.user_id, db=db)
     

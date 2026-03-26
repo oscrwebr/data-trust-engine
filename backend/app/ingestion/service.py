@@ -298,7 +298,26 @@ def get_set_all_graph_files(access_token: str, id: int, db:Session) -> str:
         "repo_response_u_files": iu_files
             }
 
-def get_download_link_by_graph_id(graph_id: str, access_token: str):
+def get_access_token_by_graph_id(application: ConfidentialClientApplication, graph_id: str, db) -> str|None:
+    '''
+    Function that will retrieve the user Microsoft access token based on the drive_id associated with a graph_id
+    Will return access_token or 'None' If there is no user with the associated drive_id
+    '''
+    print(f"\n\nthis is the graph_id: {graph_id}")
+    # Get the drive_id of the file
+    drive_id = repository.get_drive_id_by_graph_id(graph_id, db)
+    print(f"\n\nThis is the drive_id {drive_id}")
+    if not drive_id:
+        return None
+    # Get the user with the corresponding drive_id
+    return auth_service.get_access_with_drive_id(application=application, drive_id=drive_id[0], db=db)
+
+
+def get_download_link_by_graph_id(application:ConfidentialClientApplication, graph_id: str, db) -> str|None:
+    # Get the Microsoft access token for the owner of the file
+    access_token = get_access_token_by_graph_id(application=application, graph_id=graph_id, db=db)
+    print(f"This is the access token: {access_token}")
+    # Get the download url
     headers = {"Authorization": f"Bearer {access_token}"}
     response = requests.get(
         url=DOWNLOAD_URL_GET.format(graph_id=graph_id),

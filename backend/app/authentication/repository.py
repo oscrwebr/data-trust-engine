@@ -15,6 +15,9 @@ def get_by_oid(oid: str, db: Session):
 def get_by_email(email: str, db: Session):
     return db.query(User).filter(User.email == email).first()
 
+def get_user_id_by_drive_id(drive_id: str, db:Session):
+    return db.query(User).filter(User.driveId == drive_id).first()
+
 def add_user(db: Session, email: str):
     user = PendingUser(email=email)
     db.add(user)
