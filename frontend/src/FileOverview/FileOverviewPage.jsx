@@ -45,7 +45,7 @@ function FileOverviewPage() {
             <p>Hash: {file.hash}</p>
 
             <div className={styles.scan_history_container}>
-                <h2>Scan History</h2>
+                <h2 className={styles.scan_history_title}>Scan History</h2>
 
                 <div className={styles.scan_history_list}>
                     {file_scans_history.map((scan) => (
