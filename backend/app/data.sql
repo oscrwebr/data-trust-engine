@@ -73,10 +73,12 @@ INSERT INTO `sensitivity_subcategory` (`sensitivity_subcategory_id`, `name`, `se
 -- ==========================
 -- 5. Roles
 -- ==========================
-INSERT INTO `role` (`role_id`, `name`) VALUES
-(1, 'PII Role'),
-(2, 'Financial Role'),
-(3, 'Legal Role');
+INSERT INTO `role` (`role_id`, `workspace_id`, `name`) VALUES
+(1, 1, 'PII Role'),
+(2, 1, 'Financial Role'),
+(3, 1, 'Legal Role'),
+(4, 1, 'HR Role'),
+(5, 1, 'Executive Role');
 
 -- ==========================
 -- 6. Role Permissions (threshold=50)
@@ -104,9 +106,11 @@ INSERT INTO `role_permission` (`role_permission_id`, `role_id`, `sensitivity_sub
 -- 7. User Roles
 -- ==========================
 INSERT INTO `user_role` (`user_role_id`, `user_id`, `role_id`) VALUES
-(1, 1, 1),
-(2, 2, 2),
-(3, 3, 3);
+(1, 2, 1),
+(2, 3, 2),
+(3, 4, 3),
+(4, 6, 4),
+(5, 7, 5);
 
 -- ==========================
 -- 8. Files

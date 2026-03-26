@@ -87,3 +87,15 @@ async def get_all_employees(db: Annotated[Session, Depends(get_database)], curre
         })
     
     return result
+
+@router.get("/get-workspace-roles")
+async def get_workspace_roles(db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)]):
+
+    # Access admnin user and their workspace
+    user = service.test_route(current_user.user_id, db=db)
+    workspace = user.workspaces
+
+    # Pull all the roles from that workspace
+    roles = db.query(Role).filter(Role.workspace_id == workspace[0].id).all()
+
+    return roles

@@ -10,9 +10,10 @@ import { Button } from "primereact/button";
 import RowCard from "./RowCard";
 
 function ViewEmployees(){
-    const [selectedRole, setSelectedRole] = useState([]);
-    const [selectedRisk, setSelectedRisk] = useState([]);
+    const [selectedRole, setSelectedRole] = useState(null);
+    const [selectedRisk, setSelectedRisk] = useState(null);
     const [employees, setEmployees] = useState([])
+    const [roles, setRoles] = useState([])
     const [view, setView] = useState(true)
 
      useEffect(() => {
@@ -20,7 +21,15 @@ function ViewEmployees(){
         .then(res => {
             setEmployees(res.data)
         });
+
+        api.get("/workspace/get-workspace-roles")
+        .then(res => {
+            const all = { id: "all", name: "View All Roles" };
+            const none = { id: "null", name: "No Role Assigned" };
+            setRoles([all, none, ...res.data]);
+        });
     }, []);
+    console.log(employees)
 
     return(
         <div>
@@ -29,7 +38,7 @@ function ViewEmployees(){
                 <strong>Employee Count: {employees.length}</strong>
                 <div className={styles.search_dropdown_icon_container}>
                     <div className="card flex justify-content-center" style={{ marginRight:"15px" }}>
-                        <Dropdown value={selectedRole} onChange={(e) => setSelectedRole(e.value)} optionLabel="name" 
+                        <Dropdown value={selectedRole} options={roles} onChange={(e) => setSelectedRole(e.value)} optionLabel="name" 
                             placeholder="Filter by Department" className="p-inputtext-sm"/>
                     </div>
                     <div className="card flex justify-content-center" style={{ marginRight:"15px" }}>
@@ -47,15 +56,26 @@ function ViewEmployees(){
 
             // Employees displayed as rows
             (<div className={styles.row_container}>
-                {employees.map((employee) => (
-                    <RowCard
-                        initials={(employee.user.firstname?.[0]?.toUpperCase() || "?") + (employee.user.surname?.[0]?.toUpperCase() || "?")} 
-                        firstname={employee.user.firstname}
-                        surname={employee.user.surname}
-                        email={employee.user.email}
-                        role={employee.role_name || "No Role Assigned"}
-                    />
-                ))}
+                {employees
+                    .filter(employee => 
+                        !selectedRole || 
+                        selectedRole.name === "View All Roles" || 
+                        selectedRole.name === "No Role Assigned" 
+                        && employee.role_name === null ||
+                        employee.role_name === selectedRole.name 
+                    )
+                    .map((employee) => (
+                        <RowCard
+                            initials={
+                                (employee.user.firstname?.[0]?.toUpperCase() || "?") +
+                                (employee.user.surname?.[0]?.toUpperCase() || "?")
+                            } 
+                            firstname={employee.user.firstname}
+                            surname={employee.user.surname}
+                            email={employee.user.email}
+                            role={employee.role_name || "No Role Assigned"}
+                        />
+                    ))}
             </div>
 
             ) : (
