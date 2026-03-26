@@ -15,6 +15,7 @@ import Unprocessable422 from "./Errors/unprocessable422.jsx";
 import WorkspaceJoinedError from "./invites/WorkspaceJoined.jsx";
 import Forbidden403 from "./Errors/Forbidden403.jsx";
 import Layout from "./components/layout/layout.jsx";
+import ScanPage from "./scans/ScanPage.jsx";
 
 
 function App() {
@@ -37,6 +38,8 @@ function App() {
           <Route path="/upload-org-chart" element={null} />
           <Route path="/settings" element={null} />
           <Route path="/dashboard" element={<Dashboard toast={toast}/>} />
+          <Route path="/scans" element={<Scans />} />
+          <Route path="/scans/:scanId" element={<ScanPage/>} />
         </Route>
 
         {/* Elements in here will not inherit the sidebar */}
@@ -47,7 +50,6 @@ function App() {
         <Route path="/error/403" element={<Forbidden403/>}/>
         <Route path="/invite-error/:type" element={<EmployeeInviteError toast={toast}/>} />
         <Route path="/workspace-joined" element={<WorkspaceJoinedError />} />
-        <Route path="/scans" element={<Scans />} />
       </Routes>
 
     </>

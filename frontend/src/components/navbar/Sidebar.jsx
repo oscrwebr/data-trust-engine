@@ -8,6 +8,7 @@ import NavbarItem from "./NavbarItem";
 import DropdownItem from "./DropdownItem";
 import api from "../../api/axiosConfig";
 import { Avatar } from "primereact/Avatar";
+import { BiFileFind } from "react-icons/bi";
         
 function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role}){
     const [openDropdown, setOpenDropdown] = useState(null);
@@ -45,11 +46,14 @@ function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role
                     </div>
                     <NavbarItem className={styles.navbar_item} url="/dashboard" text="Dashboard" icon="pi pi-th-large"/>
                     <div className={styles.line}/>
-
+                    <SidebarDropdown className={styles.dropdown} icon="pi pi-file" label="Files" openDropdown={openDropdown} setOpenDropdown={setOpenDropdown}>
+            
+                    </SidebarDropdown>
                     {/* Add a dropdown menu item using SidebarDropdown - choose your own label, an icon from PrimeReact and everything else can be kept the same*/}
-                    <SidebarDropdown className={styles.dropdown} icon="pi pi-folder" label="Scanning" openDropdown={openDropdown} setOpenDropdown={setOpenDropdown}>
+                    <SidebarDropdown className={styles.dropdown} icon="pi pi-search" label="Scanning" openDropdown={openDropdown} setOpenDropdown={setOpenDropdown}>
 
                         {/* Add your scanning pages here */}
+                        <DropdownItem url="/scans" text="View Scans"/>
                     </SidebarDropdown>
 
                     <SidebarDropdown className={styles.dropdown} icon="pi pi-users" label="My Employees" openDropdown={openDropdown} setOpenDropdown={setOpenDropdown}>

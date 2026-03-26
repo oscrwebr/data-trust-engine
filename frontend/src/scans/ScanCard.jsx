@@ -46,7 +46,7 @@ function ScanCard({ scan }) {
                             : <PiClockClockwise/>
 
     return(
-        <Link to={`/scans/${scan.scan_id}`}>
+        <Link to={`/scans/${scan.scan_id}`} className="scan-card-link">
             <div className={`scan-card ${scanTypeClassName}`}>
                 {/* Top section of the ScanCard split into two sections */}
                 <div className="scan-card-top">
