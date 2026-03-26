@@ -80,6 +80,8 @@ dependencies = [
     "pytest>=9.0.2",
     "spacy",
     "Pillow",
+    "fixtures>=4.3.2",
+    "requests-mock>=1.12.1"
 ]
 
 [tool.setuptools.packages.find]

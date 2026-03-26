@@ -16,8 +16,9 @@ from sqlalchemy.orm import Session
 from app.core.database import get_database
 
 load_dotenv()
-# make this singleton!
-# application = ConfidentialClientApplication(client_id=os.environ.get("CLIENT_ID"), authority=os.environ.get("AUTHORITY"), client_credential=os.environ.get("CLIENT_SECRET"))
+
+def get_session(request: Request):
+    return request
 
 router = APIRouter(
     prefix = "/auth",
@@ -30,7 +31,7 @@ roles_dict = {
 }
 
 @router.get("/sign-in")
-async def sign_in(application: Annotated[ConfidentialClientApplication, Depends(application)], request: Request, next: str, signup: bool | None=None, role: int | None=None, workspace_id: int | None=None):
+async def sign_in(application: Annotated[ConfidentialClientApplication, Depends(application)], request: Annotated[dict, Depends(get_session)], next: str, signup: bool | None=None, role: int | None=None, workspace_id: int | None=None):
     # Protect against url manipulation!
     if not next.startswith("/"):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
@@ -57,7 +58,7 @@ async def sign_in(application: Annotated[ConfidentialClientApplication, Depends(
     return RedirectResponse(flow['auth_uri'])
 
 @router.get("/success/")
-async def login_redirect(application: Annotated[ConfidentialClientApplication, Depends(application)], request: Request, response: Response, db: Annotated[Session, Depends(get_database)], client_info: str | None=None, code: str | None=None, state: str | None=None, error: str | None=None, error_description: str | None=None):
+async def login_redirect(application: Annotated[ConfidentialClientApplication, Depends(application)], request: Annotated[dict, Depends(get_session)], response: Response, db: Annotated[Session, Depends(get_database)], client_info: str | None=None, code: str | None=None, state: str | None=None, error: str | None=None, error_description: str | None=None):
     if error:
         return RedirectResponse(url=f"{config.FRONTEND_BASE_URL}/error/422")
 
@@ -90,7 +91,7 @@ async def login_redirect(application: Annotated[ConfidentialClientApplication, D
     if user:
         # generates the refresh and access token for the user (refresh will be returned later at the end of this if block, access token is gained in another flow by the user)
         _, refresh_token, _ = service.create_access_refresh(db=db, data={"userId": user.user_id, "role": user.role})
-        redirect_response = RedirectResponse(f"http://localhost:5173{url}") # This will redirect the user back to the page that they were on originally
+        redirect_response = RedirectResponse(f"{config.FRONTEND_BASE_URL}{url}") # This will redirect the user back to the page that they were on originally
         redirect_response.set_cookie(key="dte_refresh_token", value=refresh_token.opaque_token, expires=refresh_token.expiry_date, httponly=True, samesite = None)
         # return {"access_token": access_token} # This is now technically irrelevant - optimised flow to save milliseconds would be to remove this entirely
         return redirect_response
