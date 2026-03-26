@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 from app.scanning.models import File, NamingConvention, Scan, ScanNamingConvention, NamingConventionScanResult, Scan, ScanFile, ScanFileDetection
 from datetime import datetime, timezone
@@ -87,9 +87,21 @@ def get_file_by_graph_id(db: Session, graph_file_id: str):
 
 def get_file_scans(db: Session, file_id: int):
     return (
-        db.query(Scan)
-        .join(ScanFile, Scan.scan_id == ScanFile.scan_id)
-        .filter(ScanFile.file_id == file_id)
+        db.query(
+            Scan.scan_id,
+            Scan.started_at,
+            Scan.finished_at,
+
+            # Count number of detections for this file within each scan
+            func.count(ScanFileDetection.scan_file_detection_id).label("detection_count")
+        )
+        .join(ScanFile, Scan.scan_id == ScanFile.scan_id) # Join Scan to ScanFile, links each scan to the files included in that scan
+        .outerjoin( # Outerjoin ScanFile to ScanFileDetections, so that scans are included even if number of detections is 0
+            ScanFileDetection,
+            ScanFile.scan_file_id == ScanFileDetection.scan_file_id
+        )
+        .filter(ScanFile.file_id == file_id) # Filter to only include rows where ScanFile relates to the given file_id
+        .group_by(Scan.scan_id, Scan.started_at, Scan.finished_at) # Group by scan to aggregate 
         .order_by(Scan.started_at.desc())
         .all()
     )

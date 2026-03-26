@@ -22,7 +22,9 @@ class FileResponse(BaseModel):
 
 class FileScansResponse(BaseModel):
     scan_id: int
+    started_at: datetime
     finished_at: datetime | None
+    detection_count: int
 
     class Config:
         from_attributes = True

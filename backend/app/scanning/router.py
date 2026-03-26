@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_database
 from app.scanning import service, repository
 from pydantic import BaseModel
-from app.scanning.schemas import OrganisationScanRequest, FileResponse
+from app.scanning.schemas import OrganisationScanRequest, FileResponse, FileScansResponse
 
 router = APIRouter(prefix="/scanning", tags=["scanning"])
 
@@ -36,6 +36,7 @@ def create_file(graph_file_id: str, file_name: str, db: Session = Depends(get_da
     repository.create_file(db, graph_file_id, file_name, hash_result)
 
 
+# Get a file's details using its id
 @router.get("/get_file/{file_id}", response_model=FileResponse)
 def get_file(file_id: int, db: Session = Depends(get_database)):
     file = service.get_file(db, file_id)
@@ -46,7 +47,8 @@ def get_file(file_id: int, db: Session = Depends(get_database)):
     return file
 
 
-@router.get("/get_file_scans/{file_id}")
+# Get all scans a file is part of using its id
+@router.get("/get_file_scans/{file_id}", response_model=list[FileScansResponse])
 def get_file_scans(file_id: int, db: Session = Depends(get_database)):
     return service.get_file_scans(db, file_id)
 
