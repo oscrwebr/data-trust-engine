@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import api from "../api/axiosConfig";
-import { Link, useParams } from "react-router-dom";
 import ScanCard from "./ScanCard";
 import { Divider } from 'primereact/divider';
 import "./scans.css";
@@ -12,7 +11,6 @@ function Scans(){
     const [error, setError] = useState(null)
     const [scans, setScans] = useState([]);
 
-    const {scanId} = useParams();
     // Get scans with file count from endpoint
     useEffect(() => {
         api.get("/scanning/get_scans_with_file_count")
@@ -28,7 +26,7 @@ function Scans(){
         setLoading(false);
         });
 
-    }, [scanId]);
+    }, []);
 
 
     return (
