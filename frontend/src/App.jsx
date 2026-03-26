@@ -15,6 +15,7 @@ import Unprocessable422 from "./Errors/unprocessable422.jsx";
 import WorkspaceJoinedError from "./invites/WorkspaceJoined.jsx";
 import Forbidden403 from "./Errors/Forbidden403.jsx";
 import Layout from "./components/layout/layout.jsx";
+import OrgChart from "./org_chart/orgChart";
 
 
 function App() {
@@ -47,6 +48,7 @@ function App() {
         <Route path="/error/403" element={<Forbidden403/>}/>
         <Route path="/invite-error/:type" element={<EmployeeInviteError toast={toast}/>} />
         <Route path="/workspace-joined" element={<WorkspaceJoinedError />} />
+        <Route path="org-chart" element={OrgChart} />
         <Route path="/scans" element={<Scans />} />
       </Routes>
 

@@ -4,19 +4,31 @@ from ..core.security import create_refresh_token, create_access_token, hash_user
 from datetime import datetime, timezone, timedelta
 from app.workspaces.repository import add_notification, get_workspace_by_workspace_id, add_user_workspace
 from app.invites.repository import get_invite_by_workspace_id, update_invite_used_value
+from app.roles.repository import migrate_pending_roles
+from app.authentication.repository import get_pending_user_by_email, delete_pending_user
 
 def create_user(db, details: dict, role: str, workspace_id: int):
     split_name = details["name"].split()
     firstname, surname = split_name[0], split_name[-1]
 
+    email = details["email"]
+
+    pending_user = repository.get_pending_user_by_email(db, email)
+
     user = repository.create_user(
         db=db,
         firstname=firstname,
         surname=surname,
-        email=details["email"],
+        email=email,
         oid=details["oid"],
         role=role
     )
+    
+    if pending_user:
+        migrate_pending_roles(db, pending_user.user_id, user.user_id)
+
+        # delete pending user AFTER migration
+        delete_pending_user(db, pending_user)
     
     if(workspace_id != None and role == "employee"):
         invite = get_invite_by_workspace_id(db, workspace_id)
