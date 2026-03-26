@@ -13,7 +13,7 @@ from ..authentication import service as auth_service
 INIT_GRAPH_GET = "https://graph.microsoft.com/v1.0/me/drive/root/delta?$select=id,name,lastModifiedDateTime,parentReference,file,folder,webUrl,content.downloadUrl,shared"
 DOWNLOAD_URL_GET = "https://graph.microsoft.com/v1.0/me/drive/items/{graph_id}?select=content.downloadUrl"
 GET_PERMISSIONS = "me/drive/items/{graph_id}/permissions"
-GRAHP_BATCH_URL = "https://graph.microsoft.com/v1.0/$batch"
+GRAPH_BATCH_URL = "https://graph.microsoft.com/v1.0/$batch"
 
 
 
@@ -107,7 +107,7 @@ def get_permissions(shared_folders_files: dict, access_token: str) -> dict:
     all_permissions = []
     for request_body in request_body_list:
         response = requests.post(
-            url=GRAHP_BATCH_URL,
+            url=GRAPH_BATCH_URL,
             json={"requests": request_body},
             headers=headers
         )
@@ -231,8 +231,10 @@ def clean_folders_files_with_permissions(folder_file_data: dict, permissions: di
 
 def get_set_all_graph_files(access_token: str, id: int, db:Session) -> str:
     '''
-    This function will run as soon as a user accepts the invite request/after a workspace has been created.
-    It will get all the files for the user using delta, to ensure a delta link is returned
+    This function will run once a user has signed up (once queing has been added).
+    It will get all the files for a user from their OneDrive, using a delta query.
+    By adding the DeltaLink (received once all files/folders are retrieved) to the user's row in the user table,
+    we can make sure that we only pull the latest *changes* to the user's OneDrive, instead of having to look at all files and folders again.
     '''
     headers = {"Authorization": f"Bearer {access_token}"}
     # print(access_token)
