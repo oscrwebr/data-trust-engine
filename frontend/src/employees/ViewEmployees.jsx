@@ -12,6 +12,7 @@ import RowCard from "./RowCard";
 function ViewEmployees(){
     const [selectedRole, setSelectedRole] = useState(null);
     const [selectedRisk, setSelectedRisk] = useState(null);
+    const [searchValue, setSearchValue] = useState(null);
     const [employees, setEmployees] = useState([])
     const [roles, setRoles] = useState([])
     const [view, setView] = useState(true)
@@ -26,10 +27,9 @@ function ViewEmployees(){
         .then(res => {
             const all = { id: "all", name: "View All Roles" };
             const none = { id: "null", name: "No Role Assigned" };
-            setRoles([all, none, ...res.data]);
+            setRoles([all, ...res.data, none]);
         });
     }, []);
-    console.log(employees)
 
     return(
         <div>
@@ -47,7 +47,7 @@ function ViewEmployees(){
                     </div>
                     <IconField iconPosition="left">
                         <InputIcon className="pi pi-search"> </InputIcon>
-                        <InputText style={{ width: '23vw'}} placeholder="Search by employee name or email" className="p-inputtext-sm"/>
+                        <InputText onChange={(e) => setSearchValue(e.target.value)} style={{ width: '23vw'}} placeholder="Search by employee name or email" className="p-inputtext-sm"/>
                     </IconField>
                     <Button className={styles.view_button} onClick={() => setView(!view)}><i style={{ color:"black", fontSize:"20px" }} className={view ? "pi pi-list" : "pi pi-table"}/></Button>
                 </div>
@@ -57,13 +57,22 @@ function ViewEmployees(){
             // Employees displayed as rows
             (<div className={styles.row_container}>
                 {employees
-                    .filter(employee => 
-                        !selectedRole || 
-                        selectedRole.name === "View All Roles" || 
-                        selectedRole.name === "No Role Assigned" 
-                        && employee.role_name === null ||
-                        employee.role_name === selectedRole.name 
-                    )
+                    .filter(employee => {
+                        const matchesRole =
+                            !selectedRole ||
+                            selectedRole.name === "View All Roles" ||
+                            (selectedRole.name === "No Role Assigned" && employee.role_name === null) ||
+                            employee.role_name === selectedRole.name;
+
+                        const search = searchValue?.toLowerCase() || "";
+
+                        const matchesSearch =
+                            employee.user.firstname?.toLowerCase().includes(search) ||
+                            employee.user.surname?.toLowerCase().includes(search) ||
+                            employee.user.email?.toLowerCase().includes(search);
+
+                        return matchesRole && matchesSearch;
+                    })
                     .map((employee) => (
                         <RowCard
                             initials={
