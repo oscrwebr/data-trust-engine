@@ -16,7 +16,8 @@ function FileScanHistoryItem({ scan }) {
                     {scan.detection_count === 1 ? "detection" : "detections"}
                 </div>
 
-                <div className={styles.item_status}>{scan.finished_at ? "Completed" : "In Progress"}</div>
+                <div className={`${styles.item_status} ${is_completed ? styles.completed : styles.in_progress}`}>
+                    {is_completed ? "Completed" : "In Progress"}</div>
             </div>
         </div>
     )

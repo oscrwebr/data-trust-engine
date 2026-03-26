@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import FileScanHistoryItem from "./FileScanHistoryItem";
+import styles from "./FileOverview.module.css";
 
 
 function FileOverviewPage() {
@@ -43,10 +44,10 @@ function FileOverviewPage() {
             <h1>{file.file_name}</h1>
             <p>Hash: {file.hash}</p>
 
-            <div className="scan-history-card">
+            <div className={styles.scan_history_container}>
                 <h2>Scan History</h2>
 
-                <div className="scan-history-list">
+                <div className={styles.scan_history_list}>
                     {file_scans_history.map((scan) => (
                         <FileScanHistoryItem key={scan.scan_id} scan={scan} />
                     ))}
