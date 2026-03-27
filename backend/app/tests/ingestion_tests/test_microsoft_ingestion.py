@@ -1,15 +1,26 @@
 from sqlalchemy import insert, select
-import requests
+import requests, json
+from datetime import datetime, timezone
 
-from app.tests.ingestion_tests.ingestion_data import GRAPH_RESPONSE_ODATA_NEXT, GRAPH_RESPONSE_ODATA_LINK, GRAPH_RESPONSE_2_PERMISSIONS
+from app.tests.ingestion_tests.ingestion_data import GRAPH_RESPONSE_ODATA_NEXT, GRAPH_RESPONSE_ODATA_LINK, GRAPH_RESPONSE_2_PERMISSIONS, GRAPH_RESPONSE_BATCH_25
 from app.authentication.models import User
 from app.authentication.service import get_user_access
 from app.ingestion import models
-from app.ingestion.service import INIT_GRAPH_GET, GET_PERMISSIONS, GRAPH_BATCH_URL, DOWNLOAD_URL_GET, get_set_all_graph_files
+from app.ingestion.service import INIT_GRAPH_GET, GET_PERMISSIONS, GRAPH_BATCH_URL, DOWNLOAD_URL_GET, get_set_all_graph_files, get_download_link_by_graph_id
 from app.core.security import encrypt_refresh, decrypt_refresh
 
+# Fake classes used for mocking
+class FakeMsal():
+    def get_accounts(self, *args, **kwargs):
+        return ["This is the user account!"]
+    def acquire_token_silent(self, *args, **kwargs):
+        return {
+            "access_token": "fake-ms-access-token",
+            "refresh_token": "fake-ms-refresh-token"
+        }
+
 # Unit test to ensure that the function successfully pulls all one drive files and folders for a user
-def test_files_and_folders_pulled_from_one_drive_correctly(client, db, requests_mock):
+def test_files_and_folders_pulled_from_one_drive_correctly(db, requests_mock):
     ms_access_token = "fake-ms-access-token"
 
     # create data for the two user that is being tested (adding permissions for both users)
@@ -89,5 +100,105 @@ def test_files_and_folders_pulled_from_one_drive_correctly(client, db, requests_
     assert len(user_folders) == 5
 
 # Test ensuring system can pull files without an '@odata.nextLink'
+def test_files_pulled_without_next_link(db, requests_mock):
+    ms_access_token = "fake-ms-access-token"
+    # Create user that is being tested
+    oid = "000000-7sdf77-88asdf8-9sdiy99"
+    insert_statement = insert(User).values(firstname="John", surname="Smith", username="johnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", refresh=encrypt_refresh("ms-refresh-token"), oid=oid, role="employee").returning(User)
+    user = db.execute(insert_statement).scalar_one()
+
+    # Mock the api response with only odata.deltaLink
+    mock_graph_init_get = requests_mock.get(
+        INIT_GRAPH_GET,
+        json=GRAPH_RESPONSE_ODATA_LINK,
+        status_code=200
+    )
+
+    # Ensure that ingestion files and folders are empty
+    select_files = select(models.IngestionFile)
+    select_folders = select(models.Folder)
+    file = db.execute(select_files).all()
+    folder = db.execute(select_folders).all()
+    assert file == [] # Making sure that ingestion_file is empty to begin with
+    assert folder == [] # Making sure that folder is empty to begin with
+
+    # Calling the function that handles graph ingestion
+    output = get_set_all_graph_files(access_token=ms_access_token, id=user.user_id, db=db)
+
+    # Ensure there is ONE API call to graph api with 'delta' in the path and the access token in the header
+    assert len(mock_graph_init_get.request_history) == 1
+    assert mock_graph_init_get.request_history[0].path.endswith("/delta") == True
+    assert mock_graph_init_get.request_history[0]._request.headers["Authorization"] == f"Bearer {ms_access_token}"
+
+    # Ensure that the single new file is successfully added to the database
+    folder = db.execute(select_folders).all()
+    assert len(folder) == 1
 
 # Test to ensure that the system can correctly batch requests for permissions in 20's
+def test_ensure_permission_requests_batch_in_20(db, requests_mock):
+    ms_access_token = "fake-ms-access-token"
+    # Create user that is being tested
+    oid = "000000-7sdf77-88asdf8-9sdiy99"
+    insert_statement = insert(User).values(firstname="John", surname="Smith", username="johnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", refresh=encrypt_refresh("ms-refresh-token"), oid=oid, role="employee").returning(User)
+    user = db.execute(insert_statement).scalar_one()
+
+    # Mock the api response with only over 20 shared files/folders
+    mock_graph_init_get = requests_mock.get(
+        INIT_GRAPH_GET,
+        json=GRAPH_RESPONSE_BATCH_25,
+        status_code=200
+    )
+    # This will be used to ensure multiple requests are sent
+    mock_permissions_response = requests_mock.post(
+        url=GRAPH_BATCH_URL,
+        json=GRAPH_RESPONSE_2_PERMISSIONS
+    )
+
+    # Ensure that ingestion files and folders are empty
+    select_files = select(models.IngestionFile)
+    select_folders = select(models.Folder)
+    file = db.execute(select_files).all()
+    folder = db.execute(select_folders).all()
+    assert file == [] # Making sure that ingestion_file is empty to begin with
+    assert folder == [] # Making sure that folder is empty to begin with
+
+    # Calling the function that handles graph ingestion
+    output = get_set_all_graph_files(access_token=ms_access_token, id=user.user_id, db=db)
+
+    # Ensure that there are 2 calls to the 'mock_permissions_response'
+    assert len(mock_permissions_response.request_history) == 2
+    # Count the number of items in the first request body and ensure it is 20
+    request_body = json.loads(mock_permissions_response.request_history[0]._request.body.decode('utf-8'))
+    assert len(request_body["requests"]) == 20
+
+# Test that the download url can be retrieved with the graph id
+def test_download_link_retrieved_via_graph_id(db, requests_mock):
+    # Creating the dummy user who's driveId the file will belong to
+    oid = "000000-7sdf77-88asdf8-9sdiy99"
+    insert_statement = insert(User).values(firstname="John", surname="Smith", username="johnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", refresh=encrypt_refresh("ms-refresh-token"), driveId="fake-drive-id", oid=oid, role="employee").returning(User)
+    user = db.execute(insert_statement)
+    
+    # Creating the dummy file that will be used
+    insert_statement = insert(models.IngestionFile).values(graph_id="testgraphid1234", name="name_of_file", extension="docx", hash="dummy_hash", hash_type="sha256", last_modified=datetime.now(timezone.utc), web_url="dummy_url", parent_graph_id=None, drive_id="fake-drive-id")
+    db.execute(insert_statement)
+
+    # Mock the API call to graph
+    download_url_get = requests_mock.get(
+        url=DOWNLOAD_URL_GET.format(graph_id="testgraphid1234"),
+        json={
+            "@microsoft.graph.downloadUrl": "fake-download-url-returned-by-mock"
+        },
+        status_code=200
+    )
+    fake_msal = FakeMsal()
+    download_url = get_download_link_by_graph_id(application=fake_msal, graph_id="testgraphid1234", db=db)
+
+    # ASSERTIONS
+    ## Ensure that a download link is returned
+    assert download_url
+    ## Ensure that the returned download link is the one returned by the mock api
+    assert download_url == "fake-download-url-returned-by-mock"
+    ## Ensure that there is a request to the mock api
+    assert len(download_url_get.request_history) == 1
+    ## Ensure that the download link was requested with an access token
+    assert download_url_get.request_history[0]._request.headers["Authorization"] == f"Bearer {fake_msal.acquire_token_silent()["access_token"]}"
