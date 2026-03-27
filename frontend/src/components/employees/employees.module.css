@@ -61,7 +61,7 @@
     font-size: 10px;
     font-weight: 600;
     padding: 5px;
-    border-radius: 5px;
+    border-radius: 15px;
 }
 
 .chip_container {
@@ -72,6 +72,11 @@
     overflow-y: auto;
     margin-top: 5px;
     margin-bottom: 20px;
+}
+
+
+#chip_remove_icon:hover {
+    cursor: pointer;
 }
 
 .dialog {

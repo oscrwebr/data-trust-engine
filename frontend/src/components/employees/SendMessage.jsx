@@ -3,7 +3,7 @@ import { Chip } from 'primereact/chip';
 import { Dialog } from "primereact/dialog";
 import { InputTextarea } from 'primereact/inputtextarea';
     
-function SendMessage({visible, setVisible, selectedEmployees}) {
+function SendMessage({visible, setVisible, selectedEmployees, onRemove}) {
 
     return (
         <div>
@@ -21,7 +21,7 @@ function SendMessage({visible, setVisible, selectedEmployees}) {
                     {selectedEmployees.map((employee) => (
                         <div className={styles.chip}>
                             <span style={{ marginRight: '5px' }}>{employee.user.firstname} {employee.user.surname}</span>
-                            <i className="pi pi-times-circle"/>
+                            <i id={styles.chip_remove_icon} onClick={() => onRemove(employee.user.user_id)} className="pi pi-times-circle"/>
                         </div>
                     ))}
                 </div>

@@ -30,6 +30,12 @@ function ViewEmployees(){
     });
     };
 
+    const onRemove = (id) => {
+        setSelectedEmployees(prev => 
+        prev.filter(emp => emp.user.user_id !== id)
+    );
+    }
+
     useEffect(() => {
         api.get("/workspace/get-employees")
         .then(res => {
@@ -47,7 +53,7 @@ function ViewEmployees(){
 
     return(
         <div>
-            <SendMessage visible={sendMessageDialog} setVisible={setSendMessageDialog} selectedEmployees={selectedEmployees}/>
+            <SendMessage visible={sendMessageDialog} setVisible={setSendMessageDialog} selectedEmployees={selectedEmployees} onRemove={onRemove}/>
             <div className={styles.container}>
                 <h1 className={styles.title}>View Employees</h1>
                 <Button disabled={selectedEmployees.length == 0 ? (true) : (false)} onClick={() => setSendMessageDialog(true)} className={styles.send_message_button}>Send a Message</Button>
