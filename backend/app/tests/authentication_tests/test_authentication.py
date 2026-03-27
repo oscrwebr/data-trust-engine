@@ -29,7 +29,7 @@ def test_success_with_error_in_query_params(client):
 def test_user_returned_when_they_exist_in_db(db):
     # Creating the user
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    insert_statement = insert(models.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="admin")
+    insert_statement = insert(models.User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode() , role="admin")
     db.execute(insert_statement)
     assert db.query(models.User).count() == 1 # incase the user doesn't get added
 
@@ -55,7 +55,7 @@ def test_auth_and_refresh_token_rotated_if_user_has_valid_refresh(db, client):
     ## SETTING UP THE TEST
     # Insert the test user
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    insert_statement = insert(models.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="employee")
+    insert_statement = insert(models.User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode() , role="admin")
     res = db.execute(insert_statement)
 
     # Create test refresh_family entry
@@ -87,7 +87,7 @@ def test_replaced_by_and_at_updated_if_refresh_token_is_valid(db, client):
     ## SETTING UP THE TEST
     # Insert the test user
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    insert_statement = insert(models.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="admin")
+    insert_statement = insert(models.User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode() , role="admin")
     res = db.execute(insert_statement)
 
     # Create test refresh_family entry
@@ -134,7 +134,7 @@ def test_401_raised_if_refresh_family_is_revoked(db, client):
     ## SETTING UP THE TEST
     # Insert the test user
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    insert_statement = insert(models.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="employee")
+    insert_statement = insert(models.User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode() , role="admin")
     res = db.execute(insert_statement)
 
     # Create test refresh_family entry
@@ -160,7 +160,7 @@ def test_no_rotation_and_same_access_token_returned_if_requests_within_30_second
     ## SETTING UP THE TEST
     # Insert the test user
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    insert_statement = insert(models.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="admin")
+    insert_statement = insert(models.User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode() , role="admin")
     res = db.execute(insert_statement)
 
     # Create test refresh_family entry
@@ -209,7 +209,7 @@ def test_401_returned_if_refresh_expired(db, client):
     ## SETTING UP THE TEST
     # Insert the test user
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    insert_statement = insert(models.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="employee")
+    insert_statement = insert(models.User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode() , role="admin")
     res = db.execute(insert_statement)
 
     # Create test refresh_family entry
@@ -242,7 +242,7 @@ def test_is_revoked_is_true_if_refresh_expired(db, client):
     ## SETTING UP THE TEST
     # Insert the test user
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    insert_statement = insert(models.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="admin")
+    insert_statement = insert(models.User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode() , role="admin")
     res = db.execute(insert_statement)
 
     # Create test refresh_family entry
