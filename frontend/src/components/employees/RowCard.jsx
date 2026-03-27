@@ -12,7 +12,7 @@ function RowCard({id, initials, firstname, surname, email, role, checked, onChan
                 <span className={styles.row_role}>{role}</span>
                 <strong className={styles.row_risk}>Scanning Risk</strong>
             </div>
-            <div className="card flex justify-content-center" style={{ marginRight: "20px" }}>
+            <div className="card flex justify-content-center" style={{ margin: " 0 20px" }}>
                 <Checkbox inputId={id} onChange={(e) => onChange(id, e.checked)} checked={checked} />
             </div>
         </div>

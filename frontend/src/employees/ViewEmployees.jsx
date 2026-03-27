@@ -9,6 +9,7 @@ import { Dropdown } from 'primereact/dropdown';
 import { Button } from "primereact/button";
 import RowCard from "../components/employees/RowCard";
 import SendMessage from "../components/employees/SendMessage";
+import SquareCard from "../components/employees/SquareCard";
 
 function ViewEmployees({toast}){
     const [selectedRole, setSelectedRole] = useState(null);
@@ -51,6 +52,23 @@ function ViewEmployees({toast}){
         });
     }, []);
 
+    const filteredEmployees = employees.filter(employee => {
+        const matchesRole =
+            !selectedRole ||
+            selectedRole.name === "View All Roles" ||
+            (selectedRole.name === "No Role Assigned" && employee.role_name === null) ||
+            employee.role_name === selectedRole.name;
+
+        const search = searchValue?.toLowerCase() || "";
+
+        const matchesSearch =
+            employee.user.firstname?.toLowerCase().includes(search) ||
+            employee.user.surname?.toLowerCase().includes(search) ||
+            employee.user.email?.toLowerCase().includes(search);
+
+        return matchesRole && matchesSearch;
+    });
+
     return(
         <div>
             <SendMessage visible={sendMessageDialog} setVisible={setSendMessageDialog} selectedEmployees={selectedEmployees} setSelectedEmployees={setSelectedEmployees} onRemove={onRemove} toast={toast}/>
@@ -76,51 +94,48 @@ function ViewEmployees({toast}){
                     <Button className={styles.view_button} onClick={() => setView(!view)}><i style={{ color:"black", fontSize:"20px" }} className={view ? "pi pi-list" : "pi pi-table"}/></Button>
                 </div>
             </div>
-            {view ? 
-
-            // Employees displayed as rows
-            (<div className={styles.row_container}>
-                {employees
-                    .filter(employee => {
-                        const matchesRole =
-                            !selectedRole ||
-                            selectedRole.name === "View All Roles" ||
-                            (selectedRole.name === "No Role Assigned" && employee.role_name === null) ||
-                            employee.role_name === selectedRole.name;
-
-                        const search = searchValue?.toLowerCase() || "";
-
-                        const matchesSearch =
-                            employee.user.firstname?.toLowerCase().includes(search) ||
-                            employee.user.surname?.toLowerCase().includes(search) ||
-                            employee.user.email?.toLowerCase().includes(search);
-
-                        return matchesRole && matchesSearch;
-                    })
-                    .map((employee) => (
-                        <RowCard
-                            id={employee.user.user_id}
-                            initials={
-                                (employee.user.firstname?.[0]?.toUpperCase() || "?") +
-                                (employee.user.surname?.[0]?.toUpperCase() || "?")
-                            } 
-                            firstname={employee.user.firstname}
-                            surname={employee.user.surname}
-                            email={employee.user.email}
-                            role={employee.role_name || "No Role Assigned"}
-                            onChange={(id, checked) => onSelectedEmployeesChange(employee, checked)}
-                            checked={selectedEmployees.some(emp => emp.user.user_id === employee.user.user_id)}
-                        />
-                    ))}
+            <div style={{ marginTop: '15px' }}>
+                {view ? (
+                    // Row Cards
+                    filteredEmployees.map(employee => (
+                        <div className={styles.row_container} key={employee.user.user_id}>
+                            <RowCard
+                                id={employee.user.user_id}
+                                initials={
+                                    (employee.user.firstname?.[0]?.toUpperCase() || "?") +
+                                    (employee.user.surname?.[0]?.toUpperCase() || "?")
+                                }
+                                firstname={employee.user.firstname}
+                                surname={employee.user.surname}
+                                email={employee.user.email}
+                                role={employee.role_name || "No Role Assigned"}
+                                onChange={(id, checked) => onSelectedEmployeesChange(employee, checked)}
+                                checked={selectedEmployees.some(emp => emp.user.user_id === employee.user.user_id)}
+                            />
+                        </div>
+                    ))
+                ) : (
+                    // Square Cards
+                    <div className={styles.square_container}>
+                        {filteredEmployees.map(employee => (
+                            <SquareCard
+                                key={employee.user.user_id}
+                                id={employee.user.user_id}
+                                initials={
+                                    (employee.user.firstname?.[0]?.toUpperCase() || "?") +
+                                    (employee.user.surname?.[0]?.toUpperCase() || "?")
+                                }
+                                firstname={employee.user.firstname}
+                                surname={employee.user.surname}
+                                email={employee.user.email}
+                                role={employee.role_name || "No Role Assigned"}
+                                onChange={(id, checked) => onSelectedEmployeesChange(employee, checked)}
+                                checked={selectedEmployees.some(emp => emp.user.user_id === employee.user.user_id)}
+                            />
+                        ))}
+                    </div>
+                )}
             </div>
-
-            ) : (
-            
-            // Employees displayed as squares
-            <div>
-
-            </div>
-            )}
         </div>
     )
 }

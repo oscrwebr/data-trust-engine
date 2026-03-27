@@ -5,20 +5,21 @@
     border: 1px solid lightslategray;
     margin-bottom: 10px;
     margin-right: 20px;
-    padding: 5px;
+    padding: 10px;
     border-radius: 5px;
-    width: 86%;
+    width: 95%;
+    box-sizing: border-box;
+    transition: background-color 0.2s ease;
 }
 
 .row_card_container:hover {
-  cursor: pointer;
-  background-color: rgb(210, 208, 208);
+    cursor: pointer;
+    background-color: rgb(210, 208, 208);
 }
 
 .row_avatar {
-    width: 40px;
-    height: 40px;
-    margin-left: 5px;
+    width: 50px;
+    height: 50px;
     margin-right: 20px;
 }
 
@@ -27,19 +28,37 @@
     flex: 1;
     align-items: center;
     justify-content: space-between;
+    gap: 15px;
 }
 
-.row_risk {
-    margin-right: 80px;
+.row_name {
+    font-weight: bold;
+    font-size: 14px;
 }
 
-.row_role {
+.row_email {
+    font-size: 15px;
+    color: #555;
+}
+
+.row_role, .square_role {
     background-color: #868686;
     border-radius: 5px;
     color: white;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
-    padding: 5px;
+    padding: 5px 8px;
+    text-align: center;
+}
+
+.row_risk {
+    color: red;
+    font-weight: bold;
+    margin-right: 20px;
+}
+
+.row_card_container .p-checkbox {
+    margin-left: 10px;
 }
 
 .dialog_header {
@@ -81,4 +100,62 @@
 
 .send_message_button {
     margin-top: 10px;
+}
+
+.square_card_container {
+    position: relative;
+    width: 180px;
+    height: 220px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background: #fff;
+    transition: background-color 0.2s ease;
+}
+
+.checkbox_container {
+    position: absolute;
+    top: 8px;
+    right: 0px;
+}
+
+.square_card_container:hover {
+    cursor: pointer;
+    background-color: rgb(210, 208, 208);
+}
+
+.square_avatar {
+    width: 60px !important;  
+    height: 60px !important;
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+}
+
+.square_info {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;              
+    flex-grow: 1;
+    justify-content: center;
+}
+
+.square_name {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.square_email {
+    font-size: 12px;
+    color: #555;
+}
+
+.square_risk {
+    font-size: 12px;
+    color: red;
 }
