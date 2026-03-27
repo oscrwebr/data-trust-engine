@@ -50,13 +50,17 @@ def get_values_data(folders: dict, files: dict, shared_folder_files: dict, value
         elif "file" in item:
             id = item["id"]
             item_name = item["name"]
-            # setting the hash type - using desired order
-            if "sha256Hash" in (hashes := item["file"]["hashes"]):
-                item_hash = ("sha256Hash", hashes["sha256Hash"])
-            elif "quickXorHash" in hashes:
-                item_hash = ("quickXorHash", hashes["quickXorHash"])
-            elif "sha1Hash" in hashes:
-                item_hash = ("sha1Hash", hashes["sha1Hash"])
+            # Check whether the hash is actually there
+            if "hashes" in item["file"]:
+                # setting the hash type - using desired order
+                if "sha256Hash" in (hashes := item["file"]["hashes"]):
+                    item_hash = ("sha256Hash", hashes["sha256Hash"])
+                elif "quickXorHash" in hashes:
+                    item_hash = ("quickXorHash", hashes["quickXorHash"])
+                elif "sha1Hash" in hashes:
+                    item_hash = ("sha1Hash", hashes["sha1Hash"])
+                else:
+                    item_hash = (None, None)
             else:
                 item_hash = (None, None)
 
@@ -75,9 +79,9 @@ def get_values_data(folders: dict, files: dict, shared_folder_files: dict, value
                 "parent_graph_id": item["parentReference"]["id"],
                 "drive_id": item["parentReference"]["driveId"]
             }
-        else:
-            print("Something went terrible wrong in the 'get_values_data' function!")
-
+        # else:
+            # This should raise an error, be logged and void the entire process!
+            
     return folders, files, shared_folder_files
 
 def get_permissions(shared_folders_files: dict, access_token: str) -> dict:
@@ -115,8 +119,8 @@ def get_permissions(shared_folders_files: dict, access_token: str) -> dict:
     
     # Create a dictionary where the key is the graph_id and values are a set of emails that need to be checked in the db
     id_permissions_dict = defaultdict(dict)
-    try:    
-        for item in all_permissions:
+    for item in all_permissions:
+        try:
             item_id = item["id"]
             # Get 'grantedToPermissionsV2' for each item
             granted = set()
@@ -130,11 +134,8 @@ def get_permissions(shared_folders_files: dict, access_token: str) -> dict:
                 "granted_permission": granted
                 # "type": shared_folders_files[item_id]
             }
-            # print("\n\nThere were no issues with the get_permissions function")
-    except:
-        print("\nThere were issues with the get_permissions function!!")
-        # print(shared_folders_files)
-        # print(all_permissions) # ENSURE THAT ERRORS HERE ARE HANDLED!!!!
+        except:
+            print("\nThere were issues with the get_permissions function!!")
 
     return id_permissions_dict
 
@@ -243,10 +244,11 @@ def get_set_all_graph_files(access_token: str, id: int, db:Session) -> str:
         headers=headers
     )
 
-    # Catch error, where user has no one drive files and returned is a 404 error
-    if response.status_code == 404:
+    # Catch error from response if it's not successful, returning 400 status_code
+    if response.status_code != 200:
         return {
-            "error": "no data!"
+            "status_code": 400,
+            "error": "Couldn't retrieve!"
         }
 
     folder_data, file_data, shared_folders_files = {}, {}, {}
@@ -314,6 +316,8 @@ def get_access_token_by_graph_id(application: ConfidentialClientApplication, gra
 def get_download_link_by_graph_id(application:ConfidentialClientApplication, graph_id: str, db) -> str|None:
     # Get the Microsoft access token for the owner of the file
     access_token = get_access_token_by_graph_id(application=application, graph_id=graph_id, db=db)
+    if not access_token:
+        return None
     # Get the download url
     headers = {"Authorization": f"Bearer {access_token}"}
     response = requests.get(

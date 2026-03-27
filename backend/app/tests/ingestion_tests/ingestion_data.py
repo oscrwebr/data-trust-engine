@@ -98,7 +98,6 @@ GRAPH_RESPONSE_ODATA_NEXT = {
                         "mimeType": "application/octet-stream",
                         "hashes": {
                             "sha1Hash": "75955F5B9962C28DF5C8DA2344966210AF8DF586",
-                            "sha256Hash": "3BC49B5CB77193EFA2E70FA02D87AC2FDE93D9522234529BEE28F97096F06CD7"
                         }
                     },
                     "shared": {
@@ -147,6 +146,112 @@ GRAPH_RESPONSE_ODATA_LINK = {
                     "parentReference": {
                         "driveType": "personal",
                         "driveId": "1H9872G9875T7K1"
+                    },
+                    "folder": {
+                        "childCount": 11,
+                        "view": {
+                            "sortBy": "name",
+                            "sortOrder": "ascending",
+                            "viewType": "thumbnails"
+                        }
+                    }
+                }]
+            }
+
+GRAPH_RESPONSE_NOT_SHARED = {
+            "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#Collection(microsoft.graph.driveItem)",
+            "@odata.deltaLink": "https://graph.microsoft.com/v1.0/me/drive/root/delta?$select=id%2cname%2clastModifiedDateTime%2cparentReference%2cfile%2cfolder%2cwebUrl%2ccontent.downloadUrl%2cshared&token=token",
+            "value": [
+                {
+                    "id": "1H9872G9875T7K1!alkdsjhf878768asdf76876lasdkfj89876",
+                    "lastModifiedDateTime": "2026-03-23T19:05:55Z",
+                    "name": "root",
+                    "webUrl": "https://onedrive.live.com?cid=1H9872G9875T7K1&id=anotherId",
+                    "parentReference": {
+                        "driveType": "personal",
+                        "driveId": "1H9872G9875T7K1"
+                    },
+                    "folder": {
+                        "childCount": 11,
+                        "view": {
+                            "sortBy": "name",
+                            "sortOrder": "ascending",
+                            "viewType": "thumbnails"
+                        }
+                    }
+                },
+                {
+                    "id": "1H9872G9875T7K1!1",
+                    "lastModifiedDateTime": "2026-03-23T19:05:55Z",
+                    "name": "test_file_1",
+                    "webUrl": "https://onedrive.live.com?cid=1H9872G9875T7K1&id=anotherId",
+                    "parentReference": {
+                        "driveType": "personal",
+                        "driveId": "1H9872G9875T7K1",
+                        "id": "1H9872G9875T7K1!alkdsjhf878768asdf76876lasdkfj89876"
+                    },
+                    "file": {
+                        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                        "hashes": {
+                            "quickXorHash": "AAAAAAAAAAAAAAAAAAAAAAAAAAA="
+                        }
+                    }
+                },
+                {
+                    "id": "1H9872G9875T7K1!2",
+                    "lastModifiedDateTime": "2026-03-23T19:05:55Z",
+                    "name": "test_folder_2",
+                    "webUrl": "https://onedrive.live.com?cid=1H9872G9875T7K1&id=anotherId",
+                    "parentReference": {
+                        "driveType": "personal",
+                        "driveId": "1H9872G9875T7K1",
+                        "id": "1H9872G9875T7K1!alkdsjhf878768asdf76876lasdkfj89876"
+                    },
+                    "folder": {
+                        "childCount": 11,
+                        "view": {
+                            "sortBy": "name",
+                            "sortOrder": "ascending",
+                            "viewType": "thumbnails"
+                        }
+                    }
+                }]
+            }
+
+GRAPH_RESPONSE_NO_FILE_OR_FOLDER = {
+            "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#Collection(microsoft.graph.driveItem)",
+            "@odata.deltaLink": "https://graph.microsoft.com/v1.0/me/drive/root/delta?$select=id%2cname%2clastModifiedDateTime%2cparentReference%2cfile%2cfolder%2cwebUrl%2ccontent.downloadUrl%2cshared&token=token",
+            "value": [
+                {
+                    "id": "1H9872G9875T7K1!alkdsjhf878768asdf76876lasdkfj89876",
+                    "lastModifiedDateTime": "2026-03-23T19:05:55Z",
+                    "name": "root",
+                    "webUrl": "https://onedrive.live.com?cid=1H9872G9875T7K1&id=anotherId",
+                    "parentReference": {
+                        "driveType": "personal",
+                        "driveId": "1H9872G9875T7K1"
+                    }
+                },
+                {
+                    "id": "1H9872G9875T7K1!1",
+                    "lastModifiedDateTime": "2026-03-23T19:05:55Z",
+                    "name": "test_file_1",
+                    "webUrl": "https://onedrive.live.com?cid=1H9872G9875T7K1&id=anotherId",
+                    "parentReference": {
+                        "driveType": "personal",
+                        "driveId": "1H9872G9875T7K1",
+                        "id": "1H9872G9875T7K1!alkdsjhf878768asdf76876lasdkfj89876"
+                    }
+                },
+                {
+                    "id": "1H9872G9875T7K1!2",
+                    "lastModifiedDateTime": "2026-03-23T19:05:55Z",
+                    "name": "test_folder_2",
+                    "webUrl": "https://onedrive.live.com?cid=1H9872G9875T7K1&id=anotherId",
+                    "parentReference": {
+                        "driveType": "personal",
+                        "driveId": "1H9872G9875T7K1",
+                        "id": "1H9872G9875T7K1!alkdsjhf878768asdf76876lasdkfj89876"
                     },
                     "folder": {
                         "childCount": 11,
@@ -285,10 +390,6 @@ GRAPH_RESPONSE_BATCH_25 = {
                     },
                     "file": {
                         "mimeType": "application/octet-stream",
-                        "hashes": {
-                            "sha1Hash": "75955F5B9962C28DF5C8DA2344966210AF8DF586",
-                            "sha256Hash": "3BC49B5CB77193EFA2E70FA02D87AC2FDE93D9522234529BEE28F97096F06CD7"
-                        }
                     },
                     "shared": {
                         "scope": "users",
@@ -616,8 +717,6 @@ GRAPH_RESPONSE_BATCH_25 = {
                     "file": {
                         "mimeType": "application/octet-stream",
                         "hashes": {
-                            "sha1Hash": "75955F5B9962C28DF5C8DA2344966210AF8DF586",
-                            "sha256Hash": "3BC49B5CB77193EFA2E70FA02D87AC2FDE93D9522234529BEE28F97096F06CD7"
                         }
                     },
                     "shared": {
@@ -937,3 +1036,55 @@ GRAPH_RESPONSE_2_PERMISSIONS = {
                 }
             }]
         }
+
+GRAPH_PERMISSIONS_NO_GRANTED_V2 = {
+            "responses": [{
+                "id": "1H9872G9875T7K1!5784",
+                "body": {
+                }
+            },
+            {
+                "id": "1H9872G9875T7K1!573",
+                "body": {
+                    "value": [
+                        {
+                            "grantedToIdentitiesV2": [
+                                {
+                                    "siteUser": {
+                                        "email": "johnSmith1@hotmail.com"
+                                    }
+                                },
+                                {
+                                    "siteUser": {
+                                        "email": "manbat@hotmail.com"
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }]
+        }
+
+GRAPH_RESPONSE_NO_ODATA_LINK = {
+            "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#Collection(microsoft.graph.driveItem)",
+            "value": [
+                {
+                    "id": "1H9872G9875T7K1!alkdsjhf878768asdf76876lasdkfj89876",
+                    "lastModifiedDateTime": "2026-03-23T19:05:55Z",
+                    "name": "root",
+                    "webUrl": "https://onedrive.live.com?cid=1H9872G9875T7K1&id=anotherId",
+                    "parentReference": {
+                        "driveType": "personal",
+                        "driveId": "1H9872G9875T7K1"
+                    },
+                    "folder": {
+                        "childCount": 11,
+                        "view": {
+                            "sortBy": "name",
+                            "sortOrder": "ascending",
+                            "viewType": "thumbnails"
+                        }
+                    }
+                }]
+            }

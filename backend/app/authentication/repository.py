@@ -95,7 +95,7 @@ def update_delta_link(id: int, delta_link: str, db: Session) -> None:
     db.execute(update_statement)
     db.commit()
 
-def update_user_drive_data(user_id: int, drive_id: str, db: Session) -> None:
-    update_statement = update(User).where(User.user_id == user_id).values(driveId = drive_id)
-    db.execute(update_statement)
-    db.commit()
+# def update_user_drive_data(user_id: int, drive_id: str, db: Session) -> None:
+#     update_statement = update(User).where(User.user_id == user_id).values(driveId = drive_id)
+#     db.execute(update_statement)
+#     db.commit()
