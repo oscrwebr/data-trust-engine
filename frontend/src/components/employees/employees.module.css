@@ -52,13 +52,26 @@
     margin: 0;
 }
 
-.dialog_input_container {
+.chip {
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: space-between;
+    background-color: #868686;
+    color: white;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+.chip_container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    max-height: 120px; 
+    overflow-y: auto;
     margin-top: 5px;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
 }
 
 .dialog {

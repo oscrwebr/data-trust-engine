@@ -20,14 +20,14 @@ function ViewEmployees(){
     const [view, setView] = useState(true);
     const [selectedEmployees, setSelectedEmployees] = useState([]);
 
-    const onSelectedEmployeesChange = (id, checked) => {
+    const onSelectedEmployeesChange = (employee, checked) => {
         setSelectedEmployees(prev => {
-            if (checked) {
-                return [...prev, id];
-            } else {
-                return prev.filter(empId => empId !== id);
-            }
-        });
+        if (checked) {
+            return [...prev, employee];
+        } else {
+            return prev.filter(emp => emp.user.user_id !== employee.user.user_id);
+        }
+    });
     };
 
     useEffect(() => {
@@ -47,7 +47,7 @@ function ViewEmployees(){
 
     return(
         <div>
-            <SendMessage visible={sendMessageDialog} setVisible={setSendMessageDialog} roles={roles} setRoles={setRoles}/>
+            <SendMessage visible={sendMessageDialog} setVisible={setSendMessageDialog} selectedEmployees={selectedEmployees}/>
             <div className={styles.container}>
                 <h1 className={styles.title}>View Employees</h1>
                 <Button disabled={selectedEmployees.length == 0 ? (true) : (false)} onClick={() => setSendMessageDialog(true)} className={styles.send_message_button}>Send a Message</Button>
@@ -102,8 +102,8 @@ function ViewEmployees(){
                             surname={employee.user.surname}
                             email={employee.user.email}
                             role={employee.role_name || "No Role Assigned"}
-                            onChange={onSelectedEmployeesChange}
-                            checked={selectedEmployees.includes(employee.user.user_id)}
+                            onChange={(id, checked) => onSelectedEmployeesChange(employee, checked)}
+                            checked={selectedEmployees.some(emp => emp.user.user_id === employee.user.user_id)}
                         />
                     ))}
             </div>
