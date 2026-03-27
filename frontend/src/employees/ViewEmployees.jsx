@@ -10,7 +10,7 @@ import { Button } from "primereact/button";
 import RowCard from "../components/employees/RowCard";
 import SendMessage from "../components/employees/SendMessage";
 
-function ViewEmployees(){
+function ViewEmployees({toast}){
     const [selectedRole, setSelectedRole] = useState(null);
     const [selectedRisk, setSelectedRisk] = useState(null);
     const [searchValue, setSearchValue] = useState(null);
@@ -53,7 +53,7 @@ function ViewEmployees(){
 
     return(
         <div>
-            <SendMessage visible={sendMessageDialog} setVisible={setSendMessageDialog} selectedEmployees={selectedEmployees} onRemove={onRemove}/>
+            <SendMessage visible={sendMessageDialog} setVisible={setSendMessageDialog} selectedEmployees={selectedEmployees} setSelectedEmployees={setSelectedEmployees} onRemove={onRemove} toast={toast}/>
             <div className={styles.container}>
                 <h1 className={styles.title}>View Employees</h1>
                 <Button disabled={selectedEmployees.length == 0 ? (true) : (false)} onClick={() => setSendMessageDialog(true)} className={styles.send_message_button}>Send a Message</Button>

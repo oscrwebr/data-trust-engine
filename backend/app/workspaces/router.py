@@ -6,7 +6,7 @@ from typing import Annotated
 from ..core.security_schemas import User
 from ..core.security import get_user_from_access_token
 from app.authentication import service
-from app.workspaces.schema import NotificationSchema, RemoveSchema
+from app.workspaces.schema import NotificationSchema, RemoveSchema, MessageSchema
 from datetime import datetime
 from app.roles.models import UserRole, Role
 
@@ -48,6 +48,17 @@ async def dashboard(db: Annotated[Session, Depends(get_database)], current_user:
 @router.post("/request-join-workspace")
 async def create_notification(db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)], notification: NotificationSchema):
     result = add_notification(db, notification.title, notification.body, datetime.now(), current_user.user_id)
+    return result
+
+@router.post("/send-message")
+async def create_notification(db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)], employees: MessageSchema):
+    
+    if employees.body is None or employees.body == "":
+        return
+    
+    for e in employees.employees:
+        result = add_notification(db, "New Message", employees.body, datetime.now(), e)
+
     return result
 
 @router.get("/get-notifications")
