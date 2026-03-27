@@ -7,7 +7,8 @@ import { InputText } from "primereact/inputtext";
 import { useState, useEffect } from "react";
 import { Dropdown } from 'primereact/dropdown';
 import { Button } from "primereact/button";
-import RowCard from "./RowCard";
+import RowCard from "../components/employees/RowCard";
+import SendMessage from "../components/employees/SendMessage";
 
 function ViewEmployees(){
     const [selectedRole, setSelectedRole] = useState(null);
@@ -15,6 +16,7 @@ function ViewEmployees(){
     const [searchValue, setSearchValue] = useState(null);
     const [employees, setEmployees] = useState([])
     const [roles, setRoles] = useState([])
+    const [sendMessageDialog, setSendMessageDialog] = useState(false);
     const [view, setView] = useState(true)
 
      useEffect(() => {
@@ -33,13 +35,17 @@ function ViewEmployees(){
 
     return(
         <div>
-            <h1 className={styles.title}>View Employees</h1>
+            <SendMessage visible={sendMessageDialog} setVisible={setSendMessageDialog}/>
+            <div className={styles.container}>
+                <h1 className={styles.title}>View Employees</h1>
+                <Button onClick={() => setSendMessageDialog(true)} className={styles.send_message_button}>Send a Message</Button>
+            </div>
             <div className={styles.header}>
-                <strong>Employee Count: {employees.length}</strong>
+                <strong className={styles.employee_count}>{employees.length} People</strong>
                 <div className={styles.search_dropdown_icon_container}>
                     <div className="card flex justify-content-center" style={{ marginRight:"15px" }}>
                         <Dropdown value={selectedRole} options={roles} onChange={(e) => setSelectedRole(e.value)} optionLabel="name" 
-                            placeholder="Filter by Department" className="p-inputtext-sm"/>
+                            placeholder="Filter by Roles" className="p-inputtext-sm"/>
                     </div>
                     <div className="card flex justify-content-center" style={{ marginRight:"15px" }}>
                         <Dropdown value={selectedRisk} onChange={(e) => setSelectedRisk(e.value)} optionLabel="name" 
