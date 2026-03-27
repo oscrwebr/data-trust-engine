@@ -14,12 +14,23 @@ function ViewEmployees(){
     const [selectedRole, setSelectedRole] = useState(null);
     const [selectedRisk, setSelectedRisk] = useState(null);
     const [searchValue, setSearchValue] = useState(null);
-    const [employees, setEmployees] = useState([])
-    const [roles, setRoles] = useState([])
+    const [employees, setEmployees] = useState([]);
+    const [roles, setRoles] = useState([]);
     const [sendMessageDialog, setSendMessageDialog] = useState(false);
-    const [view, setView] = useState(true)
+    const [view, setView] = useState(true);
+    const [selectedEmployees, setSelectedEmployees] = useState([]);
 
-     useEffect(() => {
+    const onSelectedEmployeesChange = (id, checked) => {
+        setSelectedEmployees(prev => {
+            if (checked) {
+                return [...prev, id];
+            } else {
+                return prev.filter(empId => empId !== id);
+            }
+        });
+    };
+
+    useEffect(() => {
         api.get("/workspace/get-employees")
         .then(res => {
             setEmployees(res.data)
@@ -30,15 +41,16 @@ function ViewEmployees(){
             const all = { id: "all", name: "View All Roles" };
             const none = { id: "null", name: "No Role Assigned" };
             setRoles([all, ...res.data, none]);
+            
         });
     }, []);
 
     return(
         <div>
-            <SendMessage visible={sendMessageDialog} setVisible={setSendMessageDialog}/>
+            <SendMessage visible={sendMessageDialog} setVisible={setSendMessageDialog} roles={roles} setRoles={setRoles}/>
             <div className={styles.container}>
                 <h1 className={styles.title}>View Employees</h1>
-                <Button onClick={() => setSendMessageDialog(true)} className={styles.send_message_button}>Send a Message</Button>
+                <Button disabled={selectedEmployees.length == 0 ? (true) : (false)} onClick={() => setSendMessageDialog(true)} className={styles.send_message_button}>Send a Message</Button>
             </div>
             <div className={styles.header}>
                 <strong className={styles.employee_count}>{employees.length} People</strong>
@@ -81,6 +93,7 @@ function ViewEmployees(){
                     })
                     .map((employee) => (
                         <RowCard
+                            id={employee.user.user_id}
                             initials={
                                 (employee.user.firstname?.[0]?.toUpperCase() || "?") +
                                 (employee.user.surname?.[0]?.toUpperCase() || "?")
@@ -89,6 +102,8 @@ function ViewEmployees(){
                             surname={employee.user.surname}
                             email={employee.user.email}
                             role={employee.role_name || "No Role Assigned"}
+                            onChange={onSelectedEmployeesChange}
+                            checked={selectedEmployees.includes(employee.user.user_id)}
                         />
                     ))}
             </div>
