@@ -136,17 +136,26 @@ describe("View Employees Component", () => {
         );
 
         const trigger = await screen.findByRole("button", { name: /filter by roles/i });
-        userEvent.click(trigger);
+        await userEvent.click(trigger);
 
         const panel = await waitFor(() => {
-        const el = document.querySelector(".p-dropdown-items-wrapper");
+            const el = document.querySelector(".p-dropdown-items-wrapper");
+            if (!el) throw new Error("Dropdown not ready");
             return el;
         });
 
         expect(panel).toBeInTheDocument();
-        const option = within(panel).getByText((content) => content.replace(/\s+/g,'') === 'PIIRole');
+        const options = await screen.findAllByText(/pii role/i);
 
-        userEvent.click(option);
+        const dropdownOption = options.find(el =>
+        el.classList.contains("p-dropdown-item-label")
+        );
+
+        if (!dropdownOption) {
+        throw new Error("Dropdown option not found");
+        }
+
+        await userEvent.click(dropdownOption);
 
         await waitFor(() => {
             expect(screen.getByText(/Alice\s+Smith/i)).toBeInTheDocument();
