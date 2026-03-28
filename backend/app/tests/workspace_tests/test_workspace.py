@@ -1,6 +1,7 @@
 from app.workspaces import models as workspace_model
 from app.authentication import models as auth_model, repository, service
 from app.workspaces.repository import add_user_workspace, add_notification, get_workspace_by_workspace_id
+from app.roles.repository import create_role
 from sqlalchemy import insert, select, desc
 from datetime import datetime
 
@@ -283,11 +284,9 @@ def test_get_workspace_image_route(db, client):
     image = create_test_image()
 
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    admin_insert = insert(auth_model.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="employee")
+    admin_insert = insert(auth_model.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="admin")
     res = db.execute(admin_insert)
     
-    user = repository.get_by_id(res.inserted_primary_key[0], db)
-
     workspace_insert = insert(workspace_model.Workspace).values(name="Test Workspace", image=image)
     workspace_insert = db.execute(workspace_insert)
 
@@ -310,6 +309,141 @@ def test_get_workspace_image_route(db, client):
     image_bytes = response.content 
     assert isinstance(image_bytes, bytes)
 
+
+# Test the /workspace/send-message route when a body is present
+def test_successful_send_message_route(db, client):
+    image = create_test_image()
+
+    oid = "000000-7sdf77-88asdf8-9sdiy99"
+    oid2 = "000000-7sdf87-88asdf8-9sdiy99"
+
+    admin_insert = insert(auth_model.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="admin")
+    employee_insert = insert(auth_model.User).values(firstname="Bob", surname="Messi", email="bobmessi@hotmail.com", oid=oid2, role="employee")
+
+    res = db.execute(admin_insert)
+    res_2 = db.execute(employee_insert)
+    
+    workspace_insert = insert(workspace_model.Workspace).values(name="Test Workspace", image=image)
+    workspace_insert = db.execute(workspace_insert)
+
+    add_user_workspace(db, workspace_insert.inserted_primary_key[0], res.inserted_primary_key[0])
+    add_user_workspace(db, workspace_insert.inserted_primary_key[0], res_2.inserted_primary_key[0])
+
+    refresh_family = repository.create_refresh_family(db)
+
+    access, refresh, _ = service.create_access_refresh(db, data={"userId": res.inserted_primary_key[0], "role": "admin"}, refresh_family_id=refresh_family.refresh_family_id)
+
+    req = client.build_request(
+        method="post",
+        url="/workspace/send-message",
+        headers={"Authorization": f"Bearer {access}"}, 
+        json={"employees":[res_2.inserted_primary_key[0]], "body":"Test Body"}
+    )
+
+    response = client.send(request = req)
+
+    assert response.status_code == 200
+    assert response.json() == True
+
+# Test the /workspace/send-message route when a body is not present
+def test_invalid_send_message_route(db, client):
+    image = create_test_image()
+
+    oid = "000000-7sdf77-88asdf8-9sdiy99"
+    oid2 = "000000-7sdf87-88asdf8-9sdiy99"
+
+    admin_insert = insert(auth_model.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="admin")
+    employee_insert = insert(auth_model.User).values(firstname="Bob", surname="Messi", email="bobmessi@hotmail.com", oid=oid2, role="employee")
+
+    res = db.execute(admin_insert)
+    res_2 = db.execute(employee_insert)
+    
+    workspace_insert = insert(workspace_model.Workspace).values(name="Test Workspace", image=image)
+    workspace_insert = db.execute(workspace_insert)
+
+    add_user_workspace(db, workspace_insert.inserted_primary_key[0], res.inserted_primary_key[0])
+    add_user_workspace(db, workspace_insert.inserted_primary_key[0], res_2.inserted_primary_key[0])
+
+    refresh_family = repository.create_refresh_family(db)
+
+    access, refresh, _ = service.create_access_refresh(db, data={"userId": res.inserted_primary_key[0], "role": "admin"}, refresh_family_id=refresh_family.refresh_family_id)
+
+    req = client.build_request(
+        method="post",
+        url="/workspace/send-message",
+        headers={"Authorization": f"Bearer {access}"}, 
+        json={"employees":[2], "body":None}
+    )
+
+    response = client.send(request = req)
+
+    assert response.status_code == 200
+    assert response.json() == None
+
+# Test the /workspace/get-employees route 
+def test_get_all_employees_route(db, client):
+    image = create_test_image()
+
+    oid = "000000-7sdf77-88asdf8-9sdiy99"
+    oid2 = "000000-7sdf87-88asdf8-9sdiy99"
+
+    admin_insert = insert(auth_model.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="admin")
+    employee_insert = insert(auth_model.User).values(firstname="Bob", surname="Messi", email="bobmessi@hotmail.com", oid=oid2, role="employee")
+
+    res = db.execute(admin_insert)
+    res_2 = db.execute(employee_insert)
+    
+    workspace_insert = insert(workspace_model.Workspace).values(name="Test Workspace", image=image)
+    workspace_insert = db.execute(workspace_insert)
+
+    add_user_workspace(db, workspace_insert.inserted_primary_key[0], res.inserted_primary_key[0])
+    add_user_workspace(db, workspace_insert.inserted_primary_key[0], res_2.inserted_primary_key[0])
+
+    refresh_family = repository.create_refresh_family(db)
+
+    access, refresh, _ = service.create_access_refresh(db, data={"userId": res.inserted_primary_key[0], "role": "admin"}, refresh_family_id=refresh_family.refresh_family_id)
+
+    req = client.build_request(
+        method="get",
+        url="/workspace/get-employees",
+        headers={"Authorization": f"Bearer {access}"}, 
+    )
+
+    response = client.send(request = req)
+
+    assert response.status_code == 200
+
+# Test the /workspace/get-workspace-roles route
+def test_get_all_workspace_roles_route(db, client):
+    image = create_test_image()
+
+    oid = "000000-7sdf77-88asdf8-9sdiy99"
+    admin_insert = insert(auth_model.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="admin")
+    res = db.execute(admin_insert)
+
+    workspace_insert = insert(workspace_model.Workspace).values(name="Test Workspace", image=image)
+    workspace_insert = db.execute(workspace_insert)
+
+    add_user_workspace(db, workspace_insert.inserted_primary_key[0], res.inserted_primary_key[0])
+
+    r_1 = create_role(db, "Role 1", workspace_insert.inserted_primary_key[0])
+    r_2 = create_role(db, "Role 2", workspace_insert.inserted_primary_key[0])
+    r_3 = create_role(db, "Role 3", workspace_insert.inserted_primary_key[0])
+
+    refresh_family = repository.create_refresh_family(db)
+
+    access, refresh, _ = service.create_access_refresh(db, data={"userId": res.inserted_primary_key[0], "role": "admin"}, refresh_family_id=refresh_family.refresh_family_id)
+
+    req = client.build_request(
+        method="get",
+        url="/workspace/get-workspace-roles",
+        headers={"Authorization": f"Bearer {access}"}, 
+    )
+
+    response = client.send(request = req)
+
+    assert response.status_code == 200
+    assert response.json() == [{"name":"Role 1", "role_id": r_1.role_id, "workspace_id":workspace_insert.inserted_primary_key[0]}, { "name":"Role 2", "role_id": r_2.role_id, "workspace_id":workspace_insert.inserted_primary_key[0]}, {"name":"Role 3", "role_id": r_3.role_id, "workspace_id":workspace_insert.inserted_primary_key[0]}]
 
 
 
