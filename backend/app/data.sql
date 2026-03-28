@@ -1,5 +1,11 @@
 -- ==========================
--- 1. Users
+-- 1. Workspaces
+-- ==========================
+INSERT INTO `workspaces` (`id`, `name`, `image`) VALUES
+(1, 'Test Workspace', 0x66616B652D696D6167652D6279746573);
+
+-- ==========================
+-- 2. Users
 -- ==========================
 DELETE FROM `user`;
 INSERT INTO `user` (`user_id`, `firstname`, `surname`, `username`, `email`, `oid`, `refresh`, `role`) VALUES
@@ -69,7 +75,7 @@ INSERT INTO `user_workspace` (`user_id`, `workspace_id`) VALUES
 
 
 -- ==========================
--- 6. Pending User Workspaces
+-- 6. Pending User User Workspace
 -- ==========================
 DELETE FROM `pending_user_workspace`;
 INSERT INTO `pending_user_workspace` (`user_id`, `workspace_id`) VALUES
@@ -80,6 +86,11 @@ INSERT INTO `pending_user_workspace` (`user_id`, `workspace_id`) VALUES
 (5, 1),
 (6, 1);
 
+
+INSERT INTO `user_workspace` (`user_id`, `workspace_id`) VALUES
+(1, 1),
+(2, 1),
+(3, 1);
 
 -- ==========================
 -- 7. Sensitivity Categories
