@@ -75,7 +75,7 @@ function ViewEmployees({toast}){
             <SendMessage visible={sendMessageDialog} setVisible={setSendMessageDialog} selectedEmployees={selectedEmployees} setSelectedEmployees={setSelectedEmployees} onRemove={onRemove} toast={toast}/>
             <div className={styles.container}>
                 <h1 className={styles.title}>View Employees</h1>
-                <Button disabled={selectedEmployees.length == 0 ? (true) : (false)} onClick={() => setSendMessageDialog(true)}>Send a Message</Button>
+                <Button data-testid="send-message-button" disabled={selectedEmployees.length == 0 ? (true) : (false)} onClick={() => setSendMessageDialog(true)}>Send a Message</Button>
             </div>
             <div className={styles.header}>
                 <strong className={styles.employee_count}>{employees.length} People</strong>

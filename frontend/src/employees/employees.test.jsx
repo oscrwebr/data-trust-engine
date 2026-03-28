@@ -93,9 +93,14 @@ describe("View Employees Component", () => {
 
         const checkbox = await screen.findByTestId("checkbox-1")
         const selectAllInput = within(checkbox).getByRole("checkbox");
+        const button = await screen.findByTestId("send-message-button")
 
         expect(selectAllInput).not.toBeChecked();
+        expect(button).toBeDisabled();
+
         fireEvent.click(selectAllInput);
+
+        expect(button).not.toBeDisabled();
         expect(selectAllInput).toBeChecked();
 
     })
@@ -185,9 +190,13 @@ describe("View Employees Component", () => {
         const checkbox_3 = await screen.findByTestId("checkbox-3")
         const checkbox_3_input = within(checkbox_3).getByRole("checkbox");
 
+        const button = await screen.findByTestId("send-message-button")
+
         expect(checkbox_1_input).not.toBeChecked();
         expect(checkbox_2_input).not.toBeChecked();
         expect(checkbox_3_input).not.toBeChecked();
+        expect(button).toBeDisabled();
+
 
         const selectAllWrapper = await screen.findByTestId("select-all-checkbox");
         const selectAllInput = within(selectAllWrapper).getByRole("checkbox");
@@ -196,6 +205,8 @@ describe("View Employees Component", () => {
         expect(checkbox_1_input).toBeChecked();
         expect(checkbox_2_input).toBeChecked();
         expect(checkbox_3_input).toBeChecked();
+        expect(button).not.toBeDisabled();
+
     })
 })
 
