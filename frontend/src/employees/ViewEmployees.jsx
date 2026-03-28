@@ -8,9 +8,9 @@ import { useState, useEffect } from "react";
 import { Dropdown } from 'primereact/dropdown';
 import { Button } from "primereact/button";
 import { Checkbox } from "primereact/checkbox";
-import RowCard from "../components/employees/RowCard";
-import SendMessage from "../components/employees/SendMessage";
-import SquareCard from "../components/employees/SquareCard";
+import RowCard from "../components/view_employees/RowCard";
+import SendMessage from "../components/view_employees/SendMessage";
+import SquareCard from "../components/view_employees/SquareCard";
 
 function ViewEmployees({toast}){
     const [selectedRole, setSelectedRole] = useState(null);
@@ -32,20 +32,10 @@ function ViewEmployees({toast}){
         });
     };
 
-    const onSelectAllEmployees = (employees, checked) => {
-        setSelectedEmployees(prev => {
-            if (checked) {
-                return [employees];
-            } else {
-                return [];
-            }
-        });
-    };
-
     const onRemove = (id) => {
         setSelectedEmployees(prev => 
-        prev.filter(emp => emp.user.user_id !== id)
-    );
+            prev.filter(emp => emp.user.user_id !== id)
+        );
     }
 
     useEffect(() => {
@@ -91,7 +81,7 @@ function ViewEmployees({toast}){
                 <strong className={styles.employee_count}>{employees.length} People</strong>
                 <div className={styles.search_dropdown_icon_container}>
                     <div className="card flex justify-content-center" style={{ marginRight:"15px" }}>
-                        <Dropdown value={selectedRole} options={roles} onChange={(e) => setSelectedRole(e.value)} optionLabel="name" 
+                        <Dropdown data-testid="roles-dropdown" value={selectedRole} options={roles} onChange={(e) => setSelectedRole(e.value)} optionLabel="name" 
                             placeholder="Filter by Roles" className="p-inputtext-sm"/>
                     </div>
                     <div className="card flex justify-content-center" style={{ marginRight:"15px" }}>
@@ -105,7 +95,7 @@ function ViewEmployees({toast}){
                     <div className={styles.select_all_container}>
                         <span>Select All</span>
                         <div className="card flex justify-content-center">
-                            <Checkbox style={{ marginLeft: '10px' }}
+                            <Checkbox data-testid="select-all-checkbox" style={{ marginLeft: '10px' }}
 
                                 checked={selectedEmployees.length === filteredEmployees.length && filteredEmployees.length > 0}
                                 onChange={(e) => {
@@ -114,7 +104,7 @@ function ViewEmployees({toast}){
                                 }}/>
                         </div>
                     </div>
-                    <Button className={styles.view_button} onClick={() => setView(!view)}><i style={{ color:"black", fontSize:"20px" }} className={view ? "pi pi-list" : "pi pi-table"}/></Button>
+                    <Button data-testid="display-change-button" className={styles.view_button} onClick={() => setView(!view)}><i style={{ color:"black", fontSize:"20px" }} className={view ? "pi pi-list" : "pi pi-table"}/></Button>
                 </div>
             </div>
             <div className={styles.list_container}>

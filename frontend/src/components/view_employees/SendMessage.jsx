@@ -1,5 +1,5 @@
 import { Button } from "primereact/button";
-import styles from "./employees.module.css";
+import styles from "./view_employees.module.css";
 import { Dialog } from "primereact/dialog";
 import { InputTextarea } from 'primereact/inputtextarea';
 import api from "../../api/axiosConfig";
@@ -18,19 +18,19 @@ function SendMessage({visible, setVisible, selectedEmployees, setSelectedEmploye
 
     const handleSendMessage = async () => {
         try {
-            await api.post("/workspace/send-message", {
+            const res = await api.post("/workspace/send-message", {
                 employees: selectedEmployees.map(emp => emp.user.user_id),
                 body: text
-            }).then(res => {
-                if(res.data == true){
-                    showSuccessMessage();
-                    setVisible(false);
-                    setSelectedEmployees([]);
-                    setText(null)
-                } else {
-                    showErrorMessage();
-                }
-            })
+            });
+
+            if (res.data === true) {
+                showSuccessMessage();
+                setVisible(false);
+                setSelectedEmployees([]);
+                setText(null);
+            } else {
+                showErrorMessage();
+            }
         } catch (error) {
             console.log(error)
         }
