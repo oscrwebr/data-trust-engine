@@ -48,7 +48,7 @@ function App() {
         <Route path="/error/403" element={<Forbidden403/>}/>
         <Route path="/invite-error/:type" element={<EmployeeInviteError toast={toast}/>} />
         <Route path="/workspace-joined" element={<WorkspaceJoinedError />} />
-        <Route path="org-chart" element={OrgChart} />
+        <Route path="/org-chart" element={<OrgChart />} />
         <Route path="/scans" element={<Scans />} />
       </Routes>
 

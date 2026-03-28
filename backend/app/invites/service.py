@@ -113,7 +113,7 @@ async def send_invite_service(db: Session, email: str, expiry: str, token: str, 
 
                         <p style="font-size:14px; color:#333333;">
                             Best regards,<br />
-                            <strong>{user.firstname} {user.surname}</strong>
+                            <strong>{user.firstname + " " + user.surname if user else "Workspace Admin"}</strong>
                         </p>
 
                         <p style="font-size:14px; color:#333333; margin-top:25px;">

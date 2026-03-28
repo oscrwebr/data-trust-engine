@@ -1,5 +1,11 @@
 -- ==========================
--- 1. Users
+-- 1. Workspaces
+-- ==========================
+INSERT INTO `workspaces` (`id`, `name`, `image`) VALUES
+(1, 'Test Workspace', 0x66616B652D696D6167652D6279746573);
+
+-- ==========================
+-- 2. Users
 -- ==========================
 INSERT INTO `user` (`user_id`, `firstname`, `surname`, `email`, `oid`, `role`) VALUES
 (1, 'Alice', 'Smith', 'alice@example.com', 'oid1', 'Employee'),
@@ -7,13 +13,16 @@ INSERT INTO `user` (`user_id`, `firstname`, `surname`, `email`, `oid`, `role`) V
 (3, 'Charlie', 'Brown', 'charlie@example.com', 'oid3', 'Employee');
 
 -- ==========================
--- 2. Workspaces
+-- 2. User Workspace
 -- ==========================
-INSERT INTO `workspaces` (`id`, `name`, `image`, `user_id`) VALUES
-(1, 'Test Workspace', 0x66616B652D696D6167652D6279746573, 1); -- 'fake-image-bytes' as hex
+
+INSERT INTO `user_workspace` (`user_id`, `workspace_id`) VALUES
+(1, 1),
+(2, 1),
+(3, 1);
 
 -- ==========================
--- 3. Sensitivity Categories
+-- 4. Sensitivity Categories
 -- ==========================
 INSERT INTO `sensitivity_category` (`sensitivity_category_id`, `name`) VALUES
 (1, 'PII'),
@@ -21,7 +30,7 @@ INSERT INTO `sensitivity_category` (`sensitivity_category_id`, `name`) VALUES
 (3, 'Legal');
 
 -- ==========================
--- 4. Sensitivity Subcategories
+-- 5. Sensitivity Subcategories
 -- ==========================
 INSERT INTO `sensitivity_subcategory` (`sensitivity_subcategory_id`, `name`, `sensitivity_category_id`) VALUES
 (1, 'Names', 1),
@@ -43,7 +52,7 @@ INSERT INTO `sensitivity_subcategory` (`sensitivity_subcategory_id`, `name`, `se
 (17, 'Compliance Documents', 3);
 
 -- ==========================
--- 5. Roles
+-- 6. Roles
 -- ==========================
 INSERT INTO `role` (`role_id`, `name`) VALUES
 (1, 'PII Role'),
@@ -51,7 +60,7 @@ INSERT INTO `role` (`role_id`, `name`) VALUES
 (3, 'Legal Role');
 
 -- ==========================
--- 6. Role Permissions (threshold=50)
+-- 7. Role Permissions (threshold=50)
 -- ==========================
 INSERT INTO `role_permission` (`role_permission_id`, `role_id`, `sensitivity_subcategory_id`, `threshold`) VALUES
 (1, 1, 1, 50),
@@ -73,7 +82,7 @@ INSERT INTO `role_permission` (`role_permission_id`, `role_id`, `sensitivity_sub
 (17, 3, 17, 50);
 
 -- ==========================
--- 7. User Roles
+-- 8. User Roles
 -- ==========================
 INSERT INTO `user_role` (`user_role_id`, `user_id`, `role_id`) VALUES
 (1, 1, 1),
@@ -81,7 +90,7 @@ INSERT INTO `user_role` (`user_role_id`, `user_id`, `role_id`) VALUES
 (3, 3, 3);
 
 -- ==========================
--- 8. Files
+-- 9. Files
 -- ==========================
 INSERT INTO `file` (`file_id`, `graph_file_id`, `file_name`, `hash`) VALUES
 (1,'abc123','operational_report_document','e42ad1628a7c4757d92664bda3eeb1ce670f09e490807c2337bc5ebfe39d4edc'),
@@ -98,7 +107,7 @@ INSERT INTO `file` (`graph_file_id`, `file_name`, `hash`) VALUES
 ('graph_018', 'employee-Report_final.docx', 'mno654');
 
 -- ==========================
--- 9. Naming Conventions
+-- 10. Naming Conventions
 -- ==========================
 INSERT INTO `naming_convention` (`naming_convention_id`, `name`) VALUES 
 (1, 'camel_case'),

@@ -16,12 +16,12 @@ async def parse_orgchart(orgChart: UploadFile = File(...)):
 
 
 @router.post("/confirm-orgchart")
-def confirm_orgchart_roles(
+async def confirm_orgchart_roles(
     data: dict, 
     db: Session = Depends(get_database)
 ):
     """
     Accept parsed roles and save them into DB
     """
-    result = confirm_orgchart(data["roles"], db)
+    result = await confirm_orgchart(data["roles"], db)
     return {"status": "success", "roles": result}
