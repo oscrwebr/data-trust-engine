@@ -98,6 +98,7 @@ function Invite({ visible, setVisible, toast}) {
         draggable={false}
         dismissableMask
         closable={false}
+        data-testid="invite-dialog"
         >
         <p className={styles.d_description}>Send an invite to an employee by specifying the recipient's email address. You can also set an expiry date for the invitation.</p>
         

@@ -99,14 +99,14 @@ function ViewEmployees({toast}){
                             placeholder="Filter by Risk Level" className="p-inputtext-sm"/>
                     </div>
                     <IconField iconPosition="left">
-                        <InputIcon className="pi pi-search"> </InputIcon>
+                        <InputIcon className="pi pi-search"></InputIcon>
                         <InputText onChange={(e) => setSearchValue(e.target.value)} style={{ width: '23vw'}} placeholder="Search by employee name or email" className="p-inputtext-sm"/>
                     </IconField>
                     <div className={styles.select_all_container}>
                         <span>Select All</span>
                         <div className="card flex justify-content-center">
                             <Checkbox style={{ marginLeft: '10px' }}
-                            
+
                                 checked={selectedEmployees.length === filteredEmployees.length && filteredEmployees.length > 0}
                                 onChange={(e) => {
                                     const checked = e.checked;
