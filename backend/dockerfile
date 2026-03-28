@@ -1,0 +1,18 @@
+FROM python:3.12-alpine AS backend-dev
+
+WORKDIR /backend
+
+# Copy over pyproject.toml and allow it to be cached
+COPY ./pyproject.toml /backend/pyproject.toml
+
+RUN pip install --no-cache-dir --upgrade -e .
+
+# copy over alembic folders and files
+COPY ./alembic /backend/alembic
+COPY ./alembic.ini /backend/alembic.ini
+
+# Copy over the fastapi application
+COPY ./app /backend/app
+
+# This is to run the app on port 8000 - Currently using dev!
+CMD ["fastapi", "dev", "app/main.py", "--port", "8000"]
