@@ -1,13 +1,32 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;     
+  overflow: hidden;
+}
+
+.list_container {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-top: 15px;
+  scrollbar-width: none;
+}
+
 .title {
     font-size: 40px;
     margin-bottom: 20px;
 }
 
 .header {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
+  display: flex;
+  flex-wrap: wrap; 
+  align-items: center;
+  justify-content: flex-start; 
+  gap: 15px; 
+  padding: 10px 0; 
+  width: 100%; 
+  box-sizing: border-box;
 }
 
 .body {
@@ -30,24 +49,25 @@
 }
 
 .employee_count {
-    margin-left: 60px;
-}
-
-.send_message_button {
-    margin-right: 80px;
+  margin-left: 0;
+  flex-shrink: 0;
+  font-weight: 600;
 }
 
 .search_dropdown_icon_container {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    margin-right: 20px;
+  display: flex;
+  flex-wrap: wrap; 
+  flex-grow: 1; 
+  justify-content: flex-end;
+  min-width: 250px;
 }
 
 .view_button {
   outline: none;
   box-shadow: none;
   background: transparent;
+  flex-shrink: 0; 
+  padding-right: 0;
 }
 
 .square_container {
@@ -57,3 +77,15 @@
     gap: 15px;
     flex-wrap: wrap; 
 }
+
+.select_all_container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  font-size: 14px;
+  color: #555;
+  margin-left: 15px; 
+  white-space: nowrap; 
+  flex-shrink: 0;
+}
+

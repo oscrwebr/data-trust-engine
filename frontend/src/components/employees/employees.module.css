@@ -4,10 +4,9 @@
     align-items: center;
     border: 1px solid lightslategray;
     margin-bottom: 10px;
-    margin-right: 20px;
     padding: 10px;
     border-radius: 5px;
-    width: 95%;
+    width: 100%;
     box-sizing: border-box;
     transition: background-color 0.2s ease;
 }
@@ -104,7 +103,7 @@
 
 .square_card_container {
     position: relative;
-    width: 180px;
+    width: 189px;
     height: 220px;
     display: flex;
     flex-direction: column;

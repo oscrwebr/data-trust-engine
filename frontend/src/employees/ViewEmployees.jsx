@@ -7,6 +7,7 @@ import { InputText } from "primereact/inputtext";
 import { useState, useEffect } from "react";
 import { Dropdown } from 'primereact/dropdown';
 import { Button } from "primereact/button";
+import { Checkbox } from "primereact/checkbox";
 import RowCard from "../components/employees/RowCard";
 import SendMessage from "../components/employees/SendMessage";
 import SquareCard from "../components/employees/SquareCard";
@@ -23,12 +24,22 @@ function ViewEmployees({toast}){
 
     const onSelectedEmployeesChange = (employee, checked) => {
         setSelectedEmployees(prev => {
-        if (checked) {
-            return [...prev, employee];
-        } else {
-            return prev.filter(emp => emp.user.user_id !== employee.user.user_id);
-        }
-    });
+            if (checked) {
+                return [...prev, employee];
+            } else {
+                return prev.filter(emp => emp.user.user_id !== employee.user.user_id);
+            }
+        });
+    };
+
+    const onSelectAllEmployees = (employees, checked) => {
+        setSelectedEmployees(prev => {
+            if (checked) {
+                return [employees];
+            } else {
+                return [];
+            }
+        });
     };
 
     const onRemove = (id) => {
@@ -70,11 +81,11 @@ function ViewEmployees({toast}){
     });
 
     return(
-        <div>
+        <div className={styles.page}>
             <SendMessage visible={sendMessageDialog} setVisible={setSendMessageDialog} selectedEmployees={selectedEmployees} setSelectedEmployees={setSelectedEmployees} onRemove={onRemove} toast={toast}/>
             <div className={styles.container}>
                 <h1 className={styles.title}>View Employees</h1>
-                <Button disabled={selectedEmployees.length == 0 ? (true) : (false)} onClick={() => setSendMessageDialog(true)} className={styles.send_message_button}>Send a Message</Button>
+                <Button disabled={selectedEmployees.length == 0 ? (true) : (false)} onClick={() => setSendMessageDialog(true)}>Send a Message</Button>
             </div>
             <div className={styles.header}>
                 <strong className={styles.employee_count}>{employees.length} People</strong>
@@ -91,10 +102,22 @@ function ViewEmployees({toast}){
                         <InputIcon className="pi pi-search"> </InputIcon>
                         <InputText onChange={(e) => setSearchValue(e.target.value)} style={{ width: '23vw'}} placeholder="Search by employee name or email" className="p-inputtext-sm"/>
                     </IconField>
+                    <div className={styles.select_all_container}>
+                        <span>Select All</span>
+                        <div className="card flex justify-content-center">
+                            <Checkbox style={{ marginLeft: '10px' }}
+                            
+                                checked={selectedEmployees.length === filteredEmployees.length && filteredEmployees.length > 0}
+                                onChange={(e) => {
+                                    const checked = e.checked;
+                                    setSelectedEmployees(checked ? [...filteredEmployees] : []);
+                                }}/>
+                        </div>
+                    </div>
                     <Button className={styles.view_button} onClick={() => setView(!view)}><i style={{ color:"black", fontSize:"20px" }} className={view ? "pi pi-list" : "pi pi-table"}/></Button>
                 </div>
             </div>
-            <div style={{ marginTop: '15px' }}>
+            <div className={styles.list_container}>
                 {view ? (
                     // Row Cards
                     filteredEmployees.map(employee => (
