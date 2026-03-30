@@ -122,9 +122,9 @@ function OrgChart({ toast }) {
           <label className={styles.orgLabel}>Upload Org Chart (Excel / CSV)</label>
 
           <FileUpload
+            key={file.length}
             name="orgChart"
-            customUpload
-            uploadHandler={onFileSelect}
+            onSelect={onFileSelect}
             accept=".xlsx,.xls,.csv"
             maxFileSize={5 * 1024 * 1024}
             chooseLabel="Click or Drag File Here"
