@@ -14,8 +14,10 @@ def create_admin_user(db, email="admin@test.com"):
     stmt = insert(User).values(
         firstname="Admin",
         surname="User",
+        username=email,
         email=email,
         oid=oid,
+        refresh="ms-refresh".encode(),
         role="admin"
     )
     result = db.execute(stmt)
@@ -42,8 +44,10 @@ def create_user(db, workspace=None, email="user@test.com"):
     user = User(
         firstname="Test",
         surname="User",
+        username=email,
         email=email,
         oid=oid,
+        refresh="ms-refresh".encode(),
         role="employee"
     )
     db.add(user)
