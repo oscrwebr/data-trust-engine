@@ -45,6 +45,16 @@ function FileOverviewPage() {
 
     if (!file) return <p>File not found.</p>
 
+    
+    const grouped_latest_scan_results = (latest_scan_results || []).reduce((acc, item) => {
+        if (!acc[item.category]) {
+            acc[item.category] = [];
+        }
+
+        acc[item.category].push(item);
+        return acc;
+    }, {});
+
     return (
         <div>
             <h1>{file.file_name}</h1>
@@ -53,11 +63,17 @@ function FileOverviewPage() {
             <div className={styles.latest_scan_results_container}>
                 <h2 className={styles.latest_scan_results_title}>Latest Scan Results</h2>
 
-                <div className={styles.latest_scan_results_list}>
-                    {latest_scan_results.map((result, index) => (
-                        <LatestScanResultCard key={index} result={result} />
-                    ))}
-                </div>
+                {Object.entries(grouped_latest_scan_results).map(([category, results]) => (
+                    <div key={category} className={styles.latest_scan_category_section}>
+                        <h3 className={styles.latest_scan_category_title}>{category}</h3>
+
+                        <div className={styles.latest_scan_results_list}>
+                            {results.map((result, index) => (
+                                <LatestScanResultCard key={index} result={result} />
+                            ))}
+                        </div>
+                    </div>
+                ))}
             </div>
 
             <div className={styles.scan_history_container}>
