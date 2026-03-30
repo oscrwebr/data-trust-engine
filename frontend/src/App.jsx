@@ -55,7 +55,7 @@ function App() {
         <Route path="/error/403" element={<Forbidden403/>}/>
         <Route path="/invite-error/:type" element={<EmployeeInviteError toast={toast}/>} />
         <Route path="/workspace-joined" element={<WorkspaceJoinedError />} />
-        <Route path="/org-chart" element={<OrgChart />} />
+        <Route path="/upload-org-chart" element={<OrgChart toast={toast} />} />
         <Route path="/scans" element={<Scans />} />
       </Routes>
 
