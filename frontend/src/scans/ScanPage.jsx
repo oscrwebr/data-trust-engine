@@ -6,13 +6,15 @@ import { Link, useParams } from "react-router-dom";
 import OrganisationScanPage from "./OrganisationScanPage";
 import SensitivityScanPage from "./SensitivityScanPage";
 
+import formatDateTime from "./ScanCard";
+
 function ScanPage() {
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [scan, setScan] = useState(null);
     const {scanId} = useParams();
-    // Used to determine what type of ScanPage to load rather than having multiple if statements
+    // Used to determine what type of ScanPage to load rather than having multiple if statements 
     // Better for scalability and ability to plug new scan types in
     const scanPageTypes = {
         organisation: OrganisationScanPage,
@@ -33,17 +35,11 @@ function ScanPage() {
         })
     }, [scanId])
 
+    // Fetches the page type to render
     const ScanTypePage = scan ? scanPageTypes[scan.scan_type] : null;
 
     return (
         <div>
-            <div className="scan-header">
-                <h1 className="scan-heading">
-                    {scan ? `Scan ${scan.scan_id}` : 'Unknown Scan'}
-                </h1>
-                <Divider/>
-            </div>
-
             <div>
                 {loading ? (
                     <p className="scan-loading">Loading scan...</p>
@@ -52,8 +48,22 @@ function ScanPage() {
                 ) : scan === null ? (
                     <p className="scan-loading">No scan found.</p>
                 ) : ScanTypePage ? (
-                    // Render the type of page depending on scan type (only organisation and sensitivity as of now)
-                    <ScanTypePage scan={scan} />
+                    <div>
+                        {/* Heading portion */}
+                        <div className="scan-header">
+                            <h1 className="scan-heading">
+                                Scan ID - {scan.scan_id}
+                            </h1>
+                            <p className="scan-loading">
+                                Type: {scan.scan_type.charAt(0).toUpperCase() + scan.scan_type.slice(1)} | 
+                                Started At: {formatDateTime(scan.started_at)}
+                            </p>
+                        <Divider/>
+                        </div>
+
+                        {/* Render the type of page depending on scan type (only organisation and sensitivity as of now) */}
+                        <ScanTypePage scan={scan} />
+                    </div>
                 ) : (
                     <p className="scan-loading">Error fetching scan type.</p>
                 )}

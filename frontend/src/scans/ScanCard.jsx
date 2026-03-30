@@ -6,6 +6,8 @@ import { Divider } from 'primereact/divider';
 import { PiWarningCircle } from "react-icons/pi";
 import { Link } from "react-router-dom";
 
+import { formatDateTime } from "./utils/formatDateTime";
+
 
 
 
@@ -14,17 +16,6 @@ function ScanCard({ scan }) {
     // Extra layer of validation
     if (!scan) {
         return null;
-    }
-    // Format date into dd/mm/yyyy, hh:mm:ss
-        const formatDateTime = (dateTimeString) => {
-            // For ongoing scans... Display "-" as the Finished At time
-            if (!dateTimeString) {
-                return "-";
-            }
-            const date = new Date(dateTimeString);
-            const formattedDate = date.toLocaleDateString("en-GB");
-            const formattedTime = date.toLocaleTimeString("en-GB");
-            return `${formattedDate}, ${formattedTime}`;
     }
 
     // Setting the ScanCard visuals for each scan type
