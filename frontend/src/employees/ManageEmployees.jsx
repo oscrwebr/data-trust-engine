@@ -1,4 +1,6 @@
 import styles from "./employees.module.css"
+import api from "../api/axiosConfig"
+import { useEffect } from "react";
 
 import { IconField } from "primereact/iconfield";
 import { InputIcon } from "primereact/inputicon";
@@ -12,6 +14,24 @@ function ManageEmployees({toast}){
     const [selectedStatus, setSelectedStatus] = useState(null);
     const [searchValue, setSearchValue] = useState(null);
     const [view, setView] = useState(true);
+    const [employees, setEmployees] = useState([])
+    const [roles, setRoles] = useState([])
+    const [pendingEmployees, setPendingEmployees] = useState([])
+
+    useEffect(() => {
+        api.get("/workspace/get-employees")
+        .then(res => {
+            setEmployees(res.data.active);
+            setPendingEmployees(res.data.pending);
+        });
+
+        api.get("/workspace/get-workspace-roles")
+        .then(res => {
+            const all = { id: "all", name: "View All Roles" };
+            const none = { id: "null", name: "No Role Assigned" };
+            setRoles([all, ...res.data, none]);
+        });
+    }, []);
 
     return(
         <div className={styles.page}>
@@ -20,8 +40,8 @@ function ManageEmployees({toast}){
             </div>
             <div className={styles.header}>
                 <div className={styles.count_container}>
-                    <strong className={styles.active_employee_count}>Active Employees</strong>
-                    <strong className={styles.pending_employee_count}>Pending Employees</strong>
+                    <strong className={styles.active_employee_count}>{employees.length} Active Employees</strong>
+                    <strong className={styles.pending_employee_count}>{pendingEmployees.length} Pending Employees</strong>
                 </div>
                 <div className={styles.search_dropdown_icon_container}>
                     <div className="card flex justify-content-center" style={{ marginRight:"15px" }}>

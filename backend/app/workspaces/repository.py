@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from app.workspaces.models import Workspace, Notification, user_workspace, pending_user_workspace
-from app.authentication.models import User
+from app.authentication.models import User, PendingUser
 from datetime import datetime
 from sqlalchemy import desc, insert
 
@@ -63,3 +63,18 @@ def get_all_employees(db: Session, user_id: int):
     )
 
     return users
+
+def get_all_pending_employees(db: Session, user_id: int):
+    workspace = db.query(Workspace).join(user_workspace).filter(
+        user_workspace.c.user_id == user_id
+    ).first()
+    
+    pending_users = (
+        db.query(PendingUser)
+        .join(pending_user_workspace)
+        .filter(pending_user_workspace.c.workspace_id == workspace.id)
+        .all()
+    )
+
+    return pending_users
+

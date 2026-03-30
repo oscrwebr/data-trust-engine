@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, UploadFile, File, Form, Response
 from app.core.database import get_database
 from sqlalchemy.orm import Session
-from app.workspaces.service import workspace, add_notification, get_user_notifications, del_notification, get_employees, add_pending_user_to_workspace
+from app.workspaces.service import workspace, add_notification, get_user_notifications, del_notification, get_employees, get_pending_employees
 from typing import Annotated
 from ..core.security_schemas import User
 from ..core.security import get_user_from_access_token
@@ -79,6 +79,8 @@ async def get_workspace_image(db: Annotated[Session, Depends(get_database)], cur
 @router.get("/get-employees")
 async def get_all_employees(db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)]):
     employees = get_employees(db, current_user.user_id)
+    pending_employees = get_pending_employees(db, current_user.user_id)
+
     result = []
     for e in employees:
 
@@ -92,12 +94,12 @@ async def get_all_employees(db: Annotated[Session, Depends(get_database)], curre
             role = db.query(Role).filter(Role.role_id == role_id).first()
             role_name = role.name if role else None
 
-        result.append({
-            "user": e,
-            "role_name": role_name
-        })
-    
-    return result
+        result.append({"user": e, "role_name": role_name})
+
+    return {
+        "pending": pending_employees,
+        "active": result
+    }
 
 @router.get("/get-workspace-roles")
 async def get_workspace_roles(db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)]):
