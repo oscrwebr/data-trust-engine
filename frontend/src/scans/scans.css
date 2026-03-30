@@ -176,3 +176,40 @@
 .scan-card-link {
     text-decoration: none;
 }
+
+.scan-page-card-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 250px);
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.scan-page-card {
+    background: #ffffff;
+    border: 1px solid #d9d9d9;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 16px;
+    padding: 28px 20px;
+    min-height: 120px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.scan-page-card-text {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 8px;
+}
+
+.scan-page-card-title {
+    font-size: 30px;
+    font-weight: 800;
+    color: #111827;
+}
+
+.scan-page-card-subtitle {
+    font-size: 14px;
+    color: #6B7280;
+}
