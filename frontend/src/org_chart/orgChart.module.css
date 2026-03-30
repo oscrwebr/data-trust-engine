@@ -19,8 +19,14 @@
   --delete-red: #d73a49;
 
   --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
 
+  --bg: var(--bg-light);
+  --text: var(--text-light);
+  --card-bg: var(--card-light);
+  --border: var(--border-light);
+  --hover: var(--hover-light);
+}
+/* 
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: var(--bg-dark);
@@ -29,17 +35,7 @@
     --border: var(--border-dark);
     --hover: var(--hover-dark);
   }
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    --bg: var(--bg-light);
-    --text: var(--text-light);
-    --card-bg: var(--card-light);
-    --border: var(--border-light);
-    --hover: var(--hover-light);
-  }
-}
+} */
 
 /* ===== Page Container ===== */
 .orgPageContainer {
@@ -261,5 +257,27 @@
   .orgActionButtons {
     flex-direction: column;
     align-items: stretch;
+  }
+}
+
+.side-toast {
+  animation: slideInRight 0.3s ease, fadeOut 0.5s ease 2.5s forwards;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+    transform: translateX(120%);
   }
 }

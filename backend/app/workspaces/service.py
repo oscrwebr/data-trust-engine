@@ -25,3 +25,6 @@ def get_workspace_by_id(db: Session, workspace_id: int):
 
 def get_employees(db: Session, user_id: int):
     return repository.get_all_employees(db, user_id)
+
+def get_workspace_by_user(db: Session, user_id: int):
+    return repository.get_workspace_by_user(db, user_id)

@@ -1,8 +1,8 @@
-"""Added pending_user_role
+"""user roles
 
-Revision ID: 60c2228e4475
-Revises: 188284f384a1
-Create Date: 2026-03-28 15:57:48.705676
+Revision ID: d76718253a80
+Revises: 805e8837a422
+Create Date: 2026-03-30 22:13:45.734094
 
 """
 from typing import Sequence, Union
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision: str = '60c2228e4475'
-down_revision: Union[str, Sequence[str], None] = '188284f384a1'
+revision: str = 'd76718253a80'
+down_revision: Union[str, Sequence[str], None] = '805e8837a422'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -29,6 +29,20 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('file_id')
     )
     op.create_index(op.f('ix_file_file_id'), 'file', ['file_id'], unique=False)
+    op.create_table('folder',
+    sa.Column('folder_id', sa.Integer(), nullable=False),
+    sa.Column('graph_id', sa.String(length=100), nullable=True),
+    sa.Column('name', sa.String(length=255), nullable=False),
+    sa.Column('web_url', sa.Text(), nullable=True),
+    sa.Column('parent_graph_id', sa.String(length=100), nullable=True),
+    sa.Column('drive_id', sa.Text(), nullable=False),
+    sa.ForeignKeyConstraint(['parent_graph_id'], ['folder.graph_id'], ),
+    sa.PrimaryKeyConstraint('folder_id'),
+    sa.UniqueConstraint('graph_id', name='uq_graph_id')
+    )
+    op.create_index(op.f('ix_folder_drive_id'), 'folder', ['drive_id'], unique=False)
+    op.create_index(op.f('ix_folder_graph_id'), 'folder', ['graph_id'], unique=False)
+    op.create_index(op.f('ix_folder_parent_graph_id'), 'folder', ['parent_graph_id'], unique=False)
     op.create_table('naming_convention',
     sa.Column('naming_convention_id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=128), nullable=True),
@@ -65,11 +79,16 @@ def upgrade() -> None:
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('firstname', sa.String(length=50), nullable=False),
     sa.Column('surname', sa.String(length=50), nullable=False),
+    sa.Column('username', sa.String(length=254), nullable=False),
     sa.Column('email', sa.String(length=254), nullable=False),
     sa.Column('oid', sa.String(length=40), nullable=False),
+    sa.Column('refresh', sa.BLOB(), nullable=False),
+    sa.Column('deltaLink', sa.Text(), nullable=True),
+    sa.Column('driveId', sa.Text(), nullable=True),
     sa.Column('role', sa.String(length=11), nullable=False),
     sa.PrimaryKeyConstraint('user_id')
     )
+    op.create_index(op.f('ix_user_email'), 'user', ['email'], unique=False)
     op.create_index(op.f('ix_user_oid'), 'user', ['oid'], unique=True)
     op.create_index(op.f('ix_user_user_id'), 'user', ['user_id'], unique=False)
     op.create_table('workspaces',
@@ -79,6 +98,24 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_workspaces_id'), 'workspaces', ['id'], unique=False)
+    op.create_table('ingestion_file',
+    sa.Column('ingestion_file_id', sa.Integer(), nullable=False),
+    sa.Column('graph_id', sa.String(length=100), nullable=False),
+    sa.Column('name', sa.String(length=255), nullable=False),
+    sa.Column('extension', sa.String(length=255), nullable=False),
+    sa.Column('hash', sa.Text(), nullable=True),
+    sa.Column('hash_type', sa.String(length=20), nullable=True),
+    sa.Column('last_scanned', sa.DateTime(), nullable=True),
+    sa.Column('last_modified', sa.DateTime(), nullable=False),
+    sa.Column('web_url', sa.Text(), nullable=False),
+    sa.Column('parent_graph_id', sa.String(length=100), nullable=True),
+    sa.Column('drive_id', sa.Text(), nullable=False),
+    sa.ForeignKeyConstraint(['parent_graph_id'], ['folder.graph_id'], ),
+    sa.PrimaryKeyConstraint('ingestion_file_id')
+    )
+    op.create_index(op.f('ix_ingestion_file_drive_id'), 'ingestion_file', ['drive_id'], unique=False)
+    op.create_index(op.f('ix_ingestion_file_graph_id'), 'ingestion_file', ['graph_id'], unique=False)
+    op.create_index(op.f('ix_ingestion_file_parent_graph_id'), 'ingestion_file', ['parent_graph_id'], unique=False)
     op.create_table('invites',
     sa.Column('invite_id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
@@ -153,6 +190,14 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('sensitivity_subcategory_id')
     )
     op.create_index(op.f('ix_sensitivity_subcategory_sensitivity_subcategory_id'), 'sensitivity_subcategory', ['sensitivity_subcategory_id'], unique=False)
+    op.create_table('user_folders',
+    sa.Column('folder_id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['folder_id'], ['folder.folder_id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['user.user_id'], ),
+    sa.PrimaryKeyConstraint('folder_id', 'user_id')
+    )
+    op.create_index('rev_idx_user_folders', 'user_folders', ['user_id', 'folder_id'], unique=False)
     op.create_table('user_workspace',
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('workspace_id', sa.Integer(), nullable=False),
@@ -199,6 +244,14 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('scan_file_detection_id')
     )
     op.create_index(op.f('ix_scan_file_detection_scan_file_detection_id'), 'scan_file_detection', ['scan_file_detection_id'], unique=False)
+    op.create_table('user_files',
+    sa.Column('file_id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['file_id'], ['ingestion_file.ingestion_file_id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['user.user_id'], ),
+    sa.PrimaryKeyConstraint('file_id', 'user_id')
+    )
+    op.create_index('rev_idx_user_files', 'user_files', ['user_id', 'file_id'], unique=False)
     op.create_table('user_role',
     sa.Column('user_role_id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
@@ -216,6 +269,8 @@ def downgrade() -> None:
     # ### commands auto generated by Alembic - please adjust! ###
     op.drop_index(op.f('ix_user_role_user_role_id'), table_name='user_role')
     op.drop_table('user_role')
+    op.drop_index('rev_idx_user_files', table_name='user_files')
+    op.drop_table('user_files')
     op.drop_index(op.f('ix_scan_file_detection_scan_file_detection_id'), table_name='scan_file_detection')
     op.drop_table('scan_file_detection')
     op.drop_index(op.f('ix_role_permission_role_permission_id'), table_name='role_permission')
@@ -225,6 +280,8 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_naming_convention_scan_result_naming_convention_scan_result_id'), table_name='naming_convention_scan_result')
     op.drop_table('naming_convention_scan_result')
     op.drop_table('user_workspace')
+    op.drop_index('rev_idx_user_folders', table_name='user_folders')
+    op.drop_table('user_folders')
     op.drop_index(op.f('ix_sensitivity_subcategory_sensitivity_subcategory_id'), table_name='sensitivity_subcategory')
     op.drop_table('sensitivity_subcategory')
     op.drop_index(op.f('ix_scan_naming_convention_scan_naming_convention_id'), table_name='scan_naming_convention')
@@ -241,10 +298,15 @@ def downgrade() -> None:
     op.drop_table('notifications')
     op.drop_index(op.f('ix_invites_invite_id'), table_name='invites')
     op.drop_table('invites')
+    op.drop_index(op.f('ix_ingestion_file_parent_graph_id'), table_name='ingestion_file')
+    op.drop_index(op.f('ix_ingestion_file_graph_id'), table_name='ingestion_file')
+    op.drop_index(op.f('ix_ingestion_file_drive_id'), table_name='ingestion_file')
+    op.drop_table('ingestion_file')
     op.drop_index(op.f('ix_workspaces_id'), table_name='workspaces')
     op.drop_table('workspaces')
     op.drop_index(op.f('ix_user_user_id'), table_name='user')
     op.drop_index(op.f('ix_user_oid'), table_name='user')
+    op.drop_index(op.f('ix_user_email'), table_name='user')
     op.drop_table('user')
     op.drop_index(op.f('ix_sensitivity_category_sensitivity_category_id'), table_name='sensitivity_category')
     op.drop_table('sensitivity_category')
@@ -256,6 +318,10 @@ def downgrade() -> None:
     op.drop_table('pending_users')
     op.drop_index(op.f('ix_naming_convention_naming_convention_id'), table_name='naming_convention')
     op.drop_table('naming_convention')
+    op.drop_index(op.f('ix_folder_parent_graph_id'), table_name='folder')
+    op.drop_index(op.f('ix_folder_graph_id'), table_name='folder')
+    op.drop_index(op.f('ix_folder_drive_id'), table_name='folder')
+    op.drop_table('folder')
     op.drop_index(op.f('ix_file_file_id'), table_name='file')
     op.drop_table('file')
     # ### end Alembic commands ###

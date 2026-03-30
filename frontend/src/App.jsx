@@ -36,7 +36,7 @@ function App() {
           <Route path="/roles" element={<Roles />} />
           <Route path="/view-employees" element={<ViewEmployees toast={toast}/>} />
           <Route path="/manage-employees" element={null} />
-          <Route path="/upload-org-chart" element={null} />
+          <Route path="/upload-org-chart" element={<OrgChart toast={toast} />} />
           <Route path="/settings" element={null} />
           <Route path="/dashboard" element={<Dashboard toast={toast}/>} />
         </Route>
@@ -49,7 +49,7 @@ function App() {
         <Route path="/error/403" element={<Forbidden403/>}/>
         <Route path="/invite-error/:type" element={<EmployeeInviteError toast={toast}/>} />
         <Route path="/workspace-joined" element={<WorkspaceJoinedError />} />
-        <Route path="/org-chart" element={<OrgChart />} />
+        <Route path="/upload-org-chart" element={<OrgChart toast={toast} />} />
         <Route path="/scans" element={<Scans />} />
       </Routes>
 

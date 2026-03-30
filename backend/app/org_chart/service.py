@@ -6,6 +6,7 @@ from app.roles.models import PendingUserRole
 from app.invites.service import send_invite_service
 from app.invites.repository import add_invite
 from app.workspaces.repository import get_workspace_by_workspace_id
+from app.roles.models import Role
 import secrets
 import arrow
 from datetime import datetime
@@ -35,21 +36,29 @@ async def parse_orgchart_file(file):
     return {"roles": formatted_roles}
 
 
-async def confirm_orgchart(roles: list, db: Session):
+async def confirm_orgchart(roles: list, db: Session, workspace_id: int):
     saved_roles = []
-    workspace_id = 1  # TODO: make dynamic
+    
     workspace = get_workspace_by_workspace_id(db, workspace_id)
 
     time_now = datetime.now()
 
     for r in roles:
         # 1. Create role
-        role = roles_service.create_role(
-            db,
-            name=r["name"],
-            thresholds=[],
-            workspace_id=workspace_id
-        )
+        existing_role = db.query(Role).filter(
+            Role.name == r["name"],
+            Role.workspace_id == workspace_id
+        ).first()
+
+        if existing_role:
+            role = existing_role
+        else:
+            role = roles_service.create_role(
+                db,
+                name=r["name"],
+                thresholds=[],
+                workspace_id=workspace_id
+            )
         saved_roles.append(role)
 
         role_id = role["role_id"] if isinstance(role, dict) else role.role_id

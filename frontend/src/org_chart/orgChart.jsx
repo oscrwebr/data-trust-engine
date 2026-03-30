@@ -20,9 +20,10 @@ function OrgChart({ toast }) {
   const showSuccess = (message) => {
     toast.current.show({
       severity: "success",
-      summary: "Success",
+      summary: "",
       detail: message,
-      life: 4000,
+      life: 3000,
+      className: "side-toast",
     });
   };
 
