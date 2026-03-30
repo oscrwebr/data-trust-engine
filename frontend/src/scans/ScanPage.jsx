@@ -6,7 +6,7 @@ import { Link, useParams } from "react-router-dom";
 import OrganisationScanPage from "./OrganisationScanPage";
 import SensitivityScanPage from "./SensitivityScanPage";
 
-import formatDateTime from "./ScanCard";
+import { formatDateTime } from "./utils/formatDateTime";
 
 function ScanPage() {
 
@@ -52,11 +52,10 @@ function ScanPage() {
                         {/* Heading portion */}
                         <div className="scan-header">
                             <h1 className="scan-heading">
-                                Scan ID - {scan.scan_id}
+                                Scan {scan.scan_id} Results
                             </h1>
                             <p className="scan-loading">
-                                Type: {scan.scan_type.charAt(0).toUpperCase() + scan.scan_type.slice(1)} | 
-                                Started At: {formatDateTime(scan.started_at)}
+                                Type: {scan.scan_type.charAt(0).toUpperCase() + scan.scan_type.slice(1)} | Finished At: {formatDateTime(scan.finished_at)}
                             </p>
                         <Divider/>
                         </div>

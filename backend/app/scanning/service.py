@@ -273,3 +273,24 @@ def get_scans_with_file_count(db: Session):
 
 def get_scan_by_id(db: Session, scan_id: int):
     return repository.get_scan_by_id(db=db, scan_id=scan_id)
+
+def get_scan_details(db: Session, scan_id: int):
+    scan = repository.get_scan_by_id(db=db, scan_id=scan_id)
+    files = repository.get_scan_files_with_file(db=db, scan_id=scan_id)
+
+    if not scan:
+        return None
+    
+    return {
+        "scan_id": scan.scan_id,
+        "scan_type": scan.scan_type,
+        "started_at": scan.started_at,
+        "finished_at": scan.finished_at,
+        "file_count": len(files),
+        "files": [{
+            "file_id": file.file_id,
+            "file_name": file.file_name,
+            "hash": file.hash
+        } for scan_file, file in files
+    ]
+    }
