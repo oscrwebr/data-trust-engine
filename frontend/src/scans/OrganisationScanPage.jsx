@@ -3,12 +3,12 @@ import { PiTextAaBold } from "react-icons/pi";
 import { PiCardsBold } from "react-icons/pi";
 import { PiCheckCircleBold } from "react-icons/pi";
 
-
-
+// need to create function to calculate % of clean files
 
 function OrganisationScanPage({ scan }) {
     return (
-        // To change the colour of a card, apply either 'issues' or 'clean' to the scan-page-card class
+        <>
+        {/* To change the colour of a card, apply either 'issues' or 'clean' to the scan-page-card class */}
         <div className="scan-page-card-container">
             <div className="scan-page-card">
                 <div className="scan-page-card-text">
@@ -54,6 +54,13 @@ function OrganisationScanPage({ scan }) {
             </div>
             
         </div>
+        <h2 className="scan-page-files-heading">All Scanned Files</h2>
+        <div className="scan-page-file-card"></div>
+        <div className="scan-page-file-card"></div>
+        <div className="scan-page-file-card"></div>
+        </>
+        
+
     )
 }
 
