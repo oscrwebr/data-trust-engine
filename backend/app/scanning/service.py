@@ -115,6 +115,23 @@ def get_file_scans(db: Session, file_id: int):
     return repository.get_file_scans(db, file_id)
 
 
+# Get latest scan results of a file
+def get_file_latest_scan_results(db: Session, file_id: int):
+    results = repository.get_latest_scan_detection_summary(db, file_id)
+    subcategory_category_map = repository.get_subcategory_category_map(db)
+
+    latest_scan_results = []
+
+    for row in results:
+        latest_scan_results.append({
+            "category": subcategory_category_map.get(row.sensitivity_subcategory, "Other"),
+            "subcategory": row.sensitivity_subcategory,
+            "count": row.count
+        })
+
+    return latest_scan_results
+
+
 # Get hash of a file
 def get_file_hash(file):
     # Create hash object

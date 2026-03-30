@@ -3,6 +3,7 @@ from datetime import datetime
 from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 from app.scanning.models import File, NamingConvention, Scan, ScanNamingConvention, NamingConventionScanResult, Scan, ScanFile, ScanFileDetection
+from app.roles.models import SensitivityCategory, SensitivitySubcategory
 from datetime import datetime, timezone
 
 
@@ -79,6 +80,45 @@ def get_file_by_id(db: Session, file_id: int):
 
 def get_all_files(db: Session):
     return db.query(File).all()
+
+
+def get_latest_scan_detection_summary(db: Session, file_id: int):
+    latest_scan_file = (
+        db.query(ScanFile.scan_file_id)
+        .join(Scan, Scan.scan_id == ScanFile.scan_id)
+        .filter(ScanFile.file_id == file_id)
+        .order_by(Scan.finished_at.desc())
+        .first() # Ensure we only get the most recent scan results (one that finished most recently)
+    )
+
+    if not latest_scan_file:
+        return []
+    
+    return (
+        db.query(
+            ScanFileDetection.sensitivity_subcategory,
+            func.count(ScanFileDetection.scan_file_detection_id).label("count")
+        )
+        .filter(ScanFileDetection.scan_file_id == latest_scan_file.scan_file_id)
+        .group_by(ScanFileDetection.sensitivity_subcategory)
+        .all()
+    )
+
+
+def get_subcategory_category_map(db: Session):
+    rows = (
+        db.query(
+            SensitivitySubcategory.name,
+            SensitivityCategory.name
+        )
+        .join(
+            SensitivityCategory,
+            SensitivitySubcategory.sensitivity_category_id == SensitivityCategory.sensitivity_category_id
+        )
+        .all()
+    )
+
+    return {row.subcategory_name: row.category_name for row in rows}
 
 
 def get_file_by_graph_id(db: Session, graph_file_id: str):
