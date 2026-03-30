@@ -136,6 +136,7 @@ def test_valid_invite_request(db, client):
     assert response.json().get("success") == True
     assert db.query(Invite).count() == 1
     assert db.query(PendingUser).count() == 1
+    assert db.query(models.pending_user_workspace).count() == 1
 
 
 # Test invite record can be retrieved using its token
@@ -333,13 +334,13 @@ def test_return_statement_with_same_email_as_admin(db, client):
 
 
 # Testing the create notification route
-def test_create_notification_route(db, client):
+def test_request_join_workspace_route(db, client):
     image = create_test_image()
 
     oid = "000000-7sdf77-88asdf8-9sdiy99"
     insert_statement = insert(User).values(firstname="John", surname="Smith", username="valid@example.com", refresh="me-refresh".encode(), email="valid@example.com", oid=oid, role="admin")
     res=db.execute(insert_statement)
-    
+
     workspace = insert(models.Workspace).values(name="Test Workspace", image=image)
     workspace_instance = db.execute(workspace)
 

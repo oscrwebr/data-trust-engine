@@ -31,9 +31,15 @@ class PendingUser(Base):
     # relation
     invites = relationship(
         "Invite",
-        back_populates="pending_user",
+        back_populates="pending_users",
         cascade="all, delete",
         passive_deletes=True
+    )
+
+    workspaces = relationship(
+        "Workspace",
+        secondary="pending_user_workspace",
+        back_populates="pending_users"
     )
 
 class RefreshFamily(Base):

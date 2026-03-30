@@ -25,3 +25,6 @@ def get_workspace_by_id(db: Session, workspace_id: int):
 
 def get_employees(db: Session, user_id: int):
     return repository.get_all_employees(db, user_id)
+
+def add_pending_user_to_workspace(db: Session, workspace_id: int, user_id: int):
+    return repository.add_pending_user_workspace(db, workspace_id, user_id)

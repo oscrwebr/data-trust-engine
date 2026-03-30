@@ -4,7 +4,6 @@ import arrow
 from app.invites import repository as invite_repository
 from app.authentication import repository as user_repository
 from app.authentication import service
-from app.workspaces.repository import get_workspace_by_workspace_id
 from app.core.database import get_database
 from sqlalchemy.orm import Session
 from datetime import datetime
@@ -13,6 +12,7 @@ from .service import create_invite, send_invite_service, check_invite
 from .schema import InviteRequest
 from fastapi.responses import RedirectResponse
 from urllib.parse import quote
+from app.workspaces.service import add_pending_user_to_workspace
 
 from typing import Annotated
 from ..core.security_schemas import User
@@ -40,6 +40,7 @@ async def send_invite(db: Annotated[Session, Depends(get_database)], current_use
         user = user_repository.get_pending_user_by_email(db, invite.email)
         if not user:
             user = user_repository.add_user(db, invite.email)
+            add_pending_user_to_workspace(db, workspace.id, user.user_id)
         
         invite_repository.add_invite(db, time_now, invite.expiry_date.date(), token, False, user.user_id, workspace)
 
@@ -55,7 +56,7 @@ async def process_invite(token: str = Query(...), db: Session = Depends(get_data
         return RedirectResponse(f"http://localhost:5173/workspace-joined")
     
     # Get the pending_user based on the invite
-    user = user_repository.get_pending_user_by_id(db, invite.user_id)
+    pending_user = user_repository.get_pending_user_by_id(db, invite.user_id)
 
     # Check the invite
     result = check_invite(invite, db)

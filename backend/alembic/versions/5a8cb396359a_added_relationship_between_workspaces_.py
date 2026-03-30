@@ -1,8 +1,8 @@
-"""Created database again after merge with development
+"""Added relationship between workspaces and pending users tables
 
-Revision ID: 805e8837a422
-Revises: 7e6f0641fcf0
-Create Date: 2026-03-30 13:14:53.128114
+Revision ID: 5a8cb396359a
+Revises: a7369104ef3b
+Create Date: 2026-03-30 18:54:16.240285
 
 """
 from typing import Sequence, Union
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '805e8837a422'
-down_revision: Union[str, Sequence[str], None] = '7e6f0641fcf0'
+revision: str = '5a8cb396359a'
+down_revision: Union[str, Sequence[str], None] = 'a7369104ef3b'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, UploadFile, File, Form, Response
 from app.core.database import get_database
 from sqlalchemy.orm import Session
-from app.workspaces.service import workspace, add_notification, get_user_notifications, del_notification, get_employees
+from app.workspaces.service import workspace, add_notification, get_user_notifications, del_notification, get_employees, add_pending_user_to_workspace
 from typing import Annotated
 from ..core.security_schemas import User
 from ..core.security import get_user_from_access_token
