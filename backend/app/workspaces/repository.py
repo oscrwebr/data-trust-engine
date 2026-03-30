@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from app.workspaces.models import Workspace, Notification, user_workspace
+from app.authentication.models import User
 from datetime import datetime
 from sqlalchemy import desc, insert
 
@@ -37,3 +38,19 @@ def add_user_workspace(db: Session, workspace_id: int, user_id: int):
     db.execute(record)
     db.commit()
     return record
+
+
+def get_all_employees(db: Session, user_id: int):
+    workspace = db.query(Workspace).join(user_workspace).filter(
+        user_workspace.c.user_id == user_id
+    ).first()
+    
+    users = (
+        db.query(User)
+        .join(user_workspace)
+        .filter(user_workspace.c.workspace_id == workspace.id)
+        .filter(User.role == "employee")
+        .all()
+    )
+
+    return users

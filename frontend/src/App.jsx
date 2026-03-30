@@ -16,6 +16,7 @@ import WorkspaceJoinedError from "./invites/WorkspaceJoined.jsx";
 import Forbidden403 from "./Errors/Forbidden403.jsx";
 import Layout from "./components/layout/layout.jsx";
 import OrgChart from "./org_chart/orgChart";
+import ViewEmployees from "./employees/ViewEmployees.jsx";
 
 
 function App() {
@@ -33,7 +34,7 @@ function App() {
 
           {/* Elements in here will inherit the sidebar  */}
           <Route path="/roles" element={<Roles />} />
-          <Route path="/view-employees" element={null} />
+          <Route path="/view-employees" element={<ViewEmployees toast={toast}/>} />
           <Route path="/manage-employees" element={null} />
           <Route path="/upload-org-chart" element={null} />
           <Route path="/settings" element={null} />
@@ -42,7 +43,7 @@ function App() {
 
         {/* Elements in here will not inherit the sidebar */}
         <Route path="/" element={<Home toast={toast}/>} />
-        <Route path="/create-workspace" element={<CreateWorkspace  toast={toast}/>} />
+        <Route path="/create-workspace" element={<CreateWorkspace toast={toast}/>} />
         <Route path="/test" element={<Test/>} />
         <Route path="/error/422" element={<Unprocessable422/>}/>
         <Route path="/error/403" element={<Forbidden403/>}/>
