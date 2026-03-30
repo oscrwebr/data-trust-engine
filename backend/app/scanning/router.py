@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_database
 from app.scanning import service, repository
 from pydantic import BaseModel
-from app.scanning.schemas import OrganisationScanRequest, FileResponse, FileScansResponse
+from app.scanning.schemas import OrganisationScanRequest, FileResponse, FileScansResponse, FileLatestScanResultResponse
 
 router = APIRouter(prefix="/scanning", tags=["scanning"])
 
@@ -45,6 +45,12 @@ def get_file(file_id: int, db: Session = Depends(get_database)):
         raise HTTPException(status_code=404, detail="File not found")
     
     return file
+
+
+# Get a file's latest scan results using its id
+@router.get("/get_file_latest_scan_results/{file_id}", response_model=list[FileLatestScanResultResponse])
+def get_file_latest_scan_results(file_id: int, db: Session = Depends(get_database)):
+    return service.get_file_latest_scan_results(db=db, file_id=file_id)
 
 
 # Get all scans a file is part of using its id

@@ -20,6 +20,12 @@ class FileResponse(BaseModel):
         from_attributes = True
 
 
+class FileLatestScanResultResponse(BaseModel):
+    category: str
+    subcategory: str
+    count: int
+
+
 class FileScansResponse(BaseModel):
     scan_id: int
     started_at: datetime

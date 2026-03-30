@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import FileScanHistoryItem from "./FileScanHistoryItem";
+import LatestScanResultCard from "./LatestScanResultCard";
 import styles from "./FileOverview.module.css";
 
 
@@ -9,6 +10,7 @@ function FileOverviewPage() {
 
     const [file, set_file] = useState(null);
     const [file_scans_history, set_file_scans_history] = useState(null);
+    const [latest_scan_results, set_latest_scan_results] = useState(null);
 
     const [loading, set_loading] = useState(true);
 
@@ -21,11 +23,15 @@ function FileOverviewPage() {
                 const file_scans_history_response = await fetch(`http://localhost:8000/scanning/get_file_scans/${file_id}`)
                 const file_scans_history_data = await file_scans_history_response.json()
 
+                const latest_scan_results_response = await fetch(`http://localhost:8000/scanning/get_file_latest_scan_results/${file_id}`)
+                const latest_scan_results_data = await latest_scan_results_response.json()
+
                 set_file(file_data)
                 set_file_scans_history(file_scans_history_data)
+                set_latest_scan_results(latest_scan_results_data)
 
             } catch (error) {
-                console.error("Error while fetching file:", error)
+                console.error("Error while fetching file data:", error)
 
             } finally {
                 set_loading(false);
