@@ -128,7 +128,7 @@ function OrgChart({ toast }) {
             onSelect={onFileSelect}
             accept=".xlsx,.xls,.csv"
             maxFileSize={5 * 1024 * 1024}
-            chooseLabel="Click or Drag File Here"
+            chooseLabel="Upload file here"
             mode="basic"
             multiple={false}
             className={styles.fileUpload}
