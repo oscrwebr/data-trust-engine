@@ -27,6 +27,7 @@ class PendingUser(Base):
 
     user_id = Column(Integer, primary_key=True, index=True)
     email = Column(String(254), nullable=False)
+    type = Column(String(10), nullable=False)
 
     # relation
     invites = relationship(

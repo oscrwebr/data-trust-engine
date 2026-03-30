@@ -39,7 +39,7 @@ async def send_invite(db: Annotated[Session, Depends(get_database)], current_use
         # Record invite and new user in database (if user doesn't already exist)
         user = user_repository.get_pending_user_by_email(db, invite.email)
         if not user:
-            user = user_repository.add_user(db, invite.email)
+            user = user_repository.add_user(db, invite.email, "invite")
             add_pending_user_to_workspace(db, workspace.id, user.user_id)
         
         invite_repository.add_invite(db, time_now, invite.expiry_date.date(), token, False, user.user_id, workspace)
