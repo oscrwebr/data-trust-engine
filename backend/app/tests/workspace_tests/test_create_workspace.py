@@ -20,7 +20,7 @@ def test_add_workspace_record(db):
     image = create_test_image()
 
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    admin = insert(auth_model.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="employee")
+    admin = insert(auth_model.User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode(), role="employee")
     res=db.execute(admin)
 
     workspace = insert(workspace_model.Workspace).values(name="Test Workspace", image=image)
@@ -31,7 +31,7 @@ def test_add_workspace_record(db):
 # Testing /create-workspace endpoint with null name
 def test_create_workspace_null_name(db, client):
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    insert_statement = insert(auth_model.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="admin")
+    insert_statement = insert(auth_model.User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode(), role="admin")
     res = db.execute(insert_statement)
 
     refresh_family = repository.create_refresh_family(db)
@@ -56,7 +56,7 @@ def test_create_workspace_null_name(db, client):
 # Testing /create-workspace endpoint with null image
 def test_create_workspace_null_image(db, client):
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    insert_statement = insert(auth_model.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="employee")
+    insert_statement = insert(auth_model.User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode(), role="employee")
     res=db.execute(insert_statement)
 
     refresh_family = repository.create_refresh_family(db)
@@ -81,7 +81,7 @@ def test_create_workspace_null_image(db, client):
 # Testing /create-workspace endpoint with valid response 
 def test_create_workspace_valid(db, client):
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    insert_statement = insert(auth_model.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="admin")
+    insert_statement = insert(auth_model.User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode(), role="admin")
     res=db.execute(insert_statement)
 
     refresh_family = repository.create_refresh_family(db)
@@ -108,7 +108,7 @@ def test_method_get_workspace_by_user_id(db):
     image = create_test_image()
 
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    admin_insert = insert(auth_model.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="employee")
+    admin_insert = insert(auth_model.User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode(), role="employee")
     res = db.execute(admin_insert)
 
     workspace_insert = insert(workspace_model.Workspace).values(name="Test Workspace", image=image)
@@ -129,7 +129,7 @@ def test_delete_notification_route(db, client):
     image = create_test_image()
 
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    admin_insert = insert(auth_model.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="employee")
+    admin_insert = insert(auth_model.User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode(), role="employee")
     res = db.execute(admin_insert)
 
     user = repository.get_by_id(res.inserted_primary_key[0], db)
@@ -163,7 +163,7 @@ def test_get_all_notifications_route(db, client):
     image = create_test_image()
 
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    admin_insert = insert(auth_model.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="employee")
+    admin_insert = insert(auth_model.User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode(), role="employee")
     res = db.execute(admin_insert)
 
     user = repository.get_by_id(res.inserted_primary_key[0], db)
@@ -199,7 +199,7 @@ def test_method_get_workspace_by_id(db):
     image = create_test_image()
 
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    admin_insert = insert(auth_model.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="employee")
+    admin_insert = insert(auth_model.User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode(), role="employee")
     res = db.execute(admin_insert)
 
     workspace_insert = insert(workspace_model.Workspace).values(name="Test Workspace", image=image)
@@ -215,7 +215,7 @@ def test_dashboard_route_without_workspace(db, client):
     image = create_test_image()
 
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    admin_insert = insert(auth_model.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="employee")
+    admin_insert = insert(auth_model.User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode(), role="employee")
     res = db.execute(admin_insert)
 
     user = repository.get_by_id(res.inserted_primary_key[0], db)
@@ -248,7 +248,7 @@ def test_dashboard_route_with_workspace(db, client):
     image = create_test_image()
 
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    admin_insert = insert(auth_model.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="employee")
+    admin_insert = insert(auth_model.User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode(), role="employee")
     res = db.execute(admin_insert)
 
     user = repository.get_by_id(res.inserted_primary_key[0], db)
@@ -283,7 +283,7 @@ def test_get_workspace_image_route(db, client):
     image = create_test_image()
 
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    admin_insert = insert(auth_model.User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="employee")
+    admin_insert = insert(auth_model.User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode(), role="employee")
     res = db.execute(admin_insert)
     
     user = repository.get_by_id(res.inserted_primary_key[0], db)

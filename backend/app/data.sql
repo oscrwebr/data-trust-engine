@@ -1,16 +1,17 @@
 -- ==========================
 -- 1. Users
 -- ==========================
-INSERT INTO `user` (`user_id`, `firstname`, `surname`, `email`, `oid`, `role`) VALUES
-(1, 'Alice', 'Smith', 'alice@example.com', 'oid1', 'Employee'),
-(2, 'Bob', 'Johnson', 'bob@example.com', 'oid2', 'Employee'),
-(3, 'Charlie', 'Brown', 'charlie@example.com', 'oid3', 'Employee');
+DELETE FROM `user`;
+INSERT INTO `user` (`user_id`, `firstname`, `surname`, `username`, `email`, `refresh`, `oid`, `role`) VALUES
+(1, 'Alice', 'Smith', 'alice@example.com', 'alice@example.com', 'kasdjfh', 'oid1', 'Employee'),
+(2, 'Bob', 'Johnson', 'bob@example.com', 'bob@example.com', 'kasdjfh', 'oid2', 'Employee'),
+(3, 'Charlie', 'Brown', 'charlie@example.com', 'charlie@example.com', 'kasdjfh', 'oid3', 'Employee');
 
 -- ==========================
 -- 2. Workspaces
 -- ==========================
-INSERT INTO `workspaces` (`id`, `name`, `image`, `user_id`) VALUES
-(1, 'Test Workspace', 0x66616B652D696D6167652D6279746573, 1); -- 'fake-image-bytes' as hex
+INSERT INTO `workspaces` (`id`, `name`, `image`) VALUES
+(1, 'Test Workspace', 0x66616B652D696D6167652D6279746573); -- 'fake-image-bytes' as hex
 
 -- ==========================
 -- 3. Sensitivity Categories
