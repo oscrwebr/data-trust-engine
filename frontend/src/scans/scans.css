@@ -196,6 +196,42 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
+/* variations for card */
+.clean {
+    background: #F0FDF4;
+    border: 1px solid #B9F8CF;
+}
+.issues {
+
+    background: #FFF7ED;
+    border: 1px solid #FFD6A7;
+}
+
+/* variations for images */
+.clean svg {
+    color: #0D542B;
+}
+.issues svg {
+    color: #bd461f;
+}
+
+/* variations for text */
+.issues .scan-page-card-title {
+    color: #bd461f;
+}
+
+.issues .scan-page-card-subtitle {
+    color: #C2410C;
+}
+
+.clean .scan-page-card-title {
+    color: #0D542B;
+}
+
+.clean .scan-page-card-subtitle {
+    color: #278236;
+}
+
 .scan-page-card-text {
     display: flex;
     flex-direction: column;
