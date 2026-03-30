@@ -44,6 +44,16 @@ function FileOverviewPage() {
             <h1>{file.file_name}</h1>
             <p>Hash: {file.hash}</p>
 
+            <div className={styles.latest_scan_results_container}>
+                <h2 className={styles.latest_scan_results_title}>Latest Scan Results</h2>
+
+                <div className={styles.latest_scan_results_list}>
+                    {latest_scan_results.map((result, index) => (
+                        <LatestScanResultCard key={index} result={result} />
+                    ))}
+                </div>
+            </div>
+
             <div className={styles.scan_history_container}>
                 <h2 className={styles.scan_history_title}>Scan History</h2>
 
