@@ -1,10 +1,10 @@
-# app/tests/org_chart_tests/test_org_chart.py
 import io
 import pytest
 from app.org_chart import service
 from app.roles import repository as roles_repo
 from app.authentication.models import User
 from app.workspaces.models import Workspace
+from app.roles.models import PendingUserRole
 
 # ---------------- Helper classes ----------------
 class UploadFileMock:
@@ -66,8 +66,9 @@ async def test_parse_orgchart_success(db):
 
 @pytest.mark.asyncio
 async def test_confirm_orgchart_success(db):
-    """Test that roles are confirmed and saved correctly."""
+    """Test that roles are confirmed and saved correctly, including PendingUserRoles."""
     workspace = create_workspace(db)
+    workspace_id = workspace.id
 
     roles_payload = [
         {"name": "Manager", "employees": [{"name": "Alice", "email": "alice@example.com"}]},
@@ -75,7 +76,6 @@ async def test_confirm_orgchart_success(db):
     ]
 
     # Patch send_invite_service to avoid sending emails
-    import asyncio
     from unittest.mock import patch
     from app.invites.service import send_invite_service
 
@@ -83,7 +83,7 @@ async def test_confirm_orgchart_success(db):
         return None
 
     with patch.object(send_invite_service, "__call__", side_effect=fake_send_invite):
-        saved_roles = await service.confirm_orgchart(roles_payload, db)
+        saved_roles = await service.confirm_orgchart(roles_payload, db, workspace_id=workspace_id)
 
     # Check roles saved
     assert len(saved_roles) == 2
@@ -97,3 +97,22 @@ async def test_confirm_orgchart_success(db):
     bob = get_pending_user_by_email(db, "bob@example.com")
     assert alice is not None
     assert bob is not None
+
+    # ---------------- Check PendingUserRoles ----------------
+    for role in saved_roles:
+        # Normalize role_id and role_name
+        role_id = role.role_id if hasattr(role, "role_id") else role["role_id"]
+        role_name = role.name if hasattr(role, "name") else role["name"]
+
+        if role_name == "Manager":
+            assigned_user = alice
+        elif role_name == "Engineer":
+            assigned_user = bob
+        else:
+            continue
+
+        user_role = db.query(PendingUserRole).filter(
+            PendingUserRole.user_id == assigned_user.user_id,
+            PendingUserRole.role_id == role_id
+        ).first()
+        assert user_role is not None, f"{assigned_user.email} should have role {role_name} assigned"
