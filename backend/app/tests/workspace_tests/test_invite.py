@@ -24,7 +24,7 @@ def create_test_image():
 def test_null_email_input(db, client):
     image = create_test_image()
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    insert_statement = insert(User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="employee")
+    insert_statement = insert(User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode(), role="employee")
     res=db.execute(insert_statement)
 
     workspace_insert = insert(models.Workspace).values(name="Test Workspace", image=image)
@@ -53,7 +53,7 @@ def test_null_email_input(db, client):
 def test_invalid_email_input(db, client):
     image = create_test_image()
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    insert_statement = insert(User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="employee")
+    insert_statement = insert(User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode(), role="employee")
     res=db.execute(insert_statement)
 
     workspace_insert = insert(models.Workspace).values(name="Test Workspace", image=image)
@@ -82,7 +82,7 @@ def test_invalid_email_input(db, client):
 def test_valid_email_input(db, client):
     image = create_test_image()
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    insert_statement = insert(User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="employee")
+    insert_statement = insert(User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode(), role="employee")
     res=db.execute(insert_statement)
     
     workspace_insert = insert(models.Workspace).values(name="Test Workspace", image=image)
@@ -112,7 +112,7 @@ def test_valid_invite_request(db, client):
     image = create_test_image()
 
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    insert_statement = insert(User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="employee")
+    insert_statement = insert(User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode(), role="employee")
     res=db.execute(insert_statement)
 
     workspace = insert(models.Workspace).values(name="Test Workspace", image=image)
@@ -144,7 +144,7 @@ def test_retrieval_invite_record(db):
     token = str(secrets.token_hex(16))
 
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    admin = insert(User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="employee")
+    admin = insert(User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode(), role="employee")
     admin_instance=db.execute(admin)
 
     pending_user = insert(PendingUser).values(email="JohnSmith1@hotmail.com")
@@ -163,7 +163,7 @@ def test_expired_invite_record(db, client):
     token = str(secrets.token_hex(16))
 
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    admin = insert(User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="employee")
+    admin = insert(User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode(), role="employee")
     admin_instance=db.execute(admin)
 
     pending_user = insert(PendingUser).values(email="JohnSmith1@hotmail.com")
@@ -191,7 +191,7 @@ def test_invite_clicked_when_used_is_true(db, client):
     token = str(secrets.token_hex(16))
 
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    admin = insert(User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="admin")
+    admin = insert(User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode(), role="admin")
     admin_instance=db.execute(admin)
 
     pending_user = insert(PendingUser).values(email="JohnSmith1@hotmail.com")
@@ -209,7 +209,7 @@ def test_valid_invite(db, client):
     token = str(secrets.token_hex(16))
     
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    admin = insert(User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="admin")
+    admin = insert(User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode(), role="admin")
     admin_instance=db.execute(admin)
 
     pending_user = insert(PendingUser).values(email="JohnSmith1@hotmail.com")
@@ -244,7 +244,7 @@ def test_method_get_invite_for_cooldown(db):
     latest_time = time + timedelta(days=3)
 
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    admin = insert(User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="admin")
+    admin = insert(User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode(), role="admin")
     admin_instance=db.execute(admin)
 
     pending_user_instance = PendingUser(email="JohnSmith1@hotmail.com")
@@ -267,7 +267,7 @@ def test_return_statement_with_invalid_cooldown(db, client):
     image = create_test_image()
 
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    insert_statement = insert(User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="employee")
+    insert_statement = insert(User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode(), role="employee")
     res=db.execute(insert_statement)
 
     workspace = insert(models.Workspace).values(name="Test Workspace", image=image)
@@ -307,7 +307,7 @@ def test_return_statement_with_same_email_as_admin(db, client):
     image = create_test_image()
 
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    insert_statement = insert(User).values(firstname="John", surname="Smith", email="valid@example.com", oid=oid, role="admin")
+    insert_statement = insert(User).values(firstname="John", surname="Smith", username="valid@example.com", email="valid@example.com", refresh="ms-refresh".encode(), oid=oid, role="admin")
     res=db.execute(insert_statement)
 
     workspace = insert(models.Workspace).values(name="Test Workspace", image=image)
@@ -337,7 +337,7 @@ def test_create_notification_route(db, client):
     image = create_test_image()
 
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    insert_statement = insert(User).values(firstname="John", surname="Smith", email="valid@example.com", oid=oid, role="admin")
+    insert_statement = insert(User).values(firstname="John", surname="Smith", username="valid@example.com", refresh="me-refresh".encode(), email="valid@example.com", oid=oid, role="admin")
     res=db.execute(insert_statement)
     
     workspace = insert(models.Workspace).values(name="Test Workspace", image=image)
@@ -365,7 +365,7 @@ def test_get_all_notifications_route(db, client):
     image = create_test_image()
 
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    insert_statement = insert(User).values(firstname="John", surname="Smith", email="valid@example.com", oid=oid, role="admin")
+    insert_statement = insert(User).values(firstname="John", surname="Smith", username="valid@example.com", refresh="me-refresh".encode(), email="valid@example.com", oid=oid, role="admin")
     res=db.execute(insert_statement)
     
     workspace = insert(models.Workspace).values(name="Test Workspace", image=image)
@@ -407,7 +407,7 @@ def test_get_all_notifications_route(db, client):
 def test_delete_notification_route(db, client):
 
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    insert_statement = insert(User).values(firstname="John", surname="Smith", email="valid@example.com", oid=oid, role="admin")
+    insert_statement = insert(User).values(firstname="John", surname="Smith", username="valid@example.com", refresh="me-refresh".encode(), email="valid@example.com", oid=oid, role="admin")
     res=db.execute(insert_statement)
 
     refresh_family = repository.create_refresh_family(db)
@@ -447,7 +447,7 @@ def test_get_invite_by_workspace_id(db):
     time = datetime.now().replace(microsecond=0)
 
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    insert_statement = insert(User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="employee")
+    insert_statement = insert(User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode(), role="employee")
     res=db.execute(insert_statement)
 
     workspace = add_workspace(db, "Test Workspace", image=image)
@@ -468,7 +468,7 @@ def test_update_invite_used_value(db):
     time = datetime.now().replace(microsecond=0)
 
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    insert_statement = insert(User).values(firstname="John", surname="Smith", email="JohnSmith1@hotmail.com", oid=oid, role="employee")
+    insert_statement = insert(User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode(), role="employee")
     res=db.execute(insert_statement)
 
     workspace = add_workspace(db, "Test Workspace", image=image)

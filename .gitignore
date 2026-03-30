@@ -30,3 +30,7 @@ env/
 .env
 __pycache__
 *.egg-info/
+
+# Coverage
+htmlcov/
+.coverage

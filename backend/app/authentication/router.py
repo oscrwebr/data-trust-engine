@@ -9,15 +9,16 @@ from typing import Annotated
 from datetime import datetime, timezone
 
 from app.authentication import service
-from ..core.security import create_access_token, get_user_from_access_token, hash_user_refresh_token, application
+from ..core.security import application, get_user_from_access_token, encrypt_refresh
 from ..core.security_schemas import User
 from ..core import config
 from sqlalchemy.orm import Session
 from app.core.database import get_database
 
 load_dotenv()
-# make this singleton!
-# application = ConfidentialClientApplication(client_id=os.environ.get("CLIENT_ID"), authority=os.environ.get("AUTHORITY"), client_credential=os.environ.get("CLIENT_SECRET"))
+
+def get_session(request: Request):
+    return request
 
 router = APIRouter(
     prefix = "/auth",
@@ -30,12 +31,13 @@ roles_dict = {
 }
 
 @router.get("/sign-in")
-async def sign_in(application: Annotated[ConfidentialClientApplication, Depends(application)], request: Request, next: str, signup: bool | None=None, role: int | None=None, workspace_id: int | None=None):
+async def sign_in(application: Annotated[ConfidentialClientApplication, Depends(application)], request: Annotated[dict, Depends(get_session)], next: str, signup: bool | None=None, role: int | None=None, workspace_id: int | None=None):
     # Protect against url manipulation!
     if not next.startswith("/"):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
     
-    flow = application.initiate_auth_code_flow(scopes=os.environ.get("SCOPES").split())
+    flow = application.initiate_auth_code_flow(scopes=config.SCOPES)
+    # print(flow)
     request.session["flow"] = flow
     request.session["next"] = next
 
@@ -56,7 +58,7 @@ async def sign_in(application: Annotated[ConfidentialClientApplication, Depends(
     return RedirectResponse(flow['auth_uri'])
 
 @router.get("/success/")
-async def login_redirect(application: Annotated[ConfidentialClientApplication, Depends(application)], request: Request, response: Response, db: Annotated[Session, Depends(get_database)], client_info: str | None=None, code: str | None=None, state: str | None=None, error: str | None=None, error_description: str | None=None):
+async def login_redirect(application: Annotated[ConfidentialClientApplication, Depends(application)], request: Annotated[dict, Depends(get_session)], response: Response, db: Annotated[Session, Depends(get_database)], client_info: str | None=None, code: str | None=None, state: str | None=None, error: str | None=None, error_description: str | None=None):
     if error:
         return RedirectResponse(url=f"{config.FRONTEND_BASE_URL}/error/422")
 
@@ -79,14 +81,17 @@ async def login_redirect(application: Annotated[ConfidentialClientApplication, D
     workspace_id = request.session["workspace_id"] if "workspace_id" in request.session else None
 
     # Either create user or check if the user exists
-    user = service.create_user(db=db, details=result["id_token_claims"], role=role, workspace_id=workspace_id) if "signup" in request.session else service.check_exists(result['id_token_claims']['oid'], db)
+    # Check if the user exists in the db before creating a new user, incase of repeated request
+    user = service.check_get_by_oid(result['id_token_claims']['oid'], db)
+    if "signup" in request.session and not user:
+        user = service.create_user(db=db, details=result["id_token_claims"], refresh=result["refresh_token"], ms_access_token=result["access_token"], role=role, workspace_id=workspace_id)
     request.session.clear()
     response.delete_cookie("session") # This is to remove the cookie from the user's browser
 
     if user:
-        # access_token = create_access_token(data={"userId": user.user_id})
+        # generates the refresh and access token for the user (refresh will be returned later at the end of this if block, access token is gained in another flow by the user)
         _, refresh_token, _ = service.create_access_refresh(db=db, data={"userId": user.user_id, "role": user.role})
-        redirect_response = RedirectResponse(f"http://localhost:5173{url}") # This will redirect the user back to the page that they were on originally
+        redirect_response = RedirectResponse(f"{config.FRONTEND_BASE_URL}{url}") # This will redirect the user back to the page that they were on originally
         redirect_response.set_cookie(key="dte_refresh_token", value=refresh_token.opaque_token, expires=refresh_token.expiry_date, httponly=True, samesite = None)
         # return {"access_token": access_token} # This is now technically irrelevant - optimised flow to save milliseconds would be to remove this entirely
         return redirect_response
