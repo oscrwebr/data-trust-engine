@@ -108,8 +108,8 @@ def get_latest_scan_detection_summary(db: Session, file_id: int):
 def get_subcategory_category_map(db: Session):
     rows = (
         db.query(
-            SensitivitySubcategory.name,
-            SensitivityCategory.name
+            SensitivitySubcategory.name.label("subcategory_name"),
+            SensitivityCategory.name.label("category_name")
         )
         .join(
             SensitivityCategory,
