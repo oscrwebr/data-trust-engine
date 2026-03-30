@@ -1,18 +1,19 @@
 -- ==========================
 -- 1. Users
 -- ==========================
-INSERT INTO `user` (`user_id`, `firstname`, `surname`, `email`, `oid`, `role`) VALUES
-(1, 'Tom', 'Clapham', 'tomclapham21@outlook.com',  '00000000-0000-0000-3054-4c8d7409054d', 'admin'),
-(2, 'Alice', 'Smith', 'alice@example.com', 'oid1', 'employee'),
-(3, 'Bob', 'Johnson', 'bob@example.com', 'oid2', 'employee'),
-(4, 'Charlie', 'Brown', 'charlie@example.com', 'oid3', 'employee'),
-(5, 'Delia', 'Plain', 'delia@example.com', 'oid4', 'employee'),
-(6, 'Margaret', 'Plums', 'margaret@example.com', 'oid5', 'employee'),
-(7, 'Daiyan', 'Khan', 'daiyan@example.com', 'oid6', 'employee'),
-(8, 'Oscar', 'Webster', 'oscar@example.com', 'oid7', 'employee'),
-(9, 'Sam', 'Carter', 'sam@example.com', 'oid8', 'employee'),
-(10, 'Elizabeth', 'Palmer', 'elizabeth@example.com', 'oid9', 'employee'),
-(11, 'Susan', 'Younger', 'susan@example.com', 'oid10', 'employee');
+DELETE FROM `user`;
+INSERT INTO `user` (`user_id`, `firstname`, `surname`, `username`, `email`, `oid`, `refresh`, `role`) VALUES
+(1, 'Tom', 'Clapham', 'tomclapham21@outlook.com',  'tomclapham21@outlook.com', '00000000-0000-0000-3054-4c8d7409054d', 'kasdjfh', 'admin'),
+(2, 'Alice', 'Smith', 'alice@example.com', 'alice@example.com', 'oid1', 'kasdjfh', 'employee'),
+(3, 'Bob', 'Johnson', 'bob@example.com', 'bob@example.com', 'oid2', 'kasdjfh', 'employee'),
+(4, 'Charlie', 'Brown', 'charlie@example.com', 'charlie@example.com', 'oid3', 'kasdjfh', 'employee'),
+(5, 'Delia', 'Plain', 'delia@example.com', 'delia@example.com', 'oid4', 'kasdjfh', 'employee'),
+(6, 'Margaret', 'Plums', 'margaret@example.com', 'margaret@example.com', 'oid5', 'kasdjfh', 'employee'),
+(7, 'Daiyan', 'Khan', 'daiyan@example.com', 'daiyan@example.com', 'oid6', 'kasdjfh', 'employee'),
+(8, 'Oscar', 'Webster', 'oscar@example.com', 'oscar@example.com', 'oid7', 'kasdjfh', 'employee'),
+(9, 'Sam', 'Carter', 'sam@example.com', 'sam@example.com', 'oid8', 'kasdjfh', 'employee'),
+(10, 'Elizabeth', 'Palmer', 'elizabeth@example.com', 'elizabeth@example.com', 'oid9', 'kasdjfh', 'employee'),
+(11, 'Susan', 'Younger', 'susan@example.com', 'susan@example.com', 'oid10', 'kasdjfh', 'employee');
 
 
 -- ==========================
