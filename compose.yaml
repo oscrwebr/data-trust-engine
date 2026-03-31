@@ -1,0 +1,55 @@
+services:
+  database:
+    image: mariadb:11.8-noble
+    environment:
+      - MARIADB_ROOT_PASSWORD=${DB_PASSWORD}
+      - MARIADB_DATABASE=${DB_NAME}
+      # - MARIADB_DATABASE=${DB_TEST_NAME}
+    volumes:
+      - dte-db-volume:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"] # https://mariadb.com/docs/server/server-management/automated-mariadb-deployment-and-administration/docker-and-mariadb/using-healthcheck-sh
+      start_period: 40s
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  alembic_migrations:
+    build: ./backend
+    environment:
+      - DB_HOST=database
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_TEST_NAME=${DB_TEST_NAME}
+    command: ["python", "-m", "alembic", "-c", "alembic.ini", "upgrade", "head"]
+    depends_on:
+      database:
+        condition: service_healthy
+
+  backend:
+    build: ./backend
+    ports:
+      - 8000:8000
+    environment:
+      - CLIENT_ID=${CLIENT_ID}
+      - CLIENT_SECRET=${CLIENT_SECRET}
+      - TENANT_ID=${TENANT_ID}
+      - AUTHORITY=${AUTHORITY}
+      - SCOPES=${SCOPES}
+      - DB_HOST=database
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_TEST_NAME=${DB_TEST_NAME}
+      - ACCESS_TOKEN_SECRET=${ACCESS_TOKEN_SECRET}
+      - ALGORITHM=${ALGORITHM}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      - ZEROBOUNCE_API_KEY=${ZEROBOUNCE_API_KEY}
+      - FERNET_KEY=${FERNET_KEY}
+    depends_on:
+      alembic_migrations:
+        condition: service_completed_successfully
+  
+volumes:
+  dte-db-volume:

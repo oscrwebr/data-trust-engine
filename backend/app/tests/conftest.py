@@ -11,12 +11,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+DB_HOST = os.getenv("DB_HOST")
 DATABASE_USERNAME = os.getenv("DB_USERNAME")
 DATABASE_PASSWORD = os.getenv("DB_PASSWORD")
 DB_NAME = os.getenv("DB_NAME")
 DB_TEST_NAME = os.getenv("DB_TEST_NAME")
 
-DATABASE_URL = (f"mysql+pymysql://{DATABASE_USERNAME}:{DATABASE_PASSWORD}@localhost:3306/{DB_TEST_NAME}")
+DATABASE_URL = (f"mysql+pymysql://{DATABASE_USERNAME}:{DATABASE_PASSWORD}@{DB_HOST}:3306/{DB_TEST_NAME}")
 
 @pytest.fixture(scope="session") # Runs once per test session (once for all the tests instead of once for each test)
 def db_engine():
