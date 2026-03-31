@@ -10,6 +10,7 @@ import { Dropdown } from 'primereact/dropdown';
 import { Button } from "primereact/button";
 
 import ActiveEmployeeRow from "../components/manage_employees/ActiveEmployeeRow";
+import ActiveEmployeeSquare from "../components/manage_employees/ActiveEmployeeSquare";
 
 function ManageEmployees({toast}){
     const [selectedRole, setSelectedRole] = useState(null);
@@ -78,9 +79,10 @@ function ManageEmployees({toast}){
                     <Button data-testid="display-change-button" className={styles.view_button} onClick={() => setView(!view)}><i style={{ color:"black", fontSize:"20px" }} className={view ? "pi pi-list" : "pi pi-table"}/></Button>
                 </div>
             </div>
-            <div>
+            <div className={styles.list_container}>
                 {/* Mapping the mixed users to their cards */}
-                {mixedUsers.map((employee, index) => (
+                {view ? (
+                    mixedUsers.map((employee, index) => (
                     <div className={styles.row_container} key={index}>
 
                         {/* Row view for active users*/}
@@ -91,7 +93,19 @@ function ManageEmployees({toast}){
                             } firstname={employee.user.firstname} surname={employee.user.surname} email={employee.user.email} employeeRole={employee.role_name || "No Role Assigned"} roles={roles} setEmployeeRole={setSelectedRole}/>
                         )}
                     </div>
-                ))}
+                    ))
+                ) : (
+                    <div className={styles.square_container}>
+                        {mixedUsers.map((employee, index) => (
+                            employee.type === "active" && (
+                                <ActiveEmployeeSquare initials={
+                                    (employee.user.firstname?.[0]?.toUpperCase() || "?") +
+                                    (employee.user.surname?.[0]?.toUpperCase() || "?")
+                                } firstname={employee.user.firstname} surname={employee.user.surname} email={employee.user.email} employeeRole={employee.role_name || "No Role Assigned"} roles={roles} setEmployeeRole={setSelectedRole}/>
+                            )
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     )

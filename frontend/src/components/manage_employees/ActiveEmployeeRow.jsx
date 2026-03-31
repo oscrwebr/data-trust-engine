@@ -14,9 +14,9 @@ function ActiveEmployeeRow({initials, firstname, surname, email, employeeRole, r
                 <Dropdown value={employeeRole} className="p-inputtext-sm" optionLabel="name" optionValue="name" options={roles} onChange={(e) => setEmployeeRole(e.value)}/>
                 <div className={styles.row_status_container}>
                     <span>Accepted</span>
-                    <i className="pi pi-check-circle" style={{ color: 'green', fontWeight: '600' }}/>
+                    <i id={styles.accepted_icon} className="pi pi-check-circle"/>
                 </div>
-                <Button label="Remove" severity="danger" style={{ backgroundColor: 'red' }}/>
+                <Button className={styles.remove_button} label="Remove" severity="danger"/>
             </div>
         </div>
     )
