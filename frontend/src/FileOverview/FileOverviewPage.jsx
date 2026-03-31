@@ -56,7 +56,7 @@ function FileOverviewPage() {
     }, {});
 
     return (
-        <div>
+        <div className={styles.file_overview_page}>
             <h1>{file.file_name}</h1>
             <p>Hash: {file.hash}</p>
 

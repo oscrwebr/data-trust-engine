@@ -1,3 +1,9 @@
+.file_overview_page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
 .scan_history_container {
     max-width: 900px;
 
@@ -140,6 +146,7 @@
 }
 
 .result_count {
+    margin-top: 8px;
     font-size: 0.85rem;
     color: #4b5563;
 }
@@ -153,6 +160,4 @@
     color: #111827;
     font-size: 1.1rem;
     font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
 }
