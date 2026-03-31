@@ -4,6 +4,10 @@ import FileScanHistoryItem from "./FileScanHistoryItem";
 import LatestScanResultCard from "./LatestScanResultCard";
 import styles from "./FileOverview.module.css";
 
+import { FaRegFileAlt } from "react-icons/fa";
+import { FaShieldAlt } from "react-icons/fa";
+import { FaHistory } from "react-icons/fa";
+
 
 function FileOverviewPage() {
     const { file_id } = useParams();
@@ -59,6 +63,7 @@ function FileOverviewPage() {
         <div className={styles.file_overview_page}>
             <div className={styles.file_header_card}>
                 <div className={styles.file_header_top}>
+                    <div className={styles.file_icon}><FaRegFileAlt/></div>
                     <div>
                         <h1 className={styles.file_name}>{file.file_name}</h1>
                     </div>
@@ -69,9 +74,12 @@ function FileOverviewPage() {
                     <div className={styles.file_hash}>{file.hash}</div>
                 </div>
             </div>
-            
+
             <div className={styles.latest_scan_results_container}>
-                <h2 className={styles.latest_scan_results_title}>Latest Scan Results</h2>
+                <div className={styles.section_title}>
+                    <FaShieldAlt className={styles.section_icon}/>
+                    <h2 className={styles.latest_scan_results_title}>Latest Scan Results</h2>
+                </div>
 
                 {Object.entries(grouped_latest_scan_results).map(([category, results]) => (
                     <div key={category} className={styles.latest_scan_category_section}>
@@ -87,7 +95,10 @@ function FileOverviewPage() {
             </div>
 
             <div className={styles.scan_history_container}>
-                <h2 className={styles.scan_history_title}>Scan History</h2>
+                <div className={styles.section_title}>
+                    <FaHistory className={styles.section_icon}/>
+                    <h2 className={styles.scan_history_title}>Scan History</h2>
+                </div>
 
                 <div className={styles.scan_history_list}>
                     {file_scans_history.map((scan) => (
