@@ -4,6 +4,46 @@
     padding: 2rem;
 }
 
+
+.file_header_card {
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 2rem;
+}
+
+.file_header_top {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.file_name {
+    font-weight: 700;
+    margin: 0;
+}
+
+.file_hash_section {
+    background-color: #f9fafb;
+    border-radius: 10px;
+}
+
+.hash_label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.file_hash {
+    font-size: 0.8rem;
+    font-family: monospace;
+    word-break: break-all;
+    color: #374151;
+}
+
 .scan_history_container {
     max-width: 900px;
 

@@ -57,9 +57,19 @@ function FileOverviewPage() {
 
     return (
         <div className={styles.file_overview_page}>
-            <h1>{file.file_name}</h1>
-            <p>Hash: {file.hash}</p>
+            <div className={styles.file_header_card}>
+                <div className={styles.file_header_top}>
+                    <div>
+                        <h1 className={styles.file_name}>{file.file_name}</h1>
+                    </div>
+                </div>
 
+                <div className={styles.file_hash_section}>
+                    <div className={styles.hash_label}>Hash</div>
+                    <div className={styles.file_hash}>{file.hash}</div>
+                </div>
+            </div>
+            
             <div className={styles.latest_scan_results_container}>
                 <h2 className={styles.latest_scan_results_title}>Latest Scan Results</h2>
 
