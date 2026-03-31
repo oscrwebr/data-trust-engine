@@ -8,7 +8,7 @@ import { PiCheckCircleBold } from "react-icons/pi";
 function OrganisationScanPage({ scan }) {
     return (
         <>
-        {/* To change the colour of a card, apply either 'issues' or 'clean' to the scan-page-card class */}
+        {/* To change the colour of a card, apply either 'critical' 'issues' or 'clean' to the scan-page-card class */}
         <div className="scan-page-card-container">
             <div className="scan-page-card">
                 <div className="scan-page-card-text">
@@ -20,7 +20,7 @@ function OrganisationScanPage({ scan }) {
                     <PiFileBold size={50}/>
                 </div>
             </div>
-            <div className="scan-page-card issues">
+            <div className="scan-page-card critical">
                 <div className="scan-page-card-text">
                     <span className="scan-page-card-subtitle">Naming Issues</span>
                     {/* HARDCODED FOR NOW */}
@@ -42,10 +42,10 @@ function OrganisationScanPage({ scan }) {
                 </div>
             </div>
             {/* need to create function to calculate % */}
-            <div className="scan-page-card clean">
+            <div className="scan-page-card issues">
                 <div className="scan-page-card-text">
                     <span className="scan-page-card-subtitle">Clean Files</span>
-                    <span className="scan-page-card-title">87%</span>
+                    <span className="scan-page-card-title">68%</span>
                     
                 </div>
                 <div>
@@ -55,9 +55,12 @@ function OrganisationScanPage({ scan }) {
             
         </div>
         <h2 className="scan-page-files-heading">All Scanned Files</h2>
-        <div className="scan-page-file-card"></div>
-        <div className="scan-page-file-card"></div>
-        <div className="scan-page-file-card"></div>
+
+        <div className="scan-page-file-container">
+            {scan.files.map(scan_file => (
+                <div key={scan_file.file_id} className="scan-page-file-card"></div>
+            ))}
+        </div>
         </>
         
 

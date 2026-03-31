@@ -207,6 +207,11 @@
     border: 1px solid #FFD6A7;
 }
 
+.critical {
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+}
+
 /* variations for images */
 .clean svg {
     color: #0D542B;
@@ -215,7 +220,19 @@
     color: #bd461f;
 }
 
+.critical svg {
+    color: #DC2626;
+}
+
 /* variations for text */
+.critical .scan-page-card-title {
+    color: #B91C1C;
+}
+
+.critical .scan-page-card-subtitle {
+    color: #DC2626; 
+}
+
 .issues .scan-page-card-title {
     color: #bd461f;
 }
