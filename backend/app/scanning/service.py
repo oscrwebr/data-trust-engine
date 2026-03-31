@@ -9,6 +9,7 @@ from app.scanning.models import File, Scan
 from app.scanning.regex_patterns import *
 from app.scanning.detectors import *
 from app.scanning.extractors import *
+from app.scanning.scan_type import ScanType
 
 BASE_DIRECTORY = Path(__file__).resolve().parent
 
@@ -228,7 +229,7 @@ def perform_organisation_scan(db: Session, naming_convention_ids: list[int]):
         if naming_convention_id not in valid_naming_convention_ids:
             raise ValueError(f"Invalid naming convention id: {naming_convention_id}")
 
-    scan = repository.create_scan(db=db)
+    scan = repository.create_scan(db=db, scan_type=ScanType.ORGANISATION)
     # Scan all files for now (potentially in future can be selectable)
     files = repository.get_all_files(db=db)
 
@@ -283,3 +284,16 @@ def perform_organisation_scan(db: Session, naming_convention_ids: list[int]):
             repository.set_naming_convention_scan_result(db=db, scan_file_id=scan_file.scan_file_id, scan_naming_convention_id=scan_naming_convention.scan_naming_convention_id, passed=passed, suggested_name=suggested_name)
     repository.end_scan(db=db, scan=scan)
     return scan
+
+
+# Turn repository data into JSON response
+def get_scans_with_file_count(db: Session):
+    scans = repository.get_scans_with_file_count(db=db)
+    return [{
+        "scan_id": scan.scan_id, 
+        "scan_type": scan.scan_type, 
+        "started_at": scan.started_at, 
+        "finished_at": scan.finished_at,
+        # Gets the number of scan_file records associated with a scan
+        "file_count": file_count} 
+        for scan, file_count in scans]

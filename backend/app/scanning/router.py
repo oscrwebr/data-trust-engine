@@ -69,4 +69,10 @@ def organisation_scan(organisation_scan_request: OrganisationScanRequest, db: Se
     service.perform_organisation_scan(db, organisation_scan_request.naming_convention_ids)
     return {"message": "Organisation scan completed successfully"}
 
-    
+@router.get("/get_all_scans")
+def get_all_scans(db: Session = Depends(get_database)):
+    return repository.get_all_scans(db=db)
+
+@router.get("/get_scans_with_file_count")
+def get_scans_with_file_count(db: Session = Depends(get_database)):
+    return service.get_scans_with_file_count(db=db)

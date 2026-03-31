@@ -2,6 +2,8 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.core.database import get_database
 from app.roles import service
+from app.roles.models import UserRole, Role
+from app.authentication.models import User
 
 router = APIRouter(prefix="/roles", tags=["roles"])
 
@@ -12,18 +14,10 @@ def get_roles(db: Session = Depends(get_database)):
 
 @router.post("/create")
 def create_role(payload: dict, db: Session = Depends(get_database)):
-    """
-    payload = {
-        "name": "Role Name",
-        "thresholds": [
-            {"sensitivity_subcategory_id": 1, "threshold": 50},
-            ...
-        ]
-    }
-    """
     name = payload.get("name")
     thresholds = payload.get("thresholds", [])
-    return service.create_role(db, name, thresholds)
+    workspace_id = 1
+    return service.create_role(db, name, thresholds, workspace_id)
 
 @router.put("/update/{role_id}")
 def update_role(role_id: int, payload: dict, db: Session = Depends(get_database)):
@@ -43,3 +37,46 @@ def get_categories(db: Session = Depends(get_database)):
 @router.get("/sensitivity/subcategories")
 def get_subcategories(db: Session = Depends(get_database)):
     return service.get_sensitivity_subcategories(db)
+
+@router.get("/users/role/{role_id}")
+def get_users(role_id: int, db: Session = Depends(get_database)):
+    """Fetch all users with their current role"""
+    return service.get_users(db, role_id)
+
+@router.put("/users/{user_id}/role")
+def set_user_role(user_id: int, payload: dict, db: Session = Depends(get_database)):
+    """
+    payload = {
+        "role_id": <int> or None
+    }
+    """
+    role_id = payload.get("role_id")
+    service.update_user_role(db, user_id, role_id)
+    return {"message": "User role updated successfully"}
+
+@router.get("/users/all")
+def get_all_users(db: Session = Depends(get_database)):
+    users = db.query(User).all()
+    result = []
+
+    for u in users:
+        # fetch assigned sensitivity role
+        user_role = db.query(UserRole).filter(UserRole.user_id == u.user_id).first()
+        role_id = user_role.role_id if user_role else None
+
+        # optionally fetch role name
+        role_name = None
+        if role_id:
+            role = db.query(Role).filter(Role.role_id == role_id).first()
+            role_name = role.name if role else None
+
+        result.append({
+            "user_id": u.user_id,
+            "firstname": u.firstname,
+            "surname": u.surname,
+            "email": u.email,
+            "role_id": role_id,
+            "role_name": role_name
+        })
+
+    return result

@@ -1,16 +1,11 @@
 from app.workspaces import repository
-from app.core.database import get_database
 from sqlalchemy.orm import Session
-from fastapi import APIRouter, Depends
-import base64
 from datetime import datetime
 
 # Checking workspace creation inputs
-def workspace(user_id:int, name:str, image: bytes, db: Session):
-
-    # Add workspace to database
-    image_bytes = base64.b64decode(image)
-    repository.add_workspace(db, name, image_bytes, user_id)
+def workspace(name:str, image: bytes, db: Session, user_id: int):
+    workspace = repository.add_workspace(db, name, image)
+    repository.add_user_workspace(db, workspace.id, user_id)
     return True
 
 # Add a notification to database
@@ -24,3 +19,9 @@ def get_user_notifications(db: Session, user_id: int):
 
 def del_notification(db: Session, notification_id: int, user_id: int):
     return repository.delete_notification(db, notification_id, user_id)
+
+def get_workspace_by_id(db: Session, workspace_id: int):
+    return repository.get_workspace_by_workspace_id(db, workspace_id)
+
+def get_employees(db: Session, user_id: int):
+    return repository.get_all_employees(db, user_id)

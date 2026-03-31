@@ -5,10 +5,12 @@ from sqlalchemy.orm import Session
 from app.scanning.models import File, NamingConvention, Scan, ScanNamingConvention, NamingConventionScanResult, Scan, ScanFile, ScanFileDetection
 from app.roles.models import SensitivityCategory, SensitivitySubcategory
 from datetime import datetime, timezone
+from app.scanning.scan_type import ScanType
 
 
-def create_scan(db: Session):
+def create_scan(db: Session, scan_type: ScanType):
     scan = Scan(
+        scan_type = scan_type,
         started_at = datetime.now(timezone.utc),
         finished_at = None
     )
@@ -169,13 +171,6 @@ def set_naming_convention_scan_result(db: Session, scan_file_id: int, scan_namin
     db.refresh(naming_convention_scan_result)
     return naming_convention_scan_result
 
-def create_scan(db: Session):
-    scan = Scan(started_at=datetime.now())
-    db.add(scan)
-    db.commit()
-    db.refresh(scan)
-    return scan
-
 def end_scan(db: Session, scan: Scan):
     scan.finished_at = datetime.now()
     db.commit()
@@ -217,3 +212,12 @@ def create_test_file(db: Session, graph_file_id: str, file_name: str, hash: str)
     db.commit()
     db.refresh(file)
     return file
+
+def get_all_scans(db: Session):
+    return db.query(Scan).all()
+
+def get_scan_file_count(db: Session, scan_id: int):
+    return db.query(ScanFile).filter(ScanFile.scan_id == scan_id).count()
+
+def get_scans_with_file_count(db: Session):
+    return db.query(Scan, func.count(ScanFile.scan_file_id)).outerjoin(ScanFile, Scan.scan_id == ScanFile.scan_id).group_by(Scan.scan_id).all()

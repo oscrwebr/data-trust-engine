@@ -12,6 +12,12 @@ def get_by_id(user_id: int, db: Session):
 def get_by_oid(oid: str, db: Session):
     return db.query(User).filter(User.oid == oid).first()
 
+def get_by_email(email: str, db: Session):
+    return db.query(User).filter(User.email == email).first()
+
+def get_user_id_by_drive_id(drive_id: str, db:Session):
+    return db.query(User).filter(User.driveId == drive_id).first()
+
 def add_user(db: Session, email: str):
     user = PendingUser(email=email)
     db.add(user)
@@ -29,8 +35,8 @@ def delete_pending_user(db: Session, user: PendingUser):
     db.delete(user)
     db.commit()
 
-def create_user(db: Session, firstname: str, surname: str, email: str, oid: str, role: str) -> User:
-    user = User(firstname=firstname, surname=surname, email=email, oid=oid, role=role)
+def create_user(db: Session, firstname: str, surname: str, username: str, email: str, oid: str, role: str, driveId: str, refresh: bytes) -> User:
+    user = User(firstname=firstname, surname=surname, username=username, email=email, oid=oid, role=role, driveId=driveId, refresh=refresh)
     db.add(user)
     db.commit()
     db.refresh(user)
@@ -79,3 +85,17 @@ def revoke_refresh_family(db: Session, refresh_family_id: int) -> None:
     db.execute(update_statement)
     db.commit()
 
+def update_ms_refresh(id: int, refresh_token: str, db: Session) -> None:
+    update_statement = update(User).where(User.user_id == id).values(refresh = refresh_token)
+    db.execute(update_statement)
+    db.commit()
+
+def update_delta_link(id: int, delta_link: str, db: Session) -> None:
+    update_statement = update(User).where(User.user_id == id).values(deltaLink = delta_link)
+    db.execute(update_statement)
+    db.commit()
+
+# def update_user_drive_data(user_id: int, drive_id: str, db: Session) -> None:
+#     update_statement = update(User).where(User.user_id == user_id).values(driveId = drive_id)
+#     db.execute(update_statement)
+#     db.commit()
