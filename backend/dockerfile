@@ -1,5 +1,7 @@
 FROM python:3.12-alpine AS backend-dev
 
+RUN apk add --no-cache libstdc++
+
 WORKDIR /backend
 
 # Copy over pyproject.toml and allow it to be cached
@@ -17,4 +19,4 @@ COPY ./alembic.ini /backend/alembic.ini
 COPY ./app /backend/app
 
 # This is to run the app on port 8000 - Currently using dev!
-CMD ["fastapi", "dev", "app/main.py", "--port", "8000"]
+CMD ["fastapi", "dev", "app/main.py", "--host", "0.0.0.0", "--port", "8000"]

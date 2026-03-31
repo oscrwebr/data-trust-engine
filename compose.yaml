@@ -16,6 +16,7 @@ services:
 
   alembic_migrations:
     build: ./backend
+    image: fastapi-backend:latest
     environment:
       - DB_HOST=database
       - DB_USERNAME=${DB_USERNAME}
@@ -28,7 +29,8 @@ services:
         condition: service_healthy
 
   backend:
-    build: ./backend
+    image: fastapi-backend:latest
+    pull_policy: never
     ports:
       - 8000:8000
     environment:
