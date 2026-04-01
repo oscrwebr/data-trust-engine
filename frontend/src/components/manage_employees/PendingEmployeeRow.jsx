@@ -17,12 +17,11 @@ function PendingEmployeeRow({email, status, datetime}){
                     <Avatar className={styles.row_avatar} label="" shape="circle" />
                     <div className={styles.row_info}>
                         <span className={styles.row_email}>{email}</span>
-                        <div className={styles.row_status_container}>
-                            <span>Pending</span>
-                            <i className="pi pi-clock"/>
+                        <span className={styles.row_workspace_join_text}>This employee has requested to join your workspace</span>
+                        <div>
+                            <Button className={styles.accept_button} label="Accept"/>
+                            <Button className={styles.reject_button} label="Reject"/>
                         </div>
-                        <Button className={styles.accept_button} label="Accept"/>
-                        <Button className={styles.reject_button} label="Reject"/>
                     </div>
                 </>
             )}

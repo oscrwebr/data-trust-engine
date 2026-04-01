@@ -53,6 +53,11 @@
     color: #555;
 }
 
+.row_workspace_join_text {
+    font-size: 15px;
+    color: black;
+}
+
 .row_datetime {
     margin-right: 50px;
 }
@@ -95,6 +100,7 @@
 
 .accept_button {
     background-color: rgb(2, 147, 2);
+    margin-right: 10px;
     transition: background-color 0.2s ease;
 }
 
