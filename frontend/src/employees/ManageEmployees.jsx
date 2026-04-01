@@ -28,7 +28,6 @@ function ManageEmployees({toast}){
         .then(res => {
             setEmployees(res.data.active);
             setPendingEmployees(res.data.pending);
-            console.log(res.data.pending)
         });
 
         api.get("/workspace/get-workspace-roles")
@@ -36,7 +35,6 @@ function ManageEmployees({toast}){
             const all = { id: "all", name: "View All Roles" };
             const none = { id: "null", name: "No Role Assigned" };
             setRoles([all, ...res.data, none]);
-            console.log(res.data)
         });
     }, []);
 
@@ -96,7 +94,7 @@ function ManageEmployees({toast}){
 
                         {employee.status === "pending" && (
                             <PendingEmployeeRow 
-                                email={employee.email} status={employee.type}/>
+                                email={employee.pending.email} status={employee.pending.type} datetime={employee.datetime}/>
                         )}
                     </div>
                     ))

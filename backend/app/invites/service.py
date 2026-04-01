@@ -8,7 +8,7 @@ from starlette.responses import JSONResponse
 from datetime import datetime, date, timedelta
 from sqlalchemy.orm import Session
 from app.invites.models import Invite
-from app.invites.repository import get_invite_for_cooldown
+from app.invites.repository import get_invite_for_cooldown, get_invite_by_pending_user_id
 from app.workspaces.models import Workspace
 from app.authentication.repository import get_pending_user_by_email
 from app.authentication.models import User
@@ -167,3 +167,6 @@ def check_invite(invite:Invite, db: Session):
 
     db.commit()
     return True
+
+def get_invite_pending_user_id(db: Session, user_id: int):
+    return get_invite_by_pending_user_id(db, user_id) or None

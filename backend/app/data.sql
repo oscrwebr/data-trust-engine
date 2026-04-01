@@ -28,7 +28,6 @@ INSERT INTO `pending_users` (`user_id`, `email`, `type`) VALUES
 (5, 'francesca@outlook.com', 'request'),
 (6, 'tony@email.com', 'request');
 
-
 -- ==========================
 -- 3. Workspaces
 -- ==========================
@@ -37,7 +36,17 @@ INSERT INTO `workspaces` (`id`, `name`, `image`) VALUES
 
 
 -- ==========================
--- 4. User Workspaces
+-- 4. Invites
+-- ==========================
+DELETE FROM `invites`;
+INSERT INTO `invites` (`invite_id`, `created_at`, `expiry_date`, `token`, `used`, `user_id`, `workspace_id`) VALUES
+(1, '2026-01-30 14:00:00', '2026-04-30', 'token_abc123', TRUE, 1, 1),
+(2, '2026-12-25 18:05:00', '2026-04-30', 'token_def456', TRUE, 2, 1),
+(3, '2026-04-01 09:30:00', '2026-04-30', 'token_ghi789', TRUE, 3, 1);
+
+
+-- ==========================
+-- 5. User Workspaces
 -- ==========================
 INSERT INTO `user_workspace` (`user_id`, `workspace_id`) VALUES
 (1, 1),
@@ -54,7 +63,7 @@ INSERT INTO `user_workspace` (`user_id`, `workspace_id`) VALUES
 
 
 -- ==========================
--- 5. Pending User Workspaces
+-- 6. Pending User Workspaces
 -- ==========================
 INSERT INTO `pending_user_workspace` (`user_id`, `workspace_id`) VALUES
 (1, 1),
@@ -66,7 +75,7 @@ INSERT INTO `pending_user_workspace` (`user_id`, `workspace_id`) VALUES
 
 
 -- ==========================
--- 6. Sensitivity Categories
+-- 7. Sensitivity Categories
 -- ==========================
 INSERT INTO `sensitivity_category` (`sensitivity_category_id`, `name`) VALUES
 (1, 'PII'),
@@ -75,7 +84,7 @@ INSERT INTO `sensitivity_category` (`sensitivity_category_id`, `name`) VALUES
 
 
 -- ==========================
--- 7. Sensitivity Subcategories
+-- 8. Sensitivity Subcategories
 -- ==========================
 INSERT INTO `sensitivity_subcategory` (`sensitivity_subcategory_id`, `name`, `sensitivity_category_id`) VALUES
 (1, 'Names', 1),
@@ -97,7 +106,7 @@ INSERT INTO `sensitivity_subcategory` (`sensitivity_subcategory_id`, `name`, `se
 (17, 'Compliance Documents', 3);
 
 -- ==========================
--- 8. Roles
+-- 9. Roles
 -- ==========================
 INSERT INTO `role` (`role_id`, `workspace_id`, `name`) VALUES
 (1, 1, 'PII Role'),
@@ -107,7 +116,7 @@ INSERT INTO `role` (`role_id`, `workspace_id`, `name`) VALUES
 (5, 1, 'Executive Role');
 
 -- ==========================
--- 9. Role Permissions (threshold=50)
+-- 10. Role Permissions (threshold=50)
 -- ==========================
 INSERT INTO `role_permission` (`role_permission_id`, `role_id`, `sensitivity_subcategory_id`, `threshold`) VALUES
 (1, 1, 1, 50),
@@ -129,7 +138,7 @@ INSERT INTO `role_permission` (`role_permission_id`, `role_id`, `sensitivity_sub
 (17, 3, 17, 50);
 
 -- ==========================
--- 10. User Roles
+-- 11. User Roles
 -- ==========================
 INSERT INTO `user_role` (`user_role_id`, `user_id`, `role_id`) VALUES
 (1, 2, 1),
@@ -139,7 +148,7 @@ INSERT INTO `user_role` (`user_role_id`, `user_id`, `role_id`) VALUES
 (5, 7, 5);
 
 -- ==========================
--- 11. Files
+-- 12. Files
 -- ==========================
 INSERT INTO `file` (`file_id`, `graph_file_id`, `file_name`, `hash`) VALUES
 (1,'abc123','operational_report_document','e42ad1628a7c4757d92664bda3eeb1ce670f09e490807c2337bc5ebfe39d4edc'),
@@ -156,7 +165,7 @@ INSERT INTO `file` (`graph_file_id`, `file_name`, `hash`) VALUES
 ('graph_018', 'employee-Report_final.docx', 'mno654');
 
 -- ==========================
--- 12. Naming Conventions
+-- 13. Naming Conventions
 -- ==========================
 INSERT INTO `naming_convention` (`naming_convention_id`, `name`) VALUES 
 (1, 'camel_case'),
