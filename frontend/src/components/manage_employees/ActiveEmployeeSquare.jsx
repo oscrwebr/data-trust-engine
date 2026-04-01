@@ -3,11 +3,11 @@ import styles from "./manage_employees.module.css"
 import { Avatar } from "primereact/Avatar";
 import { Dropdown } from "primereact/dropdown";
 
-function ActiveEmployeeSquare({initials, firstname, surname, email, employeeRole, roles, setEmployeeRole}){
+function ActiveEmployeeSquare({initials, firstname, surname, email, employeeRole, roles, setEmployeeRole, onRemove}){
     return(
         <div className={styles.square_card_container}>
             <div className={styles.icon_container}>
-                <i id={styles.remove_icon} className="pi pi-times"/>
+                <i onClick={onRemove} id={styles.remove_icon} className="pi pi-times"/>
             </div>
             <Avatar className={styles.square_avatar} label={initials} shape="circle" />
             <div className={styles.square_info}>

@@ -35,13 +35,13 @@ class Notification(Base):
 user_workspace = Table(
     "user_workspace",
     Base.metadata,
-    Column("user_id", Integer, ForeignKey("user.user_id"), primary_key=True),
-    Column("workspace_id", Integer, ForeignKey("workspaces.id"), primary_key=True),
+    Column("user_id", Integer, ForeignKey("user.user_id", ondelete="CASCADE"), primary_key=True),
+    Column("workspace_id", Integer, ForeignKey("workspaces.id", ondelete="CASCADE"), primary_key=True),
 )
 
 pending_user_workspace = Table(
     "pending_user_workspace",
     Base.metadata,
-    Column("user_id", Integer, ForeignKey("pending_users.user_id"), primary_key=True),
-    Column("workspace_id", Integer, ForeignKey("workspaces.id"), primary_key=True),
+    Column("user_id", Integer, ForeignKey("pending_users.user_id", ondelete="CASCADE"), primary_key=True),
+    Column("workspace_id", Integer, ForeignKey("workspaces.id", ondelete="CASCADE"), primary_key=True),
 )

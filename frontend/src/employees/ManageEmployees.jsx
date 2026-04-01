@@ -83,7 +83,6 @@ function ManageEmployees({toast}){
     });
 
     const handleRoleChange = (employee_id, new_role, original_role) => {
-
         setEmployeeRoles(prev => {
             if (new_role === original_role) {
                 const updated = { ...prev };
@@ -96,6 +95,23 @@ function ManageEmployees({toast}){
                 [employee_id]: new_role
             };
         });
+    };
+
+    const handleRemoveEmployee = (employee_id) => {
+        api.delete(`/workspace/delete-user/${employee_id}`)
+        .then(res => {
+            showSuccessMessageRemove();
+        })
+
+        api.get("/workspace/get-employees")
+        .then(res => {
+            setEmployees(res.data.active);
+            setPendingEmployees(res.data.pending);
+        });
+    }
+
+    const showSuccessMessageRemove = () => {
+        toast.current.show({ severity: 'success', summary: 'Success', detail: 'Employee succesfully removed!', life: 4000});
     };
 
     return(
@@ -136,7 +152,15 @@ function ManageEmployees({toast}){
                             <ActiveEmployeeRow initials={
                                 (employee.user.firstname?.[0]?.toUpperCase() || "?") +
                                 (employee.user.surname?.[0]?.toUpperCase() || "?")
-                            } firstname={employee.user.firstname} surname={employee.user.surname} email={employee.user.email} employeeRole={(employeeRoles[employee.user.user_id] ?? employee.role_name) || "No Role Assigned"} roles={roles} setEmployeeRole={(role) => handleRoleChange(employee.user.user_id, role, employee.role_name || "No Role Assigned")}/>
+                            } 
+                                id={employee.user.user_id}
+                                firstname={employee.user.firstname}
+                                surname={employee.user.surname}
+                                email={employee.user.email}
+                                employeeRole={(employeeRoles[employee.user.user_id] ?? employee.role_name) || "No Role Assigned"}
+                                roles={roles}
+                                setEmployeeRole={(role) => handleRoleChange(employee.user.user_id, role, employee.role_name || "No Role Assigned")}
+                                removeEmployee={() => handleRemoveEmployee(employee.user.user_id)}/>
                         )}
 
                         {employee.status === "Pending" && (
@@ -154,7 +178,7 @@ function ManageEmployees({toast}){
                                     <ActiveEmployeeSquare initials={
                                         (employee.user.firstname?.[0]?.toUpperCase() || "?") +
                                         (employee.user.surname?.[0]?.toUpperCase() || "?")
-                                    } firstname={employee.user.firstname} surname={employee.user.surname} email={employee.user.email} employeeRole={employee.role_name || "No Role Assigned"} roles={roles} setEmployeeRole={setSelectedRole}/>
+                                    } firstname={employee.user.firstname} surname={employee.user.surname} email={employee.user.email} employeeRole={employee.role_name || "No Role Assigned"} roles={roles} setEmployeeRole={setSelectedRole} onRemove={() => handleRemoveEmployee(employee.user.user_id)}/>
                                 )
                             }
                                 
