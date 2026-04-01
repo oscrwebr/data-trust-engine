@@ -33,7 +33,7 @@ function ManageEmployees({toast}){
 
         api.get("/workspace/get-workspace-roles")
         .then(res => {
-            const all = { id: "all", name: "View All Roles" };
+            const all = { id: "all", name: "View All Employees" };
             const none = { id: "null", name: "No Role Assigned" };
             setRoles([all, ...res.data, none]);
         });
@@ -51,7 +51,18 @@ function ManageEmployees({toast}){
         }
 
         setMixedUsers(combined);
+        console.log(combined)
     }, [pendingEmployees, employees]);
+
+    const filteredEmployees = mixedUsers.filter(employee => {
+        const matchesRole =
+            !selectedRole ||
+                selectedRole.name === "View All Employees" ||
+                (selectedRole.name === "No Role Assigned" && employee.role_name === null) ||
+                employee.role_name === selectedRole.name
+
+        return matchesRole;
+    });
 
     return(
         <div className={styles.page}>
@@ -65,7 +76,7 @@ function ManageEmployees({toast}){
                 </div>
                 <div className={styles.search_dropdown_icon_container}>
                     <div className="card flex justify-content-center" style={{ marginRight:"15px" }}>
-                        <Dropdown data-testid="roles-dropdown" value={selectedRole} onChange={(e) => setSelectedRole(e.value)} optionLabel="name" 
+                        <Dropdown data-testid="roles-dropdown" options={roles} value={selectedRole} onChange={(e) => setSelectedRole(e.value)} optionLabel="name" 
                             placeholder="Filter by Roles" className="p-inputtext-sm"/>
                     </div>
                     <div className="card flex justify-content-center" style={{ marginRight:"15px" }}>
@@ -82,7 +93,7 @@ function ManageEmployees({toast}){
             <div className={styles.list_container}>
                 {/* Mapping the mixed users to their cards */}
                 {view ? (
-                    mixedUsers.map((employee, index) => (
+                    filteredEmployees.map((employee, index) => (
                     <div className={styles.row_container} key={index}>
 
                         {/* Row view for active users*/}
@@ -101,7 +112,7 @@ function ManageEmployees({toast}){
                     ))
                 ) : (
                     <div className={styles.square_container}>
-                        {mixedUsers.map((employee, index) => {
+                        {filteredEmployees.map((employee, index) => {
 
                             if (employee.status === "active") {
                                 return (
