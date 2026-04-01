@@ -12,6 +12,7 @@ import { Button } from "primereact/button";
 import ActiveEmployeeRow from "../components/manage_employees/ActiveEmployeeRow";
 import ActiveEmployeeSquare from "../components/manage_employees/ActiveEmployeeSquare";
 import PendingEmployeeRow from "../components/manage_employees/PendingEmployeeRow";
+import PendingEmployeeSquare from "../components/manage_employees/PendingEmployeeSquare";
 
 function ManageEmployees({toast}){
     const [selectedRole, setSelectedRole] = useState(null);
@@ -100,14 +101,25 @@ function ManageEmployees({toast}){
                     ))
                 ) : (
                     <div className={styles.square_container}>
-                        {mixedUsers.map((employee, index) => (
-                            employee.status === "active" && (
-                                <ActiveEmployeeSquare initials={
-                                    (employee.user.firstname?.[0]?.toUpperCase() || "?") +
-                                    (employee.user.surname?.[0]?.toUpperCase() || "?")
-                                } firstname={employee.user.firstname} surname={employee.user.surname} email={employee.user.email} employeeRole={employee.role_name || "No Role Assigned"} roles={roles} setEmployeeRole={setSelectedRole}/>
-                            )
-                        ))}
+                        {mixedUsers.map((employee, index) => {
+
+                            if (employee.status === "active") {
+                                return (
+                                    <ActiveEmployeeSquare initials={
+                                        (employee.user.firstname?.[0]?.toUpperCase() || "?") +
+                                        (employee.user.surname?.[0]?.toUpperCase() || "?")
+                                    } firstname={employee.user.firstname} surname={employee.user.surname} email={employee.user.email} employeeRole={employee.role_name || "No Role Assigned"} roles={roles} setEmployeeRole={setSelectedRole}/>
+                                )
+                            }
+                                
+                            
+                            if(employee.status === "pending") {
+                                return (
+                                    <PendingEmployeeSquare
+                                    email={employee.pending.email} status={employee.pending.type} datetime={employee.datetime}/>
+                                )
+                            }
+                        })}
                     </div>
                 )}
             </div>
