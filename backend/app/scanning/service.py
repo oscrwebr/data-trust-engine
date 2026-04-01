@@ -274,13 +274,9 @@ def get_scans_with_file_count(db: Session):
 def get_scan_by_id(db: Session, scan_id: int):
     return repository.get_scan_by_id(db=db, scan_id=scan_id)
 
-def get_scan_details(db: Session, scan_id: int):
-    scan = repository.get_scan_by_id(db=db, scan_id=scan_id)
+def get_organisational_scan_details(db: Session, scan):
     files = repository.get_scan_files_with_file(db=db, scan_id=scan_id)
 
-    if not scan:
-        return None
-    
     return {
         "scan_id": scan.scan_id,
         "scan_type": scan.scan_type,
@@ -291,7 +287,30 @@ def get_scan_details(db: Session, scan_id: int):
             "scan_file_id": scan_file.scan_file_id,
             "file_id": file.file_id,
             "file_name": file.file_name,
-            "hash": file.hash
+            "hash": file.hash,
+            # Can be more than one (scans can check for multiple naming conventions) so needs to be put into an array
+            "naming_convention_scan_results": [{
+                "naming_convention_scan_result_id": naming_convention_scan_result.naming_convention_scan_result_id,
+                # Get the naming convention name used by the scan
+                "naming_convention_name": naming_convention_name,
+                "passed": naming_convention_scan_result.passed,
+                "suggested_name": naming_convention_scan_result.suggested_name,
+                
+            } for naming_convention_scan_result, naming_convention_name in repository.get_naming_convention_scan_result_by_scan_file_id(db=db, scan_file_id=scan_file.scan_file_id)
+            ]
+
         } for scan_file, file in files
     ]
     }
+
+    
+
+def get_scan_details(db: Session, scan_id: int):
+    scan = repository.get_scan_by_id(db=db, scan_id=scan_id)
+    
+    if not scan:
+        return None
+    
+    if scan.scan_type == ScanType.ORGANISATION:
+        return get_organisational_scan_details(db=db, scan=scan)
+    
