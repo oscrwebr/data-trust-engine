@@ -67,7 +67,19 @@ function ManageEmployees({toast}){
                 selectedStatus === "View All Employees" ||
                 employee.status === selectedStatus
 
-        return matchesRole && matchesStatus;
+        const search = searchValue?.toLowerCase() || "";
+
+        const matchesSearch = employee.status === "Active"
+            ? (
+                (employee.user?.firstname?.toLowerCase().includes(search) || false) ||
+                (employee.user?.surname?.toLowerCase().includes(search) || false) ||
+                (employee.user?.email?.toLowerCase().includes(search) || false)
+            )
+            : (
+                employee.pending?.email?.toLowerCase().includes(search) || false
+            );
+
+        return matchesRole && matchesStatus && matchesSearch;
     });
 
     return(
