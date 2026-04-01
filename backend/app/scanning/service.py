@@ -275,7 +275,7 @@ def get_scan_by_id(db: Session, scan_id: int):
     return repository.get_scan_by_id(db=db, scan_id=scan_id)
 
 def get_organisational_scan_details(db: Session, scan):
-    files = repository.get_scan_files_with_file(db=db, scan_id=scan_id)
+    files = repository.get_scan_files_with_file(db=db, scan_id=scan.scan_id)
 
     return {
         "scan_id": scan.scan_id,
