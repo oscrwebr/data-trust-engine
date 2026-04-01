@@ -9,6 +9,7 @@ import CreateWorkspace from "./workspace/CreateWorkspace";
 import Home from "./home/home.jsx"
 import { Toast } from 'primereact/toast';
 import Scans from "./scans/Scans.jsx";
+import FilesDashboard from "./FilesDashboard/filesDashboard.jsx";
 
 import Test from "./Test/Test.jsx";
 import Unprocessable422 from "./Errors/unprocessable422.jsx";
@@ -16,6 +17,7 @@ import WorkspaceJoinedError from "./invites/WorkspaceJoined.jsx";
 import Forbidden403 from "./Errors/Forbidden403.jsx";
 import Layout from "./components/layout/layout.jsx";
 import ViewEmployees from "./employees/ViewEmployees.jsx";
+
 
 
 function App() {
@@ -38,6 +40,7 @@ function App() {
           <Route path="/upload-org-chart" element={null} />
           <Route path="/settings" element={null} />
           <Route path="/dashboard" element={<Dashboard toast={toast}/>} />
+          <Route path="/dashboard-files" element={<FilesDashboard toast={toast}/>} />
         </Route>
 
         {/* Elements in here will not inherit the sidebar */}
