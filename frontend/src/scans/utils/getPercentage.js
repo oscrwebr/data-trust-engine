@@ -1,5 +1,5 @@
-export const getPercentage = (number, totalFiles) => {
-    if (totalFiles === 0) return 0;
+export const getPercentage = (number, total) => {
+    if (total === 0) return 0;
 
-    return Math.round((number / totalFiles) * 100);
+    return Math.round((number / total) * 100);
 }

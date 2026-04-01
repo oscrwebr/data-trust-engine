@@ -3,10 +3,19 @@ import { PiTextAaBold } from "react-icons/pi";
 import { PiCardsBold } from "react-icons/pi";
 import { PiCheckCircleBold } from "react-icons/pi";
 import ScanFileCard from "./ScanFileCard";
-
-// need to create function to calculate % of clean files
+import { getScanPageCardClass } from "./utils/getScanPageCardClass";
 
 function OrganisationScanPage({ scan }) {
+
+
+    
+    const namingIssues = scan.files.filter(
+        // A file is only considered to have a naming issue if it fails ALL naming convention checks
+        // .every() checks for this (see below)
+        // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/every
+        file => file.naming_convention_scan_results.every(result => !result.passed)
+    ).length;
+
     return (
         <>
         {/* To change the colour of a card, apply either 'critical' 'issues' or 'clean' to the scan-page-card class */}
@@ -21,11 +30,11 @@ function OrganisationScanPage({ scan }) {
                     <PiFileBold size={50}/>
                 </div>
             </div>
-            <div className="scan-page-card critical">
+            <div className={`scan-page-card ${getScanPageCardClass(namingIssues, scan.file_count)}`}>
                 <div className="scan-page-card-text">
                     <span className="scan-page-card-subtitle">Naming Issues</span>
                     {/* HARDCODED FOR NOW */}
-                    <span className="scan-page-card-title">7</span>
+                    <span className="scan-page-card-title">{namingIssues}</span>
                     
                 </div>
                 <div>
@@ -42,7 +51,6 @@ function OrganisationScanPage({ scan }) {
                     <PiCardsBold size={50}/>
                 </div>
             </div>
-            {/* need to create function to calculate % */}
             <div className="scan-page-card issues">
                 <div className="scan-page-card-text">
                     <span className="scan-page-card-subtitle">Clean Files</span>
