@@ -21,6 +21,7 @@ function ManageEmployees({toast}){
     const [view, setView] = useState(true);
     const [employees, setEmployees] = useState([])
     const [roles, setRoles] = useState([])
+    const [status, _] = useState(["View All Employees", "Active", "Pending"])
     const [pendingEmployees, setPendingEmployees] = useState([])
      const [mixedUsers, setMixedUsers] = useState([]);
 
@@ -41,8 +42,8 @@ function ManageEmployees({toast}){
 
     useEffect(() => {
         const combined = [
-            ...pendingEmployees.map(u => ({ ...u, status: "pending" })),
-            ...employees.map(u => ({ ...u, status: "active" }))
+            ...pendingEmployees.map(u => ({ ...u, status: "Pending" })),
+            ...employees.map(u => ({ ...u, status: "Active" }))
         ];
 
         for (let i = combined.length - 1; i > 0; i--) {
@@ -61,7 +62,12 @@ function ManageEmployees({toast}){
                 (selectedRole.name === "No Role Assigned" && employee.role_name === null) ||
                 employee.role_name === selectedRole.name
 
-        return matchesRole;
+        const matchesStatus =
+            !selectedStatus ||
+                selectedStatus === "View All Employees" ||
+                employee.status === selectedStatus
+
+        return matchesRole && matchesStatus;
     });
 
     return(
@@ -80,7 +86,7 @@ function ManageEmployees({toast}){
                             placeholder="Filter by Roles" className="p-inputtext-sm"/>
                     </div>
                     <div className="card flex justify-content-center" style={{ marginRight:"15px" }}>
-                        <Dropdown value={selectedStatus} onChange={(e) => setSelectedStatus(e.value)} optionLabel="name" 
+                        <Dropdown value={selectedStatus} options={status} onChange={(e) => setSelectedStatus(e.value)} optionLabel="name" 
                             placeholder="Filter by Status" className="p-inputtext-sm"/>
                     </div>
                     <IconField iconPosition="left">
@@ -97,14 +103,14 @@ function ManageEmployees({toast}){
                     <div className={styles.row_container} key={index}>
 
                         {/* Row view for active users*/}
-                        {employee.status === "active" && (
+                        {employee.status === "Active" && (
                             <ActiveEmployeeRow initials={
                                 (employee.user.firstname?.[0]?.toUpperCase() || "?") +
                                 (employee.user.surname?.[0]?.toUpperCase() || "?")
                             } firstname={employee.user.firstname} surname={employee.user.surname} email={employee.user.email} employeeRole={employee.role_name || "No Role Assigned"} roles={roles} setEmployeeRole={setSelectedRole}/>
                         )}
 
-                        {employee.status === "pending" && (
+                        {employee.status === "Pending" && (
                             <PendingEmployeeRow 
                                 email={employee.pending.email} status={employee.pending.type} datetime={employee.datetime}/>
                         )}
