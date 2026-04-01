@@ -196,4 +196,8 @@ def delete_user(db: Session, user_id: int):
     repository.delete_user(db, user_id)
     return True
 
+def reject_pending_user(db: Session, user_id: int):
+    repository.delete_pending_user(db, user_id)
+    return True
+
     

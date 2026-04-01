@@ -14,6 +14,7 @@ import ActiveEmployeeSquare from "../components/manage_employees/active_employee
 import PendingEmployeeRow from "../components/manage_employees/pending_employee_cards/PendingEmployeeRow";
 import PendingEmployeeSquare from "../components/manage_employees/pending_employee_cards/PendingEmployeeSquare";
 import EmployeeRemoveModal from "../components/manage_employees/validation_modals/EmployeeRemoveModal";
+import PendingRejectModal from "../components/manage_employees/validation_modals/PendingRejectModal";
 
 function ManageEmployees({toast}){
     const [employeeRoles, setEmployeeRoles] = useState({});
@@ -28,6 +29,7 @@ function ManageEmployees({toast}){
     const [mixedUsers, setMixedUsers] = useState([]);
     const [user, setUser] = useState(null)
     const [removeEmployeeModal, setRemoveEmployeeModal] = useState(false)
+    const [rejectPendingModal, setRejectPendingModal] = useState(false)
 
     useEffect(() => {
         api.get("/workspace/get-employees")
@@ -104,7 +106,20 @@ function ManageEmployees({toast}){
         api.delete(`/workspace/delete-user/${employee_id}`)
             .then(res => {
                 showSuccessMessageRemove();
-                return api.get("/workspace/get-employees"); // wait for delete to finish
+                return api.get("/workspace/get-employees"); 
+            })
+            .then(res => {
+                setEmployees(res.data.active);
+                setPendingEmployees(res.data.pending);
+            })
+            .catch(err => console.error(err));
+    }
+
+    const handleRejectPending = (employee_id) => {
+        api.patch(`/workspace/reject-pending/${employee_id}`)
+            .then(res => {
+                showSuccessMessageReject();
+                return api.get("/workspace/get-employees"); 
             })
             .then(res => {
                 setEmployees(res.data.active);
@@ -117,9 +132,14 @@ function ManageEmployees({toast}){
         toast.current.show({ severity: 'success', summary: 'Success', detail: 'Employee succesfully removed!', life: 4000});
     };
 
+    const showSuccessMessageReject = () => {
+        toast.current.show({ severity: 'success', summary: 'Success', detail: 'Employee succesfully rejected!', life: 4000});
+    };
+
     return(
         <div className={styles.page}>
             <EmployeeRemoveModal firstname={user?.firstname || ""} surname={user?.surname || ""} visible={removeEmployeeModal} setVisible={() => setRemoveEmployeeModal(false)} onRemove={() => {setRemoveEmployeeModal(false); handleRemoveEmployee(user.user_id);}}/>
+            <PendingRejectModal email={user?.email || ""} visible={rejectPendingModal} setVisible={() => setRejectPendingModal(false)} onReject={() => {setRejectPendingModal(false); handleRejectPending(user.user_id);}}/>
             <div className={styles.container}>
                 <h1 className={styles.title}>Manage Employees</h1>
                 <Button data-testid="save-information" disabled={Object.keys(employeeRoles).length === 0}>Save Information</Button>
@@ -172,7 +192,7 @@ function ManageEmployees({toast}){
 
                         {employee.status === "Pending" && (
                             <PendingEmployeeRow 
-                                email={employee.pending.email} status={employee.pending.type} datetime={employee.datetime}/>
+                                email={employee.pending.email} status={employee.pending.type} datetime={employee.datetime} onReject={() => {setRejectPendingModal(true); setUser(employee.pending);}}/>
                         )}
                     </div>
                     ))
@@ -198,7 +218,7 @@ function ManageEmployees({toast}){
                             if(employee.status === "Pending") {
                                 return (
                                     <PendingEmployeeSquare
-                                    email={employee.pending.email} status={employee.pending.type} datetime={employee.datetime}/>
+                                    email={employee.pending.email} status={employee.pending.type} datetime={employee.datetime} onReject={() => {setRejectPendingModal(true); setUser(employee.pending);}}/>
                                 )
                             }
                         })}

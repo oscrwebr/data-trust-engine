@@ -138,3 +138,7 @@ async def get_all_pending_employees(db: Annotated[Session, Depends(get_database)
 @router.delete("/delete-user/{user_id}")
 async def delete_active_user(user_id: int, db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)]):
     return service.delete_user(db, user_id)
+
+@router.patch("/reject-pending/{user_id}")
+async def reject_pending(user_id: int, db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)]):
+    return service.reject_pending_user(db, user_id)
