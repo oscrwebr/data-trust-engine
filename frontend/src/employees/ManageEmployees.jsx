@@ -11,6 +11,7 @@ import { Button } from "primereact/button";
 
 import ActiveEmployeeRow from "../components/manage_employees/ActiveEmployeeRow";
 import ActiveEmployeeSquare from "../components/manage_employees/ActiveEmployeeSquare";
+import PendingEmployeeRow from "../components/manage_employees/PendingEmployeeRow";
 
 function ManageEmployees({toast}){
     const [selectedRole, setSelectedRole] = useState(null);
@@ -27,7 +28,7 @@ function ManageEmployees({toast}){
         .then(res => {
             setEmployees(res.data.active);
             setPendingEmployees(res.data.pending);
-            console.log(res.data.active)
+            console.log(res.data.pending)
         });
 
         api.get("/workspace/get-workspace-roles")
@@ -41,8 +42,8 @@ function ManageEmployees({toast}){
 
     useEffect(() => {
         const combined = [
-            ...pendingEmployees.map(u => ({ ...u, type: "pending" })),
-            ...employees.map(u => ({ ...u, type: "active" }))
+            ...pendingEmployees.map(u => ({ ...u, status: "pending" })),
+            ...employees.map(u => ({ ...u, status: "active" }))
         ];
 
         for (let i = combined.length - 1; i > 0; i--) {
@@ -86,18 +87,23 @@ function ManageEmployees({toast}){
                     <div className={styles.row_container} key={index}>
 
                         {/* Row view for active users*/}
-                        {employee.type === "active" && (
+                        {employee.status === "active" && (
                             <ActiveEmployeeRow initials={
                                 (employee.user.firstname?.[0]?.toUpperCase() || "?") +
                                 (employee.user.surname?.[0]?.toUpperCase() || "?")
                             } firstname={employee.user.firstname} surname={employee.user.surname} email={employee.user.email} employeeRole={employee.role_name || "No Role Assigned"} roles={roles} setEmployeeRole={setSelectedRole}/>
+                        )}
+
+                        {employee.status === "pending" && (
+                            <PendingEmployeeRow 
+                                email={employee.email} status={employee.type}/>
                         )}
                     </div>
                     ))
                 ) : (
                     <div className={styles.square_container}>
                         {mixedUsers.map((employee, index) => (
-                            employee.type === "active" && (
+                            employee.status === "active" && (
                                 <ActiveEmployeeSquare initials={
                                     (employee.user.firstname?.[0]?.toUpperCase() || "?") +
                                     (employee.user.surname?.[0]?.toUpperCase() || "?")

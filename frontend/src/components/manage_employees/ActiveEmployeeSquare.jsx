@@ -7,7 +7,6 @@ function ActiveEmployeeSquare({initials, firstname, surname, email, employeeRole
     return(
         <div className={styles.square_card_container}>
             <div className={styles.icon_container}>
-                <i id={styles.accepted_icon} className="pi pi-check-circle"/>
                 <i id={styles.remove_icon} className="pi pi-times"/>
             </div>
             <Avatar className={styles.square_avatar} label={initials} shape="circle" />

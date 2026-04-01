@@ -12,10 +12,6 @@ function ActiveEmployeeRow({initials, firstname, surname, email, employeeRole, r
                 <span className={styles.row_name}>{firstname} {surname}</span>
                 <span className={styles.row_email}>{email}</span>
                 <Dropdown value={employeeRole} className="p-inputtext-sm" optionLabel="name" optionValue="name" options={roles} onChange={(e) => setEmployeeRole(e.value)}/>
-                <div className={styles.row_status_container}>
-                    <span>Accepted</span>
-                    <i id={styles.accepted_icon} className="pi pi-check-circle"/>
-                </div>
                 <Button className={styles.remove_button} label="Remove" severity="danger"/>
             </div>
         </div>
