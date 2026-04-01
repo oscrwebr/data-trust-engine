@@ -226,7 +226,7 @@
                                         <ActiveEmployeeSquare initials={
                                             (employee.user.firstname?.[0]?.toUpperCase() || "?") +
                                             (employee.user.surname?.[0]?.toUpperCase() || "?")
-                                        } firstname={employee.user.firstname} surname={employee.user.surname} email={employee.user.email} employeeRole={(employeeRoles[employee.user.user_id] ?? employee.role_name) || "No Role Assigned"} roles={roles} setEmployeeRole={setSelectedRole}
+                                        } firstname={employee.user.firstname} surname={employee.user.surname} email={employee.user.email} employeeRole={(employeeRoles[employee.user.user_id] ?? employee.role_name) || "No Role Assigned"} roles={roles} setEmployeeRole={(role) => handleRoleChange(employee.user.user_id, role, employee.role_name || "No Role Assigned")}
                                             removeEmployee={() => {
                                                 setRemoveEmployeeModal(true);
                                                 setUser(employee.user);
