@@ -18,6 +18,10 @@ def create_role(db: Session, name: str, workspace_id: int):
 def get_all_roles(db: Session):
     return db.query(Role).all()
 
+def get_role_by_name(db: Session, name: str):
+    role = db.query(Role).filter(Role.name == name).first()
+    return role
+
 def delete_role(db: Session, role_id: int):
     db.query(RolePermission).filter(RolePermission.role_id == role_id).delete(synchronize_session=False)
     db.query(Role).filter(Role.role_id == role_id).delete(synchronize_session=False)
