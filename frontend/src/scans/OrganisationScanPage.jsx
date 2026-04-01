@@ -2,6 +2,7 @@ import { PiFileBold } from "react-icons/pi";
 import { PiTextAaBold } from "react-icons/pi";
 import { PiCardsBold } from "react-icons/pi";
 import { PiCheckCircleBold } from "react-icons/pi";
+import ScanFileCard from "./ScanFileCard";
 
 // need to create function to calculate % of clean files
 
@@ -58,7 +59,7 @@ function OrganisationScanPage({ scan }) {
 
         <div className="scan-page-file-container">
             {scan.files.map(scan_file => (
-                <div key={scan_file.file_id} className="scan-page-file-card"></div>
+                <ScanFileCard key={scan_file.scan_file_id} scan_file={scan_file}/>
             ))}
         </div>
         </>

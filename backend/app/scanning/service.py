@@ -288,6 +288,7 @@ def get_scan_details(db: Session, scan_id: int):
         "finished_at": scan.finished_at,
         "file_count": len(files),
         "files": [{
+            "scan_file_id": scan_file.scan_file_id,
             "file_id": file.file_id,
             "file_name": file.file_name,
             "hash": file.hash
