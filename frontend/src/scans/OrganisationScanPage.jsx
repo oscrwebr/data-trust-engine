@@ -4,6 +4,8 @@ import { PiCardsBold } from "react-icons/pi";
 import { PiCheckCircleBold } from "react-icons/pi";
 import ScanFileCard from "./ScanFileCard";
 import { getScanPageCardClass } from "./utils/getScanPageCardClass";
+import { getPercentage } from "./utils/getPercentage";
+import { getCleanFilesClass } from "./utils/getCleanFilesClass";
 
 function OrganisationScanPage({ scan }) {
 
@@ -15,6 +17,10 @@ function OrganisationScanPage({ scan }) {
         // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/every
         file => file.naming_convention_scan_results.every(result => !result.passed)
     ).length;
+
+    // HARD CODED FOR NOW... need to get implemnent duplicate file results in backend (different branch)
+    const cleanFilesDummy = 2;
+    const cleanFiles = getPercentage(cleanFilesDummy, scan.file_count);
 
     return (
         <>
@@ -51,10 +57,10 @@ function OrganisationScanPage({ scan }) {
                     <PiCardsBold size={50}/>
                 </div>
             </div>
-            <div className="scan-page-card issues">
+            <div className={`scan-page-card ${getCleanFilesClass(cleanFiles)}`}>
                 <div className="scan-page-card-text">
                     <span className="scan-page-card-subtitle">Clean Files</span>
-                    <span className="scan-page-card-title">68%</span>
+                    <span className="scan-page-card-title">{cleanFiles}%</span>
                     
                 </div>
                 <div>
