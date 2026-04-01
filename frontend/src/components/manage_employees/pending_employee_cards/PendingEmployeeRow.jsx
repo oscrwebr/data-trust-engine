@@ -1,4 +1,4 @@
-import styles from "./manage_employees.module.css"
+import styles from "../manage_employees.module.css"
 import dayjs from "dayjs";
 import { Avatar } from "primereact/Avatar";
 import { Button } from "primereact/button";

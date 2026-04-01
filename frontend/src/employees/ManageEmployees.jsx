@@ -9,10 +9,11 @@ import { useState } from "react";
 import { Dropdown } from 'primereact/dropdown';
 import { Button } from "primereact/button";
 
-import ActiveEmployeeRow from "../components/manage_employees/ActiveEmployeeRow";
-import ActiveEmployeeSquare from "../components/manage_employees/ActiveEmployeeSquare";
-import PendingEmployeeRow from "../components/manage_employees/PendingEmployeeRow";
-import PendingEmployeeSquare from "../components/manage_employees/PendingEmployeeSquare";
+import ActiveEmployeeRow from "../components/manage_employees/active_employee_cards/ActiveEmployeeRow";
+import ActiveEmployeeSquare from "../components/manage_employees/active_employee_cards/ActiveEmployeeSquare";
+import PendingEmployeeRow from "../components/manage_employees/pending_employee_cards/PendingEmployeeRow";
+import PendingEmployeeSquare from "../components/manage_employees/pending_employee_cards/PendingEmployeeSquare";
+import EmployeeRemoveModal from "../components/manage_employees/validation_modals/EmployeeRemoveModal";
 
 function ManageEmployees({toast}){
     const [employeeRoles, setEmployeeRoles] = useState({});
@@ -24,7 +25,9 @@ function ManageEmployees({toast}){
     const [roles, setRoles] = useState([])
     const [status, _] = useState(["View All Employees", "Active", "Pending"])
     const [pendingEmployees, setPendingEmployees] = useState([])
-     const [mixedUsers, setMixedUsers] = useState([]);
+    const [mixedUsers, setMixedUsers] = useState([]);
+    const [user, setUser] = useState(null)
+    const [removeEmployeeModal, setRemoveEmployeeModal] = useState(false)
 
     useEffect(() => {
         api.get("/workspace/get-employees")
@@ -99,15 +102,15 @@ function ManageEmployees({toast}){
 
     const handleRemoveEmployee = (employee_id) => {
         api.delete(`/workspace/delete-user/${employee_id}`)
-        .then(res => {
-            showSuccessMessageRemove();
-        })
-
-        api.get("/workspace/get-employees")
-        .then(res => {
-            setEmployees(res.data.active);
-            setPendingEmployees(res.data.pending);
-        });
+            .then(res => {
+                showSuccessMessageRemove();
+                return api.get("/workspace/get-employees"); // wait for delete to finish
+            })
+            .then(res => {
+                setEmployees(res.data.active);
+                setPendingEmployees(res.data.pending);
+            })
+            .catch(err => console.error(err));
     }
 
     const showSuccessMessageRemove = () => {
@@ -116,6 +119,7 @@ function ManageEmployees({toast}){
 
     return(
         <div className={styles.page}>
+            <EmployeeRemoveModal firstname={user?.firstname || ""} surname={user?.surname || ""} visible={removeEmployeeModal} setVisible={() => setRemoveEmployeeModal(false)} onRemove={() => {setRemoveEmployeeModal(false); handleRemoveEmployee(user.user_id);}}/>
             <div className={styles.container}>
                 <h1 className={styles.title}>Manage Employees</h1>
                 <Button data-testid="save-information" disabled={Object.keys(employeeRoles).length === 0}>Save Information</Button>
@@ -160,7 +164,10 @@ function ManageEmployees({toast}){
                                 employeeRole={(employeeRoles[employee.user.user_id] ?? employee.role_name) || "No Role Assigned"}
                                 roles={roles}
                                 setEmployeeRole={(role) => handleRoleChange(employee.user.user_id, role, employee.role_name || "No Role Assigned")}
-                                removeEmployee={() => handleRemoveEmployee(employee.user.user_id)}/>
+                                removeEmployee={() => {
+                                    setRemoveEmployeeModal(true);
+                                    setUser(employee.user);
+                                }}/>
                         )}
 
                         {employee.status === "Pending" && (
@@ -178,7 +185,12 @@ function ManageEmployees({toast}){
                                     <ActiveEmployeeSquare initials={
                                         (employee.user.firstname?.[0]?.toUpperCase() || "?") +
                                         (employee.user.surname?.[0]?.toUpperCase() || "?")
-                                    } firstname={employee.user.firstname} surname={employee.user.surname} email={employee.user.email} employeeRole={employee.role_name || "No Role Assigned"} roles={roles} setEmployeeRole={setSelectedRole} onRemove={() => handleRemoveEmployee(employee.user.user_id)}/>
+                                    } firstname={employee.user.firstname} surname={employee.user.surname} email={employee.user.email} employeeRole={employee.role_name || "No Role Assigned"} roles={roles} setEmployeeRole={setSelectedRole}
+                                        removeEmployee={() => {
+                                            setRemoveEmployeeModal(true);
+                                            setUser(employee.user);
+                                        }}
+                                    />  
                                 )
                             }
                                 

@@ -1,13 +1,13 @@
-import styles from "./manage_employees.module.css"
+import styles from "../manage_employees.module.css"
 
 import { Avatar } from "primereact/Avatar";
 import { Dropdown } from "primereact/dropdown";
 
-function ActiveEmployeeSquare({initials, firstname, surname, email, employeeRole, roles, setEmployeeRole, onRemove}){
+function ActiveEmployeeSquare({initials, firstname, surname, email, employeeRole, roles, setEmployeeRole, removeEmployee}){
     return(
         <div className={styles.square_card_container}>
             <div className={styles.icon_container}>
-                <i onClick={onRemove} id={styles.remove_icon} className="pi pi-times"/>
+                <i onClick={removeEmployee} id={styles.remove_icon} className="pi pi-times"/>
             </div>
             <Avatar className={styles.square_avatar} label={initials} shape="circle" />
             <div className={styles.square_info}>
