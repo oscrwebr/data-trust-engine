@@ -32,30 +32,36 @@
         const [rejectPendingModal, setRejectPendingModal] = useState(false)
         const [saving, setSaving] = useState(false);
 
-        useEffect(() => {
-            api.get("/workspace/get-employees")
-            .then(res => {
-                const active = res.data.active.map(u => ({ ...u, status: "Active" }));
-                const pending = res.data.pending.map(u => ({ ...u, status: "Pending" }));
+        const fetchEmployees = () => {
+            return api.get("/workspace/get-employees")
+                .then(res => {
+                    const active = res.data.active.map(u => ({ ...u, status: "Active" }));
+                    const pending = res.data.pending.map(u => ({ ...u, status: "Pending" }));
 
-                const combined = [...active, ...pending];
+                    const combined = [...active, ...pending];
 
-                for (let i = combined.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [combined[i], combined[j]] = [combined[j], combined[i]];
+                    // optional shuffle
+                    for (let i = combined.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [combined[i], combined[j]] = [combined[j], combined[i]];
+                    }
+
+                    setEmployees(active);
+                    setPendingEmployees(pending);
+                    setMixedUsers(combined);
                 }
-                
-                setEmployees(active);
-                setPendingEmployees(pending);
-                setMixedUsers(combined);
-            });
+            );
+        };
+
+        useEffect(() => {
+            fetchEmployees();
 
             api.get("/workspace/get-workspace-roles")
-            .then(res => {
-                const all = { id: "all", name: "View All Employees" };
-                const none = { id: "null", name: "No Role Assigned" };
-                setRoles([all, ...res.data, none]);
-            });
+                .then(res => {
+                    const all = { id: "all", name: "View All Employees" };
+                    const none = { id: "null", name: "No Role Assigned" };
+                    setRoles([all, ...res.data, none]);
+                });
         }, []);
 
         const filteredEmployees = mixedUsers.filter(employee => {
@@ -113,21 +119,17 @@
 
             }).then(res => {
                 showSuccessMessageUpdate();
+                fetchEmployees();
             })
             .catch(err => console.error("Error updating roles:", err))
             .finally(() => setSaving(false));
-            window.location.reload();
         }
 
         const handleRemoveEmployee = (employee_id) => {
             api.delete(`/workspace/delete-user/${employee_id}`)
                 .then(res => {
                     showSuccessMessageRemove();
-                    return api.get("/workspace/get-employees"); 
-                })
-                .then(res => {
-                    setEmployees(res.data.active);
-                    setPendingEmployees(res.data.pending);
+                    fetchEmployees();
                 })
                 .catch(err => console.error(err));
         }
@@ -136,21 +138,17 @@
             api.patch(`/workspace/reject-pending/${employee_id}`)
                 .then(res => {
                     showSuccessMessageReject();
-                    return api.get("/workspace/get-employees"); 
-                })
-                .then(res => {
-                    setEmployees(res.data.active);
-                    setPendingEmployees(res.data.pending);
+                    fetchEmployees();
                 })
                 .catch(err => console.error(err));
         }
 
         const showSuccessMessageRemove = () => {
-            toast.current.show({ severity: 'success', summary: 'Success', detail: 'Employee succesfully removed!', life: 4000});
+            toast.current.show({ severity: 'success', summary: 'Success', detail: 'Employee successfully removed!', life: 4000});
         };
 
         const showSuccessMessageReject = () => {
-            toast.current.show({ severity: 'success', summary: 'Success', detail: 'Employee succesfully rejected!', life: 4000});
+            toast.current.show({ severity: 'success', summary: 'Success', detail: 'Employee successfully rejected!', life: 4000});
         };
 
         const showSuccessMessageUpdate = () => {
