@@ -1,5 +1,5 @@
 // Helper function to use across application
-export function formatDateTime(dateTimeString) {
+export const formatDateTime = (dateTimeString) => {
             // Format date into dd/mm/yyyy, hh:mm:ss
             // For ongoing scans... Display "-" as the Finished At time
             if (!dateTimeString) {
