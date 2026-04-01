@@ -15,7 +15,8 @@ import PendingEmployeeRow from "../components/manage_employees/PendingEmployeeRo
 import PendingEmployeeSquare from "../components/manage_employees/PendingEmployeeSquare";
 
 function ManageEmployees({toast}){
-    const [selectedRole, setSelectedRole] = useState(null);
+    const [employeeRoles, setEmployeeRoles] = useState({});
+    const [selectedRole, setSelectedRole] = useState(null)
     const [selectedStatus, setSelectedStatus] = useState(null);
     const [searchValue, setSearchValue] = useState(null);
     const [view, setView] = useState(true);
@@ -52,7 +53,6 @@ function ManageEmployees({toast}){
         }
 
         setMixedUsers(combined);
-        console.log(combined)
     }, [pendingEmployees, employees]);
 
     const filteredEmployees = mixedUsers.filter(employee => {
@@ -82,10 +82,27 @@ function ManageEmployees({toast}){
         return matchesRole && matchesStatus && matchesSearch;
     });
 
+    const handleRoleChange = (employee_id, new_role, original_role) => {
+
+        setEmployeeRoles(prev => {
+            if (new_role === original_role) {
+                const updated = { ...prev };
+                delete updated[employee_id];
+                return updated;
+            }
+
+            return {
+                ...prev,
+                [employee_id]: new_role
+            };
+        });
+    };
+
     return(
         <div className={styles.page}>
-            <div>
+            <div className={styles.container}>
                 <h1 className={styles.title}>Manage Employees</h1>
+                <Button data-testid="save-information" disabled={Object.keys(employeeRoles).length === 0}>Save Information</Button>
             </div>
             <div className={styles.header}>
                 <div className={styles.count_container}>
@@ -115,11 +132,11 @@ function ManageEmployees({toast}){
                     <div className={styles.row_container} key={index}>
 
                         {/* Row view for active users*/}
-                        {employee.status === "Active" && (
+                        {employee.status === "Active" && (                  
                             <ActiveEmployeeRow initials={
                                 (employee.user.firstname?.[0]?.toUpperCase() || "?") +
                                 (employee.user.surname?.[0]?.toUpperCase() || "?")
-                            } firstname={employee.user.firstname} surname={employee.user.surname} email={employee.user.email} employeeRole={employee.role_name || "No Role Assigned"} roles={roles} setEmployeeRole={setSelectedRole}/>
+                            } firstname={employee.user.firstname} surname={employee.user.surname} email={employee.user.email} employeeRole={(employeeRoles[employee.user.user_id] ?? employee.role_name) || "No Role Assigned"} roles={roles} setEmployeeRole={(role) => handleRoleChange(employee.user.user_id, role, employee.role_name || "No Role Assigned")}/>
                         )}
 
                         {employee.status === "Pending" && (
@@ -132,7 +149,7 @@ function ManageEmployees({toast}){
                     <div className={styles.square_container}>
                         {filteredEmployees.map((employee, index) => {
 
-                            if (employee.status === "active") {
+                            if (employee.status === "Active") {
                                 return (
                                     <ActiveEmployeeSquare initials={
                                         (employee.user.firstname?.[0]?.toUpperCase() || "?") +
@@ -142,7 +159,7 @@ function ManageEmployees({toast}){
                             }
                                 
                             
-                            if(employee.status === "pending") {
+                            if(employee.status === "Pending") {
                                 return (
                                     <PendingEmployeeSquare
                                     email={employee.pending.email} status={employee.pending.type} datetime={employee.datetime}/>

@@ -5,6 +5,7 @@ import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
 
 function ActiveEmployeeRow({initials, firstname, surname, email, employeeRole, roles, setEmployeeRole}){
+    
     return(
         <div className={styles.row_card_container}>
             <Avatar className={styles.row_avatar} label={initials} shape="circle" />
