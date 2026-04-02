@@ -17,7 +17,7 @@ BASE_DIRECTORY = Path(__file__).resolve().parent
 # Perform a scan
 def perform_scan(db: Session, graph_file_ids: list[str]):
     # Initialise the Scan record
-    scan = repository.create_scan(db=db)
+    scan = repository.create_scan(db=db, scan_type=ScanType.SENSITIVITY)
     
     # Call scan file method for every graph_file_id received (scan_file method will call a method to pull the files)
     for graph_file_id in graph_file_ids:
