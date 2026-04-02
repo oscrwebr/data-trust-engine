@@ -47,7 +47,7 @@ def test_perform_scan_sets_started_and_finished_timestamps(db):
 
 def test_scan_file_method_creates_scan_file_record_for_each_file(db):
     # Create a test scan record
-    scan = repository.create_scan(db=db)
+    scan = repository.create_scan(db=db, scan_type=ScanType.SENSITIVITY)
 
     # Create a test file record
     test_file = repository.create_file(
@@ -75,7 +75,7 @@ def test_scan_file_method_creates_scan_file_record_for_each_file(db):
 
 def test_scan_file_method_creates_scan_file_detections_for_scan_file(db):
     # Create a test scan record
-    scan = repository.create_scan(db=db)
+    scan = repository.create_scan(db=db, scan_type=ScanType.SENSITIVITY)
 
     # Create a test file record
     test_file = repository.create_file(
