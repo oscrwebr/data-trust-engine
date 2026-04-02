@@ -5,9 +5,9 @@ import { MemoryRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 
 const employees = [
-    {user: {email:"alice@example.com", firstname: "Alice", oid: "oid1", role: "employee", surname: "Smith", user_id: 1}, role_name: 'PII Role'},
-    {user: {email:"charlie@example.com", firstname: "Charlie", oid: "oid2", role: "employee", surname: "Brown", user_id: 2}, role_name: 'Legal Role'},
-    {user: {email:"bob@example.com", firstname: "Bob", oid: "oid3", role: "employee", surname: "Messi", user_id: 3}, role_name: ''}
+    { user: { email:"alice@example.com", firstname:"Alice", surname:"Smith", user_id:1 }, role_name:"PII Role" },
+    { user: { email:"bob@example.com", firstname:"Bob", surname:"Messi", user_id:2 }, role_name:"" },
+    { user: { email:"charlie@example.com", firstname:"Charlie", surname:"Brown", user_id:3 }, role_name:"Legal Role" },
 ]
 
 const roles = [
@@ -35,9 +35,11 @@ describe("View Employees Component", () => {
 
     // Test 1
     test("Check that ViewEmployees component loads correctly with data", async() => {
-        api.get
-            .mockResolvedValueOnce({ data: employees })
-            .mockResolvedValueOnce({ data: [] });
+        api.get.mockResolvedValueOnce({
+            data: {
+                active: employees
+            }
+        });
 
         render(
             <MemoryRouter>
@@ -56,9 +58,11 @@ describe("View Employees Component", () => {
 
     // Test 2
     test("Check correct card arrangement is displayed when clicking display icon", async() => {
-        api.get
-            .mockResolvedValueOnce({ data: employees }) // employees call
-            .mockResolvedValueOnce({ data: [] });
+        api.get.mockResolvedValueOnce({
+            data: {
+                active: employees
+            }
+        });
 
         render(
             <MemoryRouter>
@@ -81,9 +85,11 @@ describe("View Employees Component", () => {
 
     // Test 3
     test("Check that clicking individual checkbox performs correct actions", async() => {
-      api.get
-        .mockResolvedValueOnce({ data: employees }) // employees call
-        .mockResolvedValueOnce({ data: [] });
+        api.get.mockResolvedValueOnce({
+            data: {
+                active: employees
+            }
+        });
 
         render(
             <MemoryRouter>
@@ -108,9 +114,11 @@ describe("View Employees Component", () => {
 
     // Test 4
     test("Check that search bar works as expected and returns correct row", async() => {
-        api.get
-        .mockResolvedValueOnce({ data: employees }) // employees call
-        .mockResolvedValueOnce({ data: [] });
+        api.get.mockResolvedValueOnce({
+            data: {
+                active: employees
+            }
+        });
 
         render(
             <MemoryRouter>
@@ -130,9 +138,15 @@ describe("View Employees Component", () => {
 
     // Test 5
     test("Check that filter by role works as expected and returns correct row", async() => {
-        api.get
-        .mockResolvedValueOnce({ data: employees })
-        .mockResolvedValueOnce({ data: roles });
+        api.get.mockResolvedValueOnce({
+            data: {
+                active: employees,
+            }
+        });
+
+        api.get.mockResolvedValueOnce({
+            data: roles,
+        });
 
         render(
             <MemoryRouter>
@@ -171,9 +185,11 @@ describe("View Employees Component", () => {
 
     // Test 6
     test("Check clicking select all performs correct actions", async() => {
-        api.get
-        .mockResolvedValueOnce({ data: employees }) // employees call
-        .mockResolvedValueOnce({ data: [] });
+        api.get.mockResolvedValueOnce({
+            data: {
+                active: employees
+            }
+        });
 
         render(
             <MemoryRouter>

@@ -49,6 +49,7 @@ function ViewEmployees({toast}){
             const all = { id: "all", name: "View All Roles" };
             const none = { id: "null", name: "No Role Assigned" };
             setRoles([all, ...res.data, none]);
+            console.log(res)
         });
     }, []);
 

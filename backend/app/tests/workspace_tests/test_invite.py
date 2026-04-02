@@ -233,7 +233,7 @@ def test_delete_pending_user_by_getting_id(db):
     insert_statement = insert(PendingUser).values(email="JohnSmith1@hotmail.com", type="invite")
     res = db.execute(insert_statement)
     user = get_pending_user_by_id(db, res.inserted_primary_key[0])
-    delete_pending_user(db, user)
+    delete_pending_user(db, user.user_id)
     assert db.query(PendingUser).first() is None
 
 

@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import styles from "./navbar.module.css"
-import { Badge } from "primereact/Badge"
+import { Badge } from "primereact/badge"
 
 function DropdownItem({ url, text, icon, onClick, value}) {
     return (
