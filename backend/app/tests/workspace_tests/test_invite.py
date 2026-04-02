@@ -139,6 +139,41 @@ def test_valid_invite_request(db, client):
     assert db.query(models.pending_user_workspace).count() == 1
 
 
+# Test sending an invite when a pending user with type 'request' has already been added to the database
+def test_valid_invite_request(db, client):
+    image = create_test_image()
+
+    oid = "000000-7sdf77-88asdf8-9sdiy99"
+    insert_statement = insert(User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode(), role="employee")
+    res=db.execute(insert_statement)
+
+    pending_user = insert(PendingUser).values(email="valid@example.com", type="request")
+    res_2=db.execute(pending_user)
+
+    workspace = insert(models.Workspace).values(name="Test Workspace", image=image)
+    workspace_insert=db.execute(workspace)
+    
+    add_user_workspace(db, workspace_insert.inserted_primary_key[0], res.inserted_primary_key[0])
+
+    refresh_family = repository.create_refresh_family(db)
+
+    access, refresh, _ = service.create_access_refresh(db, data={"userId": res.inserted_primary_key[0], "role": "admin"}, refresh_family_id=refresh_family.refresh_family_id)
+
+    req = client.build_request(
+        method="post",
+        url="/invite/send-invite",
+        headers={"Authorization": f"Bearer {access}"}, 
+        json={"email":"valid@example.com", "expiry_date":"2026-03-01T14:35:10.123456"},
+    )
+    response = client.send(request = req)
+
+    user = get_pending_user_by_id(db, res_2.inserted_primary_key[0])
+    assert response.status_code == 200
+    assert response.json().get("success") == True
+    assert db.query(PendingUser).count() == 1
+    assert user.type == "invite"
+
+
 # Test invite record can be retrieved using its token
 def test_retrieval_invite_record(db):
     image = create_test_image()

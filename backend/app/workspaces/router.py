@@ -124,17 +124,6 @@ async def get_workspace_roles(db: Annotated[Session, Depends(get_database)], cur
 
     return roles
 
-# @router.get("/get-pending-employees")
-# async def get_all_pending_employees(db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)]):
-#     result = get_pending_employees(db, current_user.user_id)
-#     pending_employees = []
-
-#     for p in result:
-#         if p.type == "request":
-#             pending_employees.append(p)
-
-#     return pending_employees
-
 @router.delete("/delete-user/{user_id}")
 async def delete_active_user(user_id: int, db: Annotated[Session, Depends(get_database)]):
     return service.delete_user(db, user_id)
