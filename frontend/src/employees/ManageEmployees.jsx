@@ -36,13 +36,13 @@
 
         const expiryDate = new Date();
         expiryDate.setDate(expiryDate.getDate() + 7);
+        expiryDate.setMilliseconds(0);
 
         const fetchEmployees = () => {
             return api.get("/workspace/get-employees")
                 .then(res => {
-                    const active = res.data.active.map(u => ({ ...u, status: "Active" }));
-                    const pending = res.data.pending.map(u => ({ ...u, status: "Pending" }));
-
+                    const active = (res.data.active || []).map(u => ({ ...u, status: "Active" }));
+                    const pending = (res.data.pending || []).map(u => ({ ...u, status: "Pending" }));
                     const combined = [...active, ...pending];
                     
                     for (let i = combined.length - 1; i > 0; i--) {
@@ -264,7 +264,7 @@
 
                                 if (employee.status === "Active") {
                                     return (
-                                        <ActiveEmployeeSquare initials={
+                                        <ActiveEmployeeSquare id={employee.user.user_id} initials={
                                             (employee.user.firstname?.[0]?.toUpperCase() || "?") +
                                             (employee.user.surname?.[0]?.toUpperCase() || "?")
                                         } firstname={employee.user.firstname} surname={employee.user.surname} email={employee.user.email} employeeRole={(employeeRoles[employee.user.user_id] ?? employee.role_name) || "No Role Assigned"} roles={roles} setEmployeeRole={(role) => handleRoleChange(employee.user.user_id, role, employee.role_name || "No Role Assigned")}

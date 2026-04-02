@@ -19,8 +19,8 @@ function PendingEmployeeRow({email, status, datetime, onReject, onAccept}){
                         <span className={styles.row_email}>{email}</span>
                         <span className={styles.row_workspace_join_text}>This employee has requested to join your workspace</span>
                         <div>
-                            <Button onClick={onAccept} className={styles.accept_button} label="Accept"/>
-                            <Button onClick={onReject} className={styles.reject_button} label="Reject"/>
+                            <Button data-testid={`accept-button-${email}`} onClick={onAccept} className={styles.accept_button} label="Accept"/>
+                            <Button data-testid={`reject-button-${email}`}  onClick={onReject} className={styles.reject_button} label="Reject"/>
                         </div>
                     </div>
                 </>

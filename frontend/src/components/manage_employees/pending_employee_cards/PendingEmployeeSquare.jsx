@@ -16,7 +16,7 @@ function PendingEmployeeSquare({email, status, datetime, onReject, onAccept}){
             {status === "request" && (
                 <>
                     <div className={styles.icon_container}>
-                        <i id={styles.request_icon} className="pi pi-user-plus"/>
+                        <i data-testid="request-icon" id={styles.request_icon} className="pi pi-user-plus"/>
                     </div>
                     <Avatar className={styles.square_avatar} label="" shape="circle" />
                     <div className={styles.square_info}>
@@ -32,7 +32,7 @@ function PendingEmployeeSquare({email, status, datetime, onReject, onAccept}){
             {status === "invite" && (
                 <>  
                     <div className={styles.icon_container}>
-                        <i id={styles.invite_icon} className="pi pi-clock"/>
+                        <i data-testid="invite-icon" id={styles.invite_icon} className="pi pi-clock"/>
                     </div>
                     <Avatar className={styles.square_avatar} label="" shape="circle" />
                     <div className={styles.square_info}>
