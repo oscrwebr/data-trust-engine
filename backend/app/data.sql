@@ -44,32 +44,26 @@ INSERT INTO `user_workspace` (`user_id`, `workspace_id`) VALUES
 -- 3. Sensitivity Categories
 -- ==========================
 INSERT INTO `sensitivity_category` (`sensitivity_category_id`, `name`) VALUES
-(1, 'PII'),
+(1, 'Personal'),
 (2, 'Financial'),
-(3, 'Legal');
+(3, 'Legal Case');
 
 
 -- ==========================
 -- 4. Sensitivity Subcategories
 -- ==========================
 INSERT INTO `sensitivity_subcategory` (`sensitivity_subcategory_id`, `name`, `sensitivity_category_id`) VALUES
-(1, 'Names', 1),
-(2, 'Phone numbers', 1),
-(3, 'Emails', 1),
-(4, 'Passwords', 1),
-(5, 'Addresses', 1),
-(6, 'Postcodes', 1),
-(7, 'Number plates', 1),
-(8, 'IP address', 1),
-(9, 'MAC address', 1),
-(10, 'IBANs', 2),
-(11, 'VAT numbers', 2),
-(12, 'Payment transactions', 2),
-(13, 'Contracts', 3),
-(14, 'Court Records', 3),
-(15, 'NDAs', 3),
-(16, 'Legal Claims', 3),
-(17, 'Compliance Documents', 3);
+(1, 'NAME', 1),
+(2, 'PHONE', 1),
+(3, 'EMAIL', 1),
+(4, 'ADDRESS', 1),
+(5, 'POSTCODE', 1),
+(6, 'IBAN', 2),
+(7, 'VAT', 2),
+(8, 'CITATION', 3),
+(9, 'ACT', 3),
+(10, 'REGULATION', 3),
+(11, 'CASE_NAME', 3),
 
 -- ==========================
 -- 5. Roles
