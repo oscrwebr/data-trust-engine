@@ -127,10 +127,10 @@
             }).then(res => {
                 showSuccessMessageUpdate();
                 fetchEmployees();
+                setEmployeeRoles({});
             })
             .catch(err => console.error("Error updating roles:", err))
             .finally(() => setSaving(false));
-            window.location.reload();
         }
 
         const handleRemoveEmployee = () => {
@@ -176,7 +176,7 @@
         };
 
         const showSuccessMessageUpdate = () => {
-            toast.current.show({ severity: 'info', summary: 'Info', detail: 'The information has now been updated.', life: 4000});
+            toast.current.show({ severity: 'info', summary: 'Info', detail: 'The information was updated.', life: 4000});
         };
 
         return(

@@ -48,6 +48,10 @@ def get_users(role_id: int, db: Session = Depends(get_database)):
 def set_user_role(roleUpdate: UpdateUserRolesRequest, db: Session = Depends(get_database)):
 
     for entity in roleUpdate.employees:
+        if entity.role_name == 'No Role Assigned':
+            service.update_user_role(db, entity.user_id, None)
+            return {"message": "User role updated successfully"}
+
         role = service.get_role_by_name(db, entity.role_name)
         service.update_user_role(db, entity.user_id, role.role_id)
 
