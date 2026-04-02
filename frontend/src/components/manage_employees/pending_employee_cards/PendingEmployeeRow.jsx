@@ -3,7 +3,7 @@ import dayjs from "dayjs";
 import { Avatar } from "primereact/Avatar";
 import { Button } from "primereact/button";
 
-function PendingEmployeeRow({email, status, datetime, onReject}){
+function PendingEmployeeRow({email, status, datetime, onReject, onAccept}){
 
     const d = dayjs(datetime);
 
@@ -19,7 +19,7 @@ function PendingEmployeeRow({email, status, datetime, onReject}){
                         <span className={styles.row_email}>{email}</span>
                         <span className={styles.row_workspace_join_text}>This employee has requested to join your workspace</span>
                         <div>
-                            <Button className={styles.accept_button} label="Accept"/>
+                            <Button onClick={onAccept} className={styles.accept_button} label="Accept"/>
                             <Button onClick={onReject} className={styles.reject_button} label="Reject"/>
                         </div>
                     </div>

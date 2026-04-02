@@ -3,7 +3,7 @@ import { Avatar } from "primereact/Avatar";
 import { Button } from "primereact/button";
 import dayjs from "dayjs";
 
-function PendingEmployeeSquare({email, status, datetime, onReject}){
+function PendingEmployeeSquare({email, status, datetime, onReject, onAccept}){
 
     const d = dayjs(datetime);
     
@@ -22,7 +22,7 @@ function PendingEmployeeSquare({email, status, datetime, onReject}){
                     <div className={styles.square_info}>
                         <span className={styles.square_email}>{email}</span>
                         <div className={styles.square_button_container}>
-                            <Button className={styles.square_accept_button}>Accept</Button>
+                            <Button onClick={onAccept} className={styles.square_accept_button}>Accept</Button>
                             <Button onClick={onReject} className={styles.square_reject_button}>Reject</Button>
                         </div>
                     </div>

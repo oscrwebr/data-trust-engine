@@ -15,6 +15,7 @@
     import PendingEmployeeSquare from "../components/manage_employees/pending_employee_cards/PendingEmployeeSquare";
     import EmployeeRemoveModal from "../components/manage_employees/validation_modals/EmployeeRemoveModal";
     import PendingRejectModal from "../components/manage_employees/validation_modals/PendingRejectModal";
+    import PendingAcceptModal from "../components/manage_employees/validation_modals/PendingAcceptModal";
 
     function ManageEmployees({toast}){
         const [employeeRoles, setEmployeeRoles] = useState({});
@@ -30,6 +31,7 @@
         const [user, setUser] = useState(null)
         const [removeEmployeeModal, setRemoveEmployeeModal] = useState(false)
         const [rejectPendingModal, setRejectPendingModal] = useState(false)
+        const [acceptPendingModal, setAcceptPendingModal] = useState(false)
         const [saving, setSaving] = useState(false);
 
         const fetchEmployees = () => {
@@ -39,6 +41,8 @@
                     const pending = res.data.pending.map(u => ({ ...u, status: "Pending" }));
 
                     const combined = [...active, ...pending];
+
+                    console.log(combined)
 
                     // optional shuffle
                     for (let i = combined.length - 1; i > 0; i--) {
@@ -123,6 +127,7 @@
             })
             .catch(err => console.error("Error updating roles:", err))
             .finally(() => setSaving(false));
+            window.location.reload();
         }
 
         const handleRemoveEmployee = (employee_id) => {
@@ -135,6 +140,15 @@
         }
 
         const handleRejectPending = (employee_id) => {
+            api.patch(`/workspace/reject-pending/${employee_id}`)
+                .then(res => {
+                    showSuccessMessageReject();
+                    fetchEmployees();
+                })
+                .catch(err => console.error(err));
+        }
+
+        const handleAcceptPending = (employee_id) => {
             api.patch(`/workspace/reject-pending/${employee_id}`)
                 .then(res => {
                     showSuccessMessageReject();
@@ -159,6 +173,8 @@
             <div className={styles.page}>
                 <EmployeeRemoveModal firstname={user?.firstname || ""} surname={user?.surname || ""} visible={removeEmployeeModal} setVisible={() => setRemoveEmployeeModal(false)} onRemove={() => {setRemoveEmployeeModal(false); handleRemoveEmployee(user.user_id);}}/>
                 <PendingRejectModal email={user?.email || ""} visible={rejectPendingModal} setVisible={() => setRejectPendingModal(false)} onReject={() => {setRejectPendingModal(false); handleRejectPending(user.user_id);}}/>
+                <PendingAcceptModal email={user?.email || ""} visible={acceptPendingModal} setVisible={() => setAcceptPendingModal(false)} onAccept={() => {setAcceptPendingModal(false); handleAcceptPending(user.user_id);}}/>
+
                 <div className={styles.container}>
                     <h1 className={styles.title}>Manage Employees</h1>
                     <Button data-testid="save-information" onClick={() => handleSaveInformation()} disabled={Object.keys(employeeRoles).length === 0 || saving}>Save Information</Button>
@@ -211,7 +227,7 @@
 
                             {employee.status === "Pending" && (
                                 <PendingEmployeeRow 
-                                    email={employee.pending.email} status={employee.pending.type} datetime={employee.datetime} onReject={() => {setRejectPendingModal(true); setUser(employee.pending);}}/>
+                                    email={employee.pending.email} status={employee.pending.type} datetime={employee.datetime} onReject={() => {setRejectPendingModal(true); setUser(employee.pending);}} onAccept={() => {setAcceptPendingModal(true); setUser(employee.pending);}}/>
                             )}
                         </div>
                         ))
@@ -237,7 +253,7 @@
                                 if(employee.status === "Pending") {
                                     return (
                                         <PendingEmployeeSquare
-                                        email={employee.pending.email} status={employee.pending.type} datetime={employee.datetime} onReject={() => {setRejectPendingModal(true); setUser(employee.pending);}}/>
+                                        email={employee.pending.email} status={employee.pending.type} datetime={employee.datetime} onReject={() => {setRejectPendingModal(true); setUser(employee.pending);}} onAccept={() => {setAcceptPendingModal(true); setUser(employee.pending);}}/>
                                     )
                                 }
                             })}
