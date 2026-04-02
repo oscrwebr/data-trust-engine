@@ -148,16 +148,24 @@
                 .catch(err => console.error(err));
         }
 
-        const handleAcceptPending = () => {
-            api.post(`/invite/send-invite`, {
+        const handleAcceptPending = async () => {
+            await api.post(`/invite/send-invite`, {
                 email: user.email || null,
                 expiry_date: expiryDate ? expiryDate.toISOString() : null,
             })
             .then(res => {
-                showSuccessMessageAccept();
-                fetchEmployees();
+                if(res.data.success == "invalid"){
+                    showErrorMessageInvalid();
+                } else if (res.data.success == "trust") {
+                    showErrorMessageTrust();
+                } else if (res.data.success == "cooldown") {
+                    showErrorMessageCooldown();
+                } else {
+                    showSuccessMessageAccept();
+                    fetchEmployees();
+                }
+                
             })
-            .catch(err => console.error(err));
         }
 
         const showSuccessMessageRemove = () => {
@@ -174,6 +182,18 @@
 
         const showSuccessMessageUpdate = () => {
             toast.current.show({ severity: 'info', summary: 'Info', detail: 'The information was updated.', life: 4000});
+        };
+
+        const showErrorMessageTrust = () => {
+            toast.current.show({ severity: 'error', summary: 'Error', detail: 'The email you are trying to send an invite to is untrustworthy.', life: 4000});
+        };
+
+        const showErrorMessageCooldown = () => {
+            toast.current.show({ severity: 'error', summary: 'Error', detail: 'You are sending this employee too many invites, please try again tomorrow.', life: 4000});
+        };
+
+        const showErrorMessageInvalid = () => {
+            toast.current.show({ severity: 'error', summary: 'Error', detail: 'The email you are trying to send an invite to does not exist.', life: 4000});
         };
 
         return(
