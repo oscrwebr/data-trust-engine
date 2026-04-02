@@ -34,6 +34,9 @@
         const [acceptPendingModal, setAcceptPendingModal] = useState(false)
         const [saving, setSaving] = useState(false);
 
+        const expiryDate = new Date();
+        expiryDate.setDate(expiryDate.getDate() + 7);
+
         const fetchEmployees = () => {
             return api.get("/workspace/get-employees")
                 .then(res => {
@@ -130,8 +133,8 @@
             window.location.reload();
         }
 
-        const handleRemoveEmployee = (employee_id) => {
-            api.delete(`/workspace/delete-user/${employee_id}`)
+        const handleRemoveEmployee = () => {
+            api.delete(`/workspace/delete-user/${user.user_id}`)
                 .then(res => {
                     showSuccessMessageRemove();
                     fetchEmployees();
@@ -139,8 +142,8 @@
                 .catch(err => console.error(err));
         }
 
-        const handleRejectPending = (employee_id) => {
-            api.patch(`/workspace/reject-pending/${employee_id}`)
+        const handleRejectPending = () => {
+            api.patch(`/workspace/reject-pending/${user.user_id}`)
                 .then(res => {
                     showSuccessMessageReject();
                     fetchEmployees();
@@ -148,32 +151,39 @@
                 .catch(err => console.error(err));
         }
 
-        const handleAcceptPending = (employee_id) => {
-            api.patch(`/workspace/reject-pending/${employee_id}`)
-                .then(res => {
-                    showSuccessMessageReject();
-                    fetchEmployees();
-                })
-                .catch(err => console.error(err));
+        const handleAcceptPending = () => {
+            api.post(`/invite/send-invite`, {
+                email: user.email || null,
+                expiry_date: expiryDate ? expiryDate.toISOString() : null,
+            })
+            .then(res => {
+                showSuccessMessageAccept();
+                fetchEmployees();
+            })
+            .catch(err => console.error(err));
         }
 
         const showSuccessMessageRemove = () => {
-            toast.current.show({ severity: 'success', summary: 'Success', detail: 'Employee successfully removed!', life: 4000});
+            toast.current.show({ severity: 'info', summary: 'Info', detail: 'The employee was removed from your workspace.', life: 4000});
+        };
+
+        const showSuccessMessageAccept= () => {
+            toast.current.show({ severity: 'info', summary: 'Info', detail: 'An invite has been sent to the employee.', life: 4000});
         };
 
         const showSuccessMessageReject = () => {
-            toast.current.show({ severity: 'success', summary: 'Success', detail: 'Employee successfully rejected!', life: 4000});
+            toast.current.show({ severity: 'info', summary: 'Info', detail: 'The employee was rejected from your workspace.', life: 4000});
         };
 
         const showSuccessMessageUpdate = () => {
-            toast.current.show({ severity: 'success', summary: 'Success', detail: 'Successfully updated information!', life: 4000});
+            toast.current.show({ severity: 'info', summary: 'Info', detail: 'The information has now been updated.', life: 4000});
         };
 
         return(
             <div className={styles.page}>
-                <EmployeeRemoveModal firstname={user?.firstname || ""} surname={user?.surname || ""} visible={removeEmployeeModal} setVisible={() => setRemoveEmployeeModal(false)} onRemove={() => {setRemoveEmployeeModal(false); handleRemoveEmployee(user.user_id);}}/>
-                <PendingRejectModal email={user?.email || ""} visible={rejectPendingModal} setVisible={() => setRejectPendingModal(false)} onReject={() => {setRejectPendingModal(false); handleRejectPending(user.user_id);}}/>
-                <PendingAcceptModal email={user?.email || ""} visible={acceptPendingModal} setVisible={() => setAcceptPendingModal(false)} onAccept={() => {setAcceptPendingModal(false); handleAcceptPending(user.user_id);}}/>
+                <EmployeeRemoveModal firstname={user?.firstname || ""} surname={user?.surname || ""} visible={removeEmployeeModal} setVisible={() => setRemoveEmployeeModal(false)} onRemove={() => {setRemoveEmployeeModal(false); handleRemoveEmployee();}}/>
+                <PendingRejectModal email={user?.email || ""} visible={rejectPendingModal} setVisible={() => setRejectPendingModal(false)} onReject={() => {setRejectPendingModal(false); handleRejectPending();}}/>
+                <PendingAcceptModal email={user?.email || ""} visible={acceptPendingModal} setVisible={() => setAcceptPendingModal(false)} onAccept={() => {setAcceptPendingModal(false); handleAcceptPending();}} date={expiryDate}/>
 
                 <div className={styles.container}>
                     <h1 className={styles.title}>Manage Employees</h1>

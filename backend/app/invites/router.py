@@ -2,6 +2,7 @@ import secrets
 import arrow
 
 from app.invites import repository as invite_repository
+from app.invites.service import set_pending_user_type_invite
 from app.authentication import repository as user_repository
 from app.authentication import service
 from app.core.database import get_database
@@ -41,6 +42,9 @@ async def send_invite(db: Annotated[Session, Depends(get_database)], current_use
         if not user:
             user = user_repository.add_user(db, invite.email, "invite")
             add_pending_user_to_workspace(db, workspace.id, user.user_id)
+        
+        else:
+            set_pending_user_type_invite(db, user, "invite")
         
         invite_repository.add_invite(db, time_now, invite.expiry_date.date(), token, False, user.user_id, workspace)
 

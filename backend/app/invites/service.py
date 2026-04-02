@@ -10,8 +10,8 @@ from sqlalchemy.orm import Session
 from app.invites.models import Invite
 from app.invites.repository import get_invite_for_cooldown, get_invite_by_pending_user_id
 from app.workspaces.models import Workspace
-from app.authentication.repository import get_pending_user_by_email
-from app.authentication.models import User
+from app.authentication.repository import get_pending_user_by_email, set_pending_user_type
+from app.authentication.models import User, PendingUser
 import base64
 
 
@@ -170,3 +170,6 @@ def check_invite(invite:Invite, db: Session):
 
 def get_invite_pending_user_id(db: Session, user_id: int):
     return get_invite_by_pending_user_id(db, user_id) or None
+
+def set_pending_user_type_invite(db: Session, user: PendingUser, type: str):
+    return set_pending_user_type(db, user, type)
