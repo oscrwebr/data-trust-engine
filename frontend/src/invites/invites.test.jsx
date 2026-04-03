@@ -491,7 +491,7 @@ describe("Invite Component", () => {
                 {
                     title: title,
                     body: body,
-                    workspace_id: "1",
+                    workspace_id: "1"
                 }
             );
         });

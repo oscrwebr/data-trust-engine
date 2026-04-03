@@ -1,12 +1,13 @@
 from fastapi import APIRouter, Depends, UploadFile, File, Form, Response
 from app.core.database import get_database
 from sqlalchemy.orm import Session
-from app.workspaces.service import workspace, add_notification, get_user_notifications, del_notification, get_employees
+from app.workspaces.service import workspace, add_notification, get_user_notifications, del_notification, get_employees, get_pending_employees
 from typing import Annotated
 from ..core.security_schemas import User
 from ..core.security import get_user_from_access_token
 from app.authentication import service
 from app.workspaces.schema import NotificationSchema, RemoveSchema, MessageSchema
+from app.invites.service import get_invite_by_pending_user_id
 from datetime import datetime
 from app.roles.models import UserRole, Role
 
@@ -79,7 +80,11 @@ async def get_workspace_image(db: Annotated[Session, Depends(get_database)], cur
 @router.get("/get-employees")
 async def get_all_employees(db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)]):
     employees = get_employees(db, current_user.user_id)
-    result = []
+    pending = get_pending_employees(db, current_user.user_id)
+
+    active_employees = []
+    pending_employees = []
+
     for e in employees:
 
         # fetch assigned sensitivity role
@@ -92,12 +97,20 @@ async def get_all_employees(db: Annotated[Session, Depends(get_database)], curre
             role = db.query(Role).filter(Role.role_id == role_id).first()
             role_name = role.name if role else None
 
-        result.append({
-            "user": e,
-            "role_name": role_name
-        })
-    
-    return result
+        active_employees.append({"user": e, "role_name": role_name})
+
+    for p in pending:
+
+        # Fetch the invite associated with the pending user where possible
+        invite = get_invite_by_pending_user_id(db, p.user_id)
+  
+        datetime = invite.created_at if invite else None
+        pending_employees.append({"pending": p, "datetime": datetime})
+
+    return {
+        "pending": pending_employees,
+        "active": active_employees
+    }
 
 @router.get("/get-workspace-roles")
 async def get_workspace_roles(db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)]):
@@ -110,3 +123,21 @@ async def get_workspace_roles(db: Annotated[Session, Depends(get_database)], cur
     roles = db.query(Role).filter(Role.workspace_id == workspace[0].id).all()
 
     return roles
+
+@router.get("/get-pending-employees")
+async def get_all_pending_employees(db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)]):
+    result = get_pending_employees(db, current_user.user_id)
+    pending_employees = []
+    for p in result:
+        if p.type == "request":
+            pending_employees.append(p)
+
+    return pending_employees
+
+@router.delete("/delete-user/{user_id}")
+async def delete_active_user(user_id: int, db: Annotated[Session, Depends(get_database)]):
+    return service.delete_user(db, user_id)
+
+@router.patch("/reject-pending/{user_id}")
+async def reject_pending(user_id: int, db: Annotated[Session, Depends(get_database)]):
+    return service.reject_pending_user(db, user_id)

@@ -104,7 +104,34 @@ def fetch_graph_file(graph_file_id: str):
             return test_files_directory / "legal_case_report_1.pdf"
         case "lc222":
             return test_files_directory / "legal_case_report_2.pdf"
-        
+    
+
+# Get file by id
+def get_file(db: Session, file_id: int):
+    return repository.get_file_by_id(db, file_id)
+
+
+# Get all scans a file pertains to
+def get_file_scans(db: Session, file_id: int):
+    return repository.get_file_scans(db, file_id)
+
+
+# Get latest scan results of a file
+def get_file_latest_scan_results(db: Session, file_id: int):
+    results = repository.get_latest_scan_detection_summary(db, file_id)
+    subcategory_category_map = repository.get_subcategory_category_map(db)
+
+    latest_scan_results = []
+
+    for row in results:
+        latest_scan_results.append({
+            "category": subcategory_category_map.get(row.sensitivity_subcategory, "Other"),
+            "subcategory": row.sensitivity_subcategory,
+            "count": row.count
+        })
+
+    return latest_scan_results
+
 
 # Get hash of a file
 def get_file_hash(file):

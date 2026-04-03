@@ -203,4 +203,13 @@ def get_access_with_drive_id(application: ConfidentialClientApplication, drive_i
     if not user:
         return None
     return get_user_access(application=application, user_id=user.user_id, db=db)
+
+def delete_user(db: Session, user_id: int):
+    repository.delete_user(db, user_id)
+    return True
+
+def reject_pending_user(db: Session, user_id: int):
+    repository.delete_pending_user(db, user_id)
+    return True
+
     

@@ -33,7 +33,7 @@ def test_create_user_service_to_add_employee_creates_notification(db):
     admin = insert(User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode(), role="admin")
     admin_instance=db.execute(admin)
 
-    pending_user = add_user(db, "SandraGhost1@hotmail.com")
+    pending_user = add_user(db, "SandraGhost1@hotmail.com", "invite")
 
     workspace = add_workspace(db=db, name="Test Workspace", image=image)
     add_user_workspace(db, workspace.id, admin_instance.inserted_primary_key[0])
