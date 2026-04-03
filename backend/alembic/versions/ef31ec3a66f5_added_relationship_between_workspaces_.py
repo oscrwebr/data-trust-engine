@@ -1,8 +1,8 @@
-"""creating tables
+"""Added relationship between workspaces and pending users tables
 
-Revision ID: 7e6f0641fcf0
+Revision ID: ef31ec3a66f5
 Revises: 
-Create Date: 2026-03-25 20:00:57.415695
+Create Date: 2026-03-30 18:47:12.069440
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision: str = '7e6f0641fcf0'
+revision: str = 'ef31ec3a66f5'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -139,6 +139,13 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_notifications_id'), 'notifications', ['id'], unique=False)
+    op.create_table('pending_user_workspace',
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('workspace_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['user_id'], ['pending_users.user_id'], ),
+    sa.ForeignKeyConstraint(['workspace_id'], ['workspaces.id'], ),
+    sa.PrimaryKeyConstraint('user_id', 'workspace_id')
+    )
     op.create_table('refresh',
     sa.Column('refresh_id', sa.Integer(), nullable=False),
     sa.Column('token', sa.Text(), nullable=False),
@@ -283,6 +290,7 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_refresh_refresh_id'), table_name='refresh')
     op.drop_index(op.f('ix_refresh_refresh_family_id'), table_name='refresh')
     op.drop_table('refresh')
+    op.drop_table('pending_user_workspace')
     op.drop_index(op.f('ix_notifications_id'), table_name='notifications')
     op.drop_table('notifications')
     op.drop_index(op.f('ix_invites_invite_id'), table_name='invites')

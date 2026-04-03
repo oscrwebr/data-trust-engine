@@ -11,7 +11,7 @@ import { ProgressSpinner} from "primereact/ProgressSpinner"
 import { InputIcon } from "primereact/inputicon";
 import { Calendar } from 'primereact/calendar';
 import { Message } from 'primereact/message';
-import { Dialog } from "primereact/dialog";
+import { Dialog } from "primereact/Dialog";
 import { Button } from "primereact/button";
 
 import api from "../api/axiosConfig.js";

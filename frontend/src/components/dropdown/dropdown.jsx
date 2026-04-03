@@ -1,7 +1,7 @@
 import { useState } from "react";
 import styles from "./dropdown.module.css"
 
-function SidebarDropdown({icon, label, children, openDropdown, setOpenDropdown}){
+function SidebarDropdown({icon, label, children, openDropdown, setOpenDropdown, ...props}){
 
     const isOpen = openDropdown === label;
 
@@ -16,7 +16,7 @@ function SidebarDropdown({icon, label, children, openDropdown, setOpenDropdown})
 
     return (
         <div className={styles.dropdown_container}>
-            <div className={styles.dropdown_button} tabIndex={0} onClick={toggle}>
+            <div className={styles.dropdown_button} tabIndex={0} onClick={toggle} data-testid={props["data-testid"]} >
               <i id={styles.dropdown_icon} className={icon} />
               <span>{label}</span>
               <i id={styles.dropdown_chevron} className={isOpen ? "pi pi-angle-down" : "pi pi-angle-right"}/>

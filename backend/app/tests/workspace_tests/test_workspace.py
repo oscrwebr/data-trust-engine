@@ -1,6 +1,6 @@
 from app.workspaces import models as workspace_model
 from app.authentication import models as auth_model, repository, service
-from app.workspaces.repository import add_user_workspace, add_notification, get_workspace_by_workspace_id
+from app.workspaces.repository import add_user_workspace, add_pending_user_workspace, add_notification, get_workspace_by_workspace_id
 from app.roles.repository import create_role
 from sqlalchemy import insert, select, desc
 from datetime import datetime
@@ -388,16 +388,19 @@ def test_get_all_employees_route(db, client):
     oid2 = "000000-7sdf87-88asdf8-9sdiy99"
 
     admin_insert = insert(auth_model.User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode(), role="admin")
-    employee_insert = insert(auth_model.User).values(firstname="Bob", surname="Messi", username="BobMessi1@hotmail.com", email="BobMessi1@hotmail.com", oid=oid2, refresh="ms-refresh".encode(), role="employee")
+    employee_insert = insert(auth_model.User).values(firstname="Bob", surname="Messi", username="BobMessi1@hotmail.com", email="BobMessi1@hotmail.com", oid=oid2, refresh=b"ms-refresh", role="employee")
+    pending_insert = insert(auth_model.PendingUser).values(email="maria@email.com", type="invite")
 
     res = db.execute(admin_insert)
     res_2 = db.execute(employee_insert)
+    res_3 = db.execute(pending_insert)
     
     workspace_insert = insert(workspace_model.Workspace).values(name="Test Workspace", image=image)
     workspace_insert = db.execute(workspace_insert)
 
     add_user_workspace(db, workspace_insert.inserted_primary_key[0], res.inserted_primary_key[0])
     add_user_workspace(db, workspace_insert.inserted_primary_key[0], res_2.inserted_primary_key[0])
+    add_pending_user_workspace(db, workspace_insert.inserted_primary_key[0], res_3.inserted_primary_key[0])
 
     refresh_family = repository.create_refresh_family(db)
 
@@ -412,6 +415,20 @@ def test_get_all_employees_route(db, client):
     response = client.send(request = req)
 
     assert response.status_code == 200
+    response_json = response.json()  # dict
+    pending_list = response_json["pending"]
+    active_list = response_json["active"]
+
+    # Check pending emails and type only
+    pending_emails = [{"email": p["pending"]["email"], "type": p["pending"]["type"]} for p in pending_list]
+    assert pending_emails == [{"email": "maria@email.com", "type": "invite"}]
+
+    # Check active users
+    active_user = active_list[0]["user"]
+    assert active_user["email"] == "BobMessi1@hotmail.com"
+    assert active_user["firstname"] == "Bob"
+    assert active_user["surname"] == "Messi"
+    assert active_user["role"] == "employee"
 
 # Test the /workspace/get-workspace-roles route
 def test_get_all_workspace_roles_route(db, client):
@@ -445,6 +462,112 @@ def test_get_all_workspace_roles_route(db, client):
     assert response.status_code == 200
     assert response.json() == [{"name":"Role 1", "role_id": r_1.role_id, "workspace_id":workspace_insert.inserted_primary_key[0]}, { "name":"Role 2", "role_id": r_2.role_id, "workspace_id":workspace_insert.inserted_primary_key[0]}, {"name":"Role 3", "role_id": r_3.role_id, "workspace_id":workspace_insert.inserted_primary_key[0]}]
 
+# Test the delete user endpoint
+def test_delete_employee_route(db, client):
+    image = create_test_image()
 
+    oid = "000000-7sdf77-88asdf8-9sdiy99"
+    oid2 = "000000-7sdf87-88asdf8-9sdiy99"
 
+    admin_insert = insert(auth_model.User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode(), role="admin")
+    employee_insert = insert(auth_model.User).values(firstname="Bob", surname="Messi", username="BobMessi1@hotmail.com", email="BobMessi1@hotmail.com", oid=oid2, refresh="ms-refresh".encode(), role="employee")
 
+    res = db.execute(admin_insert)
+    res_2 = db.execute(employee_insert)
+    
+    workspace_insert = insert(workspace_model.Workspace).values(name="Test Workspace", image=image)
+    workspace_insert = db.execute(workspace_insert)
+
+    add_user_workspace(db, workspace_insert.inserted_primary_key[0], res.inserted_primary_key[0])
+    add_user_workspace(db, workspace_insert.inserted_primary_key[0], res_2.inserted_primary_key[0])
+
+    refresh_family = repository.create_refresh_family(db)
+
+    access, refresh, _ = service.create_access_refresh(db, data={"userId": res.inserted_primary_key[0], "role": "admin"}, refresh_family_id=refresh_family.refresh_family_id)
+
+    assert db.query(auth_model.User).count() is 2
+
+    req = client.build_request(
+        method="delete",
+        url=f"/workspace/delete-user/{res_2.inserted_primary_key[0]}",
+        headers={"Authorization": f"Bearer {access}"}, 
+    )
+
+    response = client.send(request = req)
+
+    assert response.status_code == 200
+    assert db.query(auth_model.User).count() is 1
+    
+
+# Test the reject user endpoint
+def test_reject_pending_employee_route(db, client):
+    image = create_test_image()
+
+    oid = "000000-7sdf77-88asdf8-9sdiy99"
+    oid2 = "000000-7sdf87-88asdf8-9sdiy99"
+
+    admin_insert = insert(auth_model.User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode(), role="admin")
+    pending_insert = insert(auth_model.PendingUser).values(email="maria@email.com", type="invite")
+
+    res = db.execute(admin_insert)
+    res_2 = db.execute(pending_insert)
+    
+    workspace_insert = insert(workspace_model.Workspace).values(name="Test Workspace", image=image)
+    workspace_insert = db.execute(workspace_insert)
+
+    add_user_workspace(db, workspace_insert.inserted_primary_key[0], res.inserted_primary_key[0])
+    add_pending_user_workspace(db, workspace_insert.inserted_primary_key[0], res_2.inserted_primary_key[0])
+
+    refresh_family = repository.create_refresh_family(db)
+
+    access, refresh, _ = service.create_access_refresh(db, data={"userId": res.inserted_primary_key[0], "role": "admin"}, refresh_family_id=refresh_family.refresh_family_id)
+
+    assert db.query(auth_model.PendingUser).count() is 1
+
+    req = client.build_request(
+        method="patch",
+        url=f"/workspace/reject-pending/{res_2.inserted_primary_key[0]}",
+        headers={"Authorization": f"Bearer {access}"}, 
+    )
+
+    response = client.send(request = req)
+
+    assert response.status_code == 200
+    assert db.query(auth_model.PendingUser).count() is 0
+
+# Test the /get-pending-employees route 
+def test_get_pending_employees_route(db, client):
+    image = create_test_image()
+
+    oid = "000000-7sdf77-88asdf8-9sdiy99"
+
+    admin_insert = insert(auth_model.User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode(), role="admin")
+    pending_insert = insert(auth_model.PendingUser).values(email="mary@email.com", type="request")
+    pending_insert_2 = insert(auth_model.PendingUser).values(email="joseph@email.com", type="invite")
+
+    res = db.execute(admin_insert)
+    res_2 = db.execute(pending_insert)
+    res_3 = db.execute(pending_insert_2)
+    
+    workspace_insert = insert(workspace_model.Workspace).values(name="Test Workspace", image=image)
+    workspace_insert = db.execute(workspace_insert)
+
+    add_user_workspace(db, workspace_insert.inserted_primary_key[0], res.inserted_primary_key[0])
+    add_pending_user_workspace(db, workspace_insert.inserted_primary_key[0], res_2.inserted_primary_key[0])
+    add_pending_user_workspace(db, workspace_insert.inserted_primary_key[0], res_3.inserted_primary_key[0])
+
+    refresh_family = repository.create_refresh_family(db)
+
+    access, refresh, _ = service.create_access_refresh(db, data={"userId": res.inserted_primary_key[0], "role": "admin"}, refresh_family_id=refresh_family.refresh_family_id)
+
+    req = client.build_request(
+        method="get",
+        url=f"/workspace/get-pending-employees",
+        headers={"Authorization": f"Bearer {access}"}, 
+    )
+
+    response = client.send(request = req)
+
+    assert response.status_code == 200
+    assert response.json() == [{'email': 'mary@email.com', 'type': 'request', 'user_id': res_2.inserted_primary_key[0]}]
+    

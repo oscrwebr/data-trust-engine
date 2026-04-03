@@ -11,6 +11,7 @@ import { Avatar } from "primereact/Avatar";
         
 function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role}){
     const [openDropdown, setOpenDropdown] = useState(null);
+    const [pendingEmployees, setPendingEmployees] = useState([])
     const [imageSrc, setImageSrc] = useState("");
     const user_initials = (firstname?.[0]?.toUpperCase() || "?") + (surname?.[0]?.toUpperCase() || "?");
 
@@ -21,6 +22,11 @@ function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role
             const url = URL.createObjectURL(blob);
             setImageSrc(url);
         });
+
+        api.get("/workspace/get-pending-employees")
+            .then(res => {
+                setPendingEmployees(res.data)
+            })
     }, []);
 
     return(
@@ -52,11 +58,11 @@ function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role
                         {/* Add your scanning pages here */}
                     </SidebarDropdown>
 
-                    <SidebarDropdown className={styles.dropdown} icon="pi pi-users" label="My Employees" openDropdown={openDropdown} setOpenDropdown={setOpenDropdown}>
+                    <SidebarDropdown data-testid="my-employees-element" className={styles.dropdown} icon="pi pi-users" label="My Employees" openDropdown={openDropdown} setOpenDropdown={setOpenDropdown}>
 
                         {/* SidebarDropdowns have their own children for styling purposes - specify the url and text displayed */}
                         <DropdownItem url="/view-employees" text="View Employees"/>
-                        <DropdownItem url="/manage-employees" text="Manage Employees"/>
+                        <DropdownItem url="/manage-employees" text="Manage Employees" value={pendingEmployees.length}/>
                         <DropdownItem onClick={() => setVisible(true)} text="Send Invite"/>
                     </SidebarDropdown>
 
