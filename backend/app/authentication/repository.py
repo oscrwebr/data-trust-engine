@@ -18,8 +18,8 @@ def get_by_email(email: str, db: Session):
 def get_user_id_by_drive_id(drive_id: str, db:Session):
     return db.query(User).filter(User.driveId == drive_id).first()
 
-def add_user(db: Session, email: str):
-    user = PendingUser(email=email)
+def add_user(db: Session, email: str, type: str):
+    user = PendingUser(email=email, type=type)
     db.add(user)
     db.commit()
     db.refresh(user)
@@ -31,15 +31,34 @@ def get_pending_user_by_id(db: Session, id: int):
 def get_pending_user_by_email(db: Session, email: str):
     return db.query(PendingUser).filter(PendingUser.email == email).first()
 
-def delete_pending_user(db: Session, user: PendingUser):
-    db.delete(user)
+def set_pending_user_type(db: Session, user: PendingUser, type: String):
+    user.type = type
     db.commit()
+    return user
+
+def delete_pending_user(db: Session, user_id: int):
+    user = db.query(PendingUser).filter(PendingUser.user_id == user_id).first()
+    
+    if user:
+        db.delete(user)
+        db.commit()
+    
+    return user
 
 def create_user(db: Session, firstname: str, surname: str, username: str, email: str, oid: str, role: str, driveId: str, refresh: bytes) -> User:
     user = User(firstname=firstname, surname=surname, username=username, email=email, oid=oid, role=role, driveId=driveId, refresh=refresh)
     db.add(user)
     db.commit()
     db.refresh(user)
+    return user
+
+def delete_user(db: Session, user_id: int):
+    user = db.query(User).filter(User.user_id == user_id).first()
+    
+    if user:
+        db.delete(user)
+        db.commit()
+    
     return user
 
 def verify_refresh(hashed_token: str, expiry: datetime, db: Session) -> Refresh:

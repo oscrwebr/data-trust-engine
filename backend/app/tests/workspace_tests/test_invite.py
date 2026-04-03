@@ -136,6 +136,42 @@ def test_valid_invite_request(db, client):
     assert response.json().get("success") == True
     assert db.query(Invite).count() == 1
     assert db.query(PendingUser).count() == 1
+    assert db.query(models.pending_user_workspace).count() == 1
+
+
+# Test sending an invite when a pending user with type 'request' has already been added to the database
+def test_valid_invite_request(db, client):
+    image = create_test_image()
+
+    oid = "000000-7sdf77-88asdf8-9sdiy99"
+    insert_statement = insert(User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode(), role="employee")
+    res=db.execute(insert_statement)
+
+    pending_user = insert(PendingUser).values(email="valid@example.com", type="request")
+    res_2=db.execute(pending_user)
+
+    workspace = insert(models.Workspace).values(name="Test Workspace", image=image)
+    workspace_insert=db.execute(workspace)
+    
+    add_user_workspace(db, workspace_insert.inserted_primary_key[0], res.inserted_primary_key[0])
+
+    refresh_family = repository.create_refresh_family(db)
+
+    access, refresh, _ = service.create_access_refresh(db, data={"userId": res.inserted_primary_key[0], "role": "admin"}, refresh_family_id=refresh_family.refresh_family_id)
+
+    req = client.build_request(
+        method="post",
+        url="/invite/send-invite",
+        headers={"Authorization": f"Bearer {access}"}, 
+        json={"email":"valid@example.com", "expiry_date":"2026-03-01T14:35:10.123456"},
+    )
+    response = client.send(request = req)
+
+    user = get_pending_user_by_id(db, res_2.inserted_primary_key[0])
+    assert response.status_code == 200
+    assert response.json().get("success") == True
+    assert db.query(PendingUser).count() == 1
+    assert user.type == "invite"
 
 
 # Test invite record can be retrieved using its token
@@ -147,7 +183,7 @@ def test_retrieval_invite_record(db):
     admin = insert(User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode(), role="employee")
     admin_instance=db.execute(admin)
 
-    pending_user = insert(PendingUser).values(email="JohnSmith1@hotmail.com")
+    pending_user = insert(PendingUser).values(email="JohnSmith1@hotmail.com", type="invite")
     pending_user_instance=db.execute(pending_user)
 
     workspace = add_workspace(db, "Test Workspace", image=image)
@@ -166,7 +202,7 @@ def test_expired_invite_record(db, client):
     admin = insert(User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode(), role="employee")
     admin_instance=db.execute(admin)
 
-    pending_user = insert(PendingUser).values(email="JohnSmith1@hotmail.com")
+    pending_user = insert(PendingUser).values(email="JohnSmith1@hotmail.com", type="invite")
     pending_user_instance=db.execute(pending_user)
 
     workspace = add_workspace(db, "Test Workspace", image=image)
@@ -194,7 +230,7 @@ def test_invite_clicked_when_used_is_true(db, client):
     admin = insert(User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode(), role="admin")
     admin_instance=db.execute(admin)
 
-    pending_user = insert(PendingUser).values(email="JohnSmith1@hotmail.com")
+    pending_user = insert(PendingUser).values(email="JohnSmith1@hotmail.com", type="invite")
     pending_user_instance=db.execute(pending_user)
 
     workspace = add_workspace(db, "Test Workspace", image=image)
@@ -212,7 +248,7 @@ def test_valid_invite(db, client):
     admin = insert(User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode(), role="admin")
     admin_instance=db.execute(admin)
 
-    pending_user = insert(PendingUser).values(email="JohnSmith1@hotmail.com")
+    pending_user = insert(PendingUser).values(email="JohnSmith1@hotmail.com", type="invite")
     pending_user_instance=db.execute(pending_user)
 
     workspace = add_workspace(db, "Test Workspace", image=image)
@@ -229,10 +265,10 @@ def test_valid_invite(db, client):
 
 # Test getting pending user by their id and deleting pending user method
 def test_delete_pending_user_by_getting_id(db):
-    insert_statement = insert(PendingUser).values(email="JohnSmith1@hotmail.com")
+    insert_statement = insert(PendingUser).values(email="JohnSmith1@hotmail.com", type="invite")
     res = db.execute(insert_statement)
     user = get_pending_user_by_id(db, res.inserted_primary_key[0])
-    delete_pending_user(db, user)
+    delete_pending_user(db, user.user_id)
     assert db.query(PendingUser).first() is None
 
 
@@ -247,7 +283,7 @@ def test_method_get_invite_for_cooldown(db):
     admin = insert(User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode(), role="admin")
     admin_instance=db.execute(admin)
 
-    pending_user_instance = PendingUser(email="JohnSmith1@hotmail.com")
+    pending_user_instance = PendingUser(email="JohnSmith1@hotmail.com", type="invite")
     db.add(pending_user_instance)
     db.flush()
 
@@ -333,13 +369,13 @@ def test_return_statement_with_same_email_as_admin(db, client):
 
 
 # Testing the create notification route
-def test_create_notification_route(db, client):
+def test_request_join_workspace_route(db, client):
     image = create_test_image()
 
     oid = "000000-7sdf77-88asdf8-9sdiy99"
     insert_statement = insert(User).values(firstname="John", surname="Smith", username="valid@example.com", refresh="me-refresh".encode(), email="valid@example.com", oid=oid, role="admin")
     res=db.execute(insert_statement)
-    
+
     workspace = insert(models.Workspace).values(name="Test Workspace", image=image)
     workspace_instance = db.execute(workspace)
 
@@ -452,7 +488,7 @@ def test_get_invite_by_workspace_id(db):
 
     workspace = add_workspace(db, "Test Workspace", image=image)
     
-    pending_user = insert(PendingUser).values(email="JohnSmith1@hotmail.com")
+    pending_user = insert(PendingUser).values(email="JohnSmith1@hotmail.com", type="invite")
     pending_user_instance=db.execute(pending_user)
 
     add_invite(db, time, date(2030, 3, 3), token, False, pending_user_instance.inserted_primary_key[0], workspace)
@@ -473,7 +509,7 @@ def test_update_invite_used_value(db):
 
     workspace = add_workspace(db, "Test Workspace", image=image)
 
-    pending_user = insert(PendingUser).values(email="JohnSmith1@hotmail.com")
+    pending_user = insert(PendingUser).values(email="JohnSmith1@hotmail.com", type="invite")
     pending_user_instance=db.execute(pending_user)
 
     invite = add_invite(db, time, date(2030, 3, 3), token, False, pending_user_instance.inserted_primary_key[0], workspace)

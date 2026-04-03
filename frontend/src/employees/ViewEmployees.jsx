@@ -41,7 +41,7 @@ function ViewEmployees({toast}){
     useEffect(() => {
         api.get("/workspace/get-employees")
         .then(res => {
-            setEmployees(res.data)
+            setEmployees(res.data.active)
         });
 
         api.get("/workspace/get-workspace-roles")
@@ -49,7 +49,6 @@ function ViewEmployees({toast}){
             const all = { id: "all", name: "View All Roles" };
             const none = { id: "null", name: "No Role Assigned" };
             setRoles([all, ...res.data, none]);
-            
         });
     }, []);
 

@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_database
 from app.roles import service
 from app.roles.models import UserRole, Role
+from app.roles.schema import UpdateUserRolesRequest
 from app.authentication.models import User
 
 router = APIRouter(prefix="/roles", tags=["roles"])
@@ -43,15 +44,17 @@ def get_users(role_id: int, db: Session = Depends(get_database)):
     """Fetch all users with their current role"""
     return service.get_users(db, role_id)
 
-@router.put("/users/{user_id}/role")
-def set_user_role(user_id: int, payload: dict, db: Session = Depends(get_database)):
-    """
-    payload = {
-        "role_id": <int> or None
-    }
-    """
-    role_id = payload.get("role_id")
-    service.update_user_role(db, user_id, role_id)
+@router.put("/update-user-roles")
+def set_user_role(roleUpdate: UpdateUserRolesRequest, db: Session = Depends(get_database)):
+
+    for entity in roleUpdate.employees:
+        if entity.role_name == 'No Role Assigned':
+            service.update_user_role(db, entity.user_id, None)
+            return {"message": "User role updated successfully"}
+
+        role = service.get_role_by_name(db, entity.role_name)
+        service.update_user_role(db, entity.user_id, role.role_id)
+
     return {"message": "User role updated successfully"}
 
 @router.get("/users/all")

@@ -27,13 +27,20 @@ class PendingUser(Base):
 
     user_id = Column(Integer, primary_key=True, index=True)
     email = Column(String(254), nullable=False)
+    type = Column(String(10), nullable=False)
 
     # relation
     invites = relationship(
         "Invite",
-        back_populates="pending_user",
+        back_populates="pending_users",
         cascade="all, delete",
         passive_deletes=True
+    )
+
+    workspaces = relationship(
+        "Workspace",
+        secondary="pending_user_workspace",
+        back_populates="pending_users"
     )
 
 class RefreshFamily(Base):

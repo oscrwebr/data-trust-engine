@@ -17,15 +17,39 @@ INSERT INTO `user` (`user_id`, `firstname`, `surname`, `username`, `email`, `oid
 
 
 -- ==========================
--- 2. Workspaces
+-- 2. Pending Users
 -- ==========================
+DELETE FROM `pending_users`;
+INSERT INTO `pending_users` (`user_id`, `email`, `type`) VALUES
+(1, 'gertrude@email.com', 'invite'),
+(2, 'wesley@outlook.com', 'invite'),
+(3, 'philip@yahoo.com', 'invite'),
+(4, 'daquavious@email.com', 'request'),
+(5, 'francesca@outlook.com', 'request'),
+(6, 'tomclapham21@gmail.com', 'request');
+
+-- ==========================
+-- 3. Workspaces
+-- ==========================
+DELETE FROM `workspaces`;
 INSERT INTO `workspaces` (`id`, `name`, `image`) VALUES
 (1, 'Test Workspace', 0x66616B652D696D6167652D6279746573); -- 'fake-image-bytes' as hex
 
 
 -- ==========================
--- 2. Workspaces
+-- 4. Invites
 -- ==========================
+DELETE FROM `invites`;
+INSERT INTO `invites` (`invite_id`, `created_at`, `expiry_date`, `token`, `used`, `user_id`, `workspace_id`) VALUES
+(1, '2026-01-30 14:00:00', '2026-04-30', 'token_abc123', TRUE, 1, 1),
+(2, '2026-12-25 18:05:00', '2026-04-30', 'token_def456', TRUE, 2, 1),
+(3, '2026-04-01 09:30:00', '2026-04-30', 'token_ghi789', TRUE, 3, 1);
+
+
+-- ==========================
+-- 5. User Workspaces
+-- ==========================
+DELETE FROM `user_workspace`;
 INSERT INTO `user_workspace` (`user_id`, `workspace_id`) VALUES
 (1, 1),
 (2, 1),
@@ -41,8 +65,22 @@ INSERT INTO `user_workspace` (`user_id`, `workspace_id`) VALUES
 
 
 -- ==========================
--- 3. Sensitivity Categories
+-- 6. Pending User Workspaces
 -- ==========================
+DELETE FROM `pending_user_workspace`;
+INSERT INTO `pending_user_workspace` (`user_id`, `workspace_id`) VALUES
+(1, 1),
+(2, 1),
+(3, 1),
+(4, 1),
+(5, 1),
+(6, 1);
+
+
+-- ==========================
+-- 7. Sensitivity Categories
+-- ==========================
+DELETE FROM `sensitivity_category`;
 INSERT INTO `sensitivity_category` (`sensitivity_category_id`, `name`) VALUES
 (1, 'Personal'),
 (2, 'Financial'),
@@ -50,8 +88,9 @@ INSERT INTO `sensitivity_category` (`sensitivity_category_id`, `name`) VALUES
 
 
 -- ==========================
--- 4. Sensitivity Subcategories
+-- 8. Sensitivity Subcategories
 -- ==========================
+DELETE FROM `sensitivity_subcategory`;
 INSERT INTO `sensitivity_subcategory` (`sensitivity_subcategory_id`, `name`, `sensitivity_category_id`) VALUES
 (1, 'NAME', 1),
 (2, 'PHONE', 1),
@@ -63,11 +102,12 @@ INSERT INTO `sensitivity_subcategory` (`sensitivity_subcategory_id`, `name`, `se
 (8, 'CITATION', 3),
 (9, 'ACT', 3),
 (10, 'REGULATION', 3),
-(11, 'CASE_NAME', 3),
+(11, 'CASE_NAME', 3);
 
 -- ==========================
--- 5. Roles
+-- 9. Roles
 -- ==========================
+DELETE FROM `role`;
 INSERT INTO `role` (`role_id`, `workspace_id`, `name`) VALUES
 (1, 1, 'PII Role'),
 (2, 1, 'Financial Role'),
@@ -76,8 +116,9 @@ INSERT INTO `role` (`role_id`, `workspace_id`, `name`) VALUES
 (5, 1, 'Executive Role');
 
 -- ==========================
--- 6. Role Permissions (threshold=50)
+-- 10. Role Permissions (threshold=50)
 -- ==========================
+DELETE FROM `role_permission`;
 INSERT INTO `role_permission` (`role_permission_id`, `role_id`, `sensitivity_subcategory_id`, `threshold`) VALUES
 (1, 1, 1, 50),
 (2, 1, 2, 50),
@@ -89,17 +130,12 @@ INSERT INTO `role_permission` (`role_permission_id`, `role_id`, `sensitivity_sub
 (8, 1, 8, 50),
 (9, 1, 9, 50),
 (10, 2, 10, 50),
-(11, 2, 11, 50),
-(12, 2, 12, 50),
-(13, 3, 13, 50),
-(14, 3, 14, 50),
-(15, 3, 15, 50),
-(16, 3, 16, 50),
-(17, 3, 17, 50);
+(11, 2, 11, 50);
 
 -- ==========================
--- 7. User Roles
+-- 11. User Roles
 -- ==========================
+DELETE FROM `user_role`;
 INSERT INTO `user_role` (`user_role_id`, `user_id`, `role_id`) VALUES
 (1, 2, 1),
 (2, 3, 2),
@@ -108,8 +144,9 @@ INSERT INTO `user_role` (`user_role_id`, `user_id`, `role_id`) VALUES
 (5, 7, 5);
 
 -- ==========================
--- 8. Files
+-- 12. Files
 -- ==========================
+DELETE FROM `file`;
 INSERT INTO `file` (`file_id`, `graph_file_id`, `file_name`, `hash`) VALUES
 (1,'abc123','operational_report_document','e42ad1628a7c4757d92664bda3eeb1ce670f09e490807c2337bc5ebfe39d4edc'),
 (2,'def456','realistic_contract_document','5c0a051ff032e9c9a1022f11a9b42f9824a11e1b0b6d533c8fca84ed0b71ec70'),
@@ -125,8 +162,9 @@ INSERT INTO `file` (`graph_file_id`, `file_name`, `hash`) VALUES
 ('graph_018', 'employee-Report_final.docx', 'mno654');
 
 -- ==========================
--- 9. Naming Conventions
+-- 13. Naming Conventions
 -- ==========================
+DELETE FROM `naming_convention`;
 INSERT INTO `naming_convention` (`naming_convention_id`, `name`) VALUES 
 (1, 'camel_case'),
 (2, 'snake_case'),
