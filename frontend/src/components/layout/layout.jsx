@@ -45,7 +45,8 @@ const Layout = () => {
                     visible,
                     setVisible,
                     setNotifications,
-                    user
+                    user,
+                    workspace
                 }} />
             </div>
         </div>

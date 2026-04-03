@@ -38,7 +38,7 @@ async def dashboard(db: Annotated[Session, Depends(get_database)], current_user:
         "firstname": user.firstname,
         "surname": user.surname,
         "email": user.email,
-        "role": user.role}, "workspace":"You have not joined a workspace yet"} if user else {"message": "no user"}
+        "role": user.role}, "workspace": None} if user else {"message": "no user"}
     
     return {"user": {
         "firstname": user.firstname,
