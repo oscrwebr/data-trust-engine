@@ -75,7 +75,11 @@ async def delete_notification(db: Annotated[Session, Depends(get_database)], cur
 @router.get("/get-workspace-image")
 async def get_workspace_image(db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)]):
     user = service.test_route(current_user.user_id, db=db)
-    return Response(content=user.workspaces[0].image)
+    if user.role == "employee":
+        return Response(content=None)
+    
+    if user.role == "admin":
+        return Response(content=user.workspaces[0].image)
 
 @router.get("/get-employees")
 async def get_all_employees(db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)]):
@@ -126,11 +130,17 @@ async def get_workspace_roles(db: Annotated[Session, Depends(get_database)], cur
 
 @router.get("/get-pending-employees")
 async def get_all_pending_employees(db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)]):
-    result = get_pending_employees(db, current_user.user_id)
+    user = service.test_route(current_user.user_id, db=db)
     pending_employees = []
-    for p in result:
-        if p.type == "request":
-            pending_employees.append(p)
+    if user.role == "employee":
+        return pending_employees
+    
+    if user.role == "admin":
+        result = get_pending_employees(db, current_user.user_id)
+        
+        for p in result:
+            if p.type == "request":
+                pending_employees.append(p)
 
     return pending_employees
 

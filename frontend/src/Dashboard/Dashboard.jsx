@@ -3,10 +3,11 @@ import api from "../api/axiosConfig.js";
 import styles from "./dashboard.module.css"
 import { Toast } from "primereact/toast";
 import { useOutletContext } from "react-router-dom";
+import { Button } from "primereact/button";
 
 function Dashboard({toast}) {
 
-  const { toastNotifications, visible, setVisible, setNotifications } = useOutletContext();
+  const { toastNotifications, visible, setVisible, setNotifications, user } = useOutletContext();
 
   // Function to handle removing notifications
   const handleRemove = async (id) => {
@@ -22,9 +23,20 @@ function Dashboard({toast}) {
 
   return (
     <div className={styles.container}>
-        <h1 data-testid="dashboard-h1">Dashboard</h1>
         <Invite className={styles.d_invite_dialog} visible={visible} setVisible={setVisible} toast={toast}/>
+        {user.role === "employee" && (
+          <div className={styles.headerRow}>
+            <h1 className={styles.title} data-testid="dashboard-h1">Dashboard</h1>
+            <Button>Request to join Workspace</Button>
+          </div>
+        )}
 
+        {user.role === "admin" && (
+          <div>
+            <h1 data-testid="dashboard-h1">Dashboard</h1>
+          </div>
+        )}
+        
         {/* This is how and where the notifications are loaded */}
         <Toast className={styles.d_toast} ref={toastNotifications} onRemove={(message) => handleRemove(message.id)} position="top-right" />
     </div>
