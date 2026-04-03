@@ -1,3 +1,7 @@
+import { PiWarningCircle } from "react-icons/pi";
+import { PiCheckCircle } from "react-icons/pi";
+
+
 function ScanFileCard({scan_file, scan_type}) {
 
     const issues = []
@@ -22,12 +26,34 @@ function ScanFileCard({scan_file, scan_type}) {
         "card-clean" :
         "card-issue";
 
-    console.log(scan_file);
+    const issueCheck = issues.length === 0;
 
+    // Get the text to show for each scan file card (can show multiple types of issues e.g. Naming Issue, Duplicate)
+    const scanFilePillText = issueCheck ? 'Clean' : issues.map(i => i.type).join(", ");;
 
     return (
         <div className={`scan-page-file-card ${cardClass}`}>
-            <p>{scan_file.file_name}</p>
+            <div className="scan-file-top">
+                <div className="scan-file-top-left">
+                    {issueCheck ? (
+                        <PiCheckCircle size={26} className="scan-file-icon icon-clean" />
+                    ) : (
+                        <PiWarningCircle size={26} className="scan-file-icon icon-issue" />
+
+                    )}
+
+                    <span className={`scan-file-pill ${issueCheck ? 'pill-clean' : 'pill-issue'}`}>
+                        {scanFilePillText}
+                    </span>
+
+
+                </div>
+            </div>
+
+            <div className="scan-file-name">
+                <span>{scan_file.file_name}</span>
+            </div>
+
         </div>
     )
 }

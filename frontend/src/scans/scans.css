@@ -268,19 +268,19 @@
 }
 
 .scan-page-file-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, 250px);
-    gap: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .scan-page-file-card {
     background: #ffffff;
     border: 1px solid #d9d9d9;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
+    flex-direction: column;
+    align-items: flex-start;
     border-radius: 16px;
-    padding: 28px 20px;
+    padding: 15px 20px;
     width: 100%;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     margin-top: 5px;
@@ -299,8 +299,52 @@
     font-weight: 600;
 }
 
-.scan-page-card-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, 250px);
-    gap: 20px;
+
+
+.scan-file-top {
+    display: flex;
+    justify-content: space-between;
+
+}
+
+.scan-file-top-left {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.scan-file-icon {
+    font-size: 20px;
+}
+
+.icon-clean {
+    color: #106b36;
+}
+
+.icon-issue {
+    color: #bd461f;
+}
+
+.scan-file-pill {
+    border-radius: 20px;
+    font-weight: 500;
+    padding: 4px 10px;
+    font-size: 12px;
+}
+
+.pill-clean {
+    background: #d9f5df;
+    color: #11823b;
+}
+
+.pill-issue {
+    background: #FEF3C6;
+    color: #BB4D00;
+}
+
+.scan-file-name {
+    font-weight: 700;
+    font-size: 16px;
+    color: black;
+    margin-top: 10px;
 }
