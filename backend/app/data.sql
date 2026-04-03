@@ -102,7 +102,7 @@ INSERT INTO `sensitivity_subcategory` (`sensitivity_subcategory_id`, `name`, `se
 (8, 'CITATION', 3),
 (9, 'ACT', 3),
 (10, 'REGULATION', 3),
-(11, 'CASE_NAME', 3),
+(11, 'CASE_NAME', 3);
 
 -- ==========================
 -- 9. Roles
@@ -130,13 +130,7 @@ INSERT INTO `role_permission` (`role_permission_id`, `role_id`, `sensitivity_sub
 (8, 1, 8, 50),
 (9, 1, 9, 50),
 (10, 2, 10, 50),
-(11, 2, 11, 50),
-(12, 2, 12, 50),
-(13, 3, 13, 50),
-(14, 3, 14, 50),
-(15, 3, 15, 50),
-(16, 3, 16, 50),
-(17, 3, 17, 50);
+(11, 2, 11, 50);
 
 -- ==========================
 -- 11. User Roles
