@@ -18,7 +18,7 @@ function OrganisationScanPage({ scan }) {
         file => file.naming_convention_scan_results.every(result => !result.passed)
     ).length;
 
-    // HARD CODED FOR NOW... need to get implemnent duplicate file results in backend (different branch)
+    // HARD CODED FOR NOW... need to get implemnent duplicate file results in backend (different branch) so I can work out real %
     const cleanFilesDummy = 2;
     const cleanFiles = getPercentage(cleanFilesDummy, scan.file_count);
 
@@ -73,7 +73,7 @@ function OrganisationScanPage({ scan }) {
 
         <div className="scan-page-file-container">
             {scan.files.map(scan_file => (
-                <ScanFileCard key={scan_file.scan_file_id} scan_file={scan_file}/>
+                <ScanFileCard key={scan_file.scan_file_id} scan_file={scan_file} scan_type={scan.scan_type}/>
             ))}
         </div>
         </>

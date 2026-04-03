@@ -267,6 +267,12 @@
     color: #6B7280;
 }
 
+.scan-page-file-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 250px);
+    gap: 20px;
+}
+
 .scan-page-file-card {
     background: #ffffff;
     border: 1px solid #d9d9d9;
@@ -278,6 +284,14 @@
     width: 100%;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     margin-top: 5px;
+}
+
+.card-clean {
+    border: 1px solid #B9F8CF;
+}
+
+.card-issue {
+    border: 1px solid #FFD6A7;
 }
 
 .scan-page-files-heading {
