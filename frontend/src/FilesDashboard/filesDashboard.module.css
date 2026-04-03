@@ -35,15 +35,17 @@
   }
   
   .file {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     margin-left: 20px;
-    font-size: 14px;
-    padding: 2px 6px;
+    cursor: pointer;
+    padding: 4px 6px;
     border-radius: 4px;
-    color: #444;
   }
   
   .file:hover {
-    background: rgba(0, 0, 0, 0.04);
+    background: rgba(0, 0, 0, 0.05);
   }
   
   .message {

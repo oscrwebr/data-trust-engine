@@ -13,12 +13,15 @@ import {
   FaFileCode,
   FaFileArchive
 } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 function FilesDashboard() {
   const [tree, setTree] = useState([]);
   const [expanded, setExpanded] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function fetchRoot() {
@@ -115,8 +118,16 @@ function FilesDashboard() {
         <div className={styles.children}>
           {folder.children.map(renderFolder)}
           {folder.files.map(file => (
-            <div key={file.file_id} className={styles.file}>
-              {getFileIcon(file)} <span>{file.file_name || file.name}</span>
+            <div
+              key={file.file_id}
+              className={styles.file}
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/files/${file.ingestion_file_id}`);
+              }}            
+            >
+              {getFileIcon(file)}
+              <span>{file.file_name || file.name}</span>
             </div>
           ))}
         </div>

@@ -7,7 +7,7 @@ router = APIRouter(prefix="/files", tags=["Files"])
 
 @router.get("/folders")
 def get_root_folders(db: Session = Depends(get_database)):
-    return service.get_root_folders(db, )
+    return service.get_root_folders(db)
 
 @router.get("/folders/{parent_graph_id}")
 def get_subfolders(parent_graph_id: str, db: Session = Depends(get_database)):
