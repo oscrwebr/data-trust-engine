@@ -709,10 +709,10 @@ describe("View Employees Component", () => {
         let toastCalled = null;
         const mockToast = {
             current: {
-            show: (args) => {
-                toastCalled = args;
-                console.log("Toast triggered:", args);
-            },
+                show: (args) => {
+                    toastCalled = args;
+                    console.log("Toast triggered:", args);
+                },
             },
         };
 
@@ -724,7 +724,12 @@ describe("View Employees Component", () => {
 
         const expiryDate = new Date();
         expiryDate.setDate(expiryDate.getDate() + 7);
-        expiryDate.setMilliseconds(0);  
+        if (expiryDate.getSeconds() >=500) {
+            expiryDate.setMilliseconds(0);
+            expiryDate.setSeconds(expiryDate.getSeconds() + 1);
+        } else {
+            expiryDate.setMilliseconds(0);
+        }
 
         const accept_button = await screen.findByTestId("accept-button-valid@example.com")
         fireEvent.click(accept_button)
@@ -802,7 +807,7 @@ describe("View Employees Component", () => {
         });
     })
 
-    // Test 19
+    // Test 22
     test("Test cancel button for accept user modal works as expected", async() => {
         api.get.mockResolvedValueOnce({
             data: {
@@ -828,7 +833,7 @@ describe("View Employees Component", () => {
         });
     })
 
-    // Test 20
+    // Test 23
     test("Test confirm button for reject user modal works as expected", async() => {
         api.get
             .mockResolvedValueOnce({ data: { active: employees, pending: pending_users } }) 
@@ -872,7 +877,7 @@ describe("View Employees Component", () => {
         });
     })
 
-    // Test 21
+    // Test 24
     test("Test cancel button for reject user modal works as expected", async() => {
         api.get.mockResolvedValueOnce({
             data: {
