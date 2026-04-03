@@ -5,6 +5,9 @@ from app.roles import repository as roles_repo
 from app.authentication.models import User
 from app.workspaces.models import Workspace
 from app.roles.models import PendingUserRole
+from unittest.mock import patch
+from app.invites.service import send_invite_service
+from app.authentication.repository import get_pending_user_by_email
 
 # ---------------- Helper classes ----------------
 class UploadFileMock:
@@ -17,28 +20,7 @@ class UploadFileMock:
         return self._content
 
 # ---------------- Helper functions ----------------
-def create_admin_user(db, email="admin@test.com"):
-    """Create a user who can own a workspace"""
-    import secrets
-    from sqlalchemy import insert
-    from app.authentication.models import User
-
-    oid = secrets.token_hex(8)
-    stmt = insert(User).values(
-        firstname="Admin",
-        surname="User",
-        email=email,
-        oid=oid,
-        role="admin"
-    )
-    result = db.execute(stmt)
-    db.commit()
-    user_id = result.inserted_primary_key[0]
-    return db.query(User).filter(User.user_id == user_id).first()
-
 def create_workspace(db, name="Test Workspace", image=b"fake-image-bytes"):
-    from app.workspaces.models import Workspace
-
     workspace = Workspace(
         name=name,
         image=image,
@@ -75,10 +57,6 @@ async def test_confirm_orgchart_success(db):
         {"name": "Engineer", "employees": [{"name": "Bob", "email": "bob@example.com"}]},
     ]
 
-    # Patch send_invite_service to avoid sending emails
-    from unittest.mock import patch
-    from app.invites.service import send_invite_service
-
     async def fake_send_invite(*args, **kwargs):
         return None
 
@@ -91,8 +69,6 @@ async def test_confirm_orgchart_success(db):
     assert "Manager" in role_names
     assert "Engineer" in role_names
 
-    # Check pending users created
-    from app.authentication.repository import get_pending_user_by_email
     alice = get_pending_user_by_email(db, "alice@example.com")
     bob = get_pending_user_by_email(db, "bob@example.com")
     assert alice is not None

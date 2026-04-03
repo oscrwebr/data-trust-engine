@@ -70,7 +70,7 @@ async def confirm_orgchart(roles: list, db: Session, workspace_id: int):
             # --- Pending user ---
             pending_user = get_pending_user_by_email(db, email)
             if not pending_user:
-                pending_user = add_user(db, email)
+                pending_user = add_user(db, email, type="employee")
 
             # --- Assign role (no duplicates) ---
             existing = db.query(PendingUserRole).filter(
