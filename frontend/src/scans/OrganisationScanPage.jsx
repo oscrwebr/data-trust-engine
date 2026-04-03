@@ -18,9 +18,15 @@ function OrganisationScanPage({ scan }) {
         file => file.naming_convention_scan_results.every(result => !result.passed)
     ).length;
 
+    const duplicateFilesDummy = 0;
+
     // HARD CODED FOR NOW... need to get implemnent duplicate file results in backend (different branch) so I can work out real %
-    const cleanFilesDummy = 2;
-    const cleanFiles = getPercentage(cleanFilesDummy, scan.file_count);
+    // Logic works so I can just plug the implementation in without changing this code
+    const totalIssues = namingIssues + duplicateFilesDummy;
+    const cleanFiles = scan.file_count - totalIssues;
+    const cleanFilesPercentage = getPercentage(cleanFiles, scan.file_count);
+
+    
 
     return (
         <>
@@ -50,17 +56,17 @@ function OrganisationScanPage({ scan }) {
             <div className="scan-page-card clean">
                 <div className="scan-page-card-text">
                     <span className="scan-page-card-subtitle">Duplicate Files</span>
-                    <span className="scan-page-card-title">0</span>
+                    <span className="scan-page-card-title">{duplicateFilesDummy}</span>
                     
                 </div>
                 <div>
                     <PiCardsBold size={50}/>
                 </div>
             </div>
-            <div className={`scan-page-card ${getCleanFilesClass(cleanFiles)}`}>
+            <div className={`scan-page-card ${getCleanFilesClass(cleanFilesPercentage)}`}>
                 <div className="scan-page-card-text">
                     <span className="scan-page-card-subtitle">Clean Files</span>
-                    <span className="scan-page-card-title">{cleanFiles}%</span>
+                    <span className="scan-page-card-title">{cleanFilesPercentage}%</span>
                     
                 </div>
                 <div>
