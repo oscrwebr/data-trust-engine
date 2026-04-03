@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from datetime import datetime
 
 # Placeholder classes, pydantic to be used in later feature, no need for it yet
 
@@ -8,6 +9,32 @@ from pydantic import BaseModel
 # class ScanResponse(BaseModel):
 #     scan_id: int
 #     status: str
+
+
+class FileResponse(BaseModel):
+    file_id: int
+    file_name: str
+    hash: str
+
+    class Config:
+        from_attributes = True
+
+
+class FileLatestScanResultResponse(BaseModel):
+    category: str
+    subcategory: str
+    count: int
+
+
+class FileScansResponse(BaseModel):
+    scan_id: int
+    started_at: datetime
+    finished_at: datetime | None
+    detection_count: int
+
+    class Config:
+        from_attributes = True
+
 
 class OrganisationScanRequest(BaseModel):
     naming_convention_ids: list[int]
