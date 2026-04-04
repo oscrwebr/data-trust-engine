@@ -15,6 +15,7 @@ from ..core import config
 from sqlalchemy.orm import Session
 from app.core.database import get_database
 
+
 load_dotenv()
 
 def get_session(request: Request):
@@ -129,4 +130,19 @@ async def test_repo(db: Annotated[Session, Depends(get_database)], current_user:
     print(current_user.user_id)
     print(current_user.role)
     user = service.test_route(current_user.user_id, db=db)
-    return {"user": user} if user else {"message": "no user"}
+    pending_user = service.get_pending_by_email(db, user.email)
+
+    pending = True
+    if pending_user is None or pending_user.type == "invite":
+        pending = False
+    
+    if user:
+        return {
+            "user": user,
+            "pending": pending
+        }
+    else:
+        return {
+            "message": "no user",
+            "pending": pending
+        }

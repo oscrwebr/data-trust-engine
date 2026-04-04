@@ -11,7 +11,15 @@ function Dashboard({toast}) {
 
   const { toastNotifications, visible, setVisible, setNotifications, user, workspace } = useOutletContext();
   const [requestJoinWorkspaceVisible, setRequestJoinWorkspaceVisible] = useState(false);
+  const [pendingUser, setPendingUser] = useState([])
 
+  useEffect(() => {
+    api.get("/auth/test")
+    .then(res => {
+      setPendingUser(res.data.pending)
+      console.log(res.data.pending)
+    })
+  })
   // Function to handle removing notifications
   const handleRemove = async (id) => {
     try {
@@ -33,7 +41,7 @@ function Dashboard({toast}) {
         {user.role === "employee" && (
           <div className={styles.headerRow}>
             <h1 className={styles.title} data-testid="dashboard-h1">Dashboard</h1>
-            {workspace == null && (<Button onClick={() => setRequestJoinWorkspaceVisible(true)} label="Request to join Workspace" />)}
+            {workspace == null && (<Button onClick={() => setRequestJoinWorkspaceVisible(true)} disabled={pendingUser == null || pendingUser != true ? false : true} label={pendingUser == null || pendingUser != true ? "Request to Join Workspace" : "A request has been sent"} />)}
           </div>
         )}
 

@@ -20,19 +20,26 @@ function RequestJoinWorkspaceModal({toast, visible, setVisible}) {
         })
     }, [])
 
-    const showRequestSentSuccess = () => {
-      toast.current.show({ severity: 'success', summary: 'Success', detail: 'Invite request sent!', life: 4000});
+    const showRequestSentError = () => {
+      toast.current.show({ severity: 'error', summary: 'Error', detail: 'You must select a valid workspace', life: 4000});
     };
 
     const handleRequestJoinWorkspace = () => {
+        if (!selectedWorkspace || selectedWorkspace.id == null) {
+            showRequestSentError();
+            return; 
+        }
+
         api.post("/workspace/request-join-workspace", {
             title: title,
             body: body,
             workspace_id: selectedWorkspace.id,
         })
         .then(res => {
-            showRequestSentSuccess();
-            setVisible(false);
+            if(res.data == true){
+                setVisible(false);
+                window.location.reload();
+            }
         })
     }
 
