@@ -1,5 +1,12 @@
+# BACKEND
 *.egg-info/
 __pycache__
 env/
 .pytest_cache
 htmlcov/
+
+# FRONTEND
+node_modules/
+.env
+README.md
+dockerfile

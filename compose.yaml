@@ -1,4 +1,15 @@
 services:
+  # Setting up the dev environment
+  frontend-dev:
+    build:
+      context: ./frontend
+      args: # Ensures that this env variable is available during BUILD!
+        VITE_BACKEND_HOST: backend-dev
+    image: dte-frontend:latest
+    profiles: ["dev"]
+    ports:
+      - 5173:5173
+
   database-dev:
     image: mariadb:11.8-noble
     profiles: ["dev"]
@@ -7,19 +18,6 @@ services:
       - MARIADB_DATABASE=${DB_NAME}
     volumes:
       - dte-db-volume:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"] # https://mariadb.com/docs/server/server-management/automated-mariadb-deployment-and-administration/docker-and-mariadb/using-healthcheck-sh
-      start_period: 40s
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  database-test:
-    image: mariadb:11.8-noble
-    profiles: ["test"]
-    environment:
-      - MARIADB_ROOT_PASSWORD=${DB_PASSWORD}
-      - MARIADB_DATABASE=${DB_TEST_NAME}
     healthcheck:
       test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"] # https://mariadb.com/docs/server/server-management/automated-mariadb-deployment-and-administration/docker-and-mariadb/using-healthcheck-sh
       start_period: 40s
@@ -68,6 +66,20 @@ services:
       alembic_migrations-dev:
         condition: service_completed_successfully
   
+  # Setting up the backend test environment
+  database-test:
+    image: mariadb:11.8-noble
+    profiles: ["test"]
+    environment:
+      - MARIADB_ROOT_PASSWORD=${DB_PASSWORD}
+      - MARIADB_DATABASE=${DB_TEST_NAME}
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"] # https://mariadb.com/docs/server/server-management/automated-mariadb-deployment-and-administration/docker-and-mariadb/using-healthcheck-sh
+      start_period: 40s
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   backend-test:
     image: fastapi-backend:latest
     profiles: ["test-backend"]

@@ -1,0 +1,17 @@
+FROM node:20-alpine
+
+# Make the env variables available via arg and env
+ARG VITE_BACKEND_HOST
+ENV VITE_BACKEND_HOST = $VITE_BACKEND_HOST
+
+WORKDIR /app
+
+COPY package*.json/ ./
+
+RUN --mount=type=cache,target=/root/.npm npm install
+
+COPY . .
+
+EXPOSE 5173
+
+CMD ["npm", "run", "dev"]
