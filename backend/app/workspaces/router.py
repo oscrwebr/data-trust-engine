@@ -48,7 +48,9 @@ async def dashboard(db: Annotated[Session, Depends(get_database)], current_user:
 
 @router.post("/request-join-workspace")
 async def create_notification(db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)], notification: NotificationSchema):
-    pending_user = service.get_pending_by_id(db, current_user.user_id)
+    user = service.test_route(current_user.user_id, db=db)
+    pending_user = service.get_pending_by_email(db, user.email)
+    
     admin = get_admin_from_workspace(db, notification.workspace_id)
     workspace = get_workspace_by_id(db, notification.workspace_id)
 
