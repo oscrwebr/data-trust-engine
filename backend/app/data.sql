@@ -33,7 +33,11 @@ INSERT INTO `pending_users` (`user_id`, `email`, `type`) VALUES
 -- ==========================
 DELETE FROM `workspaces`;
 INSERT INTO `workspaces` (`id`, `name`, `image`) VALUES
-(1, 'Test Workspace', 0x66616B652D696D6167652D6279746573); -- 'fake-image-bytes' as hex
+(1, 'John Lewis & Partners', 0x66616B652D696D6167652D6279746573), -- 'fake-image-bytes' as hex
+(2, 'Cardiff University Cleaning', 0x66616B652D696D6167652D6279746573),
+(3, 'The Garden Center', 0x66616B652D696D6167652D6279746573),
+(4, 'Injury Lawyers for You', 0x66616B652D696D6167652D6279746573),
+(5, 'FlashPoint Cardiff', 0x66616B652D696D6167652D6279746573);
 
 
 -- ==========================

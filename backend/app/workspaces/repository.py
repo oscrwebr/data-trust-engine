@@ -11,6 +11,9 @@ def add_workspace(db: Session, name:str, image:bytes):
     db.refresh(workspace)
     return workspace
 
+def get_all_workspaces(db: Session):
+    return db.query(Workspace).all()
+
 def get_workspace_by_workspace_id(db: Session, workspace_id: int):
     return db.query(Workspace).filter(Workspace.id == workspace_id).first()
 

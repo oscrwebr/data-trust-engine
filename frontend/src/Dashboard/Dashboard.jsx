@@ -11,6 +11,7 @@ function Dashboard({toast}) {
 
   const { toastNotifications, visible, setVisible, setNotifications, user, workspace } = useOutletContext();
   const [requestJoinWorkspaceVisible, setRequestJoinWorkspaceVisible] = useState(false);
+  
   // Function to handle removing notifications
   const handleRemove = async (id) => {
     try {
@@ -27,6 +28,8 @@ function Dashboard({toast}) {
     <div className={styles.container}>
         <Invite className={styles.d_invite_dialog} visible={visible} setVisible={setVisible} toast={toast}/>
         <RequestJoinWorkspaceModal visible={requestJoinWorkspaceVisible} setVisible={() => setRequestJoinWorkspaceVisible(false)}/>
+        
+        {/* Employee View of the Dashboard */}
         {user.role === "employee" && (
           <div className={styles.headerRow}>
             <h1 className={styles.title} data-testid="dashboard-h1">Dashboard</h1>
@@ -34,6 +37,7 @@ function Dashboard({toast}) {
           </div>
         )}
 
+        {/* Admin View of the Dashboard */}
         {user.role === "admin" && (
           <div>
             <h1 data-testid="dashboard-h1">Dashboard</h1>
