@@ -17,7 +17,6 @@ function Dashboard({toast}) {
     api.get("/auth/test")
     .then(res => {
       setPendingUser(res.data.pending)
-      console.log(res.data.pending)
     })
   })
   // Function to handle removing notifications
@@ -38,15 +37,15 @@ function Dashboard({toast}) {
         <RequestJoinWorkspaceModal toast={toast} visible={requestJoinWorkspaceVisible} setVisible={() => setRequestJoinWorkspaceVisible(false)}/>
         
         {/* Employee View of the Dashboard */}
-        {user.role === "employee" && (
+        {user?.role === "employee" && (
           <div className={styles.headerRow}>
             <h1 className={styles.title} data-testid="dashboard-h1">Dashboard</h1>
-            {workspace == null && (<Button onClick={() => setRequestJoinWorkspaceVisible(true)} disabled={pendingUser == null || pendingUser != true ? false : true} label={pendingUser == null || pendingUser != true ? "Request to Join Workspace" : "A request has been sent"} />)}
+            {workspace == null && (<Button data-testid="request-join-workspace-button" onClick={() => setRequestJoinWorkspaceVisible(true)} disabled={pendingUser == null || pendingUser != true ? false : true} label={pendingUser == null || pendingUser != true ? "Request to Join Workspace" : "A request has been sent"} />)}
           </div>
         )}
 
         {/* Admin View of the Dashboard */}
-        {user.role === "admin" && (
+        {user?.role === "admin" && (
           <div>
             <h1 data-testid="dashboard-h1">Dashboard</h1>
           </div>

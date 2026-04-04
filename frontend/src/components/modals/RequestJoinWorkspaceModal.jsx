@@ -21,7 +21,7 @@ function RequestJoinWorkspaceModal({toast, visible, setVisible}) {
     }, [])
 
     const showRequestSentError = () => {
-      toast.current.show({ severity: 'error', summary: 'Error', detail: 'You must select a valid workspace', life: 4000});
+      toast.current.show({ severity: 'error', summary: 'Error', detail: 'You must select a valid workspace.', life: 4000});
     };
 
     const handleRequestJoinWorkspace = () => {
@@ -49,7 +49,7 @@ function RequestJoinWorkspaceModal({toast, visible, setVisible}) {
                 className={styles.request_dialog}
                 visible={visible} 
                 onHide={setVisible}
-                header={<h1 className={styles.dialog_header}>Request to Join a Workspace</h1>}
+                header={<h1 className={styles.dialog_header} data-testid="modal-header">Request to Join a Workspace</h1>}
                 draggable={false}
                 dismissableMask={true}
                 >
@@ -57,11 +57,11 @@ function RequestJoinWorkspaceModal({toast, visible, setVisible}) {
                 <div className={styles.container}>
                     <span>Browse available workspaces below and send a request to join.</span>
                     <div className="card flex justify-content-center">
-                        <Dropdown value={selectedWorkspace} onChange={(e) => setSelectedWorkspace(e.value)} options={workspaces} placeholder="Select a Workspace" 
+                        <Dropdown data-testid="workspace-dropdown" value={selectedWorkspace} onChange={(e) => setSelectedWorkspace(e.value)} options={workspaces} placeholder="Select a Workspace" 
                             filter filterDelay={400} valueTemplate={(workspace) => (<WorkspaceOptionTemplate workspace={workspace} />)} itemTemplate={(workspace) => (<WorkspaceOptionTemplate workspace={workspace} />)} className="w-full md:w-14rem" />
                     </div>    
                     
-                    <Button onClick={() => handleRequestJoinWorkspace()}>Send Request</Button>
+                    <Button data-testid="send-request-button" onClick={() => handleRequestJoinWorkspace()}>Send Request</Button>
                 </div>
             </Dialog>
         </div>

@@ -618,7 +618,12 @@ describe("View Employees Component", () => {
 
         const expiryDate = new Date();
         expiryDate.setDate(expiryDate.getDate() + 7);
-        expiryDate.setMilliseconds(0);  
+        if (expiryDate.getSeconds() >=500) {
+            expiryDate.setMilliseconds(0);
+            expiryDate.setSeconds(expiryDate.getSeconds() + 1);
+        } else {
+            expiryDate.setMilliseconds(0);
+        }
 
         const accept_button = await screen.findByTestId("accept-button-valid@example.com")
         fireEvent.click(accept_button)
@@ -671,7 +676,12 @@ describe("View Employees Component", () => {
 
         const expiryDate = new Date();
         expiryDate.setDate(expiryDate.getDate() + 7);
-        expiryDate.setMilliseconds(0);  
+        if (expiryDate.getSeconds() >=500) {
+            expiryDate.setMilliseconds(0);
+            expiryDate.setSeconds(expiryDate.getSeconds() + 1);
+        } else {
+            expiryDate.setMilliseconds(0);
+        }
 
         const accept_button = await screen.findByTestId("accept-button-valid@example.com")
         fireEvent.click(accept_button)
