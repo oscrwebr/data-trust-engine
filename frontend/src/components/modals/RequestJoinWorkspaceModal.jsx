@@ -1,16 +1,15 @@
 import styles from "../manage_employees/validation_modals/modal.module.css"
 import api from "../../api/axiosConfig"
 import { useState, useEffect } from "react";
-
-import { IconField } from "primereact/iconfield";
-import { InputText } from "primereact/inputtext";
-import { InputIcon } from "primereact/inputicon";
 import { Dialog } from "primereact/Dialog"
 import { Button } from "primereact/button";
+import { Dropdown } from "primereact/dropdown";
+
+import WorkspaceOptionTemplate from "../workspace/WorkspaceOptionTemplate"
 
 function RequestJoinWorkspaceModal({visible, setVisible}) {
-    const [searchValue, setSearchValue] = useState(null)
     const [workspaces, setWorkspaces] = useState([])
+    const [selectedWorkspace, setSelectedWorkspace] = useState(null)
 
     useEffect(() => {
         api.get("/workspace/get-all-workspaces")
@@ -18,11 +17,6 @@ function RequestJoinWorkspaceModal({visible, setVisible}) {
             setWorkspaces(res.data)
         })
     }, [])
-
-    const searchFunction = workspaces.filter(workspace => {
-        const search = searchValue?.toLowerCase() || "";
-        return workspace?.name.toLowerCase().includes(search) || false
-    })
 
     return(
         <div>
@@ -37,22 +31,11 @@ function RequestJoinWorkspaceModal({visible, setVisible}) {
                 
                 <div className={styles.container}>
                     <span>Browse available workspaces below and send a request to join.</span>
-                    <IconField iconPosition="left">
-                        <InputIcon className="pi pi-search"></InputIcon>
-                        <InputText onChange={(e) => setSearchValue(e.target.value)} style={{ width: '23vw'}} placeholder="Search available workspaces" className="p-inputtext-sm"/>
-                    </IconField>
-                    <div>
-                        {searchValue && (
-                        <div>
-                            {searchFunction.map(workspace => (
-                            <div key={workspace.id}>
-                                {workspace.name}
-                            </div>
-                            ))}
-                        </div>
-                        )}
-                    </div>
-                    <strong>Selected Workspace</strong>
+                    <div className="card flex justify-content-center">
+                        <Dropdown value={selectedWorkspace} onChange={(e) => setSelectedWorkspace(e.value)} options={workspaces} placeholder="Select a Workspace" 
+                            filter filterDelay={400} valueTemplate={(workspace) => (<WorkspaceOptionTemplate workspace={workspace} />)} itemTemplate={(workspace) => (<WorkspaceOptionTemplate workspace={workspace} />)} className="w-full md:w-14rem" />
+                    </div>    
+                    
                     <Button>Send Request</Button>
                 </div>
             </Dialog>

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, UploadFile, File, Form, Response
 from app.core.database import get_database
 from sqlalchemy.orm import Session
-from app.workspaces.service import workspace, add_notification, get_user_notifications, del_notification, get_employees, get_pending_employees, get_workspaces
+from app.workspaces.service import workspace, add_notification, get_user_notifications, del_notification, get_employees, get_pending_employees, get_workspaces, get_workspace_by_id
 from typing import Annotated
 from ..core.security_schemas import User
 from ..core.security import get_user_from_access_token
@@ -44,7 +44,7 @@ async def dashboard(db: Annotated[Session, Depends(get_database)], current_user:
         "firstname": user.firstname,
         "surname": user.surname,
         "email": user.email,
-        "role": user.role}, "workspace":user.workspaces[0].name} if user else {"message": "no user"}
+        "role": user.role}, "workspace":user.workspaces[0].name, "id":user.workspaces[0].id, "image":f"/workspace/image/{user.workspaces[0].id}"} if user else {"message": "no user"}
 
 @router.post("/request-join-workspace")
 async def create_notification(db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)], notification: NotificationSchema):
@@ -72,14 +72,16 @@ async def delete_notification(db: Annotated[Session, Depends(get_database)], cur
     result = del_notification(db, remove.notification_id, current_user.user_id)
     return result
 
-@router.get("/get-workspace-image")
-async def get_workspace_image(db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)]):
-    user = service.test_route(current_user.user_id, db=db)
-    if user.role == "employee":
-        return Response(content=None)
-    
-    if user.role == "admin":
-        return Response(content=user.workspaces[0].image)
+@router.get("/image/{workspace_id}")
+async def get_workspace_image(workspace_id: int, db: Annotated[Session, Depends(get_database)]):
+    workspace = get_workspace_by_id(db, workspace_id)
+
+    if not workspace or not workspace.image:
+        return Response(status_code=404)
+
+    return Response(
+        content=workspace.image
+    )
 
 @router.get("/get-employees")
 async def get_all_employees(db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)]):
@@ -155,5 +157,11 @@ async def reject_pending(user_id: int, db: Annotated[Session, Depends(get_databa
 @router.get("/get-all-workspaces")
 async def get_all_workspaces(db: Annotated[Session, Depends(get_database)]):
     workspaces = get_workspaces(db)
-    print("Workspaces:", workspaces)
-    return workspaces
+    return [
+        {
+            "id": workspace.id,
+            "name": workspace.name,
+            "image": f"/workspace/image/{workspace.id}"
+        }
+        for workspace in workspaces
+    ]
