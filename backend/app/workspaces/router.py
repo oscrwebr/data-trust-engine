@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Depends, UploadFile, File, Form, Response
 from app.core.database import get_database
 from sqlalchemy.orm import Session
-from app.workspaces.service import workspace, add_notification, get_user_notifications, del_notification, get_employees, get_pending_employees, get_workspaces, get_workspace_by_id
+from app.workspaces.service import workspace, add_notification, get_user_notifications, del_notification, get_employees, get_pending_employees, get_workspaces, get_workspace_by_id, get_admin_from_workspace
 from typing import Annotated
 from ..core.security_schemas import User
 from ..core.security import get_user_from_access_token
 from app.authentication import service
 from app.workspaces.schema import NotificationSchema, RemoveSchema, MessageSchema
-from app.invites.service import get_invite_by_pending_user_id
+from app.invites.service import get_invite_by_pending_user_id, set_pending_user_type_invite
 from datetime import datetime
 from app.roles.models import UserRole, Role
 
@@ -48,8 +48,21 @@ async def dashboard(db: Annotated[Session, Depends(get_database)], current_user:
 
 @router.post("/request-join-workspace")
 async def create_notification(db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)], notification: NotificationSchema):
-    result = add_notification(db, notification.title, notification.body, datetime.now(), current_user.user_id)
-    return result
+    pending_user = service.get_pending_by_id(db, current_user.user_id)
+    admin = get_admin_from_workspace(db, notification.workspace_id)
+    workspace = get_workspace_by_id(db, notification.workspace_id)
+
+    if pending_user:
+        set_pending_user_type_invite(db, pending_user, "request")
+        add_notification(db, notification.title, notification.body, datetime.now(), admin[0].user_id)
+
+    else:
+        user = service.test_route(current_user.user_id, db=db)
+        service.add_pending_user(db, user.email, "request")
+        add_notification(db, notification.title, notification.body, datetime.now(), admin[0].user_id)
+        add_notification(db, "Invite Request Sent", f"An invite request has been sent to {workspace.name}. You won't be able to send another request whilst the current one is pending.", datetime.now(), current_user.user_id)
+
+    return True
 
 @router.post("/send-message")
 async def create_notification(db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)], employees: MessageSchema):

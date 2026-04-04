@@ -7,9 +7,11 @@ import { Dropdown } from "primereact/dropdown";
 
 import WorkspaceOptionTemplate from "../workspace/WorkspaceOptionTemplate"
 
-function RequestJoinWorkspaceModal({visible, setVisible}) {
+function RequestJoinWorkspaceModal({toast, visible, setVisible}) {
     const [workspaces, setWorkspaces] = useState([])
     const [selectedWorkspace, setSelectedWorkspace] = useState(null)
+    const title = "New Invite Request"
+    const body = "An employee has requested join your workspace. You can review this request in Manage Employees."
 
     useEffect(() => {
         api.get("/workspace/get-all-workspaces")
@@ -17,6 +19,22 @@ function RequestJoinWorkspaceModal({visible, setVisible}) {
             setWorkspaces(res.data)
         })
     }, [])
+
+    const showRequestSentSuccess = () => {
+      toast.current.show({ severity: 'success', summary: 'Success', detail: 'Invite request sent!', life: 4000});
+    };
+
+    const handleRequestJoinWorkspace = () => {
+        api.post("/workspace/request-join-workspace", {
+            title: title,
+            body: body,
+            workspace_id: selectedWorkspace.id,
+        })
+        .then(res => {
+            showRequestSentSuccess();
+            setVisible(false);
+        })
+    }
 
     return(
         <div>
@@ -36,7 +54,7 @@ function RequestJoinWorkspaceModal({visible, setVisible}) {
                             filter filterDelay={400} valueTemplate={(workspace) => (<WorkspaceOptionTemplate workspace={workspace} />)} itemTemplate={(workspace) => (<WorkspaceOptionTemplate workspace={workspace} />)} className="w-full md:w-14rem" />
                     </div>    
                     
-                    <Button>Send Request</Button>
+                    <Button onClick={() => handleRequestJoinWorkspace()}>Send Request</Button>
                 </div>
             </Dialog>
         </div>

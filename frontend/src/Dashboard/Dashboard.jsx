@@ -27,7 +27,7 @@ function Dashboard({toast}) {
   return (
     <div className={styles.container}>
         <Invite className={styles.d_invite_dialog} visible={visible} setVisible={setVisible} toast={toast}/>
-        <RequestJoinWorkspaceModal visible={requestJoinWorkspaceVisible} setVisible={() => setRequestJoinWorkspaceVisible(false)}/>
+        <RequestJoinWorkspaceModal toast={toast} visible={requestJoinWorkspaceVisible} setVisible={() => setRequestJoinWorkspaceVisible(false)}/>
         
         {/* Employee View of the Dashboard */}
         {user.role === "employee" && (
