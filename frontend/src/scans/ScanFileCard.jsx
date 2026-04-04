@@ -1,5 +1,6 @@
 import { PiWarningCircle } from "react-icons/pi";
 import { PiCheckCircle } from "react-icons/pi";
+import { formatNamingConventionName } from "./utils/formatNamingConventionName";
 
 
 function ScanFileCard({scan_file, scan_type}) {
@@ -53,6 +54,39 @@ function ScanFileCard({scan_file, scan_type}) {
             <div className="scan-file-name">
                 <span>{scan_file.file_name}</span>
             </div>
+            {issues.length > 0 && (
+                <div>
+                    {issues.map((issue, index) => (
+                        <div key={index} className="scan-file-details">
+                            {issue.type === "Naming Issue" && (
+                                <>
+                                <div className="scan-file-issue">
+                                    <div className="scan-file-issue-text-heading">
+                                        <span>Issue:</span>
+                                    </div>
+                                    <div className="scan-file-issue-text">
+                                        <span>Name does not follow: {issue.naming_convention.map(formatNamingConventionName).join(", ")}</span>
+                                    </div>
+                                </div>
+
+                                <div className="scan-file-suggested">
+                                    <div className="scan-file-suggested-heading">
+                                        <span>Suggested Name:</span>
+                                    </div>
+                                    <div className="scan-file-suggested-text">
+                                        <span>{issue.suggested_name[0]}</span>
+                                    </div>
+                                </div>
+                                </>
+                                    
+                            )}
+
+                        </div>
+                    ))}
+
+                </div>
+                
+            )}
 
         </div>
     )

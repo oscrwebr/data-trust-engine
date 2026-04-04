@@ -268,8 +268,8 @@
 }
 
 .scan-page-file-container {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
     gap: 10px;
 }
 
@@ -347,4 +347,54 @@
     font-size: 16px;
     color: black;
     margin-top: 10px;
+}
+
+.scan-file-details {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    column-gap: 40px;
+    width: 100%;
+    margin-top: 6px;
+}
+
+.scan-file-issue {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.scan-file-issue-text-heading {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151; 
+    
+}
+
+
+.scan-file-issue-text {
+    font-size: 14px;
+    color: #868686; 
+    line-height: 1.4;
+}
+
+
+.scan-file-suggested {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.scan-file-suggested-heading {
+    color: #0D542B;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.scan-file-suggested-text {
+    font-size: 14px;
+    font-family: "Lucida Console", "Courier New", monospace;
+    color: black;
+    background: #F0FDF4;
+    line-height: 1.4;
+
 }

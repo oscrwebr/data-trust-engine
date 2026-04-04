@@ -6,6 +6,7 @@ import ScanFileCard from "./ScanFileCard";
 import { getScanPageCardClass } from "./utils/getScanPageCardClass";
 import { getPercentage } from "./utils/getPercentage";
 import { getCleanFilesClass } from "./utils/getCleanFilesClass";
+import { formatNamingConventionName } from "./utils/formatNamingConventionName";
 
 function OrganisationScanPage({ scan }) {
 
