@@ -152,6 +152,8 @@ async def delete_active_user(user_id: int, db: Annotated[Session, Depends(get_da
 async def reject_pending(user_id: int, db: Annotated[Session, Depends(get_database)]):
     return service.reject_pending_user(db, user_id)
 
-@router.patch("/get-all-workspaces")
+@router.get("/get-all-workspaces")
 async def get_all_workspaces(db: Annotated[Session, Depends(get_database)]):
-    return get_workspaces(db)
+    workspaces = get_workspaces(db)
+    print("Workspaces:", workspaces)
+    return workspaces

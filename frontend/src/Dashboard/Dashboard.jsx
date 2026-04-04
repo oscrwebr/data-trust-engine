@@ -3,7 +3,7 @@ import api from "../api/axiosConfig.js";
 import styles from "./dashboard.module.css"
 import { Toast } from "primereact/toast";
 import { useOutletContext } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "primereact/button";
 import RequestJoinWorkspaceModal from "../components/modals/RequestJoinWorkspaceModal.jsx";
 
@@ -11,7 +11,7 @@ function Dashboard({toast}) {
 
   const { toastNotifications, visible, setVisible, setNotifications, user, workspace } = useOutletContext();
   const [requestJoinWorkspaceVisible, setRequestJoinWorkspaceVisible] = useState(false);
-  
+
   // Function to handle removing notifications
   const handleRemove = async (id) => {
     try {
