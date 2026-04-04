@@ -9,6 +9,11 @@ services:
     profiles: ["dev"]
     ports:
       - 5173:5173
+    develop:
+      watch:
+        - action: sync
+          path: ./frontend
+          target: /app
 
   database-dev:
     image: mariadb:11.8-noble
@@ -62,6 +67,7 @@ services:
       - MAIL_PASSWORD=${MAIL_PASSWORD}
       - ZEROBOUNCE_API_KEY=${ZEROBOUNCE_API_KEY}
       - FERNET_KEY=${FERNET_KEY}
+      - FRONTEND_HOST=${FRONTEND_HOST} #  THESE MUST ALWAYS BE TO WHATEVER THE USER'S CLIENT SHOULD BE! FOR DEV, THAT IS LOCALHOST
     depends_on:
       alembic_migrations-dev:
         condition: service_completed_successfully
@@ -100,6 +106,7 @@ services:
       - MAIL_PASSWORD=${MAIL_PASSWORD}
       - ZEROBOUNCE_API_KEY=${ZEROBOUNCE_API_KEY}
       - FERNET_KEY=${FERNET_KEY}
+      - FRONTEND_HOST=frontend-test # This literally could be anything - should be mocking the calls!
     command: pytest --cov-fail-under=90 --cov-report=html --cov=app
     depends_on:
       database-test:

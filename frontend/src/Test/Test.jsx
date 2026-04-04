@@ -13,7 +13,7 @@ function Test() {
             console.log(res)
             console.log(import.meta.env.VITE_BACKEND_HOST)
             const test = import.meta.env.VITE_BACKEND_HOST || "localhost"
-            console.log("'VITE_BACKEND_HOST': " + test)
+            console.log(`'VITE_BACKEND_HOST': ${test}`)
             if (res.data.user) {
                 setUser(res.data.user);
             }

@@ -1,8 +1,9 @@
 import axios from "axios";
 import { setAccessToken, getAccessToken } from "../Auth/authStore.js";
 
+const test = import.meta.env.VITE_BACKEND_HOST || "localhost"
 const api = axios.create({
-  baseURL: "http://localhost:8000",
+  baseURL: `http://${test}:8000`,
   withCredentials: true
 });
 

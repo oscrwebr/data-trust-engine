@@ -2,7 +2,7 @@ import "./App.css"
 import { useRef } from "react";
 
 import { BrowserRouter, Routes, Router, Route , useLocation} from "react-router-dom";
-import Dashboard from './dashboard/Dashboard';
+import Dashboard from './Dashboard/Dashboard';
 import EmployeeInviteError from './invites/error.jsx';
 import Roles from "./roles/roles";
 import CreateWorkspace from "./workspace/CreateWorkspace";
@@ -12,7 +12,7 @@ import { Toast } from 'primereact/toast';
 import Scans from "./scans/Scans.jsx";
 
 import Test from "./Test/Test.jsx";
-import Unprocessable422 from "./Errors/unprocessable422.jsx";
+import Unprocessable422 from "./Errors/Unprocessable422.jsx";
 import WorkspaceJoinedError from "./invites/WorkspaceJoined.jsx";
 import Forbidden403 from "./Errors/Forbidden403.jsx";
 import Layout from "./components/layout/layout.jsx";

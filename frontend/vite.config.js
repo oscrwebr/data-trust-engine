@@ -8,6 +8,9 @@ export default defineConfig({
     setupFiles: './src/setupTests.js',
   },
   server: {
+    watch: {
+      usePolling: true
+    },
     host: true,
     port: 5173,
     strictPort: true

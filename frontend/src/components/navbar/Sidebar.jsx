@@ -7,7 +7,7 @@ import SidebarDropdown from "../dropdown/dropdown";
 import NavbarItem from "./NavbarItem";
 import DropdownItem from "./DropdownItem";
 import api from "../../api/axiosConfig";
-import { Avatar } from "primereact/Avatar";
+import { Avatar } from "primereact/avatar";
         
 function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role}){
     const [openDropdown, setOpenDropdown] = useState(null);
