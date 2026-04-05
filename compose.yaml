@@ -23,7 +23,7 @@ services:
       - MARIADB_ROOT_PASSWORD=${DB_PASSWORD}
       - MARIADB_DATABASE=${DB_NAME}
     volumes:
-      - dte-db-volume:/var/lib/mysql
+      - dte-dev-db-volume:/var/lib/mysql
     healthcheck:
       test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"] # https://mariadb.com/docs/server/server-management/automated-mariadb-deployment-and-administration/docker-and-mariadb/using-healthcheck-sh
       start_period: 40s
@@ -47,6 +47,8 @@ services:
         condition: service_healthy
 
   backend-dev: # Ensure that this also has watch!
+    build:
+      context: ./backend
     image: fastapi-backend-dev:latest
     profiles: ["dev"]
     pull_policy: never
@@ -71,6 +73,15 @@ services:
       - FRONTEND_HOST=${FRONTEND_HOST} #  THESE MUST ALWAYS BE TO WHATEVER THE USER'S CLIENT SHOULD BE! FOR DEV, THAT IS LOCALHOST
       - REDIRECT_URI=${REDIRECT_URI}
     command: ["fastapi", "dev", "app/main.py", "--host", "0.0.0.0", "--port", "8000"]
+    develop:
+      watch:
+        - action: rebuild
+          path: ./backend/pyproject.toml
+        - action: sync+restart
+          path: ./backend
+          target: /app
+          ignore:
+            - pyproject.toml
     depends_on:
       alembic_migrations-dev:
         condition: service_completed_successfully
@@ -188,5 +199,5 @@ services:
 
 
 volumes:
-  dte-db-volume:
+  dte-dev-db-volume:
   dte-prod-db-volume:
