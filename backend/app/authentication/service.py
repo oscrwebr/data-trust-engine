@@ -8,6 +8,8 @@ from ..core.config import SCOPES
 from ..core.security import create_refresh_token, create_access_token, hash_user_refresh_token, encrypt_refresh, decrypt_refresh
 from app.workspaces.repository import add_notification, get_workspace_by_workspace_id, add_user_workspace
 from app.invites.repository import get_invite_by_workspace_id, update_invite_used_value
+from app.roles.repository import migrate_pending_roles
+from app.authentication.repository import get_pending_user_by_email, delete_pending_user
 
 DRIVE_DATA_GRAPH_URL = "https://graph.microsoft.com/v1.0/me/drive?$select=id"
 
@@ -18,17 +20,27 @@ def create_user(db, details: dict, refresh: str, ms_access_token: str, role: str
     # Get the DriveId - IF there is an error, maybe log it for future so that it can be fetched at another time? This should be the only major potential point of failure if user creation reaches this stage
     drive_id = get_drive_id(access_token=ms_access_token)
 
+    email = details["email"]
+
+    pending_user = repository.get_pending_user_by_email(db, email)
+
     user = repository.create_user(
         db=db,
         firstname=firstname,
         surname=surname,
         username=details["preferred_username"],
-        email=details["email"],
+        email=email,
         oid=details["oid"],
         refresh=enc_refresh,
         driveId=drive_id,
         role=role
     )
+    
+    if pending_user:
+        migrate_pending_roles(db, pending_user.user_id, user.user_id)
+
+        # delete pending user AFTER migration
+        delete_pending_user(db, pending_user)
     
     if(workspace_id != None and role == "employee"):
         invite = get_invite_by_workspace_id(db, workspace_id)

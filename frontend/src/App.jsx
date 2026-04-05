@@ -16,6 +16,7 @@ import Unprocessable422 from "./Errors/unprocessable422.jsx";
 import WorkspaceJoinedError from "./invites/WorkspaceJoined.jsx";
 import Forbidden403 from "./Errors/Forbidden403.jsx";
 import Layout from "./components/layout/layout.jsx";
+import OrgChart from "./org_chart/orgChart";
 import ViewEmployees from "./employees/ViewEmployees.jsx";
 import ManageEmployees from "./employees/ManageEmployees.jsx";
 
@@ -37,7 +38,7 @@ function App() {
           <Route path="/roles" element={<Roles />} />
           <Route path="/view-employees" element={<ViewEmployees toast={toast}/>} />
           <Route path="/manage-employees" element={<ManageEmployees toast={toast}/>} />
-          <Route path="/upload-org-chart" element={null} />
+          <Route path="/upload-org-chart" element={<OrgChart toast={toast} />} />
           <Route path="/settings" element={null} />
           <Route path="/dashboard" element={<Dashboard toast={toast}/>} />
         </Route>
