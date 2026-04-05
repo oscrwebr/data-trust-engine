@@ -7,6 +7,7 @@ from pathlib import Path
 from sqlalchemy.orm import Session
 from app.scanning import repository
 from app.scanning.models import File, Scan
+from app.scanning.schemas import FileResponse
 
 from app.scanning.regex_patterns import *
 from app.scanning.detectors import *
@@ -121,7 +122,16 @@ def fetch_graph_file(graph_file_id: str):
 
 # Get file by id
 def get_file(db: Session, file_id: int):
-    return repository.get_file_by_id(db, file_id)
+    file = repository.get_file_by_id(db, file_id)
+
+    if file is None:
+        return None
+    
+    return FileResponse(
+        file_id = file.ingestion_file_id,
+        file_name = file.name,
+        hash = file.hash
+    )
 
 
 # Get all scans a file pertains to
