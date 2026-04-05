@@ -40,7 +40,7 @@ def create_user(db, details: dict, refresh: str, ms_access_token: str, role: str
         migrate_pending_roles(db, pending_user.user_id, user.user_id)
 
         # delete pending user AFTER migration
-        delete_pending_user(db, pending_user)
+        delete_pending_user(db, pending_user.user_id)
     
     if(workspace_id != None and role == "employee"):
         invite = get_invite_by_workspace_id(db, workspace_id)

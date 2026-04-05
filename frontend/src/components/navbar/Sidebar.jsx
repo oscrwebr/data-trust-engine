@@ -13,6 +13,7 @@ function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role
     const [openDropdown, setOpenDropdown] = useState(null);
     const [pendingEmployees, setPendingEmployees] = useState([])
     const [workspace_id, setWorkspaceId] = useState(null)
+    const backend_uri = import.meta.env.VITE_BACKEND_HOST || "http://localhost:8000"
     const user_initials = (firstname?.[0]?.toUpperCase() || "?") + (surname?.[0]?.toUpperCase() || "?");
 
     useEffect(() => {
@@ -78,7 +79,7 @@ function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role
                     <div className={styles.line}/>
                 </div> 
                 <div className={styles.user_info_container}>
-                    <img className={styles.user_logo} src={`http://localhost:8000/workspace/image/${workspace_id}`} alt="Workspace Logo"/>
+                    <img className={styles.user_logo} src={`${backend_uri}/workspace/image/${workspace_id}`} alt="Workspace Logo"/>
                     <div>
                         <div className={styles.user_name}>{firstname} {surname}</div>
                         <div className={styles.user_email}>{email}</div>

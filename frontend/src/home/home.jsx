@@ -29,7 +29,7 @@ function Home({toast}) {
   }
 
   function handleEmployeeSignup(){
-    window.location.href = "http://localhost:8000/auth/sign-in?next=/dashboard&signup=true&role=2"
+    window.location.href = `${backend_uri}/auth/sign-in?next=/dashboard&signup=true&role=2`
   }
 
   function handleSignIn(){
