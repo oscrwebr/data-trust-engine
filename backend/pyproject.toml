@@ -83,7 +83,9 @@ dependencies = [
     "fixtures>=4.3.2",
     "requests-mock>=1.12.1",
     "coverage>=7.13.5",
-    
+    "pandas",
+    "openpyxl",
+    "pytest-asyncio",
 ]
 
 [tool.setuptools.packages.find]

@@ -39,3 +39,9 @@ class UserRole(Base):
     user_role_id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("user.user_id", ondelete="CASCADE"))
     role_id = Column(Integer, ForeignKey("role.role_id"))
+
+class PendingUserRole(Base):
+    __tablename__ = "pending_user_role" 
+    pending_user_role_id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("pending_users.user_id"))
+    role_id = Column(Integer, ForeignKey("role.role_id"))

@@ -77,6 +77,13 @@ def get_all_employees(db: Session, user_id: int):
 
     return users
 
+def get_workspace_by_user(db: Session, user_id: int) -> int | None:
+
+    workspace_assoc = db.query(user_workspace).filter(user_workspace.c.user_id == user_id).first()
+    if workspace_assoc:
+        return workspace_assoc.workspace_id
+    return None
+
 def get_all_pending_employees(db: Session, user_id: int):
     workspace = db.query(Workspace).join(user_workspace).filter(
         user_workspace.c.user_id == user_id
@@ -90,4 +97,3 @@ def get_all_pending_employees(db: Session, user_id: int):
     )
 
     return pending_users
-
