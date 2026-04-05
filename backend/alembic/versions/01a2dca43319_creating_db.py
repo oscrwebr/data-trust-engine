@@ -1,8 +1,8 @@
-"""user roles
+"""creating db!
 
-Revision ID: 5ef452858228
-Revises: d76718253a80
-Create Date: 2026-03-30 22:25:56.848432
+Revision ID: 01a2dca43319
+Revises: 
+Create Date: 2026-04-05 15:43:39.266143
 
 """
 from typing import Sequence, Union
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision: str = '5ef452858228'
-down_revision: Union[str, Sequence[str], None] = 'd76718253a80'
+revision: str = '01a2dca43319'
+down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -52,6 +52,7 @@ def upgrade() -> None:
     op.create_table('pending_users',
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('email', sa.String(length=254), nullable=False),
+    sa.Column('type', sa.String(length=10), nullable=False),
     sa.PrimaryKeyConstraint('user_id')
     )
     op.create_index(op.f('ix_pending_users_user_id'), 'pending_users', ['user_id'], unique=False)
@@ -139,6 +140,13 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_notifications_id'), 'notifications', ['id'], unique=False)
+    op.create_table('pending_user_workspace',
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('workspace_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['user_id'], ['pending_users.user_id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['workspace_id'], ['workspaces.id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('user_id', 'workspace_id')
+    )
     op.create_table('refresh',
     sa.Column('refresh_id', sa.Integer(), nullable=False),
     sa.Column('token', sa.Text(), nullable=False),
@@ -201,8 +209,8 @@ def upgrade() -> None:
     op.create_table('user_workspace',
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('workspace_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['user_id'], ['user.user_id'], ),
-    sa.ForeignKeyConstraint(['workspace_id'], ['workspaces.id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['user.user_id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['workspace_id'], ['workspaces.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('user_id', 'workspace_id')
     )
     op.create_table('naming_convention_scan_result',
@@ -257,7 +265,7 @@ def upgrade() -> None:
     sa.Column('user_id', sa.Integer(), nullable=True),
     sa.Column('role_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['role_id'], ['role.role_id'], ),
-    sa.ForeignKeyConstraint(['user_id'], ['user.user_id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['user.user_id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('user_role_id')
     )
     op.create_index(op.f('ix_user_role_user_role_id'), 'user_role', ['user_role_id'], unique=False)
@@ -294,6 +302,7 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_refresh_refresh_id'), table_name='refresh')
     op.drop_index(op.f('ix_refresh_refresh_family_id'), table_name='refresh')
     op.drop_table('refresh')
+    op.drop_table('pending_user_workspace')
     op.drop_index(op.f('ix_notifications_id'), table_name='notifications')
     op.drop_table('notifications')
     op.drop_index(op.f('ix_invites_invite_id'), table_name='invites')
