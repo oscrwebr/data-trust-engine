@@ -3,6 +3,7 @@ from datetime import datetime
 from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 from app.scanning.models import File, NamingConvention, Scan, ScanNamingConvention, NamingConventionScanResult, Scan, ScanFile, ScanFileDetection
+from app.roles.models import SensitivityCategory, SensitivitySubcategory
 from datetime import datetime, timezone
 from app.scanning.scan_type import ScanType
 
@@ -83,8 +84,69 @@ def get_all_files(db: Session):
     return db.query(File).all()
 
 
+def get_latest_scan_detection_summary(db: Session, file_id: int):
+    latest_scan_file = (
+        db.query(ScanFile.scan_file_id)
+        .join(Scan, Scan.scan_id == ScanFile.scan_id)
+        .filter(ScanFile.file_id == file_id)
+        .order_by(Scan.finished_at.desc())
+        .first() # Ensure we only get the most recent scan results (one that finished most recently)
+    )
+
+    if not latest_scan_file:
+        return []
+    
+    return (
+        db.query(
+            ScanFileDetection.sensitivity_subcategory,
+            func.count(ScanFileDetection.scan_file_detection_id).label("count")
+        )
+        .filter(ScanFileDetection.scan_file_id == latest_scan_file.scan_file_id)
+        .group_by(ScanFileDetection.sensitivity_subcategory)
+        .all()
+    )
+
+
+def get_subcategory_category_map(db: Session):
+    rows = (
+        db.query(
+            SensitivitySubcategory.name.label("subcategory_name"),
+            SensitivityCategory.name.label("category_name")
+        )
+        .join(
+            SensitivityCategory,
+            SensitivitySubcategory.sensitivity_category_id == SensitivityCategory.sensitivity_category_id
+        )
+        .all()
+    )
+
+    return {row.subcategory_name: row.category_name for row in rows}
+
+
 def get_file_by_graph_id(db: Session, graph_file_id: str):
     return db.query(File).filter(File.graph_file_id == graph_file_id).first()
+
+
+def get_file_scans(db: Session, file_id: int):
+    return (
+        db.query(
+            Scan.scan_id,
+            Scan.started_at,
+            Scan.finished_at,
+
+            # Count number of detections for this file within each scan
+            func.count(ScanFileDetection.scan_file_detection_id).label("detection_count")
+        )
+        .join(ScanFile, Scan.scan_id == ScanFile.scan_id) # Join Scan to ScanFile, links each scan to the files included in that scan
+        .outerjoin( # Outerjoin ScanFile to ScanFileDetections, so that scans are included even if number of detections is 0
+            ScanFileDetection,
+            ScanFile.scan_file_id == ScanFileDetection.scan_file_id
+        )
+        .filter(ScanFile.file_id == file_id) # Filter to only include rows where ScanFile relates to the given file_id
+        .group_by(Scan.scan_id, Scan.started_at, Scan.finished_at) # Group by scan to aggregate 
+        .order_by(Scan.started_at.desc())
+        .all()
+    )
 
 
 def set_file_hash(db: Session, file: File, new_hash: str):

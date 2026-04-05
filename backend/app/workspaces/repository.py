@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
-from app.workspaces.models import Workspace, Notification, user_workspace
+from app.workspaces.models import Workspace, Notification, user_workspace, pending_user_workspace
+from app.authentication.models import User, PendingUser
 from datetime import datetime
 from sqlalchemy import desc, insert
 
@@ -9,6 +10,9 @@ def add_workspace(db: Session, name:str, image:bytes):
     db.commit()
     db.refresh(workspace)
     return workspace
+
+def get_all_workspaces(db: Session):
+    return db.query(Workspace).all()
 
 def get_workspace_by_workspace_id(db: Session, workspace_id: int):
     return db.query(Workspace).filter(Workspace.id == workspace_id).first()
@@ -37,3 +41,59 @@ def add_user_workspace(db: Session, workspace_id: int, user_id: int):
     db.execute(record)
     db.commit()
     return record
+
+def add_pending_user_workspace(db: Session, workspace_id: int, user_id: int):
+    record = insert(pending_user_workspace).values(
+        user_id=user_id,
+        workspace_id=workspace_id
+    )
+    db.execute(record)
+    db.commit()
+    return record
+
+def get_workspace_admin(db: Session, workspace_id: int):
+    user = (
+        db.query(User)
+        .join(user_workspace, User.user_id == user_workspace.c.user_id)
+        .filter(user_workspace.c.workspace_id == workspace_id)
+        .filter(User.role == "admin")
+        .all()
+    )
+
+    return user
+
+def get_all_employees(db: Session, user_id: int):
+    workspace = db.query(Workspace).join(user_workspace).filter(
+        user_workspace.c.user_id == user_id
+    ).first()
+    
+    users = (
+        db.query(User)
+        .join(user_workspace)
+        .filter(user_workspace.c.workspace_id == workspace.id)
+        .filter(User.role == "employee")
+        .all()
+    )
+
+    return users
+
+def get_workspace_by_user(db: Session, user_id: int) -> int | None:
+
+    workspace_assoc = db.query(user_workspace).filter(user_workspace.c.user_id == user_id).first()
+    if workspace_assoc:
+        return workspace_assoc.workspace_id
+    return None
+
+def get_all_pending_employees(db: Session, user_id: int):
+    workspace = db.query(Workspace).join(user_workspace).filter(
+        user_workspace.c.user_id == user_id
+    ).first()
+    
+    pending_users = (
+        db.query(PendingUser)
+        .join(pending_user_workspace)
+        .filter(pending_user_workspace.c.workspace_id == workspace.id)
+        .all()
+    )
+
+    return pending_users

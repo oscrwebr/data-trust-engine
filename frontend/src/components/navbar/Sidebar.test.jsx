@@ -1,5 +1,6 @@
 import Sidebar from "./Sidebar";
-import { cleanup, fireEvent, getByTestId, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
@@ -96,4 +97,48 @@ describe("Sidebar Component", () => {
 
         expect(mockSetSidebarVisible).toHaveBeenCalledWith(false);
     })
+
+    // Test 4
+    test("Check that correct badge number displays to indicate number of pending employees", async () => {
+        const pendingEmployeesMock = [
+        { id: 1, name: "Alice" },
+        { id: 2, name: "Bob" },
+        { id: 3, name: "Charlie" },
+        ];
+
+        api.get.mockImplementation((url) => {
+        if (url === "/workspace/get-pending-employees") {
+            return Promise.resolve({ data: pendingEmployeesMock });
+        }
+        if (url === "/workspace/get-workspace-image") {
+            return Promise.resolve({ data: new Blob(["image"]) });
+        }
+        return Promise.resolve({ data: [] });
+        });
+
+        // Render Sidebar
+        render(
+        <MemoryRouter>
+            <Sidebar
+            setSidebarVisible={vi.fn()}
+            firstname="John"
+            surname="Smith"
+            email="test@example.com"
+            setVisible={vi.fn()}
+            role="admin"
+            />
+        </MemoryRouter>
+        );
+
+        // Wait for the "My Employees" dropdown clickable div to appear
+        const myEmployeesDropdown = await screen.findByTestId("my-employees-element");
+
+        // Click it to expand
+        await userEvent.click(myEmployeesDropdown);
+
+        // The "Manage Employees" DropdownItem should render the badge
+        const badge = await screen.findByText(pendingEmployeesMock.length.toString());
+
+        expect(badge).toBeInTheDocument();
+    });
 })

@@ -51,7 +51,7 @@ function Header({firstname, lastname, workspace, sidebarVisible, setSidebarVisib
                 <div className={styles.topRow}>
                     <div className={styles.sidebar_icon_text}>
                         {!sidebarVisible &&(<FiSidebar onClick={() => setSidebarVisible(true)} className={styles.sidebar_toggle_icon} size={20} color="black"/>)}
-                        <span>{firstname} {lastname} / <span className={styles.workspace_text}>{workspace}</span></span>
+                        <span>{firstname} {lastname} / <span className={styles.workspace_text}>{workspace || "You have not joined a workspace yet"}</span></span>
                     </div>
 
                     {/* Notification button icon */}

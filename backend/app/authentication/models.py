@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, ForeignKey, TIMESTAMP
+from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, ForeignKey, BLOB
 from ..core.database import Base
 from sqlalchemy.orm import relationship
 
@@ -8,8 +8,12 @@ class User(Base):
     user_id = Column(Integer, primary_key=True, index=True)
     firstname = Column(String(50), nullable=False)
     surname = Column(String(50), nullable=False)
-    email = Column(String(254), nullable=False)
+    username = Column(String(254), nullable=False)
+    email = Column(String(254), nullable=False, index=True)
     oid = Column(String(40), unique=True, index=True, nullable=False)
+    refresh = Column(BLOB(), nullable=False)
+    deltaLink = Column(Text(), nullable=True)
+    driveId = Column(Text(), nullable=True)
     role = Column(String(11), nullable=False)
 
     workspaces = relationship(
@@ -23,13 +27,20 @@ class PendingUser(Base):
 
     user_id = Column(Integer, primary_key=True, index=True)
     email = Column(String(254), nullable=False)
+    type = Column(String(10), nullable=False)
 
     # relation
     invites = relationship(
         "Invite",
-        back_populates="pending_user",
+        back_populates="pending_users",
         cascade="all, delete",
         passive_deletes=True
+    )
+
+    workspaces = relationship(
+        "Workspace",
+        secondary="pending_user_workspace",
+        back_populates="pending_users"
     )
 
 class RefreshFamily(Base):

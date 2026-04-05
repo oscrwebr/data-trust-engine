@@ -12,16 +12,21 @@ import { BiFileFind } from "react-icons/bi";
         
 function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role}){
     const [openDropdown, setOpenDropdown] = useState(null);
-    const [imageSrc, setImageSrc] = useState("");
+    const [pendingEmployees, setPendingEmployees] = useState([])
+    const [workspace_id, setWorkspaceId] = useState(null)
     const user_initials = (firstname?.[0]?.toUpperCase() || "?") + (surname?.[0]?.toUpperCase() || "?");
 
     useEffect(() => {
-        api.get("/workspace/get-workspace-image", {responseType: "blob"})
+        api.get("/workspace/dashboard")
         .then(res => {
-            const blob = new Blob([res.data]);
-            const url = URL.createObjectURL(blob);
-            setImageSrc(url);
-        });
+            setWorkspaceId(res.data.id)
+            console.log(res.data.id)
+        })
+
+        api.get("/workspace/get-pending-employees")
+        .then(res => {
+            setPendingEmployees(res.data)
+        })
     }, []);
 
     return(
@@ -56,11 +61,11 @@ function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role
                         <DropdownItem url="/scans" text="View Scans"/>
                     </SidebarDropdown>
 
-                    <SidebarDropdown className={styles.dropdown} icon="pi pi-users" label="My Employees" openDropdown={openDropdown} setOpenDropdown={setOpenDropdown}>
+                    <SidebarDropdown data-testid="my-employees-element" className={styles.dropdown} icon="pi pi-users" label="My Employees" openDropdown={openDropdown} setOpenDropdown={setOpenDropdown}>
 
                         {/* SidebarDropdowns have their own children for styling purposes - specify the url and text displayed */}
                         <DropdownItem url="/view-employees" text="View Employees"/>
-                        <DropdownItem url="/manage-employees" text="Manage Employees"/>
+                        <DropdownItem url="/manage-employees" text="Manage Employees" value={pendingEmployees.length}/>
                         <DropdownItem onClick={() => setVisible(true)} text="Send Invite"/>
                     </SidebarDropdown>
 
@@ -77,12 +82,11 @@ function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role
                     <div className={styles.line}/>
                 </div> 
                 <div className={styles.user_info_container}>
-                    <img className={styles.user_logo} src={imageSrc} alt="Workspace Logo"/>
+                    <img className={styles.user_logo} src={`http://localhost:8000/workspace/image/${workspace_id}`} alt="Workspace Logo"/>
                     <div>
                         <div className={styles.user_name}>{firstname} {surname}</div>
                         <div className={styles.user_email}>{email}</div>
                     </div>
-                    
                 </div>
             </>
         ) : (

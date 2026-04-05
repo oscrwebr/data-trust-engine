@@ -4,7 +4,8 @@ from app.roles.models import (
     SensitivityCategory,
     SensitivitySubcategory,
     RolePermission,
-    UserRole
+    UserRole,
+    PendingUserRole
 )
 from app.authentication.models import User
 
@@ -17,6 +18,10 @@ def create_role(db: Session, name: str, workspace_id: int):
 
 def get_all_roles(db: Session):
     return db.query(Role).all()
+
+def get_role_by_name(db: Session, name: str):
+    role = db.query(Role).filter(Role.name == name).first()
+    return role
 
 def delete_role(db: Session, role_id: int):
     db.query(RolePermission).filter(RolePermission.role_id == role_id).delete(synchronize_session=False)
@@ -122,3 +127,20 @@ def set_user_role(db: Session, user_id: int, role_id: int | None):
             new_user_role = UserRole(user_id=user_id, role_id=role_id)
             db.add(new_user_role)
         db.commit()
+
+def migrate_pending_roles(db: Session, pending_user_id: int, new_user_id: int):
+    pending_roles = db.query(PendingUserRole).filter(
+        PendingUserRole.user_id == pending_user_id
+    ).all()
+
+    for pr in pending_roles:
+        db.add(UserRole(
+            user_id=new_user_id,
+            role_id=pr.role_id
+        ))
+
+    db.query(PendingUserRole).filter(
+        PendingUserRole.user_id == pending_user_id
+    ).delete()
+
+    db.commit()

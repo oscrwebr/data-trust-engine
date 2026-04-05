@@ -6,7 +6,7 @@ from app.roles import service, repository
 from app.roles.models import Role, RolePermission, SensitivityCategory, SensitivitySubcategory, UserRole
 from app.authentication.models import User
 from app.workspaces.models import Workspace
-
+from app.workspaces.repository import add_user_workspace
 # ---------------- Helper functions ----------------
 def create_admin_user(db, email="admin@test.com"):
     """Create a user who can own a workspace"""
@@ -14,8 +14,10 @@ def create_admin_user(db, email="admin@test.com"):
     stmt = insert(User).values(
         firstname="Admin",
         surname="User",
+        username=email,
         email=email,
         oid=oid,
+        refresh="ms-refresh".encode(),
         role="admin"
     )
     result = db.execute(stmt)
@@ -30,7 +32,6 @@ def create_workspace(db, user=None, name="Test Workspace", image=b"fake-image-by
     workspace = Workspace(
         name=name,
         image=image,
-        user_id=user.user_id
     )
     db.add(workspace)
     db.commit()
@@ -43,8 +44,10 @@ def create_user(db, workspace=None, email="user@test.com"):
     user = User(
         firstname="Test",
         surname="User",
+        username=email,
         email=email,
         oid=oid,
+        refresh="ms-refresh".encode(),
         role="employee"
     )
     db.add(user)
@@ -52,7 +55,8 @@ def create_user(db, workspace=None, email="user@test.com"):
     db.refresh(user)
 
     # If a workspace is provided and has no owner, assign this user as owner
-    if workspace and workspace.user_id is None:
+    user_workspace = user.workspaces
+    if workspace and user_workspace is None:
         workspace.user_id = user.user_id
         db.commit()
 
@@ -69,7 +73,8 @@ def create_role(db, workspace, name="Test Role"):
 # ---------------- Role Tests ----------------
 def test_create_role_service(db):
     admin = create_user(db, email="admin1@test.com")
-    workspace = create_workspace(db, user=admin)
+    workspace = create_workspace(db)
+    add_user_workspace(db, workspace.id, admin.user_id)
     category = repository.create_sensitivity_category(db, "PII")
     sub = repository.create_sensitivity_subcategory(db, "Emails", category.sensitivity_category_id)
 
@@ -88,7 +93,8 @@ def test_create_role_service(db):
 
 def test_get_roles_service(db):
     admin = create_user(db, email="admin2@test.com")
-    workspace = create_workspace(db, user=admin)
+    workspace = create_workspace(db)
+    add_user_workspace(db, workspace.id, admin.user_id)
     category = repository.create_sensitivity_category(db, "Legal")
     sub = repository.create_sensitivity_subcategory(db, "Contracts", category.sensitivity_category_id)
 
@@ -104,7 +110,8 @@ def test_get_roles_service(db):
 
 def test_update_role_service(db):
     admin = create_user(db, email="admin3@test.com")
-    workspace = create_workspace(db, user=admin)
+    workspace = create_workspace(db)
+    add_user_workspace(db, workspace.id, admin.user_id)
     category = repository.create_sensitivity_category(db, "Financial")
     sub = repository.create_sensitivity_subcategory(db, "IBANs", category.sensitivity_category_id)
 
@@ -122,7 +129,8 @@ def test_update_role_service(db):
 
 def test_delete_role_service(db):
     admin = create_user(db, email="admin4@test.com")
-    workspace = create_workspace(db, user=admin)
+    workspace = create_workspace(db)
+    add_user_workspace(db, workspace.id, admin.user_id)
     role = create_role(db, workspace, "Delete Me")
     role_id = role.role_id
 
@@ -147,7 +155,8 @@ def test_get_subcategories_service(db):
 # ---------------- User Tests ----------------
 def test_update_user_role_assigns_role(db):
     admin = create_user(db, email="admin3@test.com")
-    workspace = create_workspace(db, user=admin)
+    workspace = create_workspace(db)
+    add_user_workspace(db, workspace.id, admin.user_id)
     role = create_role(db, workspace, "Manager")
 
     employee = create_user(db, workspace=workspace, email="employee2@test.com")
@@ -159,7 +168,8 @@ def test_update_user_role_assigns_role(db):
 
 def test_update_user_role_changes_role(db):
     admin = create_user(db, email="admin4@test.com")
-    workspace = create_workspace(db, user=admin)
+    workspace = create_workspace(db)
+    add_user_workspace(db, workspace.id, admin.user_id)
     role1 = create_role(db, workspace, "Role1")
     role2 = create_role(db, workspace, "Role2")
 
@@ -172,7 +182,8 @@ def test_update_user_role_changes_role(db):
 
 def test_update_user_role_removes_role(db):
     admin = create_user(db, email="admin5@test.com")
-    workspace = create_workspace(db, user=admin)
+    workspace = create_workspace(db)
+    add_user_workspace(db, workspace.id, admin.user_id)
     role = create_role(db, workspace, "TempRole")
 
     employee = create_user(db, workspace=workspace, email="employee4@test.com")

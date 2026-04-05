@@ -50,3 +50,6 @@ def get_users(db: Session, role_id: int):
 
 def update_user_role(db: Session, user_id: int, role_id: int | None):
     repository.set_user_role(db, user_id, role_id)
+    
+def get_role_by_name(db: Session, name: str):
+    return repository.get_role_by_name(db, name)

@@ -7,6 +7,7 @@ import EmployeeInviteError from './invites/error.jsx';
 import Roles from "./roles/roles";
 import CreateWorkspace from "./workspace/CreateWorkspace";
 import Home from "./home/home.jsx"
+import FileOverviewPage from "./FileOverview/FileOverviewPage.jsx";
 import { Toast } from 'primereact/toast';
 import Scans from "./scans/Scans.jsx";
 
@@ -15,6 +16,9 @@ import Unprocessable422 from "./Errors/unprocessable422.jsx";
 import WorkspaceJoinedError from "./invites/WorkspaceJoined.jsx";
 import Forbidden403 from "./Errors/Forbidden403.jsx";
 import Layout from "./components/layout/layout.jsx";
+import OrgChart from "./org_chart/orgChart";
+import ViewEmployees from "./employees/ViewEmployees.jsx";
+import ManageEmployees from "./employees/ManageEmployees.jsx";
 import ScanPage from "./scans/ScanPage.jsx";
 
 
@@ -33,9 +37,9 @@ function App() {
 
           {/* Elements in here will inherit the sidebar  */}
           <Route path="/roles" element={<Roles />} />
-          <Route path="/view-employees" element={null} />
-          <Route path="/manage-employees" element={null} />
-          <Route path="/upload-org-chart" element={null} />
+          <Route path="/view-employees" element={<ViewEmployees toast={toast}/>} />
+          <Route path="/manage-employees" element={<ManageEmployees toast={toast}/>} />
+          <Route path="/upload-org-chart" element={<OrgChart toast={toast} />} />
           <Route path="/settings" element={null} />
           <Route path="/dashboard" element={<Dashboard toast={toast}/>} />
           <Route path="/scans" element={<Scans />} />
@@ -44,7 +48,11 @@ function App() {
 
         {/* Elements in here will not inherit the sidebar */}
         <Route path="/" element={<Home toast={toast}/>} />
+        <Route path="/roles" element={<Roles />} />
+        <Route path="/dashboard" element={<Dashboard toast={toast}/>} />
         <Route path="/create-workspace" element={<CreateWorkspace  toast={toast}/>} />
+        <Route path="/files/:file_id" element={<FileOverviewPage />} />
+        <Route path="/create-workspace" element={<CreateWorkspace toast={toast}/>} />
         <Route path="/test" element={<Test/>} />
         <Route path="/error/422" element={<Unprocessable422/>}/>
         <Route path="/error/403" element={<Forbidden403/>}/>

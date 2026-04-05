@@ -1,22 +1,46 @@
+from msal import ConfidentialClientApplication
 from sqlalchemy.orm import Session
 from app.authentication import repository
-from ..core.security import create_refresh_token, create_access_token, hash_user_refresh_token
 from datetime import datetime, timezone, timedelta
+import requests
+
+from ..core.config import SCOPES
+from ..core.security import create_refresh_token, create_access_token, hash_user_refresh_token, encrypt_refresh, decrypt_refresh
 from app.workspaces.repository import add_notification, get_workspace_by_workspace_id, add_user_workspace
 from app.invites.repository import get_invite_by_workspace_id, update_invite_used_value
+from app.roles.repository import migrate_pending_roles
+from app.authentication.repository import get_pending_user_by_email, delete_pending_user
 
-def create_user(db, details: dict, role: str, workspace_id: int):
+DRIVE_DATA_GRAPH_URL = "https://graph.microsoft.com/v1.0/me/drive?$select=id"
+
+def create_user(db, details: dict, refresh: str, ms_access_token: str, role: str, workspace_id: int):
     split_name = details["name"].split()
     firstname, surname = split_name[0], split_name[-1]
+    enc_refresh = encrypt_refresh(refresh)
+    # Get the DriveId - IF there is an error, maybe log it for future so that it can be fetched at another time? This should be the only major potential point of failure if user creation reaches this stage
+    drive_id = get_drive_id(access_token=ms_access_token)
+
+    email = details["email"]
+
+    pending_user = repository.get_pending_user_by_email(db, email)
 
     user = repository.create_user(
         db=db,
         firstname=firstname,
         surname=surname,
-        email=details["email"],
+        username=details["preferred_username"],
+        email=email,
         oid=details["oid"],
+        refresh=enc_refresh,
+        driveId=drive_id,
         role=role
     )
+    
+    if pending_user:
+        migrate_pending_roles(db, pending_user.user_id, user.user_id)
+
+        # delete pending user AFTER migration
+        delete_pending_user(db, pending_user)
     
     if(workspace_id != None and role == "employee"):
         invite = get_invite_by_workspace_id(db, workspace_id)
@@ -33,10 +57,18 @@ def create_user(db, details: dict, role: str, workspace_id: int):
 
     return user
 
-def check_exists(oid: str, db):
+def check_get_by_id(id: int, db):
+    user = repository.get_by_id(id, db)
+    return user if user else None
+
+def check_get_by_oid(oid: str, db):
     # print(oid)
     user = repository.get_by_oid(oid, db)
     # print(f"User details:\nFirstname: {res.firstname}\nSurname: {res.surname}\nemail: {res.email}") if res else print("There is nothing there!")
+    return user if user else None
+
+def check_get_by_email(email: str, db: Session):
+    user = repository.get_by_email(email, db)
     return user if user else None
 
 def test_route(id: int, db):
@@ -117,3 +149,77 @@ def refresh_flow(db, client_refresh: str, current_time: datetime):
         "refresh_token": refresh_token
     }
     return return_dict
+
+def rotate_ms_refresh(id: int, refresh_token: str, db:Session):
+    repository.update_ms_refresh(id, refresh_token, db)
+
+def update_delta_link(id: int, delta_link: str, db:Session):
+    repository.update_delta_link(id, delta_link, db)
+
+def get_user_access(application: ConfidentialClientApplication, user_id, db:Session) -> str | None:
+    # This is to get the access token for users - THAT ARE ALREADY LOGGED IN!
+    user_details = check_get_by_id(user_id, db)
+    access_token = None
+    
+    if user_details:
+        account = application.get_accounts(username=user_details.username)
+        if account:
+            tokens = application.acquire_token_silent(scopes=SCOPES, account=account[0])
+            access_token = tokens["access_token"]
+            # Rotate the refresh token in the DB
+            enc_refresh = encrypt_refresh(tokens["refresh_token"])
+            rotate_ms_refresh(user_id, enc_refresh, db)
+
+        else:
+            account = application.acquire_token_by_refresh_token(refresh_token=decrypt_refresh(user_details.refresh), scopes=SCOPES)
+            access_token = account["access_token"]
+            # Rotate the refresh token in the DB
+            enc_refresh = encrypt_refresh(account["refresh_token"])
+            rotate_ms_refresh(user_id, enc_refresh, db)
+    else:
+        return None
+
+    return access_token
+
+def get_drive_id(access_token: str):
+    '''
+    Function that will get the DriveId for the user
+    '''
+    # GET request to retrieve the drive data
+    response = requests.get(url=DRIVE_DATA_GRAPH_URL,
+                 headers={"Authorization": f"Bearer {access_token}"})
+    drive_data = response.json()
+
+    # Extracting the driveId from the response and updating user table in the DB
+    if "id" in drive_data:
+        return drive_data["id"]
+        # repository.update_user_drive_data(user_id=id, drive_id=drive_data["id"], db=db)
+    else:
+        print("There was an fethching the drive data for the user!")
+        return None
+    
+def get_access_with_drive_id(application: ConfidentialClientApplication, drive_id: str, db) -> str|None:
+    user = repository.get_user_id_by_drive_id(drive_id, db)
+    if not user:
+        return None
+    return get_user_access(application=application, user_id=user.user_id, db=db)
+
+def delete_user(db: Session, user_id: int):
+    repository.delete_user(db, user_id)
+    return True
+
+def reject_pending_user(db: Session, user_id: int):
+    repository.delete_pending_user(db, user_id)
+    return True
+
+def get_pending_by_id(db: Session, user_id: int):
+    return repository.get_pending_user_by_id(db, user_id)
+
+def get_pending_by_email(db: Session, email: str):
+    return repository.get_pending_user_by_email(db, email)
+
+def add_pending_user(db: Session, email: str, type: str):
+    repository.add_user(db, email, type)
+    return True
+
+    

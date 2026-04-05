@@ -238,7 +238,7 @@ describe("Invite Component", () => {
         // Check that the success toast is triggered correctly
         await waitFor(() => {
             const successToast = toastCalls.find(
-                (t) => t.detail === "Invite successfully sent!" // Ensure this matches the exact toast message
+                (t) => t.detail === "Invite successfully sent!" 
             );
             expect(successToast).toBeDefined();
             expect(successToast.severity).toBe("success");
@@ -491,7 +491,7 @@ describe("Invite Component", () => {
                 {
                     title: title,
                     body: body,
-                    workspace_id: "1",
+                    workspace_id: "1"
                 }
             );
         });

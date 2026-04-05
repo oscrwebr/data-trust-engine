@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.core.database import get_database
 from app.scanning import service, repository
 from pydantic import BaseModel
-from app.scanning.schemas import OrganisationScanRequest
+from app.scanning.schemas import OrganisationScanRequest, FileResponse, FileScansResponse, FileLatestScanResultResponse
 
 router = APIRouter(prefix="/scanning", tags=["scanning"])
 
@@ -36,9 +36,33 @@ def create_file(graph_file_id: str, file_name: str, db: Session = Depends(get_da
     repository.create_file(db, graph_file_id, file_name, hash_result)
 
 
+# Get a file's details using its id
+@router.get("/get_file/{file_id}", response_model=FileResponse)
+def get_file(file_id: int, db: Session = Depends(get_database)):
+    file = service.get_file(db, file_id)
+
+    if not file:
+        raise HTTPException(status_code=404, detail="File not found")
+    
+    return file
+
+
+# Get a file's latest scan results using its id
+@router.get("/get_file_latest_scan_results/{file_id}", response_model=list[FileLatestScanResultResponse])
+def get_file_latest_scan_results(file_id: int, db: Session = Depends(get_database)):
+    return service.get_file_latest_scan_results(db=db, file_id=file_id)
+
+
+# Get all scans a file is part of using its id
+@router.get("/get_file_scans/{file_id}", response_model=list[FileScansResponse])
+def get_file_scans(file_id: int, db: Session = Depends(get_database)):
+    return service.get_file_scans(db, file_id)
+
+
 @router.get("/get_all_files")
 def get_all_files(db: Session = Depends(get_database)):
     return repository.get_all_files(db=db)
+
 
 @router.post("/organisation_scan")
 def organisation_scan(organisation_scan_request: OrganisationScanRequest, db: Session = Depends(get_database)):
