@@ -25,6 +25,10 @@ function Home({toast}) {
     window.location.href = "http://localhost:8000/auth/sign-in?next=/create-workspace&signup=true&role=1"
   }
 
+  function handleEmployeeSignup(){
+    window.location.href = "http://localhost:8000/auth/sign-in?next=/dashboard&signup=true&role=2"
+  }
+
   function handleSignIn(){
     nav("/dashboard")
   }
@@ -33,6 +37,7 @@ function Home({toast}) {
     <div>
       <Button onClick={handleSignIn}>Sign in</Button>
       <Button onClick={handleCreateWorkspace}>Create a workspace</Button>
+      <Button onClick={handleEmployeeSignup}>Join a Workspace</Button>
     </div>
   );
 }
