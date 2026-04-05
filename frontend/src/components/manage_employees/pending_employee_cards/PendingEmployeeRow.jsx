@@ -1,6 +1,6 @@
 import styles from "../manage_employees.module.css"
 import dayjs from "dayjs";
-import { Avatar } from "primereact/Avatar";
+import { Avatar } from "primereact/avatar";
 import { Button } from "primereact/button";
 
 function PendingEmployeeRow({email, status, datetime, onReject, onAccept}){

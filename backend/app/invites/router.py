@@ -18,6 +18,7 @@ from app.workspaces.service import add_pending_user_to_workspace
 from typing import Annotated
 from ..core.security_schemas import User
 from ..core.security import get_user_from_access_token
+from ..core.config import REDIRECT_URI, FRONTEND_BASE_URL
 
 router = APIRouter(prefix="/invite", tags=["invite"])
 
@@ -57,7 +58,7 @@ async def process_invite(token: str = Query(...), db: Session = Depends(get_data
 
     # If no invite then redirect the user to you have already joined a workspace with this invite
     if not invite or invite.used == True:
-        return RedirectResponse(f"http://localhost:5173/workspace-joined")
+        return RedirectResponse(f"{FRONTEND_BASE_URL}/workspace-joined")
     
     # Get the pending_user based on the invite
     pending_user = user_repository.get_pending_user_by_id(db, invite.user_id)
@@ -69,11 +70,11 @@ async def process_invite(token: str = Query(...), db: Session = Depends(get_data
     # Check wether the invite expiry date
     if(result == "expired"):
         expiry = invite.expiry_date
-        return RedirectResponse(f"http://localhost:5173/invite-error/expired?date={expiry}&workspace={workspace_id}")
+        return RedirectResponse(f"{FRONTEND_BASE_URL}/invite-error/expired?date={expiry}&workspace={workspace_id}")
     
     invite_repository.update_invite_used_value(db, invite.invite_id)
     next_url = "/dashboard?toast=signup"
-    redirect_url = f"http://localhost:8000/auth/sign-in?next={quote(next_url)}&signup=true&role=2&workspace_id={workspace_id}"
+    redirect_url = f"{REDIRECT_URI}/auth/sign-in?next={quote(next_url)}&signup=true&role=2&workspace_id={workspace_id}"
 
     return RedirectResponse(redirect_url, status_code=302)
 

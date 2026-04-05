@@ -29,6 +29,12 @@ def get_workspaces(db: Session):
 def get_employees(db: Session, user_id: int):
     return repository.get_all_employees(db, user_id)
 
+def get_workspace_by_user(db: Session, user_id: int):
+    return repository.get_workspace_by_user(db, user_id)
+
+def get_workspace_by_user(db: Session, user_id: int):
+    return repository.get_workspace_by_user(db, user_id)
+
 def get_admin_from_workspace(db: Session, workspace_id: int):
     return repository.get_workspace_admin(db, workspace_id)
 

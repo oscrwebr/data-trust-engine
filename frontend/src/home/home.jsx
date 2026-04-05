@@ -7,6 +7,8 @@ function Home({toast}) {
   const params = new URLSearchParams(location.search);
   const toastParam = params.get("toast");
   const shownRef = useRef(false);
+  const backend_uri = import.meta.env.VITE_BACKEND_HOST || "http://localhost:8000"
+  console.log(backend_uri);
   const nav = useNavigate();
 
   useEffect(() => {
@@ -22,11 +24,12 @@ function Home({toast}) {
   }, [toastParam]);
 
   function handleCreateWorkspace(){
-    window.location.href = "http://localhost:8000/auth/sign-in?next=/create-workspace&signup=true&role=1"
+    console.log(backend_uri)
+    window.location.href = `${backend_uri}/auth/sign-in?next=/create-workspace&signup=true&role=1`
   }
 
   function handleEmployeeSignup(){
-    window.location.href = "http://localhost:8000/auth/sign-in?next=/dashboard&signup=true&role=2"
+    window.location.href = `${backend_uri}/auth/sign-in?next=/dashboard&signup=true&role=2`
   }
 
   function handleSignIn(){

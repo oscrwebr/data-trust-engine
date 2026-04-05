@@ -1,7 +1,7 @@
 import styles from "../manage_employees/validation_modals/modal.module.css"
 import api from "../../api/axiosConfig"
 import { useState, useEffect } from "react";
-import { Dialog } from "primereact/Dialog"
+import { Dialog } from "primereact/dialog"
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
 

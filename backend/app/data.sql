@@ -63,13 +63,13 @@ INSERT INTO `user_workspace` (`user_id`, `workspace_id`) VALUES
 (6, 1),
 (7, 1),
 (8, 1),
-(9, 1),
+(9, 2),
 (10, 1),
 (11, 1);
 
 
 -- ==========================
--- 6. Pending User Workspaces
+-- 6. Pending User User Workspace
 -- ==========================
 DELETE FROM `pending_user_workspace`;
 INSERT INTO `pending_user_workspace` (`user_id`, `workspace_id`) VALUES

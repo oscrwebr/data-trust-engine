@@ -2,7 +2,7 @@ import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-li
 import { MemoryRouter, Outlet, Routes, Route} from "react-router-dom";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import userEvent from "@testing-library/user-event";
-import Dashboard from "../../dashboard/Dashboard.jsx";
+import Dashboard from "../../Dashboard/Dashboard.jsx";
 import RequestJoinWorkspaceModal from "./RequestJoinWorkspaceModal.jsx";
 
 const workspaces = [

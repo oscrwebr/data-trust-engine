@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { Message } from "primereact/message";
-import { Dialog } from "primereact/Dialog";
+import { Dialog } from "primereact/dialog";
 
 import FileUpload from "./FileUpload.jsx";
 import styles from "./CreateWorkspace.module.css";

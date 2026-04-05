@@ -2,7 +2,7 @@ import "./App.css"
 import { useRef } from "react";
 
 import { BrowserRouter, Routes, Router, Route , useLocation} from "react-router-dom";
-import Dashboard from './dashboard/Dashboard';
+import Dashboard from './Dashboard/Dashboard';
 import EmployeeInviteError from './invites/error.jsx';
 import Roles from "./roles/roles";
 import CreateWorkspace from "./workspace/CreateWorkspace";
@@ -12,13 +12,14 @@ import { Toast } from 'primereact/toast';
 import Scans from "./scans/Scans.jsx";
 
 import Test from "./Test/Test.jsx";
-import Unprocessable422 from "./Errors/unprocessable422.jsx";
+import Unprocessable422 from "./Errors/Unprocessable422.jsx";
 import WorkspaceJoinedError from "./invites/WorkspaceJoined.jsx";
 import Forbidden403 from "./Errors/Forbidden403.jsx";
 import Layout from "./components/layout/layout.jsx";
 import OrgChart from "./org_chart/orgChart";
 import ViewEmployees from "./employees/ViewEmployees.jsx";
 import ManageEmployees from "./employees/ManageEmployees.jsx";
+import OrgChart from "./org_chart/orgChart";
 
 
 function App() {
@@ -49,12 +50,12 @@ function App() {
         <Route path="/dashboard" element={<Dashboard toast={toast}/>} />
         <Route path="/create-workspace" element={<CreateWorkspace  toast={toast}/>} />
         <Route path="/files/:file_id" element={<FileOverviewPage />} />
-        <Route path="/create-workspace" element={<CreateWorkspace toast={toast}/>} />
         <Route path="/test" element={<Test/>} />
         <Route path="/error/422" element={<Unprocessable422/>}/>
         <Route path="/error/403" element={<Forbidden403/>}/>
         <Route path="/invite-error/:type" element={<EmployeeInviteError toast={toast}/>} />
         <Route path="/workspace-joined" element={<WorkspaceJoinedError />} />
+        <Route path="/upload-org-chart" element={<OrgChart toast={toast} />} />
         <Route path="/scans" element={<Scans />} />
       </Routes>
 

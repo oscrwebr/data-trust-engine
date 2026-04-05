@@ -1,6 +1,6 @@
 import styles from "../manage_employees.module.css"
 
-import { Avatar } from "primereact/Avatar";
+import { Avatar } from "primereact/avatar";
 import { Dropdown } from "primereact/dropdown";
 
 function ActiveEmployeeSquare({id, initials, firstname, surname, email, employeeRole, roles, setEmployeeRole, removeEmployee}){

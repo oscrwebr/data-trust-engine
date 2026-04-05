@@ -6,7 +6,7 @@ import api from "../api/axiosConfig"
 
 import logo from "../assets/CIH_logo.jpg";
 import { Button } from "primereact/button";
-import {Avatar} from "primereact/Avatar";
+import { Avatar } from "primereact/avatar";
 import { useEffect, useState } from "react";
 
 function EmployeeInviteError({toast}){
