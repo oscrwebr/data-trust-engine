@@ -2,7 +2,7 @@ import { cleanup, fireEvent, render, screen, within, waitFor } from "@testing-li
 import { MemoryRouter, redirect, Route, Routes, Outlet } from "react-router-dom";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import EmployeeInviteError from "./error.jsx";
-import Dashboard from "../dashboard/Dashboard.jsx";
+import Dashboard from "../Dashboard/Dashboard.jsx";
 import WorkspaceJoinedError from "./WorkspaceJoined.jsx";
 import Home from "../home/home.jsx"
 

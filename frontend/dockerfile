@@ -12,11 +12,20 @@ RUN --mount=type=cache,target=/root/.npm npm install
 
 COPY . .
 
+
+# This is the target for the development profile
 FROM base AS dev
 
 EXPOSE 5173
 
 CMD ["npm", "run", "dev"]
+
+
+# This is the target of the frontend test profile
+FROM base AS test
+
+CMD ["npm", "run", "test"]
+
 
 # This will sets up the production environment
 FROM base AS prod-setup

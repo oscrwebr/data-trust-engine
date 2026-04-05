@@ -156,10 +156,20 @@ services:
     depends_on:
       - backend-prod
 
+
+  # Setting up the frontend test environment
+  frontend-test:
+    build:
+      context: ./frontend
+      target: test
+    # image: dte-frontend-test:latest
+    profiles: ["test-frontend"]
+
+
   # Setting up the backend test environment
   database-test:
     image: mariadb:11.8-noble
-    profiles: ["test"]
+    profiles: ["test-backend"]
     environment:
       - MARIADB_ROOT_PASSWORD=${DB_PASSWORD}
       - MARIADB_DATABASE=${DB_TEST_NAME}
@@ -171,9 +181,10 @@ services:
       retries: 5
 
   backend-test:
-    image: fastapi-backend:latest
+    build:
+      context: ./backend
+    # image: fastapi-backend-test:latest
     profiles: ["test-backend"]
-    pull_policy: never
     environment:
       - CLIENT_ID=${CLIENT_ID}
       - CLIENT_SECRET=${CLIENT_SECRET}
@@ -190,7 +201,7 @@ services:
       - MAIL_PASSWORD=${MAIL_PASSWORD}
       - ZEROBOUNCE_API_KEY=${ZEROBOUNCE_API_KEY}
       - FERNET_KEY=${FERNET_KEY}
-      - FRONTEND_HOST=frontend-test # This literally could be anything - should be mocking the calls!
+      - FRONTEND_HOST=${FRONTEND_HOST} # This literally could be anything - should be mocking the calls!
       - REDIRECT_URI=${REDIRECT_URI}
     command: pytest --cov-fail-under=90 --cov-report=html --cov=app
     depends_on:
