@@ -1,5 +1,5 @@
 import styles from "../manage_employees.module.css"
-import { Avatar } from "primereact/Avatar";
+import { Avatar } from "primereact/avatar";
 import { Button } from "primereact/button";
 import dayjs from "dayjs";
 

@@ -1,4 +1,4 @@
-import { Avatar } from "primereact/Avatar";
+import { Avatar } from "primereact/avatar";
 import styles from "./workspace.module.css"
 
 function WorkspaceOptionTemplate({ workspace }) {
