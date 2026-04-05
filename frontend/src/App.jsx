@@ -19,7 +19,6 @@ import Layout from "./components/layout/layout.jsx";
 import OrgChart from "./org_chart/orgChart";
 import ViewEmployees from "./employees/ViewEmployees.jsx";
 import ManageEmployees from "./employees/ManageEmployees.jsx";
-import OrgChart from "./org_chart/orgChart";
 
 
 function App() {

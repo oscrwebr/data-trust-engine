@@ -61,9 +61,6 @@ async def sign_in(application: Annotated[ConfidentialClientApplication, Depends(
 
 @router.get("/success/")
 async def login_redirect(application: Annotated[ConfidentialClientApplication, Depends(application)], request: Annotated[dict, Depends(get_session)], response: Response, db: Annotated[Session, Depends(get_database)], client_info: str | None=None, code: str | None=None, state: str | None=None, error: str | None=None, error_description: str | None=None):
-    print("I got to the success part - you have no clue where I am failing!!!")
-    print(request.session)
-
     if error:
         return RedirectResponse(url=f"{config.FRONTEND_BASE_URL}/error/422")
 
