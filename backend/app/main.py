@@ -7,6 +7,7 @@ from app.invites.router import router as invite_router
 from app.scanning.router import router as scanning_router
 from app.roles.router import router as roles_router
 from app.workspaces.router import router as workspaces_router
+from app.org_chart.router import router as org_chart_router
 from app.ingestion.router import router as ingestion_router
 from app.file_dashboard.router import router as files_dashboard_router
 
@@ -16,6 +17,7 @@ app.include_router(scanning_router)
 app.include_router(roles_router)
 app.include_router(workspaces_router)
 app.include_router(auth_router)
+app.include_router(org_chart_router)
 app.include_router(ingestion_router)
 app.include_router(files_dashboard_router)
 

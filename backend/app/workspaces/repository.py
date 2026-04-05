@@ -11,6 +11,9 @@ def add_workspace(db: Session, name:str, image:bytes):
     db.refresh(workspace)
     return workspace
 
+def get_all_workspaces(db: Session):
+    return db.query(Workspace).all()
+
 def get_workspace_by_workspace_id(db: Session, workspace_id: int):
     return db.query(Workspace).filter(Workspace.id == workspace_id).first()
 
@@ -48,6 +51,16 @@ def add_pending_user_workspace(db: Session, workspace_id: int, user_id: int):
     db.commit()
     return record
 
+def get_workspace_admin(db: Session, workspace_id: int):
+    user = (
+        db.query(User)
+        .join(user_workspace, User.user_id == user_workspace.c.user_id)
+        .filter(user_workspace.c.workspace_id == workspace_id)
+        .filter(User.role == "admin")
+        .all()
+    )
+
+    return user
 
 def get_all_employees(db: Session, user_id: int):
     workspace = db.query(Workspace).join(user_workspace).filter(
@@ -64,6 +77,13 @@ def get_all_employees(db: Session, user_id: int):
 
     return users
 
+def get_workspace_by_user(db: Session, user_id: int) -> int | None:
+
+    workspace_assoc = db.query(user_workspace).filter(user_workspace.c.user_id == user_id).first()
+    if workspace_assoc:
+        return workspace_assoc.workspace_id
+    return None
+
 def get_all_pending_employees(db: Session, user_id: int):
     workspace = db.query(Workspace).join(user_workspace).filter(
         user_workspace.c.user_id == user_id
@@ -77,4 +97,3 @@ def get_all_pending_employees(db: Session, user_id: int):
     )
 
     return pending_users
-

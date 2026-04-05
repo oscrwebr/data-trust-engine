@@ -11,7 +11,7 @@ INSERT INTO `user` (`user_id`, `firstname`, `surname`, `username`, `email`, `oid
 (6, 'Margaret', 'Plums', 'margaret@example.com', 'margaret@example.com', 'oid5', 'kasdjfh', 'employee'),
 (7, 'Daiyan', 'Khan', 'daiyan@example.com', 'daiyan@example.com', 'oid6', 'kasdjfh', 'employee'),
 (8, 'Oscar', 'Webster', 'oscar@example.com', 'oscar@example.com', 'oid7', 'kasdjfh', 'employee'),
-(9, 'Sam', 'Carter', 'sam@example.com', 'sam@example.com', 'oid8', 'kasdjfh', 'employee'),
+(9, 'Sam', 'Carter', 'samtc.1107@gmail.com', 'samtc.1107@gmail.com', '00000000-0000-0000-e24b-a6db04ddcd03', 'kasdjfh', 'admin'),
 (10, 'Elizabeth', 'Palmer', 'elizabeth@example.com', 'elizabeth@example.com', 'oid9', 'kasdjfh', 'employee'),
 (11, 'Susan', 'Younger', 'susan@example.com', 'susan@example.com', 'oid10', 'kasdjfh', 'employee');
 
@@ -33,7 +33,11 @@ INSERT INTO `pending_users` (`user_id`, `email`, `type`) VALUES
 -- ==========================
 DELETE FROM `workspaces`;
 INSERT INTO `workspaces` (`id`, `name`, `image`) VALUES
-(1, 'Test Workspace', 0x66616B652D696D6167652D6279746573); -- 'fake-image-bytes' as hex
+(1, 'John Lewis & Partners', 0x66616B652D696D6167652D6279746573), -- 'fake-image-bytes' as hex
+(2, 'Cardiff University Cleaning', 0x66616B652D696D6167652D6279746573),
+(3, 'The Garden Center', 0x66616B652D696D6167652D6279746573),
+(4, 'Injury Lawyers for You', 0x66616B652D696D6167652D6279746573),
+(5, 'FlashPoint Cardiff', 0x66616B652D696D6167652D6279746573);
 
 
 -- ==========================

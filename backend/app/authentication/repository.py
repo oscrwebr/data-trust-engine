@@ -31,7 +31,7 @@ def get_pending_user_by_id(db: Session, id: int):
 def get_pending_user_by_email(db: Session, email: str):
     return db.query(PendingUser).filter(PendingUser.email == email).first()
 
-def set_pending_user_type(db: Session, user: PendingUser, type: String):
+def set_pending_user_type(db: Session, user: PendingUser, type: str):
     user.type = type
     db.commit()
     return user

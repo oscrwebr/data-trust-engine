@@ -20,7 +20,6 @@ const Layout = () => {
       .then(res => {
           if (res.data.user) {
             setUser(res.data.user);
-            console.log(res.data.user)
             setWorkspace(res.data.workspace);
           }
       })
@@ -45,7 +44,9 @@ const Layout = () => {
                     toastNotifications,
                     visible,
                     setVisible,
-                    setNotifications
+                    setNotifications,
+                    user,
+                    workspace
                 }} />
             </div>
         </div>

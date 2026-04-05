@@ -10,6 +10,10 @@
     width: 30vw;
 }
 
+.request_dialog {
+    width: 35vw;
+}
+
 .remove_button {
     background-color: green;
     margin-right: 5px;
@@ -34,4 +38,16 @@
     position: absolute;
     top: 15px;
     right: 15px;
+}
+
+.dialog_header {
+    font-size: 23px;
+    margin: 0;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: 15px;
 }

@@ -1,0 +1,283 @@
+:root {
+  --bg-light: #f6f8fa;
+  --bg-dark: #0d1117;
+
+  --text-light: #24292f;
+  --text-dark: #c9d1d9;
+
+  --card-light: #ffffff;
+  --card-dark: #161b22;
+
+  --border-light: #e1e4e8;
+  --border-dark: #30363d;
+
+  --hover-light: #f3f4f6;
+  --hover-dark: #21262d;
+
+  --accent-green: #28a745;
+  --accent-blue: #0969da;
+  --delete-red: #d73a49;
+
+  --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+
+  --bg: var(--bg-light);
+  --text: var(--text-light);
+  --card-bg: var(--card-light);
+  --border: var(--border-light);
+  --hover: var(--hover-light);
+}
+/* 
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: var(--bg-dark);
+    --text: var(--text-dark);
+    --card-bg: var(--card-dark);
+    --border: var(--border-dark);
+    --hover: var(--hover-dark);
+  }
+} */
+
+/* ===== Page Container ===== */
+.orgPageContainer {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: var(--text);
+  background-color: var(--bg);
+  min-height: 100vh;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* ===== Page Header ===== */
+.pageHeader {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--accent-blue);
+  text-align: center;
+}
+
+/* ===== Upload Section ===== */
+.orgUploadSection {
+  max-width: 720px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.orgLabel {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.fileUpload {
+  border: 2px dashed var(--border);
+  border-radius: 16px;
+  padding: 2rem;
+  text-align: center;
+  background-color: var(--card-bg);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.fileUpload:hover {
+  background-color: var(--hover);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+}
+
+.selectedFile {
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+/* ===== Buttons ===== */
+.btn {
+  display: inline-block;
+  padding: 0.6rem 1.4rem;
+  font-weight: 600;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  min-width: 130px;
+}
+
+.addBtn {
+  background-color: var(--accent-green);
+  color: white;
+}
+
+.saveBtn {
+  background-color: var(--accent-blue);
+  color: white;
+}
+
+.deleteBtn {
+  background-color: var(--delete-red);
+  color: white;
+  font-size: 1rem;
+}
+
+.cancelBtn,
+.parseBtn{
+  background-color: var(--hover);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+}
+
+/* ===== Preview Section ===== */
+.orgPreviewSection {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.orgPreviewTitle {
+  font-weight: 700;
+  font-size: 1.6rem;
+  margin-bottom: 1rem;
+  color: var(--accent-blue);
+}
+
+/* ===== Roles Grid ===== */
+.orgRolesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+/* ===== Role Card ===== */
+.roleBlock {
+  background-color: var(--card-bg);
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-shadow: var(--shadow);
+  transition: all 0.3s ease;
+}
+
+.roleBlock:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  background-color: var(--hover);
+}
+
+.roleTitle {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+/* ===== Employee Tiles ===== */
+.userRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--hover);
+  padding: 0.7rem 1rem;
+  border-radius: 12px;
+  cursor: grab;
+  transition: all 0.2s ease;
+}
+
+.userRow:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+}
+
+.userRow:active {
+  cursor: grabbing;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+
+.userName {
+  font-weight: 500;
+  font-size: 0.95rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ===== Action Buttons ===== */
+.orgActionButtons {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+/* ===== Add User Form ===== */
+.orgAddUserForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.inputField,
+.roleDropdown {
+  padding: 0.6rem 0.8rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background-color: var(--card-bg);
+  color: var(--text);
+  transition: all 0.2s ease;
+}
+
+.inputField:focus,
+.roleDropdown:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px rgba(9,105,218,0.15);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .orgRolesGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .userRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .orgActionButtons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.side-toast {
+  animation: slideInRight 0.3s ease, fadeOut 0.5s ease 2.5s forwards;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+    transform: translateX(120%);
+  }
+}
