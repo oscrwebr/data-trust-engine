@@ -54,7 +54,7 @@ function OrganisationScanPage({ scan }) {
                     <PiTextAaBold size={50}/>
                 </div>
             </div>
-            <div className="scan-page-card clean">
+            <div className={`scan-page-card ${getScanPageCardClass(duplicateFilesDummy, scan.file_count)}`}>
                 <div className="scan-page-card-text">
                     <span className="scan-page-card-subtitle">Duplicate Files</span>
                     <span className="scan-page-card-title">{duplicateFilesDummy}</span>
