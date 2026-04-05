@@ -1,5 +1,7 @@
 import hashlib
 import wordninja
+import requests
+from app.core.security import application
 
 from pathlib import Path
 from sqlalchemy.orm import Session
@@ -10,6 +12,9 @@ from app.scanning.regex_patterns import *
 from app.scanning.detectors import *
 from app.scanning.extractors import *
 from app.scanning.scan_type import ScanType
+
+from app.ingestion.service import get_download_link_by_graph_id
+from app.ingestion.repository import get_ingestion_file_by_graph_id
 
 BASE_DIRECTORY = Path(__file__).resolve().parent
 
@@ -40,12 +45,20 @@ def perform_scan(db: Session, graph_file_ids: list[str]):
 def scan_file(db: Session, graph_file_id: str, scan_id: int):
 
     # Fetch file (for now using the testing method) using its graph_file_id (ingestion component will be integrated here later)
-    file_path = fetch_graph_file(graph_file_id=graph_file_id)
+    # file_path = fetch_graph_file(graph_file_id=graph_file_id)
+
+    # Get file's download link via its graph id
+    download_url = get_download_link_by_graph_id(application=application(), db=db, graph_id=graph_file_id)
+
+    # Get file's bytes by request, allow for max 2 minutes to not scan empty files / expired links
+    file_response = requests.get(download_url, timeout=120)
+    file_response.raise_for_status()
+    file_bytes = file_response.content
 
     # Create scan_file record
-    file = repository.get_file_by_graph_id(db=db, graph_file_id=graph_file_id)
+    file = get_ingestion_file_by_graph_id(db=db, graph_id=graph_file_id)
 
-    # Throw error if file with provided graph file id could not bne found
+    # Throw error if file with provided graph file id could not be found
     if file is None:
         raise ValueError(f"File with graph_file_id '{graph_file_id}' not found")
 
@@ -53,11 +66,11 @@ def scan_file(db: Session, graph_file_id: str, scan_id: int):
     scan_file_record = repository.create_scan_file(
         db=db, 
         scan_id=scan_id, 
-        file_id=file.file_id
+        file_id=file.ingestion_file_id
     )
 
     # Extract text from fetched file
-    file_extracted_text = extract_text_from_pdf(filepath=file_path)
+    file_extracted_text = extract_text_from_pdf(file_bytes=file_bytes)
 
     # Detect sensitive data in file's extracted text
     detections = []

@@ -48,3 +48,7 @@ def insert_user_files(user_files: list, db: Session):
 
 def get_drive_id_by_graph_id(graph_id: str, db: Session):
     return db.query(IngestionFile.drive_id).where(IngestionFile.graph_id == graph_id).first()
+
+
+def get_ingestion_file_by_graph_id(graph_id: str, db: Session):
+    return db.query(IngestionFile).filter(IngestionFile.graph_id == graph_id).first()
