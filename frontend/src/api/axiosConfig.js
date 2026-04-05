@@ -1,9 +1,9 @@
 import axios from "axios";
 import { setAccessToken, getAccessToken } from "../Auth/authStore.js";
 
-const test = import.meta.env.VITE_BACKEND_HOST || "localhost"
+const backend_uri = import.meta.env.VITE_BACKEND_HOST || "http://localhost:8000"
 const api = axios.create({
-  baseURL: `http://${test}:8000`,
+  baseURL: backend_uri,
   withCredentials: true
 });
 
@@ -35,7 +35,7 @@ api.interceptors.response.use(
 
       } catch (error) {
         // This is incase the user actually needs to reauthenticate because the backend hasn't accepted the refresh, etc
-        window.location.href = "http://localhost:8000/auth/sign-in?next=" + window.location.pathname;
+        window.location.href = `${backend_uri}/auth/sign-in?next=` + window.location.pathname;
       }
       
     }
