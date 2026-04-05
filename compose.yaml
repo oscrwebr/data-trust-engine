@@ -127,7 +127,7 @@ services:
       - ZEROBOUNCE_API_KEY=${ZEROBOUNCE_API_KEY}
       - FERNET_KEY=${FERNET_KEY}
       - FRONTEND_HOST=http://localhost #  THESE MUST ALWAYS BE TO WHATEVER THE USER'S CLIENT SHOULD BE! FOR DEV, THAT IS LOCALHOST
-      - REDIRECT_URI=http://localhost/api/auth/success/
+      - REDIRECT_URI=http://localhost/api
     depends_on:
       alembic_migrations-prod:
         condition: service_completed_successfully
