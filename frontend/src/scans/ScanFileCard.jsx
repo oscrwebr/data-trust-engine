@@ -1,6 +1,7 @@
 import { PiWarningCircle } from "react-icons/pi";
 import { PiCheckCircle } from "react-icons/pi";
 import { formatNamingConventionName } from "./utils/formatNamingConventionName";
+import { Link } from "react-router-dom";
 
 
 function ScanFileCard({scan_file, scan_type}) {
@@ -33,6 +34,7 @@ function ScanFileCard({scan_file, scan_type}) {
     const scanFilePillText = issueCheck ? 'Clean' : issues.map(i => i.type).join(", ");;
 
     return (
+        <Link to={`/file/${scan_file.file_id}`} className="scan-page-link-fix">
         <div className={`scan-page-file-card ${cardClass}`}>
             <div className="scan-file-top">
                 <div className="scan-file-top-left">
@@ -89,6 +91,7 @@ function ScanFileCard({scan_file, scan_type}) {
             )}
 
         </div>
+        </Link>
     )
 }
 
