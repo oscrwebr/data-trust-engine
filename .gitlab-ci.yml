@@ -9,6 +9,10 @@ workflow:
     - if: $CI_COMMIT_BRANCH == "development"
     - when: never
 
+default:
+  before_script:
+    - docker info
+
 test-frontend:
   stage: test-frontend
   script:
