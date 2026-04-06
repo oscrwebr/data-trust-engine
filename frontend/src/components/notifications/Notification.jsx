@@ -1,4 +1,3 @@
-import { Button } from "primereact/button";
 import styles from "../notifications/notifications.module.css"
 
 function Notification({title, body, date}) {

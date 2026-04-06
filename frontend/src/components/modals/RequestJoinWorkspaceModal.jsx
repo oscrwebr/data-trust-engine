@@ -30,7 +30,7 @@ function RequestJoinWorkspaceModal({toast, visible, setVisible}) {
             return; 
         }
 
-        api.post("/workspace/request-join-workspace", {
+        api.post(`/workspace/dashboard/request-join-workspace`, {
             title: title,
             body: body,
             workspace_id: selectedWorkspace.id,

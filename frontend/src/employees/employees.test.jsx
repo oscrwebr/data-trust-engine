@@ -59,6 +59,7 @@ describe("View Employees Component", () => {
         expect(await screen.findByText("Charlie Brown")).toBeInTheDocument();
         expect(await screen.findByText("Bob Messi")).toBeInTheDocument();
         expect(await screen.findByText("Send a Message")).toBeInTheDocument();
+        expect(await screen.findByText("Send an Invite")).toBeInTheDocument();
     })
 
 
@@ -912,5 +913,45 @@ describe("View Employees Component", () => {
             expect(screen.queryByText(/Are you sure you want to reject/)).not.toBeInTheDocument();
         });
     })
+
+    // Test 25
+    test("Check that ViewEmployees send invite button opens the send invite modal correctly", async() => {
+        api.get
+            .mockResolvedValueOnce({ data: { active: employees, pending: pending_users } }) 
+            .mockResolvedValueOnce({ data: roles }); 
+
+        render(
+            <MemoryRouter>
+                <ViewEmployees />
+            </MemoryRouter>
+        );
+
+        const send_invite_button = await screen.findByTestId("send-invite")
+        fireEvent.click(send_invite_button)
+
+        expect(await screen.findByText(/Send your employee an invite/i)).toBeInTheDocument();
+    })
+
+    // Test 25
+    test("Check that ManageEmployees send invite button opens the send invite modal correctly", async() => {
+        api.get
+            .mockResolvedValueOnce({ data: { active: employees, pending: pending_users } }) 
+            .mockResolvedValueOnce({ data: roles }); 
+
+
+        render(
+            <MemoryRouter>
+                <ManageEmployees />
+            </MemoryRouter>
+        );
+
+        const send_invite_button = await screen.findByTestId("send-invite")
+        fireEvent.click(send_invite_button)
+
+        expect(await screen.findByText(/Send your employee an invite/i)).toBeInTheDocument();
+    })
 })
+
+
+
 

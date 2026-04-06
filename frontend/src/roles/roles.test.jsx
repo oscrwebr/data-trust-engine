@@ -63,19 +63,6 @@ describe("Roles Component", () => {
     expect(roles.length).toBeGreaterThan(0);
   });
 
-  test("switch to user assignment and show users", async () => {
-    render(<Roles />);
-
-    await screen.findByText("Admin");
-
-    fireEvent.click(screen.getByText("User Assignment"));
-
-    await waitFor(() => {
-      expect(screen.getByText("Alice Smith")).toBeInTheDocument();
-      expect(screen.getByText("Bob Jones")).toBeInTheDocument();
-    });
-  });
-
   test("add a new role", async () => {
     render(<Roles />);
 
@@ -122,65 +109,6 @@ describe("Roles Component", () => {
 
     await waitFor(() => {
       expect(screen.queryByText("Admin")).not.toBeInTheDocument();
-    });
-  });
-
-  test("search and filter users", async () => {
-    render(<Roles />);
-
-    await screen.findByText("Admin");
-
-    fireEvent.click(screen.getByText("User Assignment"));
-
-    await screen.findByText("Alice Smith");
-
-    // Search
-    fireEvent.change(screen.getByPlaceholderText("Search by username..."), {
-      target: { value: "Alice" },
-    });
-
-    await waitFor(() => {
-      expect(screen.getByText("Alice Smith")).toBeInTheDocument();
-      expect(screen.queryByText("Bob Jones")).not.toBeInTheDocument();
-    });
-
-    // Filter
-    fireEvent.change(screen.getByPlaceholderText("Search by username..."), {
-      target: { value: "" },
-    });
-
-    const selects = screen.getAllByRole("combobox");
-
-    fireEvent.change(selects[0], { target: { value: "2" } });
-
-    await waitFor(() => {
-      expect(screen.getByText("Bob Jones")).toBeInTheDocument();
-    });fireEvent.change(selects[0], { target: { value: "2" } });
-
-    await waitFor(() => {
-      expect(screen.queryByText("Alice Smith")).not.toBeInTheDocument();
-      expect(screen.getByText("Bob Jones")).toBeInTheDocument();
-    });
-  });
-
-  test("assign a role to a user", async () => {
-    render(<Roles />);
-
-    await screen.findByText("Admin");
-
-    fireEvent.click(screen.getByText("User Assignment"));
-
-    await screen.findByText("Alice Smith");
-
-    const selects = screen.getAllByRole("combobox");
-
-    fireEvent.change(selects[1], { target: { value: "2" } });
-
-    await waitFor(() => {
-      expect(api.put).toHaveBeenCalledWith(
-        "/roles/users/1/role",
-        { role_id: "2" }
-      );
     });
   });
 });

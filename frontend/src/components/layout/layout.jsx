@@ -13,6 +13,7 @@ const Layout = () => {
   const [user, setUser] = useState({});
   const [workspace, setWorkspace] = useState(null)
   const [notifications, setNotifications] = useState([])
+  const [workspace_id, setWorkspaceId] = useState(null)
 
 // Getting user information and all their notifications on loading
   useEffect(() => {

@@ -26,7 +26,7 @@ INSERT INTO `pending_users` (`user_id`, `email`, `type`) VALUES
 (3, 'philip@yahoo.com', 'invite'),
 (4, 'daquavious@email.com', 'request'),
 (5, 'francesca@outlook.com', 'request'),
-(6, 'tomclapham21@gmail.com', 'request');
+(6, 'TheWrightBrothers@yahoo.com', 'request');
 
 -- ==========================
 -- 3. Workspaces
