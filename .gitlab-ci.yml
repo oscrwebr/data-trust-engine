@@ -18,6 +18,7 @@ default:
 
 variables:
   DOCKER_TLS_CERTDIR: ""
+  DOCKER_HOST: "tcp://docker:2375"
 
 test-frontend:
   stage: test-frontend
