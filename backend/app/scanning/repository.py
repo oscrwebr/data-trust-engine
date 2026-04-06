@@ -222,12 +222,29 @@ def get_scan_file_count(db: Session, scan_id: int):
 def get_scans_with_file_count(db: Session):
     return db.query(Scan, func.count(ScanFile.scan_file_id)).outerjoin(ScanFile, Scan.scan_id == ScanFile.scan_id).group_by(Scan.scan_id).all()
 
-def get_naming_convention_scan_result_by_scan_file_id(db: Session, scan_file_id: int):
-    return db.query(NamingConventionScanResult, NamingConvention.name).join(
-    # Join to first get the ScanNamingConvention result
-    ScanNamingConvention, NamingConventionScanResult.scan_naming_convention_id == ScanNamingConvention.scan_naming_convention_id
-    ).join(
-    # Then join to get the actual NamingConvention
-    NamingConvention, ScanNamingConvention.naming_convention_id == NamingConvention.naming_convention_id
+def get_naming_convention_scan_results_by_scan_id(db: Session, scan_id: int):
+    return(
+        db.query(
+        
+        NamingConventionScanResult, 
+        NamingConvention.name,
+        ScanFile.scan_file_id
+    )
+    .join(
+        # Join to first get the ScanNamingConvention result
+        ScanNamingConvention, NamingConventionScanResult.scan_naming_convention_id == ScanNamingConvention.scan_naming_convention_id
+    )
+    .join(
+        # Then join to get the actual NamingConvention
+        NamingConvention, ScanNamingConvention.naming_convention_id == NamingConvention.naming_convention_id
+    )
+    .join(
+        # Join to get the ScanFile so that we can filter by scan_file_id
+        ScanFile, NamingConventionScanResult.scan_file_id == ScanFile.scan_file_id
+    )
     # Then get the naming convention scan results for the given scan_file_id
-    ).filter(NamingConventionScanResult.scan_file_id == scan_file_id).all()
+    .filter(ScanFile.scan_id == scan_id).all()
+    )
+
+def get_sensitivity_scan_result_by_scan_file_id(db: Session, scan_file_id: int):
+    pass

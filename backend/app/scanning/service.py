@@ -17,7 +17,7 @@ BASE_DIRECTORY = Path(__file__).resolve().parent
 # Perform a scan
 def perform_scan(db: Session, graph_file_ids: list[str]):
     # Initialise the Scan record
-    scan = repository.create_scan(db=db)
+    scan = repository.create_scan(db=db, scan_type=ScanType.SENSITIVITY)
     
     # Call scan file method for every graph_file_id received (scan_file method will call a method to pull the files)
     for graph_file_id in graph_file_ids:
@@ -303,6 +303,22 @@ def get_scan_by_id(db: Session, scan_id: int):
 
 def get_organisational_scan_details(db: Session, scan):
     files = repository.get_scan_files_with_file(db=db, scan_id=scan.scan_id)
+    results_query = repository.get_naming_convention_scan_results_by_scan_id(db=db, scan_id=scan.scan_id)
+
+    # Put results_query into dictionary to access when looping
+    results = {}
+
+    for naming_convention_scan_result, naming_convention_name, scan_file_id in results_query:
+        # Create an empty array if we haven't added any results for this ID yet
+        if scan_file_id not in results:
+            results[scan_file_id] = []
+        
+        results[scan_file_id].append({
+            "naming_convention_scan_result_id": naming_convention_scan_result.naming_convention_scan_result_id,
+            "naming_convention_name": naming_convention_name,
+            "passed": naming_convention_scan_result.passed,
+            "suggested_name": naming_convention_scan_result.suggested_name
+        })
 
     return {
         "scan_id": scan.scan_id,
@@ -315,20 +331,34 @@ def get_organisational_scan_details(db: Session, scan):
             "file_id": file.file_id,
             "file_name": file.file_name,
             "hash": file.hash,
-            # Can be more than one (scans can check for multiple naming conventions) so needs to be put into an array
-            "naming_convention_scan_results": [{
-                "naming_convention_scan_result_id": naming_convention_scan_result.naming_convention_scan_result_id,
-                # Get the naming convention name used by the scan
-                "naming_convention_name": naming_convention_name,
-                "passed": naming_convention_scan_result.passed,
-                "suggested_name": naming_convention_scan_result.suggested_name,
-                
-            } for naming_convention_scan_result, naming_convention_name in repository.get_naming_convention_scan_result_by_scan_file_id(db=db, scan_file_id=scan_file.scan_file_id)
-            ]
+            "naming_convention_scan_results": results.get(scan_file.scan_file_id, [])
 
         } for scan_file, file in files
-    ]
+        ]
     }
+
+def get_sensitivity_scan_details(db: Session, scan):
+    files = repository.get_scan_files_with_file(db=db, scan_id=scan.scan_id)
+    return None
+    # return {
+    #     "scan_id": scan.scan_id,
+    #     "scan_type": scan.scan_type,
+    #     "started_at": scan.started_at,
+    #     "finished_at": scan.finished_at,
+    #     "file_count": len(files),
+    #     "files": [{
+    #         "scan_file_id": scan_file.scan_file_id,
+    #         "file_id": file.file_id,
+    #         "file_name": file.file_name,
+    #         "hash": file.hash,
+    #         "sensitivity_scan_results": [{
+                
+    #         }]
+            
+    #     } for scan_file, file in files
+    #     ]
+    # }
+
 
     
 
@@ -341,3 +371,5 @@ def get_scan_details(db: Session, scan_id: int):
     if scan.scan_type == ScanType.ORGANISATION:
         return get_organisational_scan_details(db=db, scan=scan)
     
+    if scan.scan_type == ScanType.SENSITIVITY:
+        return get_sensitivity_scan_details(db=db, scan=scan)
