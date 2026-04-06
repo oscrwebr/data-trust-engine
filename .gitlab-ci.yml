@@ -12,7 +12,8 @@ workflow:
 default:
   image: docker:24.0.5-cli
   services:
-    - docker:24.0.5-dind
+    - name: docker:24.0.5-dind
+      alias: docker 
   before_script:
     - docker info
 
