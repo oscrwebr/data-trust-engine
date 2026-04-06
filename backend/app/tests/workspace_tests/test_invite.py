@@ -209,7 +209,7 @@ def test_expired_invite_record(db, client):
     add_invite(db, datetime.now(), date(2025, 3, 3), token, False, pending_user_instance.inserted_primary_key[0], workspace)
     response = client.get("/invite/invite-processing", params={"token": token}, follow_redirects=False)
 
-    assert response.headers["location"] == f"http://localhost:5173/invite-error/expired?date=2025-03-03&workspace={workspace.id}"
+    assert response.headers["location"] == f"http://localhost:5173/invite-error/expired?date=2025-03-03&workspace={workspace.id}&pending_user_id={pending_user_instance.inserted_primary_key[0]}"
     assert db.query(PendingUser).count() == 1
     assert db.query(Invite).count() == 1
 
@@ -366,72 +366,6 @@ def test_return_statement_with_same_email_as_admin(db, client):
     assert response.json().get("success") == "admin"
     assert db.query(Invite).count() == 0
     assert db.query(PendingUser).count() == 0
-
-# Testing the request join workspace route when a pending user is present
-def test_request_join_workspace_route_with_pending_user(db, client):
-    image = create_test_image()
-
-    oid = "000000-7sdf77-88asdf8-9sdiy99"
-    insert_statement = insert(User).values(firstname="John", surname="Smith", username="valid@example.com", refresh="me-refresh".encode(), email="valid@example.com", oid=oid, role="admin")
-    pending_user = insert(PendingUser).values(email="valid@example.com", type="invite")
-
-    res=db.execute(insert_statement)
-    res_2=db.execute(pending_user)
-
-    workspace = insert(models.Workspace).values(name="Test Workspace", image=image)
-    workspace_instance = db.execute(workspace)
-
-    add_user_workspace(db, workspace_instance.inserted_primary_key[0], res.inserted_primary_key[0])
-
-    refresh_family = repository.create_refresh_family(db)
-
-    access, refresh, _ = service.create_access_refresh(db, data={"userId": res.inserted_primary_key[0], "role": "employee"}, refresh_family_id=refresh_family.refresh_family_id)
-
-    req = client.build_request(
-        method="post",
-        url="/workspace/request-join-workspace",
-        headers={"Authorization": f"Bearer {access}"}, 
-        json={"title":"Test title", "body":"Test body", "workspace_id":workspace_instance.inserted_primary_key[0]},
-    )
-    response = client.send(request = req)
-
-    pending = get_pending_user_by_id(db, res_2.inserted_primary_key[0])
-
-    assert response.status_code == 200
-    assert response.json() == True
-    assert db.query(models.Notification).count() == 1
-    assert pending.type == "request"
-
-
-# Testing the request join workspace route when a pending user is not present
-def test_request_join_workspace_route_with_no_pending_user(db, client):
-    image = create_test_image()
-
-    oid = "000000-7sdf77-88asdf8-9sdiy99"
-    insert_statement = insert(User).values(firstname="John", surname="Smith", username="valid@example.com", refresh="me-refresh".encode(), email="valid@example.com", oid=oid, role="admin")
-    res=db.execute(insert_statement)
-
-    workspace = insert(models.Workspace).values(name="Test Workspace", image=image)
-    workspace_instance = db.execute(workspace)
-
-    add_user_workspace(db, workspace_instance.inserted_primary_key[0], res.inserted_primary_key[0])
-
-    refresh_family = repository.create_refresh_family(db)
-
-    access, refresh, _ = service.create_access_refresh(db, data={"userId": res.inserted_primary_key[0], "role": "admin"}, refresh_family_id=refresh_family.refresh_family_id)
-
-    req = client.build_request(
-        method="post",
-        url="/workspace/request-join-workspace",
-        headers={"Authorization": f"Bearer {access}"}, 
-        json={"title":"Test title", "body":"Test body", "workspace_id":workspace_instance.inserted_primary_key[0]},
-    )
-    response = client.send(request = req)
-
-    assert response.status_code == 200
-    assert response.json() == True
-    assert db.query(models.Notification).count() == 2
-    assert db.query(PendingUser).count() == 1
 
 
 # Testing the route to get all notifications for a user

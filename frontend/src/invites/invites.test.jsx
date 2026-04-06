@@ -474,7 +474,7 @@ describe("Invite Component", () => {
         };
 
         render(
-            <MemoryRouter initialEntries={["/invite-error/expired?date=2026-03-03&workspace=1"]}>
+            <MemoryRouter initialEntries={["/invite-error/expired?date=2026-03-03&workspace=1&pending_user_id=1"]}>
                 <Routes>
                     <Route path="/invite-error/:type" element={<EmployeeInviteError toast={mockToast}/>} />
                 </Routes>
@@ -487,7 +487,7 @@ describe("Invite Component", () => {
         expect(request_button).toBeDisabled();
 
         await waitFor(() => {
-            expect(api.post).toHaveBeenCalledWith("/workspace/request-join-workspace",
+            expect(api.post).toHaveBeenCalledWith(`/workspace/invite/request-join-workspace/1`,
                 {
                     title: title,
                     body: body,

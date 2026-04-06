@@ -8,7 +8,6 @@ function Home({toast}) {
   const toastParam = params.get("toast");
   const shownRef = useRef(false);
   const backend_uri = import.meta.env.VITE_BACKEND_HOST || "http://localhost:8000"
-  console.log(backend_uri);
   const nav = useNavigate();
 
   useEffect(() => {
