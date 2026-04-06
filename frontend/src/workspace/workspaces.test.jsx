@@ -21,7 +21,8 @@ import api from "../api/axiosConfig.js";
 
 function FileUploadWrapper() {
   const [file, setFile] = useState([]);
-  return <FileUpload file={file} setFile={setFile} />;
+  const [error, setError] = useState(false);
+  return <FileUpload file={file} setFile={setFile} error={error} setError={setError}/>;
 }
 
 describe("Workspace Component", () => {
@@ -130,10 +131,31 @@ describe("Workspace Component", () => {
         await userEvent.upload(input, file);
         const fileName = await screen.findByText("workspace.png");
             expect(fileName).toBeInTheDocument();
-        });
-
+    })
 
     // Test 5
+    test("Check error message displays when invalid file type is uploaded", async () => {
+        render(
+            <MemoryRouter>
+                <CreateWorkspace />
+            </MemoryRouter>
+        );
+
+
+        const dropzone = screen.getByTestId("file-upload");
+        const file = new File(["file content"], "video.mp4", { type: "video/mp4" });
+        const input = dropzone.querySelector("input");
+        await userEvent.upload(input, file);
+
+        const fileName = await screen.findByText("video.mp4");
+            expect(fileName).not.toBeInTheDocument();
+
+        const error = await screen.findByText("You cannot upload a file of this type, please choose an image.");
+            expect(error).toBeInTheDocument();
+    })
+
+
+    // Test 6
     test("Check file is removed when remove button is clicked from preview", async () => {
         render(<FileUploadWrapper />);
 
@@ -149,7 +171,7 @@ describe("Workspace Component", () => {
     });
 
     
-    // Test 6
+    // Test 7
     test("Test success message and redirect with all valid inputs", async () => {
 
         let toastCalled = null;
