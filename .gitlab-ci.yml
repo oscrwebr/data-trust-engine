@@ -18,9 +18,10 @@ default:
 
 variables:
   DOCKER_TLS_CERTDIR: "/certs"
+  DOCKER_HOST: "tcp://docker:2376"
 
 test-frontend:
   stage: test-frontend
   script:
-    - echo ls
+    - ls
     - docker compose --profile frontend-test up --build
