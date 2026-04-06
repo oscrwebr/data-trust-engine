@@ -17,8 +17,7 @@ default:
     - docker info
 
 variables:
-  DOCKER_TLS_CERTDIR: "/certs"
-  DOCKER_HOST: "tcp://docker:2376"
+  DOCKER_TLS_CERTDIR: ""
 
 test-frontend:
   stage: test-frontend
