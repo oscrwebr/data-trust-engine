@@ -61,7 +61,6 @@
 
         useEffect(() => {
             fetchEmployees();
-
             api.get("/workspace/get-workspace-roles")
                 .then(res => {
                     const all = { id: "all", name: "View All Employees" };
