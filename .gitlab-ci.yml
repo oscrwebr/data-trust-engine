@@ -10,10 +10,14 @@ workflow:
     - when: never
 
 default:
+  image: docker:24.0.5-cli
+  services:
+    - docker:24.0.5-dind
   before_script:
     - docker info
 
 test-frontend:
   stage: test-frontend
   script:
+    - echo ls
     - docker compose --profile frontend-test up --build
