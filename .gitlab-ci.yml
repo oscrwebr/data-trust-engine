@@ -9,30 +9,21 @@ workflow:
     - if: $CI_COMMIT_BRANCH == "development"
     - when: never
 
-debug-runner:
+default:
+  image: docker:24.0.5-cli
+  services:
+    - name: docker:24.0.5-dind
+      alias: docker
+      command: ["--tls=false"]
+  before_script:
+    - docker info
+
+variables:
+  DOCKER_TLS_CERTDIR: ""
+  DOCKER_HOST: "tcp://docker:2375"
+
+test-frontend:
   stage: test-frontend
-  image: alpine
-  services: []
-  before_script: []
   script:
-    - cat /proc/1/cgroup
-    - env | grep -i runner
-    - whoami
-    - cat /etc/os-release
-
-# default:
-#   image: docker:24.0.5-cli
-#   services:
-#     - docker:24.0.5-dind
-#   before_script:
-#     - docker info
-
-# variables:
-#   DOCKER_TLS_CERTDIR: ""
-#   DOCKER_HOST: "tcp://docker:2375"
-
-# test-frontend:
-#   stage: test-frontend
-#   script:
-#     - ls
-#     - docker compose --profile frontend-test up --build
+    - ls
+    - docker compose --profile frontend-test up --build
