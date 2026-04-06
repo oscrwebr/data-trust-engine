@@ -16,6 +16,7 @@
     import EmployeeRemoveModal from "../components/manage_employees/validation_modals/EmployeeRemoveModal";
     import PendingRejectModal from "../components/manage_employees/validation_modals/PendingRejectModal";
     import PendingAcceptModal from "../components/manage_employees/validation_modals/PendingAcceptModal";
+    import Invite from "../invites/invites";
 
     function ManageEmployees({toast}){
         const [employeeRoles, setEmployeeRoles] = useState({});
@@ -33,6 +34,7 @@
         const [rejectPendingModal, setRejectPendingModal] = useState(false)
         const [acceptPendingModal, setAcceptPendingModal] = useState(false)
         const [saving, setSaving] = useState(false);
+        const [sendInviteModal, setSendInviteModal] = useState(false)
 
         const expiryDate = new Date();
         expiryDate.setDate(expiryDate.getDate() + 7);
@@ -201,10 +203,13 @@
                 <EmployeeRemoveModal firstname={user?.firstname || ""} surname={user?.surname || ""} visible={removeEmployeeModal} setVisible={() => setRemoveEmployeeModal(false)} onRemove={() => {setRemoveEmployeeModal(false); handleRemoveEmployee();}}/>
                 <PendingRejectModal email={user?.email || ""} visible={rejectPendingModal} setVisible={() => setRejectPendingModal(false)} onReject={() => {setRejectPendingModal(false); handleRejectPending();}}/>
                 <PendingAcceptModal email={user?.email || ""} visible={acceptPendingModal} setVisible={() => setAcceptPendingModal(false)} onAccept={() => {setAcceptPendingModal(false); handleAcceptPending();}} date={expiryDate}/>
-
+                <Invite className={styles.d_invite_dialog} visible={sendInviteModal} setVisible={setSendInviteModal} toast={toast}/>
                 <div className={styles.container}>
                     <h1 className={styles.title}>Manage Employees</h1>
-                    <Button data-testid="save-information" onClick={() => handleSaveInformation()} disabled={Object.keys(employeeRoles).length === 0 || saving}>Save Information</Button>
+                    <div>
+                        <Button data-testid="send-invite" style={{ marginRight: '10px'}} onClick={() => setSendInviteModal(true)} >Send an Invite</Button>
+                        <Button data-testid="save-information" onClick={() => handleSaveInformation()} disabled={Object.keys(employeeRoles).length === 0 || saving}>Save Information</Button>
+                    </div>
                 </div>
                 <div className={styles.header}>
                     <div className={styles.count_container}>
