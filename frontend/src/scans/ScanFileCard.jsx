@@ -3,9 +3,16 @@ import { PiCheckCircle } from "react-icons/pi";
 import { formatNamingConventionName } from "./utils/formatNamingConventionName";
 import { Link } from "react-router-dom";
 import { formatSubcategoryText } from "./utils/formatSubcategoryText";
+import { PiMagnifyingGlassBold } from "react-icons/pi";
+import { PiFileMagnifyingGlassBold } from "react-icons/pi";
+import { useNavigate } from "react-router-dom";
+
+
 
 
 function ScanFileCard({scan_file, scan_type}) {
+
+    const navigate = useNavigate();
 
     const issues = []
     // Issue check for organisational scan files
@@ -51,8 +58,7 @@ function ScanFileCard({scan_file, scan_type}) {
                             
 
     return (
-        <Link to={`/files/${scan_file.file_id}`} className="scan-page-link-fix">
-        <div className={`scan-page-file-card ${cardClass}`}>
+        <div className={`scan-page-file-card ${cardClass} scan-page-link-fix`} onClick={() => navigate(`/files/${scan_file.file_id}`)}>
             <div className="scan-file-top">
                 <div className="scan-file-top-left">
                     {issueCheck ? (
@@ -107,7 +113,11 @@ function ScanFileCard({scan_file, scan_type}) {
             )}
 
             {scan_type === "sensitivity" && issues.length > 0 && (
+                <>
                 <div className="scan-file-sensitivity-details">
+                    <div className="scan-file-issue-text-heading">
+                        <span>Detections:</span>
+                    </div>
                     {issues.map((issue, index) => (
                         <div key={index} className="sensitivity-detection">
                             <div className="sensitivity-detection-category">
@@ -118,11 +128,21 @@ function ScanFileCard({scan_file, scan_type}) {
                             </div>
                         </div>
                     ))}
+
                 </div>
+                <div className="sensitivity-scan-file-view-details">
+                    <button className="sensitivity-scan-file-button"
+                    // Link inside a link code adapted from: 
+                    // https://stackoverflow.com/a/30362416
+                            onClick={(event) => {event.preventDefault(); event.stopPropagation(); navigate(`/scan_file/${scan_file.scan_file_id}`)}}
+                    >
+                        <PiMagnifyingGlassBold /> View Advanced Details
+                    </button>
+                </div>
+                </>
             )}
 
         </div>
-        </Link>
     )
 }
 
