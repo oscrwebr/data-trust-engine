@@ -8,10 +8,11 @@ from starlette.responses import JSONResponse
 from datetime import datetime, date, timedelta
 from sqlalchemy.orm import Session
 from app.invites.models import Invite
-from app.invites.repository import get_invite_for_cooldown
+from app.invites.repository import get_invite_for_cooldown, get_invite_by_pending_user_id
 from app.workspaces.models import Workspace
-from app.authentication.repository import get_pending_user_by_email
-from app.authentication.models import User
+from app.authentication.repository import get_pending_user_by_email, set_pending_user_type
+from app.authentication.models import User, PendingUser
+from app.core.config import REDIRECT_URI
 import base64
 
 
@@ -113,7 +114,7 @@ async def send_invite_service(db: Session, email: str, expiry: str, token: str, 
 
                         <p style="font-size:14px; color:#333333;">
                             Best regards,<br />
-                            <strong>{user.firstname} {user.surname}</strong>
+                            <strong>{user.firstname + " " + user.surname if user else "Workspace Admin"}</strong>
                         </p>
 
                         <p style="font-size:14px; color:#333333; margin-top:25px;">
@@ -125,7 +126,7 @@ async def send_invite_service(db: Session, email: str, expiry: str, token: str, 
                             <tr>
                             <td align="center">
                                 <a 
-                                href="http://localhost:8000/invite/invite-processing?token={token}"
+                                href="{REDIRECT_URI}/invite/invite-processing?token={token}"
                                 style="background-color:#007bff; color:#ffffff; padding:12px 24px; text-decoration:none; font-weight:bold; font-size:16px; border-radius:4px; display:inline-block;">
                                 Accept Invite
                                 </a>
@@ -167,3 +168,9 @@ def check_invite(invite:Invite, db: Session):
 
     db.commit()
     return True
+
+def get_invite_pending_user_id(db: Session, user_id: int):
+    return get_invite_by_pending_user_id(db, user_id) or None
+
+def set_pending_user_type_invite(db: Session, user: PendingUser, type: str):
+    return set_pending_user_type(db, user, type)

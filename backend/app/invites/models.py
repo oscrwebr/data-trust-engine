@@ -17,7 +17,7 @@ class Invite(Base):
         ForeignKey("pending_users.user_id", ondelete="CASCADE"),  # <- cascade here
         nullable=False
     )
-    pending_user = relationship("PendingUser", back_populates="invites")
+    pending_users = relationship("PendingUser", back_populates="invites")
 
     # Relationship to workspace
     workspace_id = Column(

@@ -123,14 +123,14 @@ describe("Header Component", () => {
         );
 
         const button = screen.getByTestId("notification-button");
-        userEvent.click(button);
+        await userEvent.click(button);
 
         const toastTitle = await screen.findByText("New Employee Invite");
         expect(toastTitle).toBeInTheDocument();
 
         const closeButton = document.querySelector(".p-toast-icon-close");
         expect(closeButton).toBeInTheDocument();
-        userEvent.click(closeButton);
+        await userEvent.click(closeButton);
 
         await waitFor(() => {
             expect(document.querySelector(".p-toast-icon-close")).toBeNull();

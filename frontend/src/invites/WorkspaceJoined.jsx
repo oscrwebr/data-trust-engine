@@ -4,7 +4,7 @@ import "primeicons/primeicons.css";
 
 import logo from "../assets/CIH_logo.jpg";
 import { Button } from "primereact/button";
-import { Avatar } from "primereact/Avatar";
+import { Avatar } from "primereact/avatar";
 
 function WorkspaceJoinedError(){
     const nav = useNavigate();

@@ -13,11 +13,23 @@
 
 .container {
   display: flex;
-  height: 100vh;
+  flex-direction: column;
+  width: 100%;
 }
 
 .main {
   flex: 1;
   overflow-y: auto;
 }   
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; 
+  width: 100%;
+}
+
+.title {
+  white-space: nowrap;
+}
 

@@ -11,6 +11,7 @@ import { Checkbox } from "primereact/checkbox";
 import RowCard from "../components/view_employees/RowCard";
 import SendMessage from "../components/view_employees/SendMessage";
 import SquareCard from "../components/view_employees/SquareCard";
+import Invite from "../invites/invites";
 
 function ViewEmployees({toast}){
     const [selectedRole, setSelectedRole] = useState(null);
@@ -21,6 +22,7 @@ function ViewEmployees({toast}){
     const [sendMessageDialog, setSendMessageDialog] = useState(false);
     const [view, setView] = useState(true);
     const [selectedEmployees, setSelectedEmployees] = useState([]);
+    const [sendInviteModal, setSendInviteModal] = useState(false)
 
     const onSelectedEmployeesChange = (employee, checked) => {
         setSelectedEmployees(prev => {
@@ -41,7 +43,7 @@ function ViewEmployees({toast}){
     useEffect(() => {
         api.get("/workspace/get-employees")
         .then(res => {
-            setEmployees(res.data)
+            setEmployees(res.data.active)
         });
 
         api.get("/workspace/get-workspace-roles")
@@ -49,7 +51,6 @@ function ViewEmployees({toast}){
             const all = { id: "all", name: "View All Roles" };
             const none = { id: "null", name: "No Role Assigned" };
             setRoles([all, ...res.data, none]);
-            
         });
     }, []);
 
@@ -73,9 +74,13 @@ function ViewEmployees({toast}){
     return(
         <div className={styles.page}>
             <SendMessage visible={sendMessageDialog} setVisible={setSendMessageDialog} selectedEmployees={selectedEmployees} setSelectedEmployees={setSelectedEmployees} onRemove={onRemove} toast={toast}/>
+            <Invite className={styles.d_invite_dialog} visible={sendInviteModal} setVisible={setSendInviteModal} toast={toast}/>
             <div className={styles.container}>
                 <h1 className={styles.title}>View Employees</h1>
-                <Button data-testid="send-message-button" disabled={selectedEmployees.length == 0 ? (true) : (false)} onClick={() => setSendMessageDialog(true)}>Send a Message</Button>
+                <div>
+                    <Button data-testid="send-invite" style={{ marginRight: '10px'}} onClick={() => setSendInviteModal(true)} >Send an Invite</Button>
+                    <Button data-testid="send-message-button" disabled={selectedEmployees.length == 0 ? (true) : (false)} onClick={() => setSendMessageDialog(true)}>Send a Message</Button>
+                </div>
             </div>
             <div className={styles.header}>
                 <strong className={styles.employee_count}>{employees.length} People</strong>

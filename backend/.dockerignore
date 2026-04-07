@@ -1,0 +1,6 @@
+# BACKEND
+*.egg-info/
+__pycache__
+env/
+.pytest_cache
+htmlcov/

@@ -13,6 +13,7 @@ const Layout = () => {
   const [user, setUser] = useState({});
   const [workspace, setWorkspace] = useState(null)
   const [notifications, setNotifications] = useState([])
+  const [workspace_id, setWorkspaceId] = useState(null)
 
 // Getting user information and all their notifications on loading
   useEffect(() => {
@@ -20,7 +21,6 @@ const Layout = () => {
       .then(res => {
           if (res.data.user) {
             setUser(res.data.user);
-            console.log(res.data.user)
             setWorkspace(res.data.workspace);
           }
       })
@@ -45,7 +45,9 @@ const Layout = () => {
                     toastNotifications,
                     visible,
                     setVisible,
-                    setNotifications
+                    setNotifications,
+                    user,
+                    workspace
                 }} />
             </div>
         </div>

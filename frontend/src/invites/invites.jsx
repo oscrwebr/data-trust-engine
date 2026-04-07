@@ -7,7 +7,7 @@ import { useState } from "react";
 
 import { InputText } from "primereact/inputtext";
 import { IconField } from "primereact/iconfield";
-import { ProgressSpinner} from "primereact/ProgressSpinner"
+import { ProgressSpinner} from "primereact/progressspinner"
 import { InputIcon } from "primereact/inputicon";
 import { Calendar } from 'primereact/calendar';
 import { Message } from 'primereact/message';

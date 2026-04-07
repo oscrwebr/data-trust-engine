@@ -11,7 +11,7 @@ import { FaHistory } from "react-icons/fa";
 
 function FileOverviewPage() {
     const { file_id } = useParams();
-
+    const backend_uri = import.meta.env.VITE_BACKEND_HOST || "http://localhost:8000"
     const [file, set_file] = useState(null);
     const [file_scans_history, set_file_scans_history] = useState(null);
     const [latest_scan_results, set_latest_scan_results] = useState(null);
@@ -21,13 +21,13 @@ function FileOverviewPage() {
     useEffect(() => {
         const fetch_file = async() => {
             try {
-                const file_response = await fetch(`http://localhost:8000/scanning/get_file/${file_id}`);
+                const file_response = await fetch(`${backend_uri}/scanning/get_file/${file_id}`);
                 const file_data = await file_response.json()
 
-                const file_scans_history_response = await fetch(`http://localhost:8000/scanning/get_file_scans/${file_id}`)
+                const file_scans_history_response = await fetch(`${backend_uri}/scanning/get_file_scans/${file_id}`)
                 const file_scans_history_data = await file_scans_history_response.json()
 
-                const latest_scan_results_response = await fetch(`http://localhost:8000/scanning/get_file_latest_scan_results/${file_id}`)
+                const latest_scan_results_response = await fetch(`${backend_uri}/scanning/get_file_latest_scan_results/${file_id}`)
                 const latest_scan_results_data = await latest_scan_results_response.json()
 
                 set_file(file_data)
