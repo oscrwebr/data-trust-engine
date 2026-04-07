@@ -31,7 +31,7 @@ function SensitivityScanPage({ scan }) {
             </div>
             <div className={`scan-page-card ${getSensitivityScanPageCardClass(scan.detection_counts.personal, scan.file_count)}`}>
                 <div className="scan-page-card-text">
-                    <span className="scan-page-card-subtitle">PII Issues</span>
+                    <span className="scan-page-card-subtitle">PII Detections</span>
                     <span className="scan-page-card-title">{scan.detection_counts.personal}</span>
                     
                 </div>
@@ -41,7 +41,7 @@ function SensitivityScanPage({ scan }) {
             </div>
             <div className={`scan-page-card ${getSensitivityScanPageCardClass(scan.detection_counts.financial, scan.file_count)}`}>
                 <div className="scan-page-card-text">
-                    <span className="scan-page-card-subtitle">Financial Issues</span>
+                    <span className="scan-page-card-subtitle">Financial Detections</span>
                     <span className="scan-page-card-title">{scan.detection_counts.financial}</span>
                     
                 </div>
@@ -52,7 +52,7 @@ function SensitivityScanPage({ scan }) {
 
             <div className={`scan-page-card ${getSensitivityScanPageCardClass(scan.detection_counts.legal_case, scan.file_count)}`}>
                 <div className="scan-page-card-text">
-                    <span className="scan-page-card-subtitle">Legal Issues</span>
+                    <span className="scan-page-card-subtitle">Legal Detections</span>
                     <span className="scan-page-card-title">{scan.detection_counts.legal_case}</span>
                     
                 </div>
@@ -64,7 +64,7 @@ function SensitivityScanPage({ scan }) {
                 <div className="scan-page-card-text">
                     <span className="scan-page-card-subtitle">High Risk Files</span>
                     {/* HARDCODED FOR NOW... */}
-                    <span className="scan-page-card-title">0</span>
+                    <span className="scan-page-card-title">1</span>
                     
                 </div>
                 <div>

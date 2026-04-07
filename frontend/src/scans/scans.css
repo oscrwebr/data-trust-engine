@@ -332,7 +332,7 @@
 }
 
 .scan-file-pill {
-    border-radius: 20px;
+    border-radius: 5px;
     font-weight: 500;
     padding: 4px 10px;
     font-size: 12px;
@@ -412,4 +412,32 @@
 
 .scan-page-link-fix {
     text-decoration: none;
+}
+
+.sensitivity-detection {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.sensitivity-detection-category {
+    background: #FEF3C6;
+    color: #BB4D00;
+    border-radius: 5px;
+    font-weight: 500;
+    padding: 4px 10px;
+    font-size: 12px;
+}
+
+.scan-file-sensitivity-details {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+    margin-top: 10px;
+}
+
+.sensitivity-detection-subcategory {
+    color: #374151; 
+    font-size: 13px;
 }

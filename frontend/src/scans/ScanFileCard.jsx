@@ -2,6 +2,7 @@ import { PiWarningCircle } from "react-icons/pi";
 import { PiCheckCircle } from "react-icons/pi";
 import { formatNamingConventionName } from "./utils/formatNamingConventionName";
 import { Link } from "react-router-dom";
+import { formatSubcategoryText } from "./utils/formatSubcategoryText";
 
 
 function ScanFileCard({scan_file, scan_type}) {
@@ -24,6 +25,17 @@ function ScanFileCard({scan_file, scan_type}) {
         
     }
 
+    if (scan_type === "sensitivity") {
+        // For each category issue that the file has, add the category and subcategory to the issues array
+        scan_file.sensitivity_scan_results.forEach(result => {
+            issues.push({
+                category: result.category,
+                subcategory: result.subcategory_name,
+            })
+        })
+        
+    }
+
     const cardClass = issues.length === 0 ?
         "card-clean" :
         "card-issue";
@@ -31,7 +43,12 @@ function ScanFileCard({scan_file, scan_type}) {
     const issueCheck = issues.length === 0;
 
     // Get the text to show for each scan file card (can show multiple types of issues e.g. Naming Issue, Duplicate)
-    const scanFilePillText = issueCheck ? 'Clean' : issues.map(i => i.type).join(", ");;
+    const scanFilePillText = issueCheck 
+                            ? 'Clean' : 
+                            scan_type === "organisation"
+                            ? issues.map(i => i.type).join(", ")
+                            : 'Detections Found'
+                            
 
     return (
         <Link to={`/files/${scan_file.file_id}`} className="scan-page-link-fix">
@@ -44,7 +61,6 @@ function ScanFileCard({scan_file, scan_type}) {
                         <PiWarningCircle size={26} className="scan-file-icon icon-issue" />
 
                     )}
-
                     <span className={`scan-file-pill ${issueCheck ? 'pill-clean' : 'pill-issue'}`}>
                         {scanFilePillText}
                     </span>
@@ -56,7 +72,7 @@ function ScanFileCard({scan_file, scan_type}) {
             <div className="scan-file-name">
                 <span>{scan_file.file_name}</span>
             </div>
-            {issues.length > 0 && (
+            {scan_type === "organisation" && issues.length > 0 && (
                 <div>
                     {issues.map((issue, index) => (
                         <div key={index} className="scan-file-details">
@@ -88,6 +104,21 @@ function ScanFileCard({scan_file, scan_type}) {
 
                 </div>
                 
+            )}
+
+            {scan_type === "sensitivity" && issues.length > 0 && (
+                <div className="scan-file-sensitivity-details">
+                    {issues.map((issue, index) => (
+                        <div key={index} className="sensitivity-detection">
+                            <div className="sensitivity-detection-category">
+                                <span>{issue.category}</span>
+                            </div>
+                            <div className="sensitivity-detection-subcategory">
+                                <span>{formatSubcategoryText(issue.subcategory)}</span>
+                            </div>
+                        </div>
+                    ))}
+                </div>
             )}
 
         </div>
