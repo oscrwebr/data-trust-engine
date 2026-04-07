@@ -273,6 +273,12 @@
     gap: 10px;
 }
 
+.sensitivity-scan-page-file-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+}
+
 .scan-page-file-card {
     background: #ffffff;
     border: 1px solid #d9d9d9;

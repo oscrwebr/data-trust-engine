@@ -1,12 +1,15 @@
+import { PiCurrencyGbpBold } from "react-icons/pi";
+import { PiScalesBold } from "react-icons/pi";
+import { PiUserListBold } from "react-icons/pi";
 import { PiFileBold } from "react-icons/pi";
-import { PiTextAaBold } from "react-icons/pi";
-import { PiCardsBold } from "react-icons/pi";
 import { PiCheckCircleBold } from "react-icons/pi";
+import { PiWarningCircleBold } from "react-icons/pi";
 import ScanFileCard from "./ScanFileCard";
 import { getScanPageCardClass } from "./utils/getScanPageCardClass";
 import { getPercentage } from "./utils/getPercentage";
 import { getCleanFilesClass } from "./utils/getCleanFilesClass";
 import { formatNamingConventionName } from "./utils/formatNamingConventionName";
+import { getSensitivityScanPageCardClass } from "./utils/getSensitivityScanPageCardClass";
 
 function SensitivityScanPage({ scan }) {
 
@@ -15,7 +18,7 @@ function SensitivityScanPage({ scan }) {
     return (
         <>
         {/* To change the colour of a card, apply either 'critical' 'issues' or 'clean' to the scan-page-card class */}
-        <div className="scan-page-card-container">
+        <div className="sensitivity-scan-page-file-container">
             <div className="scan-page-card">
                 <div className="scan-page-card-text">
                     <span className="scan-page-card-subtitle">Total Files Scanned</span>
@@ -26,46 +29,46 @@ function SensitivityScanPage({ scan }) {
                     <PiFileBold size={50}/>
                 </div>
             </div>
-            <div className={"scan-page-card"}>
+            <div className={`scan-page-card ${getSensitivityScanPageCardClass(scan.detection_counts.personal, scan.file_count)}`}>
                 <div className="scan-page-card-text">
                     <span className="scan-page-card-subtitle">PII Issues</span>
-                    {/* HARDCODED FOR NOW */}
-                    <span className="scan-page-card-title">1</span>
+                    <span className="scan-page-card-title">{scan.detection_counts.personal}</span>
                     
                 </div>
                 <div>
-                    <PiTextAaBold size={50}/>
+                    <PiUserListBold size={50}/>
                 </div>
             </div>
-            <div className="scan-page-card clean">
+            <div className={`scan-page-card ${getSensitivityScanPageCardClass(scan.detection_counts.financial, scan.file_count)}`}>
                 <div className="scan-page-card-text">
                     <span className="scan-page-card-subtitle">Financial Issues</span>
-                    <span className="scan-page-card-title">1</span>
+                    <span className="scan-page-card-title">{scan.detection_counts.financial}</span>
                     
                 </div>
                 <div>
-                    <PiCardsBold size={50}/>
+                    <PiCurrencyGbpBold size={50}/>
                 </div>
             </div>
 
-            <div className="scan-page-card clean">
+            <div className={`scan-page-card ${getSensitivityScanPageCardClass(scan.detection_counts.legal_case, scan.file_count)}`}>
                 <div className="scan-page-card-text">
                     <span className="scan-page-card-subtitle">Legal Issues</span>
-                    <span className="scan-page-card-title">1</span>
+                    <span className="scan-page-card-title">{scan.detection_counts.legal_case}</span>
                     
                 </div>
                 <div>
-                    <PiCardsBold size={50}/>
+                    <PiScalesBold size={50}/>
                 </div>
             </div>
-            <div className={"scan-page-card clean"}>
+            <div className={"scan-page-card critical"}>
                 <div className="scan-page-card-text">
-                    <span className="scan-page-card-subtitle">Clean Files</span>
-                    <span className="scan-page-card-title">1%</span>
+                    <span className="scan-page-card-subtitle">High Risk Files</span>
+                    {/* HARDCODED FOR NOW... */}
+                    <span className="scan-page-card-title">0</span>
                     
                 </div>
                 <div>
-                    <PiCheckCircleBold size={50}/>
+                    <PiWarningCircleBold size={50}/>
                 </div>
             </div>
             

@@ -34,7 +34,7 @@ function ScanFileCard({scan_file, scan_type}) {
     const scanFilePillText = issueCheck ? 'Clean' : issues.map(i => i.type).join(", ");;
 
     return (
-        <Link to={`/file/${scan_file.file_id}`} className="scan-page-link-fix">
+        <Link to={`/files/${scan_file.file_id}`} className="scan-page-link-fix">
         <div className={`scan-page-file-card ${cardClass}`}>
             <div className="scan-file-top">
                 <div className="scan-file-top-left">
