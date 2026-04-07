@@ -302,5 +302,9 @@ def get_basic_sensitivity_scan_results_by_scan_id(db: Session, scan_id: int):
         .filter(ScanFile.scan_id == scan_id)
         # Group the rows together
         # Only want to find the UNIQUE detections that occur on the scanned file
-        .group_by(ScanFile.scan_file_id, SensitivitySubcategory.name, SensitivityCategory.name).all()
+        .group_by(ScanFile.scan_file_id, SensitivitySubcategory.name, SensitivityCategory.name)
+        .order_by(
+            SensitivityCategory.name.asc(),
+        )
+        .all()
     )
