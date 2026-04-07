@@ -1,10 +1,8 @@
 import { PiWarningCircle } from "react-icons/pi";
 import { PiCheckCircle } from "react-icons/pi";
 import { formatNamingConventionName } from "./utils/formatNamingConventionName";
-import { Link } from "react-router-dom";
 import { formatSubcategoryText } from "./utils/formatSubcategoryText";
 import { PiMagnifyingGlassBold } from "react-icons/pi";
-import { PiFileMagnifyingGlassBold } from "react-icons/pi";
 import { useNavigate } from "react-router-dom";
 
 
