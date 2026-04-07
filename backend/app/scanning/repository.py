@@ -242,9 +242,65 @@ def get_naming_convention_scan_results_by_scan_id(db: Session, scan_id: int):
         # Join to get the ScanFile so that we can filter by scan_file_id
         ScanFile, NamingConventionScanResult.scan_file_id == ScanFile.scan_file_id
     )
-    # Then get the naming convention scan results for the given scan_file_id
+    # Then get all the files that are part of the scan
     .filter(ScanFile.scan_id == scan_id).all()
     )
 
-def get_sensitivity_scan_result_by_scan_file_id(db: Session, scan_file_id: int):
-    pass
+def get_scan_detection_totals_by_scan_id(db: Session, scan_id: int):
+    return (
+        db.query(
+            SensitivityCategory.name.label("category_name"),
+            func.count(ScanFileDetection.scan_file_detection_id).label("detection_count")
+        )
+        .join(
+            # ScanFileDetection uses the name rather than ID to link to sensitivity subcategory
+            SensitivitySubcategory,
+            ScanFileDetection.sensitivity_subcategory == SensitivitySubcategory.name
+        )
+        .join(
+            # Then join to get the sensitivity category of the subcategory
+            SensitivityCategory,
+            SensitivitySubcategory.sensitivity_category_id == SensitivityCategory.sensitivity_category_id
+        )
+        .join(
+            # Then join to get the ScanFile so that we can filter by scan_id
+            ScanFile,
+            ScanFileDetection.scan_file_id == ScanFile.scan_file_id
+        )
+        .filter(ScanFile.scan_id == scan_id).group_by(SensitivityCategory.name).all()
+
+    )
+
+# Can't use '.scalars()' as we are using an older SQLAlchemy version (just to extract the names)
+# If I used SensitivityCategory.name, it would return tuples and would make code messy and harder to read
+def get_sensitivity_category_names(db: Session):
+    return db.query(SensitivityCategory).all()
+
+def get_basic_sensitivity_scan_results_by_scan_id(db: Session, scan_id: int):
+    return (
+        db.query(
+            ScanFile.scan_file_id,
+            SensitivitySubcategory.name.label("subcategory_name"),
+            SensitivityCategory.name.label("category_name"),
+        )
+        # Join to get detections for each ScanFile
+        .join(
+            ScanFileDetection, 
+            ScanFile.scan_file_id == ScanFileDetection.scan_file_id
+        )
+        # Then join to get the sensitivity subcategory for each detection
+        # ScanFileDetection uses the name rather than ID to link to sensitivity subcategory
+        .join(
+            SensitivitySubcategory, 
+            ScanFileDetection.sensitivity_subcategory == SensitivitySubcategory.name
+        )
+        # Then join to get the sensitivity category of each subcategory
+        .join(
+            SensitivityCategory, 
+            SensitivitySubcategory.sensitivity_category_id == SensitivityCategory.sensitivity_category_id
+        )
+        .filter(ScanFile.scan_id == scan_id)
+        # Group the rows together
+        # Only want to find the UNIQUE detections that occur on the scanned file
+        .group_by(ScanFile.scan_file_id, SensitivitySubcategory.name, SensitivityCategory.name).all()
+    )

@@ -339,25 +339,54 @@ def get_organisational_scan_details(db: Session, scan):
 
 def get_sensitivity_scan_details(db: Session, scan):
     files = repository.get_scan_files_with_file(db=db, scan_id=scan.scan_id)
-    return None
-    # return {
-    #     "scan_id": scan.scan_id,
-    #     "scan_type": scan.scan_type,
-    #     "started_at": scan.started_at,
-    #     "finished_at": scan.finished_at,
-    #     "file_count": len(files),
-    #     "files": [{
-    #         "scan_file_id": scan_file.scan_file_id,
-    #         "file_id": file.file_id,
-    #         "file_name": file.file_name,
-    #         "hash": file.hash,
-    #         "sensitivity_scan_results": [{
-                
-    #         }]
-            
-    #     } for scan_file, file in files
-    #     ]
-    # }
+
+    # Getting total detection counts for each sensitivity category
+    detection_counts_query = repository.get_scan_detection_totals_by_scan_id(db=db, scan_id=scan.scan_id)
+    categories = repository.get_sensitivity_category_names(db=db)
+
+    detection_counts = {}
+
+    # Loop through categories to create 'detection_counts' entries with 0 as default count
+    # Built to allow easy integration of new categories in future
+    for category in categories:
+        # Format each category key to stay consistent (needed for matching actual count to each category later on)
+        key = category.name.lower().replace(" ", "_")
+        detection_counts[key] = 0
+
+    for i in detection_counts_query:
+        key = i.category_name.lower().replace(" ", "_")
+        detection_counts[key] = i.detection_count
+
+    # Same logic as organisational scan results (see above function)
+    results_query = repository.get_basic_sensitivity_scan_results_by_scan_id(db=db, scan_id=scan.scan_id)
+
+    results = {}
+
+    for scan_file_id, subcategory_name, category_name in results_query:
+        if scan_file_id not in results:
+            results[scan_file_id] = []
+        
+        results[scan_file_id].append({
+            "subcategory_name": subcategory_name,
+            "category": category_name
+        })
+
+    return {
+        "scan_id": scan.scan_id,
+        "scan_type": scan.scan_type,
+        "started_at": scan.started_at,
+        "finished_at": scan.finished_at,
+        "file_count": len(files),
+        "detection_counts": detection_counts,
+        "files": [{
+            "scan_file_id": scan_file.scan_file_id,
+            "file_id": file.file_id,
+            "file_name": file.file_name,
+            "hash": file.hash,
+            "sensitivity_scan_results": results.get(scan_file.scan_file_id, [])
+        } for scan_file, file in files
+        ]
+    }
 
 
     
