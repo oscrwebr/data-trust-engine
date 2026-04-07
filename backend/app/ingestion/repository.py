@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import insert
 from .models import Folder, IngestionFile, UserFolders, UserFiles
+from datetime import datetime
 
 
 def create_folders_files(folders: dict, files: dict, db: Session) -> int:
@@ -52,3 +53,25 @@ def get_drive_id_by_graph_id(graph_id: str, db: Session):
 
 def get_ingestion_file_by_graph_id(graph_id: str, db: Session):
     return db.query(IngestionFile).filter(IngestionFile.graph_id == graph_id).first()
+
+
+def create_ingestion_file(db: Session, graph_id: str, name: str, extension: str, last_modified: datetime, web_url: str, drive_id: str,hash: str | None = None,hash_type: str | None = None,last_scanned: datetime | None = None, parent_graph_id: str | None = None):
+    ingestion_file = IngestionFile(
+        graph_id=graph_id,
+        name=name,
+        extension=extension,
+        hash=hash,
+        hash_type=hash_type,
+        last_scanned=last_scanned,
+        last_modified=last_modified,
+        web_url=web_url,
+        parent_graph_id=parent_graph_id,
+        drive_id=drive_id
+    )
+
+    db.add(ingestion_file)
+    db.commit()
+    db.refresh(ingestion_file)
+
+    return ingestion_file
+
