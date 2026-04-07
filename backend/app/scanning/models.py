@@ -2,6 +2,7 @@ from sqlalchemy import Boolean, Column, Integer, String, DateTime, ForeignKey
 from app.core.database import Base
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 
+from app.ingestion.models import IngestionFile
 
 class File(Base):
     __tablename__ = 'file'
@@ -47,7 +48,7 @@ class ScanFile(Base):
 
     scan_file_id = Column(Integer, primary_key=True, index=True)
     scan_id = Column(Integer, ForeignKey("scans.scan_id"), nullable=False)
-    file_id = Column(Integer, ForeignKey("file.file_id"), nullable=False)
+    file_id = Column(Integer, ForeignKey("ingestion_file.ingestion_file_id"), nullable=False)
 
 
 class ScanFileDetection(Base):

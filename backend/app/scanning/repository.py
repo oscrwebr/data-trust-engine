@@ -3,6 +3,7 @@ from datetime import datetime
 from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 from app.scanning.models import File, NamingConvention, Scan, ScanNamingConvention, NamingConventionScanResult, Scan, ScanFile, ScanFileDetection
+from app.ingestion.models import IngestionFile
 from app.roles.models import SensitivityCategory, SensitivitySubcategory
 from datetime import datetime, timezone
 from app.scanning.scan_type import ScanType
@@ -77,7 +78,7 @@ def create_file(db: Session, graph_file_id: str, file_name: str, file_hash: str)
 
 
 def get_file_by_id(db: Session, file_id: int):
-    return db.query(File).filter(File.file_id == file_id).first()
+    return db.query(IngestionFile).filter(IngestionFile.ingestion_file_id == file_id).first()
 
 
 def get_all_files(db: Session):

@@ -4,9 +4,17 @@ from app.scanning.extractors import *
 
 FIXTURES_DIRECTORY = Path(__file__).resolve().parent / "fixtures"
 
+# Helper method that reads a test file into bytes by using its path from the fixtures folder
+def read_file_bytes(file_name: str):
+    file_path = FIXTURES_DIRECTORY / file_name
+
+    with open(file_path, "rb") as file:
+        return file.read()
+
 
 def test_extract_text_from_pdf_operational_report_document():
-    extracted_text = extract_text_from_pdf(FIXTURES_DIRECTORY / "operational_report_document.pdf")
+    file_bytes = read_file_bytes("operational_report_document.pdf")
+    extracted_text = extract_text_from_pdf(file_bytes=file_bytes)
     
     # Assert all pages extracted
     assert len(extracted_text) == 4
@@ -23,7 +31,8 @@ def test_extract_text_from_pdf_operational_report_document():
 
 
 def test_extract_text_from_pdf_realistic_contract_document():
-    extracted_text = extract_text_from_pdf(FIXTURES_DIRECTORY / "realistic_contract_document.pdf")
+    file_bytes = read_file_bytes("realistic_contract_document.pdf")
+    extracted_text = extract_text_from_pdf(file_bytes=file_bytes)
 
     # Assert all pages extracted
     assert len(extracted_text) == 5
@@ -41,7 +50,8 @@ def test_extract_text_from_pdf_realistic_contract_document():
 
 
 def test_extract_text_from_pdf_supplier_agreement_document():
-    extracted_text = extract_text_from_pdf(FIXTURES_DIRECTORY / "supplier_agreement_document.pdf")
+    file_bytes = read_file_bytes("supplier_agreement_document.pdf")
+    extracted_text = extract_text_from_pdf(file_bytes=file_bytes)
 
     # Assert all pages extracted
     assert len(extracted_text) == 6
