@@ -55,7 +55,7 @@ def test_scan_file_method_creates_scan_file_record_for_each_file(mock_get_downlo
     # Mock the file download link to be returned
     mock_get_download_link.return_value = "https://example.com/test_file.pdf"
 
-    # Mock the file response
+    # Mock the HTTP response
     mock_response = Mock()
     mock_response.content = b"fake-test-file-bytes"
     mock_response.raise_for_status.return_value = None
@@ -98,16 +98,38 @@ def test_scan_file_method_creates_scan_file_record_for_each_file(mock_get_downlo
     assert scan_file_record.file_id == test_file.ingestion_file_id
 
 
-def test_scan_file_method_creates_scan_file_detections_for_scan_file(db):
+@patch("app.scanning.service.requests.get")
+@patch("app.scanning.service.extract_text_from_pdf")
+@patch("app.scanning.service.get_download_link_by_graph_id")
+def test_scan_file_method_creates_scan_file_detections_for_scan_file(mock_get_download_link, mock_extract_text, mock_requests_get, db):
+    # Mock file download link
+    mock_get_download_link.return_value = "https://example.com/test_file.pdf"
+
+    # Mock the HTTP response
+    mock_response = Mock()
+    mock_response.content = b"fake-test-file-bytes"
+    mock_response.raise_for_status.return_value = None
+    mock_requests_get.return_value = mock_response
+
+    # Mock extracted text
+    mock_extract_text.return_value = {
+        1: "John Smith johnsmith@email.com [2024] UKSC 1"
+    }
+
     # Create a test scan record
     scan = repository.create_scan(db=db, scan_type=ScanType.SENSITIVITY)
 
     # Create a test file record
-    test_file = repository.create_file(
+    test_file = create_ingestion_file(
         db=db,
-        graph_file_id="lc111",
-        file_name="legal_case_report_1",
-        file_hash="dummyhash"
+        graph_id="lc111",
+        name="legal_case_report_1.pdf",
+        extension="pdf",
+        hash="dummyhash",
+        hash_type="sha256",
+        last_modified=datetime.now(),
+        web_url="https://example.com/legal_case_report_1.pdf",
+        drive_id="test-drive-id"
     )
 
     # Scan the test file (has graph_file_id lc111)
@@ -117,7 +139,7 @@ def test_scan_file_method_creates_scan_file_detections_for_scan_file(db):
     scan_file_record = repository.get_scan_file_by_scan_id_and_file_id(
         db=db, 
         scan_id=scan.scan_id, 
-        file_id=test_file.file_id
+        file_id=test_file.ingestion_file_id
     )
     
     # Fetch the scan_file_detection records which should be created
