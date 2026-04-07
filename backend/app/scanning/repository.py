@@ -308,3 +308,17 @@ def get_basic_sensitivity_scan_results_by_scan_id(db: Session, scan_id: int):
         )
         .all()
     )
+
+def create_naming_convention_scan_result(db: Session, scan_file_id: int, scan_naming_convention_id: int, passed: bool, suggested_name: str):
+    naming_convention_scan_result = NamingConventionScanResult(scan_file_id=scan_file_id, scan_naming_convention_id=scan_naming_convention_id, passed=passed, suggested_name=suggested_name)
+    db.add(naming_convention_scan_result)
+    db.commit()
+    db.refresh(naming_convention_scan_result)
+    return naming_convention_scan_result
+
+def create_scan_naming_convention(db: Session, scan_id: int, naming_convention_id: int):
+    scan_naming_convention = ScanNamingConvention(scan_id=scan_id, naming_convention_id=naming_convention_id)
+    db.add(scan_naming_convention)
+    db.commit()
+    db.refresh(scan_naming_convention)
+    return scan_naming_convention
