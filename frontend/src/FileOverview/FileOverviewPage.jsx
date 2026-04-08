@@ -40,6 +40,7 @@ function FileOverviewPage() {
                 set_file(file_data)
                 set_file_scans_history(file_scans_history_data)
                 set_latest_scan_results(latest_scan_results_data)
+                set_employees_with_access(employees_with_access_data)
 
             } catch (error) {
                 console.error("Error while fetching file data:", error)
@@ -83,7 +84,18 @@ function FileOverviewPage() {
             </div>
 
             <div className={styles.employees_with_access_container}>
-                <h2 className={styles.section_title}>Employees with Access</h2>
+                <h2 className={styles.section_title}>Employees With Access</h2>
+
+                {employees_with_access.length === 0 ? (
+                    <p>No employees with access found.</p>
+                ) : (
+                    employees_with_access.map((employee) => (
+                        <EmployeeAccessItem
+                            key={employee.user_id}
+                            employee={employee}
+                        />
+                    ))
+                )}
             </div>
 
             <div className={styles.latest_scan_results_container}>
