@@ -55,7 +55,16 @@ def test_organisation_scan_with_two_naming_conventions_creates_scan_naming_conve
     assert new_scan_naming_convention_length == initial_scan_naming_convention_length + 2
 # Test that the scan creates a naming_convention_scan_result record in the database
 def test_organisation_scan_creates_naming_convention_scan_result_record(db, naming_conventions):
-    repository.create_test_file(db, graph_file_id="test_graph_file_id", file_name="employee_salary_report", hash="testhash")
+    repository.create_test_file(
+        db,
+        graph_file_id="abc123",
+        file_name="test_file",
+        extension=".pdf",
+        hash="abc",
+        last_modified="2024-01-01 00:00:00",
+        web_url="http://example.com/test_file.pdf",
+        drive_id="drive123"
+    )
     initial_naming_convention_scan_results = db.execute(select(models.NamingConventionScanResult)).scalars().all()
     initial_naming_convention_scan_result_length = len(initial_naming_convention_scan_results)
 
@@ -68,7 +77,16 @@ def test_organisation_scan_creates_naming_convention_scan_result_record(db, nami
 
 def test_valid_file_name_passes_scan(db, naming_conventions):
     # Create a file with a valid name for snake case
-    file = repository.create_test_file(db, graph_file_id="test_graph_file_id", file_name="employee_salary_report", hash="testhash")
+    file = repository.create_test_file(
+        db,
+        graph_file_id="abc123",
+        file_name="employee_salary_report",
+        extension=".pdf",
+        hash="abc",
+        last_modified="2024-01-01 00:00:00",
+        web_url="http://example.com/test_file.pdf",
+        drive_id="drive123"
+    )
     # Snake case scan (id = 2)
     service.perform_organisation_scan(db, naming_convention_ids=[2])
 
@@ -78,7 +96,16 @@ def test_valid_file_name_passes_scan(db, naming_conventions):
 
 def test_invalid_file_name_fails_scan(db, naming_conventions):
     # Create a file with an invalid name for camel case
-    file = repository.create_test_file(db, graph_file_id="test_graph_file_id", file_name="employee_salary_report", hash="testhash")
+    file = repository.create_test_file(
+        db,
+        graph_file_id="abc123",
+        file_name="employee_salary_report",
+        extension=".pdf",
+        hash="abc",
+        last_modified="2024-01-01 00:00:00",
+        web_url="http://example.com/test_file.pdf",
+        drive_id="drive123"
+    )
     # Camel case scan (id = 1)
     service.perform_organisation_scan(db, naming_convention_ids=[1])
 
