@@ -262,7 +262,7 @@ def perform_organisation_scan(db: Session, naming_convention_ids: list[int]):
 
     # Create a scan_file record for each file
     for file in files:
-        repository.create_scan_file(db=db, scan_id=scan.scan_id, file_id=file.file_id)
+        repository.create_scan_file(db=db, scan_id=scan.scan_id, file_id=file.ingestion_file_id)
 
     # Get the naming conventions for this scan
     scan_naming_conventions = repository.get_scan_naming_convention_by_scan_id(db=db, scan_id=scan.scan_id)
@@ -290,7 +290,7 @@ def perform_organisation_scan(db: Session, naming_convention_ids: list[int]):
     for scan_file, file in scan_files:
 
         # As file names will be stored with their extension, this removes the extension for naming convention checks
-        file_name = remove_file_extension(file.file_name)
+        file_name = remove_file_extension(file.name)
 
         for scan_naming_convention in scan_naming_conventions:
             checks = naming_convention_checks.get(scan_naming_convention.naming_convention_id)
@@ -351,8 +351,8 @@ def get_organisational_scan_details(db: Session, scan):
         "file_count": len(files),
         "files": [{
             "scan_file_id": scan_file.scan_file_id,
-            "file_id": file.file_id,
-            "file_name": file.file_name,
+            "file_id": file.ingestion_file_id,
+            "file_name": file.name,
             "hash": file.hash,
             "naming_convention_scan_results": results.get(scan_file.scan_file_id, [])
 
@@ -403,8 +403,8 @@ def get_sensitivity_scan_details(db: Session, scan):
         "detection_counts": detection_counts,
         "files": [{
             "scan_file_id": scan_file.scan_file_id,
-            "file_id": file.file_id,
-            "file_name": file.file_name,
+            "file_id": file.ingestion_file_id,
+            "file_name": file.name,
             "hash": file.hash,
             "sensitivity_scan_results": results.get(scan_file.scan_file_id, [])
         } for scan_file, file in files

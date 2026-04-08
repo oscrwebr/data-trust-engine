@@ -82,7 +82,7 @@ def get_file_by_id(db: Session, file_id: int):
 
 
 def get_all_files(db: Session):
-    return db.query(File).all()
+    return db.query(IngestionFile).all()
 
 
 def get_latest_scan_detection_summary(db: Session, file_id: int):
@@ -202,7 +202,7 @@ def get_scan_naming_convention_by_scan_id(db: Session, scan_id: int):
     return db.query(ScanNamingConvention).filter(ScanNamingConvention.scan_id == scan_id).all()
 
 def get_scan_files_with_file(db: Session, scan_id: int):
-    return db.query(ScanFile, File).join(File, ScanFile.file_id == File.file_id).filter(ScanFile.scan_id == scan_id).all()
+    return db.query(ScanFile, IngestionFile).join(IngestionFile, ScanFile.file_id == IngestionFile.ingestion_file_id).filter(ScanFile.scan_id == scan_id).all()
 
 def get_naming_convention_ids(db: Session):
         return db.execute(select(NamingConvention.naming_convention_id)).scalars().all()
