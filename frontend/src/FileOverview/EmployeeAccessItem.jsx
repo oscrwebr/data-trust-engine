@@ -9,7 +9,7 @@ function EmployeeAccessItem({ employee }) {
             </div>
 
             <div className={styles.employee_roles}>
-                <div className={styles.role_label}>Roles:</div>{" "}
+                <div className={styles.roles_label}>Roles:</div>{" "}
                 {employee.roles.length > 0 ? employee.roles.join(", ") : "No roles assigned"}
             </div>
         </div>
