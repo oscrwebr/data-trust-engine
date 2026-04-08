@@ -21,14 +21,23 @@ function FilesDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // ✅ Selected files (graph_id)
+  const [selectedFiles, setSelectedFiles] = useState([]);
+
   const navigate = useNavigate();
 
   useEffect(() => {
     async function fetchRoot() {
       try {
         const res = await api.get("/files/folders");
-        // Initialize with empty children/files
-        const folders = res.data.map(f => ({ ...f, children: [], files: [], childrenLoaded: false }));
+
+        const folders = res.data.map(f => ({
+          ...f,
+          children: [],
+          files: [],
+          childrenLoaded: false
+        }));
+
         setTree(folders);
       } catch (err) {
         console.error(err);
@@ -54,10 +63,16 @@ function FilesDashboard() {
       ]);
 
       const updatedTree = updateFolder(tree, folderId, {
-        children: subfoldersRes.data.map(f => ({ ...f, children: [], files: [], childrenLoaded: false })),
+        children: subfoldersRes.data.map(f => ({
+          ...f,
+          children: [],
+          files: [],
+          childrenLoaded: false
+        })),
         files: filesRes.data,
         childrenLoaded: true
       });
+
       setTree(updatedTree);
     } catch (err) {
       console.error(err);
@@ -78,13 +93,48 @@ function FilesDashboard() {
   const updateFolder = (folders, folderId, data) => {
     return folders.map(f => {
       if (f.folder_id === folderId) return { ...f, ...data };
-      if (f.children.length) return { ...f, children: updateFolder(f.children, folderId, data) };
+      if (f.children.length)
+        return { ...f, children: updateFolder(f.children, folderId, data) };
       return f;
     });
   };
 
+  // ✅ Toggle file selection (FIXED: uses graph_id)
+  const toggleFile = (graphId) => {
+    console.log("TOGGLE FILE:", graphId);
+
+    setSelectedFiles(prev =>
+      prev.includes(graphId)
+        ? prev.filter(id => id !== graphId)
+        : [...prev, graphId]
+    );
+  };
+
+  // ✅ Scan selected files
+  const scanSelected = async () => {
+    console.log("SELECTED FILES:", selectedFiles);
+
+    if (selectedFiles.length === 0) {
+      alert("No files selected");
+      return;
+    }
+
+    try {
+      await api.post("/scanning/scan_files", {
+        graph_file_ids: selectedFiles
+      });
+
+      alert("Scan started successfully!");
+      setSelectedFiles([]);
+    } catch (err) {
+      console.error(err.response?.data || err);
+      alert("Failed to start scan");
+    }
+  };
+
   const getFileIcon = (file) => {
     let ext = (file.extension || (file.file_name || file.name)?.split(".").pop())?.toLowerCase();
+
     switch (ext) {
       case "pdf": return <FaFilePdf color="#e74c3c" />;
       case "doc":
@@ -93,8 +143,6 @@ function FilesDashboard() {
       case "xlsx": return <FaFileExcel color="#217346" />;
       case "ppt":
       case "pptx": return <FaFilePowerpoint color="#d24726" />;
-      case "bat": return <FaFileCode color="#228B22" />;
-      case "py": return <FaFileCode color="#3776AB" />;
       default:
         if (["png","jpg","jpeg","gif","bmp","svg","webp"].includes(ext)) return <FaFileImage />;
         if (["mp3","wav","ogg","flac"].includes(ext)) return <FaFileAudio />;
@@ -107,6 +155,8 @@ function FilesDashboard() {
 
   const renderFolder = (folder) => (
     <div key={folder.folder_id} className={styles.folder}>
+      
+      {/* Folder header (NO checkbox) */}
       <div
         className={styles.folderHeader}
         onClick={() => toggleFolder(folder.folder_id, folder.graph_id)}
@@ -117,17 +167,28 @@ function FilesDashboard() {
       {expanded[folder.folder_id] && (
         <div className={styles.children}>
           {folder.children.map(renderFolder)}
+
           {folder.files.map(file => (
-            <div
-              key={file.file_id}
-              className={styles.file}
-              onClick={(e) => {
-                e.stopPropagation();
-                navigate(`/files/${file.ingestion_file_id}`);
-              }}            
-            >
-              {getFileIcon(file)}
-              <span>{file.file_name || file.name}</span>
+            <div key={file.file_id} className={styles.file}>
+
+              {/* ✅ Checkbox (FIXED) */}
+              <input
+                type="checkbox"
+                checked={selectedFiles.includes(file.graph_id)}
+                onChange={() => toggleFile(file.graph_id)}
+                onClick={(e) => e.stopPropagation()}
+              />
+
+              {/* File click */}
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(`/files/${file.ingestion_file_id}`);
+                }}
+              >
+                {getFileIcon(file)}
+                <span>{file.file_name || file.name}</span>
+              </div>
             </div>
           ))}
         </div>
@@ -141,6 +202,16 @@ function FilesDashboard() {
   return (
     <div className={styles.pageContainer}>
       <h2 className={styles.title}>Files & Folders</h2>
+
+      {/* ✅ Scan Button */}
+      <button
+        onClick={scanSelected}
+        disabled={selectedFiles.length === 0}
+        className={styles.scanButton}
+      >
+        Scan Selected Files
+      </button>
+
       {tree.length === 0 ? (
         <p className={styles.message}>No files or folders found</p>
       ) : (
