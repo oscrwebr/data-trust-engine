@@ -9,6 +9,7 @@ from app.roles.router import router as roles_router
 from app.workspaces.router import router as workspaces_router
 from app.org_chart.router import router as org_chart_router
 from app.ingestion.router import router as ingestion_router
+from app.org_chart.router import router as org_chart_router
 
 app = FastAPI()
 app.include_router(invite_router)
@@ -18,6 +19,7 @@ app.include_router(workspaces_router)
 app.include_router(auth_router)
 app.include_router(org_chart_router)
 app.include_router(ingestion_router)
+app.include_router(org_chart_router)
 
 app.add_middleware(SessionMiddleware, secret_key="data-trust-engine-21a")
 

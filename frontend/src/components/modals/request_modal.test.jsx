@@ -2,7 +2,7 @@ import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-li
 import { MemoryRouter, Outlet, Routes, Route} from "react-router-dom";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import userEvent from "@testing-library/user-event";
-import Dashboard from "../../dashboard/Dashboard.jsx";
+import Dashboard from "../../Dashboard/Dashboard.jsx";
 import RequestJoinWorkspaceModal from "./RequestJoinWorkspaceModal.jsx";
 
 const workspaces = [
@@ -46,7 +46,6 @@ vi.mock("../../api/axiosConfig.js", () => ({
 }));
 
 import api from "../../api/axiosConfig.js";
-import Header from "../header/header.jsx";
 
 describe("Request Join Workspace Modal Component", () => {
     afterEach(() => {
@@ -140,7 +139,7 @@ describe("Request Join Workspace Modal Component", () => {
         fireEvent.click(accept_button)
 
         await waitFor(() => {
-            expect(api.post).toHaveBeenCalledWith("/workspace/request-join-workspace", {
+            expect(api.post).toHaveBeenCalledWith("/workspace/dashboard/request-join-workspace", {
                 title: "New Invite Request",
                 body: "An employee has requested join your workspace. You can review this request in Manage Employees.",
                 workspace_id: 1,

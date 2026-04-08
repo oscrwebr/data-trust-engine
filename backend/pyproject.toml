@@ -83,6 +83,7 @@ dependencies = [
     "fixtures>=4.3.2",
     "requests-mock>=1.12.1",
     "coverage>=7.13.5",
+    "pytest-cov>=7.1.0",
     "pandas",
     "openpyxl",
     "pytest-asyncio",

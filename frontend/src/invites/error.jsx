@@ -6,14 +6,15 @@ import api from "../api/axiosConfig"
 
 import logo from "../assets/CIH_logo.jpg";
 import { Button } from "primereact/button";
-import {Avatar} from "primereact/Avatar";
+import { Avatar } from "primereact/avatar";
 import { useEffect, useState } from "react";
 
 function EmployeeInviteError({toast}){
 
     const [searchParams] = useSearchParams();
     const expiry = searchParams.get("date");  
-    const workspace_id = searchParams.get("workspace");      
+    const workspace_id = searchParams.get("workspace");   
+    const pending_user_id = searchParams.get("pending_user_id") 
     const [isDisabled, setIsDisabled] = useState(false);
     const title = "New Invite Request"
     const body = "An employee has requested join your workspace. You can review this request in Manage Employees."
@@ -33,7 +34,7 @@ function EmployeeInviteError({toast}){
         setIsDisabled(true);
         localStorage.setItem('buttonDisabled', 'true'); 
         try {
-            await api.post("/workspace/request-join-workspace", {
+            await api.post(`/workspace/invite/request-join-workspace/${pending_user_id}`, {
                 title: title,
                 body: body,
                 workspace_id: workspace_id,

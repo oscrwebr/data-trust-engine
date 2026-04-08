@@ -73,17 +73,13 @@
     background-color: rgb(94, 93, 93);
 }
 
-.navbar_link:focus {
-    background-color: rgb(94, 93, 93);
+.active {
+  background-color: rgb(52, 50, 50);
 }
 
 .dropdown_item_link:hover {
     cursor: pointer;
     background-color:rgb(52, 50, 50);
-}
-
-.dropdown_item_link:focus {
-    background-color: rgb(52, 50, 50);
 }
 
 .user_info_container {

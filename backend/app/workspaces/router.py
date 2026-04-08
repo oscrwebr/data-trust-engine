@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, UploadFile, File, Form, Response
 from app.core.database import get_database
 from sqlalchemy.orm import Session
-from app.workspaces.service import workspace, add_notification, get_user_notifications, del_notification, get_employees, get_pending_employees, get_workspaces, get_workspace_by_id, get_admin_from_workspace
+from app.workspaces.service import workspace, add_notification, get_user_notifications, del_notification, get_employees, get_pending_employees, get_workspaces, get_workspace_by_id, get_admin_from_workspace, add_pending_user_to_workspace
 from typing import Annotated
 from ..core.security_schemas import User
 from ..core.security import get_user_from_access_token
@@ -46,23 +46,27 @@ async def dashboard(db: Annotated[Session, Depends(get_database)], current_user:
         "email": user.email,
         "role": user.role}, "workspace":user.workspaces[0].name, "id":user.workspaces[0].id, "image":f"/workspace/image/{user.workspaces[0].id}"} if user else {"message": "no user"}
 
-@router.post("/request-join-workspace")
+@router.post("/invite/request-join-workspace/{pending_user_id}")
+async def create_notification(pending_user_id: int, db: Annotated[Session, Depends(get_database)], notification: NotificationSchema):
+    pending_user = service.get_pending_by_id(db, pending_user_id)
+    admin = get_admin_from_workspace(db, notification.workspace_id)
+
+    set_pending_user_type_invite(db, pending_user, "request")
+    add_notification(db, notification.title, notification.body, datetime.now(), admin[0].user_id)
+
+    return True
+
+@router.post("/dashboard/request-join-workspace")
 async def create_notification(db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)], notification: NotificationSchema):
-    user = service.test_route(current_user.user_id, db=db)
-    pending_user = service.get_pending_by_email(db, user.email)
     
     admin = get_admin_from_workspace(db, notification.workspace_id)
     workspace = get_workspace_by_id(db, notification.workspace_id)
 
-    if pending_user:
-        set_pending_user_type_invite(db, pending_user, "request")
-        add_notification(db, notification.title, notification.body, datetime.now(), admin[0].user_id)
-
-    else:
-        user = service.test_route(current_user.user_id, db=db)
-        service.add_pending_user(db, user.email, "request")
-        add_notification(db, notification.title, notification.body, datetime.now(), admin[0].user_id)
-        add_notification(db, "Invite Request Sent", f"An invite request has been sent to {workspace.name}. You won't be able to send another request whilst the current one is pending.", datetime.now(), current_user.user_id)
+    user = service.test_route(current_user.user_id, db=db)
+    pending = service.add_pending_user(db, user.email, "request")
+    add_pending_user_to_workspace(db, notification.workspace_id, pending.user_id)
+    add_notification(db, notification.title, notification.body, datetime.now(), admin[0].user_id)
+    add_notification(db, "Invite Request Sent", f"An invite request has been sent to {workspace.name}. You won't be able to send another request whilst the current one is pending.", datetime.now(), current_user.user_id)
 
     return True
 
