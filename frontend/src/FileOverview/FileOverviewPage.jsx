@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+
 import FileScanHistoryItem from "./FileScanHistoryItem";
 import LatestScanResultCard from "./LatestScanResultCard";
+import EmployeeAccessItem from "./EmployeeAccessItem";
 import styles from "./FileOverview.module.css";
 
 import { FaRegFileAlt } from "react-icons/fa";
@@ -12,9 +14,11 @@ import { FaHistory } from "react-icons/fa";
 function FileOverviewPage() {
     const { file_id } = useParams();
     const backend_uri = import.meta.env.VITE_BACKEND_HOST || "http://localhost:8000"
+
     const [file, set_file] = useState(null);
     const [file_scans_history, set_file_scans_history] = useState(null);
     const [latest_scan_results, set_latest_scan_results] = useState(null);
+    const [employees_with_access, set_employees_with_access] = useState([]);
 
     const [loading, set_loading] = useState(true);
 
@@ -29,6 +33,9 @@ function FileOverviewPage() {
 
                 const latest_scan_results_response = await fetch(`${backend_uri}/scanning/get_file_latest_scan_results/${file_id}`)
                 const latest_scan_results_data = await latest_scan_results_response.json()
+
+                const employees_with_access_response = await fetch(`${backend_uri}/access_mapping/get_file_employees_with_access/${file_id}`)
+                const employees_with_access_data = await employees_with_access_response.json()
 
                 set_file(file_data)
                 set_file_scans_history(file_scans_history_data)
@@ -73,6 +80,10 @@ function FileOverviewPage() {
                     <div className={styles.hash_label}>Hash</div>
                     <div className={styles.file_hash}>{file.hash}</div>
                 </div>
+            </div>
+
+            <div className={styles.employees_with_access_container}>
+                <h2 className={styles.section_title}>Employees with Access</h2>
             </div>
 
             <div className={styles.latest_scan_results_container}>

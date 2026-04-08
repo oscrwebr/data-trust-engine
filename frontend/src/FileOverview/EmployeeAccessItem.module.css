@@ -1,0 +1,32 @@
+.employee_access_item {
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+}
+
+.employee_main_info {
+    margin-bottom: 0.5rem;
+}
+
+.employee_name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #111827;
+}
+
+.employee_email {
+    font-size: 0.9rem;
+    color: #6b7280;
+}
+
+.employee_roles {
+    font-size: 0.9rem;
+    color: #374151;
+}
+
+.roles_label {
+    font-weight: 600;
+    color: #111827;
+}
