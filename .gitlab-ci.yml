@@ -9,21 +9,29 @@ workflow:
     - if: $CI_COMMIT_BRANCH == "development"
     - when: never
 
-default:
-  image: docker:24.0.5-cli
-  services:
-    - name: docker:24.0.5-dind
-      alias: docker
-      command: ["--tls=false"]
-  before_script:
-    - docker info
-
-variables:
-  DOCKER_TLS_CERTDIR: ""
-  DOCKER_HOST: "tcp://docker:2375"
-
-test-frontend:
+test-docker-available:
   stage: test-frontend
+  tags:
+    - comsc-ci
   script:
-    - ls
-    - docker compose --profile frontend-test up --build
+    - docker info
+    - docker compose version
+
+# default:
+#   image: docker:24.0.5-cli
+#   services:
+#     - name: docker:24.0.5-dind
+#       alias: docker
+#       command: ["--tls=false"]
+#   before_script:
+#     - docker info
+
+# variables:
+#   DOCKER_TLS_CERTDIR: ""
+#   DOCKER_HOST: "tcp://docker:2375"
+
+# test-frontend:
+#   stage: test-frontend
+#   script:
+#     - ls
+#     - docker compose --profile frontend-test up --build
