@@ -13,7 +13,6 @@ import { getSensitivityScanPageCardClass } from "./utils/getSensitivityScanPageC
 
 function SensitivityScanPage({ scan }) {
 
-    
 
     return (
         <>

@@ -24,9 +24,13 @@ def test_scan_file_with_no_naming_results_returns_empty_list(db):
         db,
         graph_file_id="abc123",
         file_name="test_file",
-        hash="abc"
+        extension=".pdf",
+        hash="abc",
+        last_modified="2024-01-01 00:00:00",
+        web_url="http://example.com/test_file.pdf",
+        drive_id="drive123"
     )
-    repository.create_scan_file(db, scan.scan_id, file.file_id)
+    repository.create_scan_file(db, scan.scan_id, file.ingestion_file_id)
 
     # Act
 
@@ -43,9 +47,13 @@ def test_scan_file_performed_with_multiple_naming_conventions_returns_results_fo
         db,
         graph_file_id="abc123",
         file_name="test_file",
-        hash="abc"
+        extension=".pdf",
+        hash="abc",
+        last_modified="2024-01-01 00:00:00",
+        web_url="http://example.com/test_file.pdf",
+        drive_id="drive123"
     )
-    scan_file = repository.create_scan_file(db, scan.scan_id, file.file_id)
+    scan_file = repository.create_scan_file(db, scan.scan_id, file.ingestion_file_id)
 
     # Create scan naming conventions with camel case (1) and snake case (2) check
     scan_naming_convention_1 = repository.create_scan_naming_convention(db, scan.scan_id, 1)
@@ -71,17 +79,25 @@ def test_get_organisational_scan_details_returns_correct_number_of_results(db, n
         db,
         graph_file_id="abc123",
         file_name="test_file",
-        hash="abc"
+        extension=".pdf",
+        hash="abc",
+        last_modified="2024-01-01 00:00:00",
+        web_url="http://example.com/test_file.pdf",
+        drive_id="drive123"
     )
     file2 = repository.create_test_file(
         db,
         graph_file_id="def456",
         file_name="test_file_2",
-        hash="def"
+        extension=".pdf",
+        hash="def",
+        last_modified="2024-01-01 00:00:00",
+        web_url="http://example.com/test_file_2.pdf",
+        drive_id="drive456"
     )
 
-    scan_file1 = repository.create_scan_file(db, scan.scan_id, file1.file_id)
-    scan_file2 = repository.create_scan_file(db, scan.scan_id, file2.file_id)
+    scan_file1 = repository.create_scan_file(db, scan.scan_id, file1.ingestion_file_id)
+    scan_file2 = repository.create_scan_file(db, scan.scan_id, file2.ingestion_file_id)
 
     scan_naming_convention_1 = repository.create_scan_naming_convention(db, scan.scan_id, 1)
     scan_naming_convention_2 = repository.create_scan_naming_convention(db, scan.scan_id, 2)

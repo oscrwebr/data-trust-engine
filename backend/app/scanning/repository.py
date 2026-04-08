@@ -207,8 +207,8 @@ def get_scan_files_with_file(db: Session, scan_id: int):
 def get_naming_convention_ids(db: Session):
         return db.execute(select(NamingConvention.naming_convention_id)).scalars().all()
 
-def create_test_file(db: Session, graph_file_id: str, file_name: str, hash: str):
-    file = File(graph_file_id=graph_file_id, file_name= file_name, hash=hash)
+def create_test_file(db: Session, graph_file_id: str, file_name: str, extension: str, hash: str, last_modified: datetime, web_url: str, drive_id: str):
+    file = IngestionFile(graph_id=graph_file_id, name=file_name, extension=extension, hash=hash, last_modified=last_modified, web_url=web_url, drive_id=drive_id)
     db.add(file)
     db.commit()
     db.refresh(file)

@@ -37,9 +37,13 @@ def test_sensitivity_scan_with_no_detections_returns_zero_counts(db, sensitivity
         db,
         graph_file_id="abc123",
         file_name="test_file",
-        hash="abc"
+        extension=".pdf",
+        hash="abc",
+        last_modified="2024-01-01 00:00:00",
+        web_url="http://example.com/test_file.pdf",
+        drive_id="drive123"
     )
-    scan_file = repository.create_scan_file(db, scan.scan_id, file.file_id)
+    scan_file = repository.create_scan_file(db, scan.scan_id, file.ingestion_file_id)
 
     # Act
     scan = service.get_sensitivity_scan_details(db, scan)
@@ -57,13 +61,17 @@ def test_get_sensitivity_scan_details_correctly_counts_detection_categories(db, 
         db,
         graph_file_id="abc123",
         file_name="test_file",
-        hash="abc"
+        extension=".pdf",
+        hash="abc",
+        last_modified="2024-01-01 00:00:00",
+        web_url="http://example.com/test_file.pdf",
+        drive_id="drive123"
     )
 
     scan_file = repository.create_scan_file(
         db,
         scan_id=scan.scan_id,
-        file_id=file.file_id
+        file_id=file.ingestion_file_id
     )
 
     # Personal detections
@@ -89,9 +97,13 @@ def test_get_sensitivity_scan_details_returns_unique_subcategories(db, sensitivi
         db,
         graph_file_id="abc123",
         file_name="test_file",
-        hash="abc"
+        extension=".pdf",
+        hash="abc",
+        last_modified="2024-01-01 00:00:00",
+        web_url="http://example.com/test_file.pdf",
+        drive_id="drive123"
     )
-    scan_file = repository.create_scan_file(db, scan.scan_id, file.file_id)
+    scan_file = repository.create_scan_file(db, scan.scan_id, file.ingestion_file_id)
 
     # Create multiple 'NAME' detections (multiple subcategories)
     repository.create_scan_file_detection(db, scan_file.scan_file_id, "NAME", 1)
@@ -116,9 +128,13 @@ def test_get_sensitivity_scan_details_returns_subcategories_with_correct_categor
         db,
         graph_file_id="abc123",
         file_name="test_file",
-        hash="abc"
+        extension=".pdf",
+        hash="abc",
+        last_modified="2024-01-01 00:00:00",
+        web_url="http://example.com/test_file.pdf",
+        drive_id="drive123"
     )
-    scan_file = repository.create_scan_file(db, scan.scan_id, file.file_id)
+    scan_file = repository.create_scan_file(db, scan.scan_id, file.ingestion_file_id)
     # Create one detection for each category
     repository.create_scan_file_detection(db, scan_file.scan_file_id, "NAME", 1)
     repository.create_scan_file_detection(db, scan_file.scan_file_id, "IBAN", 1)
@@ -144,18 +160,26 @@ def test_get_sensitivity_scan_details_correctly_counts_detections_with_multiple_
         db,
         graph_file_id="abc123",
         file_name="test_file1",
-        hash="abc"
+        extension=".pdf",
+        hash="abc",
+        last_modified="2024-01-01 00:00:00",
+        web_url="http://example.com/test_file1.pdf",
+        drive_id="drive123"
     )
-    scan_file1 = repository.create_scan_file(db, scan.scan_id, file1.file_id)
+    scan_file1 = repository.create_scan_file(db, scan.scan_id, file1.ingestion_file_id)
 
     file2 = repository.create_test_file(
         db,
         graph_file_id="def456",
         file_name="test_file2",
-        hash="def"
+        extension=".pdf",
+        hash="def",
+        last_modified="2024-01-01 00:00:00",
+        web_url="http://example.com/test_file2.pdf",
+        drive_id="drive456"
     )
 
-    scan_file2 = repository.create_scan_file(db, scan.scan_id, file2.file_id)
+    scan_file2 = repository.create_scan_file(db, scan.scan_id, file2.ingestion_file_id)
 
     # Create two personal detections, one financial and one legal detection
     repository.create_scan_file_detection(db, scan_file1.scan_file_id, "NAME", 1)
