@@ -9,6 +9,7 @@ import styles from "./FileOverview.module.css";
 import { FaRegFileAlt } from "react-icons/fa";
 import { FaShieldAlt } from "react-icons/fa";
 import { FaHistory } from "react-icons/fa";
+import { FaUser } from "react-icons/fa";
 
 
 function FileOverviewPage() {
@@ -84,7 +85,10 @@ function FileOverviewPage() {
             </div>
 
             <div className={styles.employees_with_access_container}>
-                <h2 className={styles.section_title}>Employees With Access</h2>
+                <div className={styles.section_title}>
+                    <FaUser className={styles.section_icon}/>
+                    <h2 className={styles.employees_with_access_category_title}>Employees With Access</h2>
+                </div>
 
                 {employees_with_access.length === 0 ? (
                     <p>No employees with access found.</p>
