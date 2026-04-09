@@ -22,6 +22,17 @@ def get_file_employees_with_access(db: Session, file_id: int):
     )
 
 
+# Method to get a user's role ids
+def get_user_role_ids(db: Session, user_id: int):
+    rows = (
+        db.query(UserRole.role_id)
+        .filter(UserRole.user_id == user_id)
+        .all()
+    )
+
+    return [row.role_id for row in rows]
+
+
 # Method to get the thresholds of a provided role
 def get_role_thresholds(db: Session, role_id: int):
     return (
