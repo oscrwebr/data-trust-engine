@@ -19,5 +19,4 @@ test-frontend:
   tags:
    - docker-tests
   script:
-    - ls
-    - docker compose --profile frontend-test up --build
+    - docker compose --profile test-frontend up --build
