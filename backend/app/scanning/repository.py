@@ -7,6 +7,7 @@ from app.ingestion.models import IngestionFile
 from app.roles.models import SensitivityCategory, SensitivitySubcategory
 from datetime import datetime, timezone
 from app.scanning.scan_type import ScanType
+from app.ingestion.models import UserFiles
 
 
 def create_scan(db: Session, scan_type: ScanType):
@@ -323,3 +324,10 @@ def create_scan_naming_convention(db: Session, scan_id: int, naming_convention_i
     db.commit()
     db.refresh(scan_naming_convention)
     return scan_naming_convention
+
+def get_files_by_user_id(db: Session, user_id: int):
+    return (db.query(IngestionFile)
+            .join(UserFiles, IngestionFile.ingestion_file_id == UserFiles.file_id)
+            .filter(UserFiles.user_id == user_id)
+            .all()
+    )
