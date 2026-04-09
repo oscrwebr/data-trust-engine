@@ -241,7 +241,7 @@ def remove_file_extension(file_name):
     return file_name.rsplit('.', 1)[0]
 
 
-def perform_organisation_scan(db: Session, naming_convention_ids: list[int]):
+def perform_organisation_scan(db: Session, user_id: int, naming_convention_ids: list[int]):
 
     # Validate the list of naming convention ids
     if not naming_convention_ids:
@@ -254,7 +254,7 @@ def perform_organisation_scan(db: Session, naming_convention_ids: list[int]):
 
     scan = repository.create_scan(db=db, scan_type=ScanType.ORGANISATION)
     # Scan all files for now (potentially in future can be selectable)
-    files = repository.get_all_files(db=db)
+    files = repository.get_files_by_user_id(db=db, user_id=user_id)
 
     # Users will be able to select multiple naming conventions on frontend
     for naming_convention_id in naming_convention_ids:
