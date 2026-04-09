@@ -10,22 +10,14 @@ workflow:
     - when: never
 
 default:
-  image: docker:24.0.5-cli
-  services:
-    - name: docker:24.0.5-dind
-      alias: docker
-      command: ["--tls=false"]
   before_script:
     - docker info
 
-variables:
-  DOCKER_TLS_CERTDIR: ""
-  DOCKER_HOST: "tcp://docker:2375"
 
 test-frontend:
   stage: test-frontend
   tags:
-   - general-docker
+   - docker-tests
   script:
     - ls
     - docker compose --profile frontend-test up --build
