@@ -176,7 +176,7 @@ def set_naming_convention_scan_result(db: Session, scan_file_id: int, scan_namin
     return naming_convention_scan_result
 
 def end_scan(db: Session, scan: Scan):
-    scan.finished_at = datetime.now()
+    scan.finished_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(scan)
     return scan
