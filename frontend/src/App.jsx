@@ -20,6 +20,7 @@ import OrgChart from "./org_chart/orgChart";
 import ViewEmployees from "./employees/ViewEmployees.jsx";
 import ManageEmployees from "./employees/ManageEmployees.jsx";
 import ScanPage from "./scans/ScanPage.jsx";
+import OrganisationalDevTest from "./scan_dev_test/OrganisationalDevTest.jsx";
 
 
 function App() {
@@ -44,6 +45,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard toast={toast}/>} />
           <Route path="/scans" element={<Scans />} />
           <Route path="/scans/:scanId" element={<ScanPage/>} />
+          <Route path="/org-scan-dev" element={<OrganisationalDevTest />} />
         </Route>
 
         {/* Elements in here will not inherit the sidebar */}
@@ -58,6 +60,7 @@ function App() {
         <Route path="/invite-error/:type" element={<EmployeeInviteError toast={toast}/>} />
         <Route path="/workspace-joined" element={<WorkspaceJoinedError />} />
         <Route path="/upload-org-chart" element={<OrgChart toast={toast} />} />
+        
       </Routes>
 
     </>
