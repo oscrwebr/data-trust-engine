@@ -365,7 +365,7 @@ def get_scan_by_id(db: Session, scan_id: int):
 def get_organisational_scan_details(db: Session, scan):
     files = repository.get_scan_files_with_file(db=db, scan_id=scan.scan_id)
     results_query = repository.get_naming_convention_scan_results_by_scan_id(db=db, scan_id=scan.scan_id)
-    duplicate_results_query = repository.get_duplicate_scan_results_by_scan_id(db=db, scan_id=scan.scan_id)
+    duplicate_results_query = repository.get_duplicate_scan_result_by_scan_id(db=db, scan_id=scan.scan_id)
 
     # Put results_query into dictionary to access when looping
     results = {}
