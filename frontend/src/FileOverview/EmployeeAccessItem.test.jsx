@@ -1,9 +1,14 @@
-import { describe, test, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, test, expect, afterEach } from "vitest";
+import { render, screen, cleanup } from "@testing-library/react";
 import EmployeeAccessItem from "./EmployeeAccessItem";
 
-
 describe("EmployeeAccessItemTests", () => {
+
+    // Cleanup after each test
+    afterEach(() => {
+        cleanup();
+    })
+
     // Test to ensure employee access item card renders employee details correctly
     test("employeeAccessItemRendersNameEmailAndRoles", () => {
         // Create a mock employee for test
@@ -54,10 +59,10 @@ describe("EmployeeAccessItemTests", () => {
             failed_detections: []
         };
 
-        const { container } = render(<EmployeeAccessItem employee={employee}/>)
+        render(<EmployeeAccessItem employee={employee}/>)
 
         // Allowed icon should be present
-        expect(container.querySelector(".allowed_icon")).toBeTruthy();
+        expect(screen.getByTestId("allowed-icon")).toBeInTheDocument();
     });
 
     // Test to ensure employee access item card renders denied icon when access is denied
@@ -72,9 +77,9 @@ describe("EmployeeAccessItemTests", () => {
             failed_detections: []
         };
 
-        const { container } = render(<EmployeeAccessItem employee={employee}/>)
+        render(<EmployeeAccessItem employee={employee}/>)
 
         // Denied icon should be present
-        expect(container.querySelector(".denied_icon")).toBeTruthy();
+        expect(screen.getByTestId("denied-icon")).toBeInTheDocument();
     });
 })

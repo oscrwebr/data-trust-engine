@@ -7,7 +7,17 @@ function EmployeeAccessItem({ employee }) {
     return (
         <div className={styles.employee_access_item}>
             <div className={styles.employee_access_status_icon}>
-                {employee.access_allowed ? (<FaCheckCircle className={styles.allowed_icon}/>) : (<FaExclamationCircle className={styles.denied_icon}/>)}
+                {employee.access_allowed ? (
+                    <FaCheckCircle 
+                        className={styles.allowed_icon}
+                        data-testid="allowed-icon"
+                    />
+                ) : (
+                    <FaExclamationCircle 
+                        className={styles.denied_icon}
+                        data-testid="denied-icon"
+                    />
+                )}
             </div>
 
             <div className={styles.employee_content}>
