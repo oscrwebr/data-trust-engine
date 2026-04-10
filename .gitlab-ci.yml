@@ -36,4 +36,4 @@ test-backend:
   tags:
     - docker-tests
   script:
-    - docker compose --profile test-frontend up --build --abort-on-container-exit --exit-code-from frontend-test # --abort-on-container-exit = when backend container exits, db container be forced to exit
+    - docker compose --profile test-backend up --build --abort-on-container-exit --exit-code-from frontend-test # --abort-on-container-exit = when backend container exits, db container be forced to exit
