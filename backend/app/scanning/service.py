@@ -285,7 +285,21 @@ def naming_convention_scan(db: Session, scan_id: int):
             repository.set_naming_convention_scan_result(db=db, scan_file_id=scan_file.scan_file_id, scan_naming_convention_id=scan_naming_convention.scan_naming_convention_id, passed=passed, suggested_name=suggested_name)
 
 def duplicate_scan(db: Session, scan_id: int):
-    pass 
+    # Join query to get scan files with their corresponding file table data
+    scan_files = repository.get_scan_files_with_file(db=db, scan_id=scan_id)
+
+    hashes_found = {}
+
+    for scan_file, file in scan_files:
+        hash = file.hash
+
+        if hash not in hashes_found:
+            hashes_found[hash] = []
+        hashes_found[hash].append(scan_file.scan_file_id)
+    for hash in hashes_found:
+        matches = hashes_found[hash]
+        if len(matches) > 1:
+            pass
 
 def perform_organisation_scan(db: Session, user_id: int, naming_convention_ids: list[int]):
 
