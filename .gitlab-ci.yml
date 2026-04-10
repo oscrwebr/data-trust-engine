@@ -1,6 +1,6 @@
 stages:
   - test-frontend
-  # - test-backend
+  - test-backend
 
 workflow:
   rules:
@@ -22,10 +22,16 @@ test-frontend:
   tags:
    - docker-tests
   script:
-    - docker compose --profile test-frontend up --build #--exit-code-from frontend-test # --exit-code-from frontend-test = compose will exit with whatever exit code the service exited with (wont pass a failing pipeline)
-    - ls
-  artifacts:
-    reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: frontend_coverage/coverage/cobertura-coverage.xml
+    - docker compose --profile test-frontend up --build --exit-code-from frontend-test # --exit-code-from frontend-test = compose will exit with whatever exit code the service exited with (wont pass a failing pipeline)
+  # artifacts:
+  #   reports:
+  #     coverage_report:
+  #       coverage_format: cobertura
+  #       path: frontend_coverage/coverage/cobertura-coverage.xml
+
+test-backend:
+  stage: test-backend
+  tags:
+    - docker-tests
+  script:
+    - docker compose --profile test-frontend up --build --abort-on-container-exit --exit-code-from frontend-test # --abort-on-container-exit = when backend container exits, db container be forced to exit
