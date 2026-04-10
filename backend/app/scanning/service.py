@@ -240,40 +240,13 @@ def is_kebab_case(file_name):
 def remove_file_extension(file_name):
     return file_name.rsplit('.', 1)[0]
 
-
-def perform_organisation_scan(db: Session, user_id: int, naming_convention_ids: list[int]):
-
-    # Validate the list of naming convention ids
-    if not naming_convention_ids:
-        raise ValueError("No naming convention(s) selected")
-    
-    valid_naming_convention_ids = repository.get_naming_convention_ids(db=db)
-    for naming_convention_id in naming_convention_ids:
-        if naming_convention_id not in valid_naming_convention_ids:
-            raise ValueError(f"Invalid naming convention id: {naming_convention_id}")
-        
-    # Get all files in the user's workspace
-    files = repository.get_workspace_files_by_user_id(db=db, user_id=user_id)
-
-    # Don't perform the scan if no files are found
-    if len(files) == 0:
-        raise ValueError("No files in this workspace")
-
-    scan = repository.create_scan(db=db, scan_type=ScanType.ORGANISATION)
-
-    # Users will be able to select multiple naming conventions on frontend
-    for naming_convention_id in naming_convention_ids:
-        repository.create_scan_naming_convention(db=db, scan_id=scan.scan_id, naming_convention_id=naming_convention_id)
-
-    # Create a scan_file record for each file
-    for file in files:
-        repository.create_scan_file(db=db, scan_id=scan.scan_id, file_id=file.ingestion_file_id)
+# Naming convention scan (used in perform_organisation_scan)
+def naming_convention_scan(db: Session, scan_id: int):
 
     # Get the naming conventions for this scan
-    scan_naming_conventions = repository.get_scan_naming_convention_by_scan_id(db=db, scan_id=scan.scan_id)
-
+    scan_naming_conventions = repository.get_scan_naming_convention_by_scan_id(db=db, scan_id=scan_id)
     # Join query to get scan files with their corresponding file table data
-    scan_files = repository.get_scan_files_with_file(db=db, scan_id=scan.scan_id)
+    scan_files = repository.get_scan_files_with_file(db=db, scan_id=scan_id)
 
 
     # Optimising if/elif code blocks adapted from:
@@ -310,6 +283,44 @@ def perform_organisation_scan(db: Session, user_id: int, naming_convention_ids: 
                 suggested_name = suggestions(file_name)
                 
             repository.set_naming_convention_scan_result(db=db, scan_file_id=scan_file.scan_file_id, scan_naming_convention_id=scan_naming_convention.scan_naming_convention_id, passed=passed, suggested_name=suggested_name)
+
+def duplicate_scan(db: Session, scan_id: int):
+    pass 
+
+def perform_organisation_scan(db: Session, user_id: int, naming_convention_ids: list[int]):
+
+    # Validate the list of naming convention ids
+    if not naming_convention_ids:
+        raise ValueError("No naming convention(s) selected")
+    
+    valid_naming_convention_ids = repository.get_naming_convention_ids(db=db)
+    for naming_convention_id in naming_convention_ids:
+        if naming_convention_id not in valid_naming_convention_ids:
+            raise ValueError(f"Invalid naming convention id: {naming_convention_id}")
+        
+    # Get all files in the user's workspace
+    files = repository.get_workspace_files_by_user_id(db=db, user_id=user_id)
+
+    # Don't perform the scan if no files are found
+    if len(files) == 0:
+        raise ValueError("No files in this workspace")
+
+    scan = repository.create_scan(db=db, scan_type=ScanType.ORGANISATION)
+
+    # Users will be able to select multiple naming conventions on frontend
+    for naming_convention_id in naming_convention_ids:
+        repository.create_scan_naming_convention(db=db, scan_id=scan.scan_id, naming_convention_id=naming_convention_id)
+
+    # Create a scan_file record for each file
+    for file in files:
+        repository.create_scan_file(db=db, scan_id=scan.scan_id, file_id=file.ingestion_file_id)
+
+    # Run naming convention scan
+    naming_convention_scan(db=db, scan_id=scan.scan_id)
+
+    # Run duplicate scan
+    duplicate_scan(db=db, scan_id=scan.scan_id)
+    
     repository.end_scan(db=db, scan=scan)
     return scan
 
