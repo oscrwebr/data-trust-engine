@@ -6,7 +6,11 @@
     margin-bottom: 1rem;
 }
 
-.employee_info {
+.employee_top_row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
     margin-bottom: 0.5rem;
 }
 
@@ -29,4 +33,18 @@
 .roles_label {
     font-weight: 600;
     color: #111827;
+}
+
+.employee_access_status_icon {
+    font-size: 1.25rem;
+    display: flex;
+    align-items: center;
+}
+
+.allowed_icon {
+    color: #22c55e;
+}
+
+.denied_icon {
+    color: #ef4444;
 }
