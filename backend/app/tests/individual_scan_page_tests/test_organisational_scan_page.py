@@ -2,8 +2,14 @@ from unittest import result
 
 import pytest
 
+from sqlalchemy import select, insert
+
 from app.scanning import router, service, repository, models
 from app.scanning.scan_type import ScanType
+from app.workspaces.models import Workspace
+from app.authentication.models import User
+from app.workspaces.models import user_workspace as UserWorkspace
+from app.ingestion.models import UserFiles
 
 # Create naming convention ids in test database
 @pytest.fixture()
@@ -15,6 +21,57 @@ def naming_conventions(db):
         models.NamingConvention(naming_convention_id=4, name="kebab_case"),
     ])
     db.commit()
+
+@pytest.fixture()
+def organisation_scan_setup(db):
+    # Create workspace model
+    workspace = Workspace(name="Test Workspace", image=b"image")
+    db.add(workspace)
+    db.commit()
+    db.refresh(workspace)
+
+    # Create a user
+    user = User(
+        firstname="Test",
+        surname="User",
+        username="test.user@example.com",
+        email="test.user@example.com",
+        oid="test-oid",
+        refresh=b"refresh",
+        role="admin")
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    # Add user to workspace using UserWorkspace table
+    db.execute(
+        insert(UserWorkspace).values(
+            user_id=user.user_id,
+            workspace_id=workspace.id
+        )
+    )
+    db.commit()
+
+    # Create file
+    file = repository.create_test_file(
+        db,
+        graph_file_id="abc123",
+        file_name="test_file",
+        extension=".pdf",
+        hash="abc",
+        last_modified="2024-01-01 00:00:00",
+        web_url="http://example.com/test_file.pdf",
+        drive_id="drive123"
+    )
+    # Add file to UserFile table
+    db.add(UserFiles(
+        user_id=user.user_id,
+        file_id=file.ingestion_file_id
+    ))
+    db.commit()
+
+    return user, workspace, file
+
 
 
 def test_scan_file_with_no_naming_results_returns_empty_list(db):
@@ -40,19 +97,10 @@ def test_scan_file_with_no_naming_results_returns_empty_list(db):
     # Assert
     assert scan["files"][0]["naming_convention_scan_results"] == []
 
-def test_scan_file_performed_with_multiple_naming_conventions_returns_results_for_all_naming_conventions(db, naming_conventions):
+def test_scan_file_performed_with_multiple_naming_conventions_returns_results_for_all_naming_conventions(db, naming_conventions, organisation_scan_setup):
     # Arrange
+    user, workspace, file = organisation_scan_setup
     scan = repository.create_scan(db, scan_type=ScanType.ORGANISATION)
-    file = repository.create_test_file(
-        db,
-        graph_file_id="abc123",
-        file_name="test_file",
-        extension=".pdf",
-        hash="abc",
-        last_modified="2024-01-01 00:00:00",
-        web_url="http://example.com/test_file.pdf",
-        drive_id="drive123"
-    )
     scan_file = repository.create_scan_file(db, scan.scan_id, file.ingestion_file_id)
 
     # Create scan naming conventions with camel case (1) and snake case (2) check
@@ -64,7 +112,7 @@ def test_scan_file_performed_with_multiple_naming_conventions_returns_results_fo
     repository.create_naming_convention_scan_result(db, scan_file.scan_file_id, scan_naming_convention_2.scan_naming_convention_id, True, "")
 
     # Act
-    perform_scan = service.perform_organisation_scan(db, naming_convention_ids=[1, 2])
+    perform_scan = service.perform_organisation_scan(db, user_id=user.user_id, naming_convention_ids=[1, 2])
     scan = service.get_organisational_scan_details(db, scan)
 
     # Assert
