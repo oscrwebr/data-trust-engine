@@ -4,14 +4,43 @@
     border-radius: 12px;
     padding: 1rem 1.25rem;
     margin-bottom: 1rem;
-}
-
-.employee_top_row {
     display: flex;
-    justify-content: space-between;
     align-items: flex-start;
     gap: 1rem;
-    margin-bottom: 0.5rem;
+}
+
+.employee_access_status_icon {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0.1rem;
+    flex-shrink: 0;
+}
+
+.allowed_icon {
+    font-size: 38px;
+    color: #22c55e;
+}
+
+.denied_icon {
+    font-size: 38px;
+    color: #ef4444;
+}
+
+.employee_content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.employee_information {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
 }
 
 .employee_name {
@@ -21,30 +50,17 @@
 }
 
 .employee_email {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: #6b7280;
 }
 
 .employee_roles {
-    font-size: 0.9rem;
-    color: #374151;
+    font-size: 0.85rem;
+    color: #111827;
 }
 
 .roles_label {
     font-weight: 600;
     color: #111827;
-}
-
-.employee_access_status_icon {
-    font-size: 1.25rem;
-    display: flex;
-    align-items: center;
-}
-
-.allowed_icon {
-    color: #22c55e;
-}
-
-.denied_icon {
-    color: #ef4444;
+    margin-bottom: 0.15rem;
 }
