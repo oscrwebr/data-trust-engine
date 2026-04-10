@@ -161,7 +161,7 @@ services:
       context: ./frontend
       target: test
     volumes:
-      - ./host_coverage:/app/coverage
+      - ./frontend_coverage:/app/frontend_coverage/
     profiles: ["test-frontend"]
 
 
