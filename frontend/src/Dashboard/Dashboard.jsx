@@ -9,7 +9,7 @@ import RequestJoinWorkspaceModal from "../components/modals/RequestJoinWorkspace
 
 function Dashboard({toast}) {
 
-  const { toastNotifications, visible, setVisible, setNotifications, user, workspace } = useOutletContext();
+  const { toastNotifications, setNotifications, user, workspace } = useOutletContext();
   const [requestJoinWorkspaceVisible, setRequestJoinWorkspaceVisible] = useState(false);
   const [pendingUser, setPendingUser] = useState([])
 
@@ -19,6 +19,7 @@ function Dashboard({toast}) {
       setPendingUser(res.data.pending)
     })
   })
+
   // Function to handle removing notifications
   const handleRemove = async (id) => {
     try {
@@ -33,7 +34,6 @@ function Dashboard({toast}) {
 
   return (
     <div className={styles.container}>
-        <Invite className={styles.d_invite_dialog} visible={visible} setVisible={setVisible} toast={toast}/>
         <RequestJoinWorkspaceModal toast={toast} visible={requestJoinWorkspaceVisible} setVisible={() => setRequestJoinWorkspaceVisible(false)}/>
         
         {/* Employee View of the Dashboard */}

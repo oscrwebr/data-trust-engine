@@ -25,6 +25,6 @@
     background-color: rgb(94, 93, 93);
 }
 
-.dropdown_button:focus {
-    background-color: rgb(94, 93, 93);
+.dropdown_button.active_closed {
+  background-color: rgb(94, 93, 93); 
 }

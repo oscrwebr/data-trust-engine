@@ -219,7 +219,7 @@ def get_pending_by_email(db: Session, email: str):
     return repository.get_pending_user_by_email(db, email)
 
 def add_pending_user(db: Session, email: str, type: str):
-    repository.add_user(db, email, type)
-    return True
+    return repository.add_user(db, email, type)
+
 
     

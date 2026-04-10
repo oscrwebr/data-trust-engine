@@ -1,15 +1,21 @@
 import hashlib
 import wordninja
+import requests
+from app.core.security import application
 
 from pathlib import Path
 from sqlalchemy.orm import Session
 from app.scanning import repository
 from app.scanning.models import File, Scan
+from app.scanning.schemas import FileResponse
 
 from app.scanning.regex_patterns import *
 from app.scanning.detectors import *
 from app.scanning.extractors import *
 from app.scanning.scan_type import ScanType
+
+from app.ingestion.service import get_download_link_by_graph_id
+from app.ingestion.repository import get_ingestion_file_by_graph_id
 
 BASE_DIRECTORY = Path(__file__).resolve().parent
 
@@ -17,7 +23,7 @@ BASE_DIRECTORY = Path(__file__).resolve().parent
 # Perform a scan
 def perform_scan(db: Session, graph_file_ids: list[str]):
     # Initialise the Scan record
-    scan = repository.create_scan(db=db)
+    scan = repository.create_scan(db=db, scan_type=ScanType.SENSITIVITY)
     
     # Call scan file method for every graph_file_id received (scan_file method will call a method to pull the files)
     for graph_file_id in graph_file_ids:
@@ -40,12 +46,20 @@ def perform_scan(db: Session, graph_file_ids: list[str]):
 def scan_file(db: Session, graph_file_id: str, scan_id: int):
 
     # Fetch file (for now using the testing method) using its graph_file_id (ingestion component will be integrated here later)
-    file_path = fetch_graph_file(graph_file_id=graph_file_id)
+    # file_path = fetch_graph_file(graph_file_id=graph_file_id)
+
+    # Get file's download link via its graph id
+    download_url = get_download_link_by_graph_id(application=application(), db=db, graph_id=graph_file_id)
+
+    # Get file's bytes by request, allow for max 2 minutes to not scan empty files / expired links
+    file_response = requests.get(download_url, timeout=120)
+    file_response.raise_for_status()
+    file_bytes = file_response.content
 
     # Create scan_file record
-    file = repository.get_file_by_graph_id(db=db, graph_file_id=graph_file_id)
+    file = get_ingestion_file_by_graph_id(db=db, graph_id=graph_file_id)
 
-    # Throw error if file with provided graph file id could not bne found
+    # Throw error if file with provided graph file id could not be found
     if file is None:
         raise ValueError(f"File with graph_file_id '{graph_file_id}' not found")
 
@@ -53,11 +67,11 @@ def scan_file(db: Session, graph_file_id: str, scan_id: int):
     scan_file_record = repository.create_scan_file(
         db=db, 
         scan_id=scan_id, 
-        file_id=file.file_id
+        file_id=file.ingestion_file_id
     )
 
     # Extract text from fetched file
-    file_extracted_text = extract_text_from_pdf(filepath=file_path)
+    file_extracted_text = extract_text_from_pdf(file_bytes=file_bytes)
 
     # Detect sensitive data in file's extracted text
     detections = []
@@ -108,7 +122,16 @@ def fetch_graph_file(graph_file_id: str):
 
 # Get file by id
 def get_file(db: Session, file_id: int):
-    return repository.get_file_by_id(db, file_id)
+    file = repository.get_file_by_id(db, file_id)
+
+    if file is None:
+        return None
+    
+    return FileResponse(
+        file_id = file.ingestion_file_id,
+        file_name = file.name,
+        hash = file.hash
+    )
 
 
 # Get all scans a file pertains to
@@ -239,7 +262,7 @@ def perform_organisation_scan(db: Session, naming_convention_ids: list[int]):
 
     # Create a scan_file record for each file
     for file in files:
-        repository.create_scan_file(db=db, scan_id=scan.scan_id, file_id=file.file_id)
+        repository.create_scan_file(db=db, scan_id=scan.scan_id, file_id=file.ingestion_file_id)
 
     # Get the naming conventions for this scan
     scan_naming_conventions = repository.get_scan_naming_convention_by_scan_id(db=db, scan_id=scan.scan_id)
@@ -267,7 +290,7 @@ def perform_organisation_scan(db: Session, naming_convention_ids: list[int]):
     for scan_file, file in scan_files:
 
         # As file names will be stored with their extension, this removes the extension for naming convention checks
-        file_name = remove_file_extension(file.file_name)
+        file_name = remove_file_extension(file.name)
 
         for scan_naming_convention in scan_naming_conventions:
             checks = naming_convention_checks.get(scan_naming_convention.naming_convention_id)
@@ -297,3 +320,108 @@ def get_scans_with_file_count(db: Session):
         # Gets the number of scan_file records associated with a scan
         "file_count": file_count} 
         for scan, file_count in scans]
+
+def get_scan_by_id(db: Session, scan_id: int):
+    return repository.get_scan_by_id(db=db, scan_id=scan_id)
+
+def get_organisational_scan_details(db: Session, scan):
+    files = repository.get_scan_files_with_file(db=db, scan_id=scan.scan_id)
+    results_query = repository.get_naming_convention_scan_results_by_scan_id(db=db, scan_id=scan.scan_id)
+
+    # Put results_query into dictionary to access when looping
+    results = {}
+
+    for naming_convention_scan_result, naming_convention_name, scan_file_id in results_query:
+        # Create an empty array if we haven't added any results for this ID yet
+        if scan_file_id not in results:
+            results[scan_file_id] = []
+        
+        results[scan_file_id].append({
+            "naming_convention_scan_result_id": naming_convention_scan_result.naming_convention_scan_result_id,
+            "naming_convention_name": naming_convention_name,
+            "passed": naming_convention_scan_result.passed,
+            "suggested_name": naming_convention_scan_result.suggested_name
+        })
+
+    return {
+        "scan_id": scan.scan_id,
+        "scan_type": scan.scan_type,
+        "started_at": scan.started_at,
+        "finished_at": scan.finished_at,
+        "file_count": len(files),
+        "files": [{
+            "scan_file_id": scan_file.scan_file_id,
+            "file_id": file.ingestion_file_id,
+            "file_name": file.name,
+            "hash": file.hash,
+            "naming_convention_scan_results": results.get(scan_file.scan_file_id, [])
+
+        } for scan_file, file in files
+        ]
+    }
+
+def get_sensitivity_scan_details(db: Session, scan):
+    files = repository.get_scan_files_with_file(db=db, scan_id=scan.scan_id)
+
+    # Getting total detection counts for each sensitivity category
+    detection_counts_query = repository.get_scan_detection_totals_by_scan_id(db=db, scan_id=scan.scan_id)
+    categories = repository.get_sensitivity_category_names(db=db)
+
+    detection_counts = {}
+
+    # Loop through categories to create 'detection_counts' entries with 0 as default count
+    # Built to allow easy integration of new categories in future
+    for category in categories:
+        # Format each category key to stay consistent (needed for matching actual count to each category later on)
+        key = category.name.lower().replace(" ", "_")
+        detection_counts[key] = 0
+
+    for i in detection_counts_query:
+        key = i.category_name.lower().replace(" ", "_")
+        detection_counts[key] = i.detection_count
+
+    # Same logic as organisational scan results (see above function)
+    results_query = repository.get_basic_sensitivity_scan_results_by_scan_id(db=db, scan_id=scan.scan_id)
+
+    results = {}
+
+    for scan_file_id, subcategory_name, category_name in results_query:
+        if scan_file_id not in results:
+            results[scan_file_id] = []
+        
+        results[scan_file_id].append({
+            "subcategory_name": subcategory_name,
+            "category": category_name
+        })
+
+    return {
+        "scan_id": scan.scan_id,
+        "scan_type": scan.scan_type,
+        "started_at": scan.started_at,
+        "finished_at": scan.finished_at,
+        "file_count": len(files),
+        "detection_counts": detection_counts,
+        "files": [{
+            "scan_file_id": scan_file.scan_file_id,
+            "file_id": file.ingestion_file_id,
+            "file_name": file.name,
+            "hash": file.hash,
+            "sensitivity_scan_results": results.get(scan_file.scan_file_id, [])
+        } for scan_file, file in files
+        ]
+    }
+
+
+    
+
+def get_scan_details(db: Session, scan_id: int):
+    scan = repository.get_scan_by_id(db=db, scan_id=scan_id)
+    
+    if not scan:
+        return None
+    
+    if scan.scan_type == ScanType.ORGANISATION:
+        return get_organisational_scan_details(db=db, scan=scan)
+    
+    if scan.scan_type == ScanType.SENSITIVITY:
+        return get_sensitivity_scan_details(db=db, scan=scan)

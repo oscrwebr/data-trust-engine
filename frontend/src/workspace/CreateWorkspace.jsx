@@ -18,6 +18,7 @@ function CreateWorkspace({toast}) {
   const formData = new FormData();
   const [nameError, setNameError] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [imageTypeError, setImageTypeError] = useState(false);
 
   useEffect(() => {
     if (file){
@@ -45,15 +46,17 @@ function CreateWorkspace({toast}) {
       if(response.data == "name"){
         setNameError(true);
         setImageError(false);
+        setImageTypeError(false);
       } else if (response.data == "image"){
         setNameError(false);
         setImageError(true);
+        setImageTypeError(false); 
       } else {
         showMessage();
         navigate("/dashboard");
         setNameError(false);
         setImageError(false);
-        
+        setImageTypeError(false);
       }
 
     } catch (error) {
@@ -74,10 +77,11 @@ function CreateWorkspace({toast}) {
             <div className={styles.cw_input_container}>
               <label className={styles.cw_label_name}>Workspace Name</label>
               <InputText id={styles.cw_workspace_name} className={`mr-2 ${nameError ? "p-invalid" : ""}`} placeholder="Enter workspace name" value={name} onChange={(e) => setName(e.target.value)}/>
-               {nameError &&(<Message severity="error" className={styles.cw_error} text={<p className={styles.cw_error_text}>You must give your workspace a name.</p>}/>)}
+                {nameError &&(<Message severity="error" className={styles.cw_error} text={<p className={styles.cw_error_text}>You must give your workspace a name.</p>}/>)}
               <label className={styles.cw_label_image}>Upload Workspace Image</label>
-              <FileUpload file={file} setFile={setFile}/>
-               {imageError &&(<Message severity="error" className={styles.cw_error} text={<p className={styles.cw_error_text}>You must upload your workspace's image.</p>}/>)}
+              <FileUpload file={file} setFile={setFile} error={imageTypeError} setError={(value) => {setImageTypeError(value); setNameError(false); setImageError(false);}}/>
+              {imageError &&(<Message severity="error" className={styles.cw_error} text={<p className={styles.cw_error_text}>You must upload your workspace's image.</p>}/>)}
+              {imageTypeError &&(<Message severity="error" className={styles.cw_type_error} text={<p className={styles.cw_error_text}>You cannot upload a file of this type, please choose an image.</p>}/>)}
               <Button onClick={handleCreateWorkspace} data-testid="send-invite-button" id={styles.cw_create_workspace}>Create Workspace</Button>
             </div>
           </div>

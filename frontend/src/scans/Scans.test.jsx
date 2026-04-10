@@ -32,10 +32,10 @@ test('scans are correctly rendered when on scans page', async () => {
     // Assert
     expect(await screen.findByText("Organisational")).toBeInTheDocument();
     expect(await screen.findByText("Sensitivity")).toBeInTheDocument();
-    expect(await screen.findByText("24/03/2026, 12:00:00")).toBeInTheDocument();
-    expect(await screen.findByText("24/03/2026, 13:00:00")).toBeInTheDocument();
-    expect(await screen.findByText("24/03/2026, 12:05:00")).toBeInTheDocument();
-    expect(await screen.findByText("24/03/2026, 13:10:00")).toBeInTheDocument();
+    expect(await screen.findByText("12:00:00, 24/03/2026")).toBeInTheDocument();
+    expect(await screen.findByText("13:00:00, 24/03/2026")).toBeInTheDocument();
+    expect(await screen.findByText("12:05:00, 24/03/2026")).toBeInTheDocument();
+    expect(await screen.findByText("13:10:00, 24/03/2026")).toBeInTheDocument();
     expect(await screen.findByText("5")).toBeInTheDocument();
     expect(await screen.findByText("10")).toBeInTheDocument();
 

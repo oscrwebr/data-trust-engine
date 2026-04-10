@@ -37,9 +37,18 @@ def test_get_scans_with_file_count_includes_correct_file_count(db, naming_conven
     # Perform a scan to create a scan record
     scan = service.perform_organisation_scan(db, naming_convention_ids=[1])
     # Create a file
-    file = repository.create_test_file(db, graph_file_id="test_graph_file_id", file_name="employee_salary_report", hash="testhash")
+    file = repository.create_test_file(
+        db,
+        graph_file_id="abc123",
+        file_name="test_file",
+        extension=".pdf",
+        hash="abc",
+        last_modified="2024-01-01 00:00:00",
+        web_url="http://example.com/test_file.pdf",
+        drive_id="drive123"
+    )
     # Create a scan_file record to associate the file with the scan
-    repository.create_scan_file(db, scan_id=scan.scan_id, file_id=file.file_id)
+    repository.create_scan_file(db, scan_id=scan.scan_id, file_id=file.ingestion_file_id)
 
     # Act
     act = service.get_scans_with_file_count(db)

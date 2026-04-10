@@ -623,4 +623,74 @@ def test_get_all_workspaces(db, client):
     assert response.json() == [{"id":workspace_1.id, "name":"Workspace 1", "image":f"/workspace/image/{workspace_1.id}"}, {"id":workspace_2.id, "name":"Workspace 2", "image":f"/workspace/image/{workspace_2.id}"}, {"id":workspace_3.id, "name":"Workspace 3", "image":f"/workspace/image/{workspace_3.id}"}]
     
 
+# Testing the request join workspace route for an expired invite
+def test_request_join_workspace_route_from_expiry_error_page(db, client):
+    image = create_test_image()
 
+    oid = "000000-7sdf77-88asdf8-9sdiy99"
+    insert_statement = insert(auth_model.User).values(firstname="John", surname="Smith", username="valid@example.com", refresh="me-refresh".encode(), email="valid@example.com", oid=oid, role="admin")
+    pending_user = insert(auth_model.PendingUser).values(email="valid@example.com", type="invite")
+
+    res=db.execute(insert_statement)
+    res_2=db.execute(pending_user)
+
+    workspace = insert(workspace_model.Workspace).values(name="Test Workspace", image=image)
+    workspace_instance = db.execute(workspace)
+
+    add_user_workspace(db, workspace_instance.inserted_primary_key[0], res.inserted_primary_key[0])
+
+    refresh_family = repository.create_refresh_family(db)
+
+    access, refresh, _ = service.create_access_refresh(db, data={"userId": res.inserted_primary_key[0], "role": "employee"}, refresh_family_id=refresh_family.refresh_family_id)
+
+    req = client.build_request(
+        method="post",
+        url=f"/workspace/invite/request-join-workspace/{res_2.inserted_primary_key[0]}",
+        headers={"Authorization": f"Bearer {access}"}, 
+        json={"title":"Test title", "body":"Test body", "workspace_id":workspace_instance.inserted_primary_key[0]},
+    )
+    response = client.send(request = req)
+
+    pending = service.get_pending_by_id(db, res_2.inserted_primary_key[0])
+
+    assert response.status_code == 200
+    assert response.json() == True
+    assert db.query(workspace_model.Notification).count() == 1
+    assert pending.type == "request"
+
+
+# Testing the request join workspace route for a user who has logged in
+def test_request_join_workspace_route_from_dashboard(db, client):
+    image = create_test_image()
+
+    oid = "000000-7sdf77-88asdf8-9sdiy99"
+    oid2 = "000000-7sdf77-88asdf8-9sdiy98"
+
+    insert_statement = insert(auth_model.User).values(firstname="John", surname="Smith", username="valid@example.com", refresh="me-refresh".encode(), email="valid@example.com", oid=oid, role="admin")
+    employee_insert = insert(auth_model.User).values(firstname="Mark", surname="Brown", username="yes@example.com", refresh="me-refresh".encode(), email="yes@example.com", oid=oid2, role="employee")
+
+    res=db.execute(insert_statement)
+    res_2=db.execute(employee_insert)
+
+    workspace = insert(workspace_model.Workspace).values(name="Test Workspace", image=image)
+    workspace_instance = db.execute(workspace)
+
+    add_user_workspace(db, workspace_instance.inserted_primary_key[0], res.inserted_primary_key[0])
+
+    refresh_family = repository.create_refresh_family(db)
+
+    access, refresh, _ = service.create_access_refresh(db, data={"userId": res_2.inserted_primary_key[0], "role": "employee"}, refresh_family_id=refresh_family.refresh_family_id)
+
+    req = client.build_request(
+        method="post",
+        url="/workspace/dashboard/request-join-workspace",
+        headers={"Authorization": f"Bearer {access}"}, 
+        json={"title":"Test title", "body":"Test body", "workspace_id":workspace_instance.inserted_primary_key[0]},
+    )
+    response = client.send(request = req)
+
+    assert response.status_code == 200
+    assert response.json() == True
+    assert db.query(workspace_model.Notification).count() == 2
+    assert db.query(workspace_model.pending_user_workspace).count() == 1
+    assert db.query(auth_model.PendingUser).count() == 1
