@@ -33,8 +33,8 @@ def get_user_role_ids(db: Session, user_id: int):
     return [row.role_id for row in rows]
 
 
-# Method to get the thresholds of a provided role
-def get_role_thresholds(db: Session, role_id: int):
+# Method to get the permissions of a provided role
+def get_role_permissions(db: Session, role_id: int):
     return (
         db.query(
             SensitivitySubcategory.name.label("subcategory"),
