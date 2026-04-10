@@ -19,6 +19,7 @@ default:
 
 test-frontend:
   stage: test-frontend
+  when: always
   tags:
    - docker-tests
   script:
@@ -31,6 +32,7 @@ test-frontend:
 
 test-backend:
   stage: test-backend
+  when: always
   tags:
     - docker-tests
   script:
