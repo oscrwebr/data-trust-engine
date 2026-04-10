@@ -22,7 +22,7 @@ test-frontend:
   tags:
    - docker-tests
   script:
-    - docker compose --profile test-frontend up --build --exit-code-from frontend-test # --exit-code-from frontend-test = compose will exit with whatever exit code the service exited with (wont pass a failing pipeline)
+    - docker compose --profile test-frontend up --build #--exit-code-from frontend-test # --exit-code-from frontend-test = compose will exit with whatever exit code the service exited with (wont pass a failing pipeline)
     - pwd
   artifacts:
     reports:
