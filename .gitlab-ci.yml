@@ -27,4 +27,4 @@ test-frontend:
     reports:
       coverage_report:
         coverage_format: cobertura
-        path: fronted_coverage/coverage/cobertura-coverage.xml
+        path: frontend_coverage/coverage/cobertura-coverage.xml
