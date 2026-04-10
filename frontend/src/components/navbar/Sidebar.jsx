@@ -1,5 +1,5 @@
 import { FiSidebar } from "react-icons/fi";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import logo from "../../assets/CIH_long_logo.png";
 import styles from "./navbar.module.css"
@@ -7,6 +7,7 @@ import SidebarDropdown from "../dropdown/dropdown";
 import DropdownItem from "./DropdownItem";
 import api from "../../api/axiosConfig";
 import { Avatar } from "primereact/avatar";
+import { setAccessToken, getAccessToken } from "../../Auth/authStore.js";
 import { BiFileFind } from "react-icons/bi";
         
 function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role}){
@@ -15,6 +16,7 @@ function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role
     const [workspace_id, setWorkspaceId] = useState(null)
     const backend_uri = import.meta.env.VITE_BACKEND_HOST || "http://localhost:8000"
     const user_initials = (firstname?.[0]?.toUpperCase() || "?") + (surname?.[0]?.toUpperCase() || "?");
+    const nav = useNavigate();
 
     useEffect(() => {
         api.get("/workspace/dashboard")
@@ -27,6 +29,21 @@ function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role
             setPendingEmployees(res.data)
         })
     }, []);
+
+    async function signOut() {
+        console.log("Hello World!!");
+        console.log(getAccessToken());
+        // Clearing the access token from local memory
+        setAccessToken(null);
+        console.log(getAccessToken());
+        // Hitting the signout endpoint 
+        await api.post("/auth/logout")
+        .then(res => {
+            console.log(res.data)
+        });
+        // redirecting user to the homepage
+        nav("/")
+    }
 
     return(
         <div className={styles.container}>
@@ -76,7 +93,7 @@ function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role
 
                     {/* Add regular navbar items here, specifying the url and the text you want displayed on the navbar */}
                     <DropdownItem url="/settings" text="Settings" icon="pi pi-cog"/>
-                    <DropdownItem text="Sign-out" icon="pi pi-sign-out"/>
+                    <DropdownItem onClick={() => signOut()} text="Sign-out" icon="pi pi-sign-out"/>
                     <div className={styles.line}/>
                 </div> 
                 <div className={styles.user_info_container}>
@@ -110,7 +127,7 @@ function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role
                     <DropdownItem className={styles.navbar_item} url="/dashboard" text="Dashboard" icon="pi pi-th-large"/>
                     <div className={styles.line}/>
                     <DropdownItem url="/settings" text="Settings" icon="pi pi-cog"/>
-                    <DropdownItem text="Sign-out" icon="pi pi-sign-out"/>
+                    <DropdownItem onClick={() => signOut()} text="Sign-out" icon="pi pi-sign-out"/>
                     <div className={styles.line}/>
                 </div> 
                 <div className={styles.user_info_container}>
