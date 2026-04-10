@@ -126,6 +126,13 @@ async def refresh_access(db: Annotated[Session, Depends(get_database)], response
         # CREATE SESSION KILL CHAIN
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
 
+@router.post("/logout")
+async def logout(db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)], response: Response, dte_refresh_token: Annotated[str | None, Cookie()] = None):
+    if not dte_refresh_token:
+        return # There was no refresh token to remove
+    response.delete_cookie("dte_refresh_token")
+    return {"details": "refresh token removed"}
+
 @router.get("/test")
 async def test_repo(db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)]):
     print(current_user.user_id)
