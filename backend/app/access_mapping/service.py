@@ -57,15 +57,15 @@ def get_file_employees_with_access(db: Session, file_id: int):
 
         # Compare the file's detections againsst employee's most permissive thresholds
         for detection in latest_scan_results:
-            subcategory = detection.subcategory
-            detection_count = detection.count
+            subcategory = detection["subcategory"]
+            detection_count = detection["count"]
             threshold = effective_thresholds.get(subcategory)
 
             # Check if the detection count is greater than the threshold and append failed detection if so
             if threshold is None or detection_count > threshold:
                 employee["failed_detections"].append({
                     "subcategory": subcategory,
-                    "count": detection.count,
+                    "count": detection["count"],
                     "threshold": threshold
                 })
 
