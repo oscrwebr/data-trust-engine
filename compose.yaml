@@ -160,7 +160,8 @@ services:
     build:
       context: ./frontend
       target: test
-    # image: dte-frontend-test:latest
+    volumes:
+      - ./host_coverage:/app/coverage
     profiles: ["test-frontend"]
 
 
