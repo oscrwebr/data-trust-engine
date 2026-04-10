@@ -369,3 +369,17 @@ def create_duplicate_scan_result(db: Session, duplicate_group_id: int, scan_file
     db.commit()
     db.refresh(duplicate_scan_result)
     return duplicate_scan_result
+
+def get_duplicate_scan_result_by_scan_id(db: Session, scan_id: int):
+    return (
+        db.query(
+            DuplicateScanResult.duplicate_group_id,
+            DuplicateScanResult.scan_file_id
+        )
+        .join(
+            DuplicateGroup,
+            DuplicateGroup.duplicate_group_id == DuplicateScanResult.duplicate_group_id
+        )
+        .filter(DuplicateGroup.scan_id == scan_id)
+        .all()
+    )

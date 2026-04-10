@@ -290,16 +290,24 @@ def duplicate_scan(db: Session, scan_id: int):
 
     hashes_found = {}
 
+    # Add scan file IDs to a dictionary with the file hash as the key
+    # e.g. if two files have the same hash, the dictionary will look like: { "hash1": [scan_file_id1, scan_file_id2] }
     for scan_file, file in scan_files:
         hash = file.hash
 
         if hash not in hashes_found:
             hashes_found[hash] = []
         hashes_found[hash].append(scan_file.scan_file_id)
+
+    # Loop through the hashes dictionary
     for hash in hashes_found:
-        matches = hashes_found[hash]
-        if len(matches) > 1:
-            pass
+        # Only get the hashes with more than one scan file ID
+        if len(hashes_found[hash]) > 1:
+            # Create 
+            duplicate_group = repository.create_duplicate_group(db=db, scan_id=scan_id)
+
+            for scan_file_id in hashes_found[hash]:
+                repository.create_duplicate_scan_result(db=db, duplicate_group_id=duplicate_group.duplicate_group_id, scan_file_id=scan_file_id)
 
 def perform_organisation_scan(db: Session, user_id: int, naming_convention_ids: list[int]):
 
@@ -357,6 +365,7 @@ def get_scan_by_id(db: Session, scan_id: int):
 def get_organisational_scan_details(db: Session, scan):
     files = repository.get_scan_files_with_file(db=db, scan_id=scan.scan_id)
     results_query = repository.get_naming_convention_scan_results_by_scan_id(db=db, scan_id=scan.scan_id)
+    duplicate_results_query = repository.get_duplicate_scan_results_by_scan_id(db=db, scan_id=scan.scan_id)
 
     # Put results_query into dictionary to access when looping
     results = {}
