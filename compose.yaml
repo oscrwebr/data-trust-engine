@@ -57,7 +57,6 @@ services:
     environment:
       - CLIENT_ID=${CLIENT_ID}
       - CLIENT_SECRET=${CLIENT_SECRET}
-      - TENANT_ID=${TENANT_ID}
       - AUTHORITY=${AUTHORITY}
       - SCOPES=${SCOPES}
       - DB_HOST=database-dev
@@ -124,7 +123,6 @@ services:
     environment:
       - CLIENT_ID=${CLIENT_ID}
       - CLIENT_SECRET=${CLIENT_SECRET}
-      - TENANT_ID=${TENANT_ID}
       - AUTHORITY=${AUTHORITY}
       - SCOPES=${SCOPES}
       - DB_HOST=database-prod
@@ -162,7 +160,8 @@ services:
     build:
       context: ./frontend
       target: test
-    # image: dte-frontend-test:latest
+    volumes:
+      - ./frontend_coverage:/app/frontend_coverage/
     profiles: ["test-frontend"]
 
 
@@ -188,7 +187,6 @@ services:
     environment:
       - CLIENT_ID=${CLIENT_ID}
       - CLIENT_SECRET=${CLIENT_SECRET}
-      - TENANT_ID=${TENANT_ID}
       - AUTHORITY=${AUTHORITY}
       - SCOPES=${SCOPES}
       - DB_HOST=database-test
