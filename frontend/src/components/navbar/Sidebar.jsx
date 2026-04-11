@@ -31,16 +31,15 @@ function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role
     }, []);
 
     async function signOut() {
-        console.log("Hello World!!");
-        console.log(getAccessToken());
-        // Clearing the access token from local memory
-        setAccessToken(null);
-        console.log(getAccessToken());
-        // Hitting the signout endpoint 
+        console.log(`This is the access token before removal${getAccessToken()}`);
+        // Hitting the signout endpoint to remove refresh token 
         await api.post("/auth/logout")
         .then(res => {
             console.log(res.data)
         });
+        // Clearing the access token from local memory
+        setAccessToken(null);
+        console.log(`This is the access token after removal${getAccessToken()}`);
         // redirecting user to the homepage
         nav("/")
     }
