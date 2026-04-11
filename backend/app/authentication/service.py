@@ -86,16 +86,6 @@ def create_access_refresh(db: Session, data: dict, refresh_family_id: int | None
     
     new_entry = repository.create_refresh(db=db, uid=data['userId'], hashed_token=hashed_token, expiry=refresh_token.expiry_date, refresh_family_id=refresh_family_id, access_token=access_token)
     return access_token, refresh_token, new_entry
-
-def update_refresh(refresh_token: str, expiry_date: datetime, db): # This doesn't seem to be used anywhere??
-    hashed_token = hash_user_refresh_token(refresh_token)
-    print(f"refresh token from client: {refresh_token} -- hashed token: {hashed_token}")
-    matched_refresh = repository.verify_refresh(hashed_token=hashed_token, expiry=expiry_date, db=db)
-    # check if the refresh has been used before
-    if matched_refresh.replaced_by:
-        return "This has been replaced! Compromised tokens! Delete chain immediately!"
-    else:
-        return "We are ready to roll baby!"
     
 def refresh_flow(db, client_refresh: str, current_time: datetime):
     """
