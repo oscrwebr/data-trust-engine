@@ -58,6 +58,7 @@ function Home({toast}) {
 
   return (
     <div>
+      <h1>Home</h1>
       <Toast ref={successToast}/>
       <Button onClick={handleSignIn}>Sign in</Button>
       <Button onClick={handleCreateWorkspace}>Create a workspace</Button>
