@@ -38,7 +38,7 @@ function EmployeeAccessItem({ employee }) {
                     </div>
 
                     {!employee.access_allowed && (
-                        <button className={styles.more_details_button} onClick={() => set_show_modal(true)}>More Details</button>
+                        <button className={styles.more_details_button} onClick={() => set_show_modal(true)}>More Details →</button>
                     )}
                 </div>
             </div>
