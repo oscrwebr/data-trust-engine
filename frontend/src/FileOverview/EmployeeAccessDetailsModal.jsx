@@ -55,3 +55,6 @@ function EmployeeAccessDetailsModal({ employee, onClose }) {
         </div>
     )
 }
+
+
+export default EmployeeAccessDetailsModal;
