@@ -62,7 +62,7 @@ def get_file_employees_with_access(db: Session, file_id: int):
             threshold = effective_thresholds.get(subcategory)
 
             # Check if the detection count is greater than the threshold and append failed detection if so
-            if threshold is None or detection_count > threshold:
+            if threshold is not None and detection_count > threshold:
                 employee["failed_detections"].append({
                     "subcategory": subcategory,
                     "count": detection["count"],
