@@ -32,7 +32,8 @@ const mockScan = {
                     passed: true,
                     suggested_name: null
                 }
-            ]
+            ],
+            duplicate_group_id: null
         },
         {
             scan_file_id: 2,
@@ -49,7 +50,9 @@ const mockScan = {
                     passed: false,
                     suggested_name: "bad_file_name"
                 }
-            ]
+            ],
+            duplicate_group_id: null
+
         },
         {
             scan_file_id: 3,
@@ -66,7 +69,8 @@ const mockScan = {
                     passed: false,
                     suggested_name: "another_bad_file"
                 }
-            ]
+            ],
+            duplicate_group_id: null
         }
     ]
 };
