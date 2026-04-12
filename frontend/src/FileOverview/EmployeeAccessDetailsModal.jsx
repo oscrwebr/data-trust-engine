@@ -45,12 +45,6 @@ function EmployeeAccessDetailsModal({ employee, onClose }) {
                         );
                     })}
                 </ul>
-
-                <div className={styles.modal_footer}>
-                    <button className={styles.close_button} onClick={onClose}>
-                        Close
-                    </button>
-                </div>
             </div>
         </div>
     )
