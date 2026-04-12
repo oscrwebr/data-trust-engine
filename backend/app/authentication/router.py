@@ -55,8 +55,6 @@ async def sign_in(application: Annotated[ConfidentialClientApplication, Depends(
         print("Need both!")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
 
-    # print(f"\n\n request.session: {request.session}")
-    print("This is the redirect response auth_uri: ", flow["auth_uri"])
     return RedirectResponse(flow['auth_uri'])
 
 @router.get("/success/")
@@ -110,7 +108,6 @@ async def refresh_access(db: Annotated[Session, Depends(get_database)], response
             status_code=status.HTTP_403_FORBIDDEN,
             detail="User has no Refresh Token!"
         )
-    # print(refresh_response)
     if "access_token" and "refresh_token" in refresh_response:
         print("This has an access token and refresh_token")
         response.set_cookie(key="dte_refresh_token", value=refresh_response["refresh_token"].opaque_token, expires=refresh_response["refresh_token"].expiry_date, httponly=True, samesite = None)
@@ -123,13 +120,14 @@ async def refresh_access(db: Annotated[Session, Depends(get_database)], response
             "access_token": refresh_response["access_token"]
         }
     else:
-        # CREATE SESSION KILL CHAIN
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
 
 @router.post("/logout")
 async def logout(db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)], response: Response, dte_refresh_token: Annotated[str | None, Cookie()] = None):
     if not dte_refresh_token:
-        return # There was no refresh token to remove
+        return # This will
+    # Update the refresh family
+    service.log_out_flow(db=db, client_refresh=dte_refresh_token, current_time=datetime.now(timezone.utc))
     response.delete_cookie("dte_refresh_token")
     return {"details": "refresh token removed"}
 
