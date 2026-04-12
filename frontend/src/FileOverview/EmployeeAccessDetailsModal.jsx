@@ -25,7 +25,7 @@ function EmployeeAccessDetailsModal({ employee, onClose }) {
                 </div>
 
                 <div className={styles.modal_warning_box}>
-                    This employee should not have access to this file.
+                    This employee should not have access to this file!
                 </div>
 
                 <ul className={styles.failed_detection_list}>
@@ -33,7 +33,7 @@ function EmployeeAccessDetailsModal({ employee, onClose }) {
                         if (detection.subcategory === "NO_ROLES_ASSIGNED") {
                             return (
                                 <li key={index}>
-                                    This employee has no assigned role permissions.
+                                    This employee has no assigned roles
                                 </li>
                             );
                         }
