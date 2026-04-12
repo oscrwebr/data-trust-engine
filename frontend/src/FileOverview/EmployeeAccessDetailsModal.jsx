@@ -19,7 +19,7 @@ function EmployeeAccessDetailsModal({ employee, onClose }) {
                         </div>
                     </div>
 
-                    <button className={styles.close_icon_button} onClick={onClose}>
+                    <button className={styles.close_icon_button} onClick={onClose} data-testid="close-modal-button">
                         <FaTimes />
                     </button>
                 </div>

@@ -142,8 +142,7 @@ describe("EmployeeAccessDetailModalTests", () => {
             />
         );
 
-        const closeButton = screen.getByRole("button");
-        fireEvent.click(closeButton);
+        fireEvent.click(screen.getByTestId("close-modal-button"));
 
         expect(onClose).toHaveBeenCalledTimes(1);
     });
