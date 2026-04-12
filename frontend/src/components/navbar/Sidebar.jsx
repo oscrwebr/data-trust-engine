@@ -12,8 +12,8 @@ import { BiFileFind } from "react-icons/bi";
         
 function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role}){
     const [openDropdown, setOpenDropdown] = useState(null);
-    const [pendingEmployees, setPendingEmployees] = useState([])
-    const [workspace_id, setWorkspaceId] = useState(null)
+    const [pendingEmployees, setPendingEmployees] = useState([]);
+    const [workspace_id, setWorkspaceId] = useState(null);
     const backend_uri = import.meta.env.VITE_BACKEND_HOST || "http://localhost:8000"
     const user_initials = (firstname?.[0]?.toUpperCase() || "?") + (surname?.[0]?.toUpperCase() || "?");
     const nav = useNavigate();
@@ -33,15 +33,15 @@ function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role
     async function signOut() {
         console.log(`This is the access token before removal${getAccessToken()}`);
         // Hitting the signout endpoint to remove refresh token 
+        let logoutStatus = 400
         await api.post("/auth/logout")
         .then(res => {
-            console.log(res.data)
+            logoutStatus = res.status
         });
         // Clearing the access token from local memory
         setAccessToken(null);
-        console.log(`This is the access token after removal${getAccessToken()}`);
         // redirecting user to the homepage
-        nav("/")
+        nav("/", {state: {status_code: logoutStatus}})
     }
 
     return(
