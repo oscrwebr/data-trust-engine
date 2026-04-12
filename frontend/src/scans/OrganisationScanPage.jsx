@@ -45,8 +45,7 @@ function OrganisationScanPage({ scan }) {
         duplicateCount += duplicateGroups[duplicateGroupId].length - 1;
     }
 
-    // HARD CODED FOR NOW... need to get implemnent duplicate file results in backend (different branch) so I can work out real %
-    // Logic works so I can just plug the implementation in without changing this code
+    // Get the amount of issues and percentage of clean files for display
     const totalIssues = namingIssues + duplicateCount;
     const cleanFiles = scan.file_count - totalIssues;
     const cleanFilesPercentage = getPercentage(cleanFiles, scan.file_count);

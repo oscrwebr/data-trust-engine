@@ -109,12 +109,26 @@ function ScanFileCard({scan_file, scan_type}) {
                                     
                             )}
 
+                            {issue.type === "Duplicate File" && (
+                                <>
+                                <div className="scan-file-issue">
+                                    <div className="scan-file-issue-text-heading">
+                                        <span>Issue:</span>
+                                    </div>
+                                    <div className="scan-file-issue-text">
+                                        <span>File is a duplicate</span>
+                                    </div>
+                                </div>
+                                </>
+                            )}
+
                         </div>
                     ))}
 
                 </div>
                 
             )}
+
 
             {scan_type === "sensitivity" && issues.length > 0 && (
                 <>
