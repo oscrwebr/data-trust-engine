@@ -416,7 +416,7 @@ def get_organisational_scan_details(db: Session, scan):
             "file_name": file.name,
             "hash": file.hash,
             "naming_convention_scan_results": naming_results.get(scan_file.scan_file_id, []),
-            "duplicate_scan_results": duplicate_results.get(scan_file.scan_file_id, [])
+            "duplicate_group_id": duplicate_results.get(scan_file.scan_file_id, None)
 
         } for scan_file, file in files
         ]

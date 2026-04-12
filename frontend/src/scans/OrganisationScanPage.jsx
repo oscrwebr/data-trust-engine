@@ -19,11 +19,35 @@ function OrganisationScanPage({ scan }) {
         file => file.naming_convention_scan_results.every(result => !result.passed)
     ).length;
 
-    const duplicateFilesDummy = 0;
+    // Similar to the hash check in the backend (duplicate_scan function in scanning/service.py)
+    // Groups files together by their duplicate_group_id
+    const duplicateGroups = {}
+
+    for (const file of scan.files) {
+        // Skip files without a duplicate group (not duplicates)
+        // Continues the for loop
+        if (file.duplicate_group_id === null) {
+            continue
+        }
+        // Create an empty array if it hasn't been created yet
+        if (!duplicateGroups[file.duplicate_group_id]) {
+            duplicateGroups[file.duplicate_group_id] = [];
+        }
+        // Add the file to that group
+        duplicateGroups[file.duplicate_group_id].push(file);
+    }
+
+    // Loop to count the number of files within a duplicate group
+    let duplicateCount = 0;
+    for (const duplicateGroupId in duplicateGroups) {
+        // -1 so if there is two files in one duplicate group it only counts as 1 duplicate file
+        // Makes more sense than saying there are 2 duplicates
+        duplicateCount += duplicateGroups[duplicateGroupId].length - 1;
+    }
 
     // HARD CODED FOR NOW... need to get implemnent duplicate file results in backend (different branch) so I can work out real %
     // Logic works so I can just plug the implementation in without changing this code
-    const totalIssues = namingIssues + duplicateFilesDummy;
+    const totalIssues = namingIssues + duplicateCount;
     const cleanFiles = scan.file_count - totalIssues;
     const cleanFilesPercentage = getPercentage(cleanFiles, scan.file_count);
 
@@ -54,10 +78,10 @@ function OrganisationScanPage({ scan }) {
                     <PiTextAaBold size={50}/>
                 </div>
             </div>
-            <div className={`scan-page-card ${getScanPageCardClass(duplicateFilesDummy, scan.file_count)}`}>
+            <div className={`scan-page-card ${getScanPageCardClass(duplicateCount, scan.file_count)}`}>
                 <div className="scan-page-card-text">
                     <span className="scan-page-card-subtitle">Duplicate Files</span>
-                    <span className="scan-page-card-title">{duplicateFilesDummy}</span>
+                    <span className="scan-page-card-title">{duplicateCount}</span>
                     
                 </div>
                 <div>
