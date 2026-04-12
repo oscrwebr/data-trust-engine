@@ -28,7 +28,7 @@ function ScanFileCard({scan_file, scan_type}) {
             });
         }
 
-        if (scan_file.duplicate_group_id !== null) {
+        if (scan_file.duplicate_group_id != null) {
             issues.push({
                 type: "Duplicate File"
             })
