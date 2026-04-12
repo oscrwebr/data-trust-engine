@@ -14,6 +14,7 @@ def get_file_employees_with_access(db: Session, file_id: int):
 
     # If file has not been scanned yet, access cannot be evaluated
     if not has_been_scanned:
+        # Set every employee's access allowed to 'None' which will display a '?' in the front-end
         for employee in employees.values():
             employee["access_allowed"] = None
 
@@ -21,61 +22,16 @@ def get_file_employees_with_access(db: Session, file_id: int):
 
     # Evaluate each employee's access
     for employee in employees.values():
-        role_ids = repository.get_user_role_ids(db=db, user_id=employee["user_id"])
-
-        # No roles means they should not have access
-        if not role_ids:
-            employee["access_allowed"] = False
-            employee["failed_detections"].append({
-                "subcategory": "NO_ROLES_ASSIGNED",
-                "count": None,
-                "threshold": None
-            })
-            continue
-
-        effective_thresholds = {}
-
-        # Build the most permissive threshold per subcategory across all roles (employees might have multiple roles)
-        for role_id in role_ids:
-            permissions = repository.get_role_permissions(db=db, role_id=role_id)
-
-            for permission in permissions:
-                subcategory = permission.subcategory
-                threshold = permission.threshold
-
-                # Append or update the subcategory with threshold to keep most permissive
-                if subcategory not in effective_thresholds:
-                    effective_thresholds[subcategory] = threshold
-                else:
-                    effective_thresholds[subcategory] = max(effective_thresholds[subcategory], threshold)
-
-        # Compare the file's detections againsst employee's most permissive thresholds
-        for detection in latest_scan_results:
-            subcategory = detection["subcategory"]
-            detection_count = detection["count"]
-            threshold = effective_thresholds.get(subcategory)
-
-            # Check if the detection count is greater than the threshold and append failed detection if so
-            if threshold is not None and detection_count > threshold:
-                employee["failed_detections"].append({
-                    "subcategory": subcategory,
-                    "count": detection["count"],
-                    "threshold": threshold
-                })
-
-        if len(employee["failed_detections"]) == 0:
-            employee["access_allowed"] = True
-        else:
-            employee["access_allowed"] = False
+        evaluate_employee_access(db, employee, latest_scan_results)
 
     return list(employees.values())
-
 
 
 # Method for building employees dictionary from fetched employee records
 def build_employees_from_records(fetched_employees_records):
     employees = {}
 
+    # Iterate through every fetched employee and append to employees dictionary
     for fetched_employee in fetched_employees_records:
         if fetched_employee.user_id not in employees:
             employees[fetched_employee.user_id] = {
@@ -91,6 +47,33 @@ def build_employees_from_records(fetched_employees_records):
             employees[fetched_employee.user_id]["roles"].append(fetched_employee.role_name)
         
     return employees
+
+
+# Method for evaluating an employee's access to the file based on its latest scan results
+def evaluate_employee_access(db: Session, employee: dict, latest_scan_results: list[dict]):
+    role_ids = repository.get_user_role_ids(db=db, user_id=employee["user_id"])
+
+    # If user has no roles, append no_roles_assigned as the violation
+    if not role_ids:
+        employee["access_allowed"] = False
+        employee["failed_detections"].append({
+            "subcategory": "NO_ROLES_ASSIGNED",
+            "count": None,
+            "threshold": None
+        })
+        return
+
+    # Build the most permissive thresholds considering all employee's role
+    effective_thresholds = build_effective_thresholds(db=db, role_ids=role_ids)
+
+    # Get the detections which violate the employee's most effective thresholds
+    failed_detections = get_failed_detections(
+        latest_scan_results=latest_scan_results,
+        effective_thresholds=effective_thresholds
+    )
+
+    employee["failed_detections"].extend(failed_detections)
+    employee["access_allowed"] = len(employee["failed_detections"]) == 0
 
 
 # Method for building effective thresholds
