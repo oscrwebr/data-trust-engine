@@ -1,5 +1,5 @@
 import { describe, test, expect, vi, afterEach } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
+import { render, screen, cleanup, fireEvent } from "@testing-library/react";
 import EmployeeAccessDetailsModal from "./EmployeeAccessDetailsModal";
 
 describe("EmployeeAccessDetailModalTests", () => {
@@ -12,6 +12,7 @@ describe("EmployeeAccessDetailModalTests", () => {
 
     // Test to ensure employee details are rendered
     test("employeeAccessDetailsModalRendersEmployeeDetails", () => {
+        // Create mock employee for test
         const employee = {
             user_id: 1,
             name: "Test Employee",
@@ -43,6 +44,7 @@ describe("EmployeeAccessDetailModalTests", () => {
 
     // Test to ensure failed detections table is rendered
     test("employeeAccessDetailsModalRendersFailedDetectionsTable", () => {
+        // Create mock employee for test
         const employee = {
             user_id: 1,
             name: "Test Employee",
@@ -80,5 +82,69 @@ describe("EmployeeAccessDetailModalTests", () => {
         expect(screen.getByText("3")).toBeInTheDocument();
         expect(screen.getByText("Maximum 5")).toBeInTheDocument();
         expect(screen.getByText("Not permitted")).toBeInTheDocument();
+    });
+
+
+    // Test to ensure modal renders no roles assigned when employee has no role
+    test("employeeAccessDetailsModalRendersNoRolesAssignedWhenEmployeeHasNoRoles", () => {
+        // Create mock employee for test
+        const employee = {
+            user_id: 1,
+            name: "Test Employee",
+            email: "testemployee@test.com",
+            roles: [],
+            access_allowed: false,
+            failed_detections: [
+                {
+                    subcategory: "NO_ROLES_ASSIGNED",
+                    count: null,
+                    threshold: null
+                }
+            ]
+        };
+
+        render(
+            <EmployeeAccessDetailsModal
+                employee={employee}
+                onClose={vi.fn()}
+            />
+        );
+
+        expect(screen.getAllByText("No roles assigned").length).toBeGreaterThan(0);
+    });
+
+
+    // Test to ensure modal closes when close button is clicked
+    test("employeeAccessDetailsModalCallsOnCloseWhenCloseButtonClicked", () => {
+        // Mock the onClose function
+        const onClose = vi.fn();
+
+        // Create mock employee for test
+        const employee = {
+            user_id: 1,
+            name: "Test Employee",
+            email: "testemployee@test.com",
+            roles: ["PII Role"],
+            access_allowed: false,
+            failed_detections: [
+                {
+                    subcategory: "CITATION",
+                    count: 14,
+                    threshold: 5
+                }
+            ]
+        };
+
+        render(
+            <EmployeeAccessDetailsModal
+                employee={employee}
+                onClose={onClose}
+            />
+        );
+
+        const closeButton = screen.getByRole("button");
+        fireEvent.click(closeButton);
+
+        expect(onClose).toHaveBeenCalledTimes(1);
     });
 })
