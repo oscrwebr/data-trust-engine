@@ -1,11 +1,12 @@
 from sqlalchemy.orm import Session
 from app.access_mapping import repository
-from app.scanning.service import get_file_latest_scan_results
+from app.scanning.service import get_file_latest_scan_results, check_file_has_scan
 
 
 # Method for getting all employees with access to a file
 def get_file_employees_with_access(db: Session, file_id: int):
     records = repository.get_file_employees_with_access(db=db, file_id=file_id)
+    has_been_scanned = check_file_has_scan(db=db, file_id=file_id)
     latest_scan_results = get_file_latest_scan_results(db=db, file_id=file_id)
 
     employees = {}
@@ -24,6 +25,13 @@ def get_file_employees_with_access(db: Session, file_id: int):
 
         if record.role_name and record.role_name not in employees[record.user_id]["roles"]:
             employees[record.user_id]["roles"].append(record.role_name)
+
+    # If file has not been scanned yet, access cannot be evaluated
+    if not has_been_scanned:
+        for employee in employees.values():
+            employee["access_allowed"] = None
+
+        return list(employees.values())
 
     # Evaluate each employee's access
     for employee in employees.values():

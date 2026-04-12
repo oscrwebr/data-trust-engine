@@ -12,5 +12,5 @@ class FileEmployeeAccessResponse(BaseModel):
     name: str
     email: str
     roles: list[str]
-    access_allowed: bool
+    access_allowed: bool | None
     failed_detections: list[FailedDetectionResponse]

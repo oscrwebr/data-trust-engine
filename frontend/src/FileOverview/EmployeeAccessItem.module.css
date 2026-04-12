@@ -31,6 +31,11 @@
     color: #ef4444;
 }
 
+.unknown_icon {
+    font-size: 36px;
+    color: #9ca3af;
+}
+
 .employee_content {
     display: flex;
     flex-direction: column;

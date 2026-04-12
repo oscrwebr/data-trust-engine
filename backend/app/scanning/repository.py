@@ -108,6 +108,18 @@ def get_latest_scan_detection_summary(db: Session, file_id: int):
     )
 
 
+# Method for the purpose of checking if this file has a scan at all
+def check_file_has_scan(db: Session, file_id: int):
+    latest_scan = (
+        db.query(ScanFile.scan_file_id)
+        .filter(ScanFile.file_id == file_id)
+        .first()
+    )
+
+    return latest_scan is not None
+
+
+
 def get_subcategory_category_map(db: Session):
     rows = (
         db.query(
