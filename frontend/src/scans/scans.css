@@ -358,10 +358,11 @@
 
 .scan-file-details {
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 1fr 1fr;
     column-gap: 40px;
     width: 100%;
     margin-top: 6px;
+    min-width: 0;
 }
 
 .scan-file-issue {
@@ -375,6 +376,14 @@
     font-weight: 600;
     color: #374151; 
     
+}
+
+.scan-file-suggested-text span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    max-width: 250px;
 }
 
 

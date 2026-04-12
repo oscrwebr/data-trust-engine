@@ -27,6 +27,12 @@ function ScanFileCard({scan_file, scan_type}) {
                 suggested_name: scan_file.naming_convention_scan_results.map(result => result.suggested_name)
             });
         }
+
+        if (scan_file.duplicate_group_id !== null) {
+            issues.push({
+                type: "Duplicate File"
+            })
+        }
         
     }
 
