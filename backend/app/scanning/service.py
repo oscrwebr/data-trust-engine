@@ -368,19 +368,26 @@ def get_organisational_scan_details(db: Session, scan):
     duplicate_results_query = repository.get_duplicate_scan_result_by_scan_id(db=db, scan_id=scan.scan_id)
 
     # Put results_query into dictionary to access when looping
-    results = {}
+    naming_results = {}
 
     for naming_convention_scan_result, naming_convention_name, scan_file_id in results_query:
         # Create an empty array if we haven't added any results for this ID yet
-        if scan_file_id not in results:
-            results[scan_file_id] = []
+        if scan_file_id not in naming_results:
+            naming_results[scan_file_id] = []
         
-        results[scan_file_id].append({
+        naming_results[scan_file_id].append({
             "naming_convention_scan_result_id": naming_convention_scan_result.naming_convention_scan_result_id,
             "naming_convention_name": naming_convention_name,
             "passed": naming_convention_scan_result.passed,
             "suggested_name": naming_convention_scan_result.suggested_name
         })
+
+    duplicate_results = {}
+
+
+    for duplicate_scan_result in duplicate_results_query:
+        duplicate_results[duplicate_scan_result.scan_file_id] = duplicate_scan_result.duplicate_group_id
+
 
     return {
         "scan_id": scan.scan_id,
@@ -393,7 +400,8 @@ def get_organisational_scan_details(db: Session, scan):
             "file_id": file.ingestion_file_id,
             "file_name": file.name,
             "hash": file.hash,
-            "naming_convention_scan_results": results.get(scan_file.scan_file_id, [])
+            "naming_convention_scan_results": naming_results.get(scan_file.scan_file_id, []),
+            "duplicate_scan_results": duplicate_results.get(scan_file.scan_file_id, [])
 
         } for scan_file, file in files
         ]
