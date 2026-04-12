@@ -2,6 +2,7 @@ import hashlib
 import wordninja
 import requests
 from app.core.security import application
+import re
 
 from pathlib import Path
 from sqlalchemy.orm import Session
@@ -270,6 +271,10 @@ def naming_convention_scan(db: Session, scan_id: int):
         # As file names will be stored with their extension, this removes the extension for naming convention checks
         file_name = remove_file_extension(file.name)
 
+        # Regex to check if file names end with space then a (number) e.g. file (1)
+        duplicate_suffix_check = re.search(r" \(\d+\)$", file_name)
+
+
         for scan_naming_convention in scan_naming_conventions:
             checks = naming_convention_checks.get(scan_naming_convention.naming_convention_id)
             suggestions = naming_convention_suggestions.get(scan_naming_convention.naming_convention_id)
@@ -277,12 +282,22 @@ def naming_convention_scan(db: Session, scan_id: int):
             if checks is None or suggestions is None:
                 continue
 
-            passed = checks(file_name)
-            suggested_name = None
-            if passed == False:
-                suggested_name = suggestions(file_name)
+            # Duplicate suffix check from earlier (performed before naming checks)
+            if duplicate_suffix_check:
+                clean_file_name = re.sub(r" \(\d+\)$", "", file_name)
+                passed = False
+                suggested_name = suggestions(clean_file_name)
+            else:
+                passed = checks(file_name)
+                suggested_name = None
+                if passed == False:
+                    suggested_name = suggestions(file_name)
                 
-            repository.set_naming_convention_scan_result(db=db, scan_file_id=scan_file.scan_file_id, scan_naming_convention_id=scan_naming_convention.scan_naming_convention_id, passed=passed, suggested_name=suggested_name)
+            repository.set_naming_convention_scan_result(db=db, 
+                                                         scan_file_id=scan_file.scan_file_id, 
+                                                         scan_naming_convention_id=scan_naming_convention.scan_naming_convention_id, 
+                                                         passed=passed, 
+                                                         suggested_name=suggested_name)
 
 def duplicate_scan(db: Session, scan_id: int):
     # Join query to get scan files with their corresponding file table data
