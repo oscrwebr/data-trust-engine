@@ -41,6 +41,7 @@ function App() {
           <Route path="/upload-org-chart" element={<OrgChart toast={toast} />} />
           <Route path="/settings" element={null} />
           <Route path="/dashboard" element={<Dashboard toast={toast}/>} />
+          <Route path="/files/:file_id" element={<FileOverviewPage />} />
         </Route>
 
         {/* Elements in here will not inherit the sidebar */}
@@ -48,7 +49,6 @@ function App() {
         <Route path="/roles" element={<Roles />} />
         <Route path="/dashboard" element={<Dashboard toast={toast}/>} />
         <Route path="/create-workspace" element={<CreateWorkspace  toast={toast}/>} />
-        <Route path="/files/:file_id" element={<FileOverviewPage />} />
         <Route path="/test" element={<Test/>} />
         <Route path="/error/422" element={<Unprocessable422/>}/>
         <Route path="/error/403" element={<Forbidden403/>}/>

@@ -92,3 +92,42 @@ def build_employees_from_records(fetched_employees_records):
         
     return employees
 
+
+# Method for building effective thresholds
+# This is to determine the most permissive thresholds while considering 
+# all of the employee's roles (since an employee might have multiple)
+def build_effective_thresholds(db: Session, role_ids: list[int]):
+    effective_thresholds = {}
+
+    for role_id in role_ids:
+        permissions = repository.get_role_permissions(db=db, role_id=role_id)
+
+        for permission in permissions:
+            subcategory = permission.subcategory
+            threshold = permission.threshold
+
+            if subcategory not in effective_thresholds:
+                effective_thresholds[subcategory] = threshold
+            else:
+                effective_thresholds[subcategory] = max(effective_thresholds[subcategory], threshold)
+
+    return effective_thresholds
+
+
+# Method for getting detections which violate the employee's thresholds per each subcategory
+def get_failed_detections(latest_scan_results: list[dict], effective_thresholds: dict):
+    failed_detections = []
+
+    for detection in latest_scan_results:
+        subcategory = detection["subcategory"]
+        detection_count = detection["count"]
+        threshold = effective_thresholds.get(subcategory)
+
+        if threshold is not None and detection_count > threshold:
+            failed_detections.append({
+                "subcategory": subcategory,
+                "count": detection_count,
+                "threshold": threshold
+            })
+
+    return failed_detections
