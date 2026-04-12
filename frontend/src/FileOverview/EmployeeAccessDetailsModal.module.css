@@ -40,7 +40,7 @@
 
 .modal_employee_name {
     font-size: 1.1rem;
-    font-weight: 700;
+    font-weight: 600;
     color: #111827;
 }
 
@@ -52,7 +52,7 @@
 
 .modal_employee_roles {
     font-size: 0.9rem;
-    color: #6b7280;
+    color: #111827;
     margin-top: 0.15rem;
 }
 
@@ -80,17 +80,35 @@
     margin-bottom: 1rem;
 }
 
-.failed_detection_list {
-    margin: 0;
-    padding-left: 1.2rem;
-    color: #374151;
-}
-
-.failed_detection_list li {
-    margin-bottom: 0.75rem;
-    line-height: 1.45;
-}
-
 .denied_icon {
     color: #ef4444;
+}
+
+.table_wrapper {
+    margin-top: 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.table_header {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    background-color: #f9fafb;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #374151;
+    padding: 0.6rem 0.75rem;
+}
+
+.table_row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    padding: 0.6rem 0.75rem;
+    font-size: 0.85rem;
+    border-top: 1px solid #f1f5f9;
+}
+
+.table_row:nth-child(even) {
+    background-color: #fcfcfc;
 }

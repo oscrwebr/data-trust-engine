@@ -25,26 +25,35 @@ function EmployeeAccessDetailsModal({ employee, onClose }) {
                 </div>
 
                 <div className={styles.modal_warning_box}>
-                    This employee should not have access to this file!
+                    This file contains <strong>sensitive data</strong> that exceeds this employee's role thresholds:
                 </div>
 
-                <ul className={styles.failed_detection_list}>
+                <div className={styles.table_wrapper}>
+                    <div className={styles.table_header}>
+                        <div>Data Type</div>
+                        <div>Occurrences</div>
+                        <div>Threshold</div>
+                    </div>
+
                     {employee.failed_detections.map((detection, index) => {
-                        if (detection.subcategory === "NO_ROLES_ASSIGNED") {
-                            return (
-                                <li key={index}>
-                                    This employee has no assigned roles
-                                </li>
-                            );
-                        }
+                        const formatted_subcategory =
+                            detection.subcategory === "NO_ROLES_ASSIGNED"
+                                ? "No roles assigned"
+                                : detection.subcategory;
 
                         return (
-                            <li key={index}>
-                                File contains: {detection.subcategory}
-                            </li>
+                            <div key={index} className={styles.table_row}>
+                                <div>{formatted_subcategory}</div>
+                                <div>{detection.count ?? "-"}</div>
+                                <div>
+                                    {detection.threshold === null || detection.threshold === undefined || detection.threshold === 0
+                                        ? "Not permitted"
+                                        : `Maximum ${detection.threshold}`}
+                                </div>
+                            </div>
                         );
                     })}
-                </ul>
+                </div>
             </div>
         </div>
     )
