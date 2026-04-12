@@ -373,13 +373,14 @@ def create_duplicate_scan_result(db: Session, duplicate_group_id: int, scan_file
 def get_duplicate_scan_result_by_scan_id(db: Session, scan_id: int):
     return (
         db.query(
-            DuplicateScanResult.duplicate_group_id,
-            DuplicateScanResult.scan_file_id
+            DuplicateScanResult
         )
+        # Join duplicate group to get scan ID
         .join(
             DuplicateGroup,
-            DuplicateGroup.duplicate_group_id == DuplicateScanResult.duplicate_group_id
+            DuplicateScanResult.duplicate_group_id == DuplicateGroup.duplicate_group_id
         )
+        # Only get results for this scan
         .filter(DuplicateGroup.scan_id == scan_id)
         .all()
     )
