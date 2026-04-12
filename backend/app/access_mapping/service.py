@@ -5,26 +5,12 @@ from app.scanning.service import get_file_latest_scan_results, check_file_has_sc
 
 # Method for getting all employees with access to a file
 def get_file_employees_with_access(db: Session, file_id: int):
-    records = repository.get_file_employees_with_access(db=db, file_id=file_id)
+    fetched_employees_records = repository.get_file_employees_with_access(db=db, file_id=file_id)
     has_been_scanned = check_file_has_scan(db=db, file_id=file_id)
     latest_scan_results = get_file_latest_scan_results(db=db, file_id=file_id)
 
-    employees = {}
-
-    # Add every fetched employee into employees dictionary
-    for record in records:
-        if record.user_id not in employees:
-            employees[record.user_id] = {
-                "user_id": record.user_id,
-                "name": f"{record.firstname} {record.surname}",
-                "email": record.email,
-                "roles": [],
-                "access_allowed": True,
-                "failed_detections": []
-            }
-
-        if record.role_name and record.role_name not in employees[record.user_id]["roles"]:
-            employees[record.user_id]["roles"].append(record.role_name)
+    # Build employees dictionary from fetched employees records
+    employees = build_employees_from_records(fetched_employees_records)
 
     # If file has not been scanned yet, access cannot be evaluated
     if not has_been_scanned:
@@ -83,3 +69,26 @@ def get_file_employees_with_access(db: Session, file_id: int):
             employee["access_allowed"] = False
 
     return list(employees.values())
+
+
+
+# Method for building employees dictionary from fetched employee records
+def build_employees_from_records(fetched_employees_records):
+    employees = {}
+
+    for fetched_employee in fetched_employees_records:
+        if fetched_employee.user_id not in employees:
+            employees[fetched_employee.user_id] = {
+                "user_id": fetched_employee.user_id,
+                "name": f"{fetched_employee.firstname} {fetched_employee.surname}",
+                "email": fetched_employee.email,
+                "roles": [],
+                "access_allowed": True,
+                "failed_detections": []
+            }
+
+        if fetched_employee.role_name and fetched_employee.role_name not in employees[fetched_employee.user_id]["roles"]:
+            employees[fetched_employee.user_id]["roles"].append(fetched_employee.role_name)
+        
+    return employees
+
