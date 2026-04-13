@@ -1,0 +1,23 @@
+FROM python:3.12-alpine
+
+RUN apk add --no-cache libstdc++
+
+WORKDIR /backend
+
+# Copy over pyproject.toml and allow it to be cached
+COPY ./pyproject.toml /backend/pyproject.toml
+
+RUN pip install --no-cache-dir --upgrade -e .
+
+RUN python -m spacy download en_core_web_lg
+
+# copy over alembic folders and files
+COPY ./alembic /backend/alembic
+COPY ./alembic.ini /backend/alembic.ini
+
+# Copy over the fastapi application
+COPY ./app /backend/app
+
+ENV PYTHONPATH=/backend
+
+CMD ["fastapi", "run", "app/main.py", "--port", "8000"]

@@ -1,0 +1,129 @@
+.header_container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between; /* push logo left, icon right */
+    height: 65px;     
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow-y: auto;  
+  scrollbar-width: none;  
+}
+
+.navbar_logo img {
+    width: 20vw;
+    height: auto;
+}
+
+.navbar_logo {
+    display: flex;
+    align-items: center;     
+    height: 100%;             
+}
+
+.sidebar_toggle_icon {
+    color: white;
+    margin-left: 15px;
+    margin-right: 15px;
+    font-size: 27px;        
+}
+
+.sidebar_toggle_icon:hover {
+    cursor: pointer;
+    color: #a4a1a1;
+}
+
+.line {
+  width: 100%;
+  height: 1px;
+  background-color: #ccc;
+  margin-bottom: 10px;
+}
+
+.navbar_title {
+    color: white;
+    font-weight: 700;
+    margin: 10px;
+}
+
+.navbar_link span, .navbar_link i, .dropdown_item_link span, .dropdown_item_link i {
+    color: white;
+}
+
+.navbar_link i, .dropdown_item_link i{
+    margin-right: 10px;
+}
+
+.navbar_link, .dropdown_item_link {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    text-decoration: none;
+    margin: 5px;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.navbar_link:hover {
+    cursor: pointer;
+    background-color: rgb(94, 93, 93);
+}
+
+.active {
+  background-color: rgb(52, 50, 50);
+}
+
+.dropdown_item_link:hover {
+    cursor: pointer;
+    background-color:rgb(52, 50, 50);
+}
+
+.user_info_container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+}
+
+.user_role_container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.user_role_card {
+    background-color: #868686;
+    border-radius: 5px;
+    color: white;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 3px;
+    margin-right: 10px;
+}
+
+.user_name {
+    color: white;
+    font-weight: 700;
+    margin-left: 15px;
+    font-size: 15px;
+}
+
+.user_logo {
+  border-radius: 40px;
+  width: 45px;
+  height: 45px;
+  object-fit: cover;
+}
+
+.user_email {
+    color: white;
+    margin-left: 15px;
+    font-size: 10px;
+    margin-top: 3px;
+}

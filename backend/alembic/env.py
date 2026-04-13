@@ -14,11 +14,12 @@ from alembic import context
 # access to the values within the .ini file in use.
 config = context.config
 
+DB_HOST = os.getenv("DB_HOST")
 DB_USERNAME = os.getenv("DB_USERNAME")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
 DB_NAME = os.getenv("DB_NAME")
 
-DATABASE_URL = (f"mysql+pymysql://{DB_USERNAME}:{DB_PASSWORD}@localhost:3306/{DB_NAME}")
+DATABASE_URL = (f"mysql+pymysql://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:3306/{DB_NAME}")
 
 config.set_main_option("sqlalchemy.url", DATABASE_URL)
 
@@ -37,6 +38,7 @@ from app.invites import models
 from app.authentication import models
 from app.roles import models
 from app.workspaces import models
+from app.ingestion import models
 
 target_metadata = Base.metadata
 

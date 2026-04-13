@@ -7,11 +7,13 @@ from functools import lru_cache
 from .security_schemas import *
 from datetime import datetime, timezone, timedelta
 from msal import ConfidentialClientApplication
+from cryptography.fernet import Fernet
 import os
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="success")
 ACCESS_TOKEN_SECRET = os.getenv("ACCESS_TOKEN_SECRET")
 ALGORITHM = os.getenv("ALGORITHM")
+KEY = os.getenv("FERNET_KEY")
 
 @lru_cache
 def application() -> ConfidentialClientApplication:
@@ -51,4 +53,31 @@ def get_user_from_access_token(token: Annotated[str, Depends(oauth2_scheme)]):
     except InvalidTokenError:
         raise token_credentials_exception
     return user        
+    
+def encrypt_refresh(token: str) -> bytes:
+    f = Fernet(KEY)
+    enc_token = f.encrypt(token.encode())
+    return enc_token
+
+def decrypt_refresh(encrypted_token: bytes) -> str:
+    f = Fernet(KEY)
+    token = f.decrypt(encrypted_token).decode()
+    return token
+
+def get_user_id_from_access_token(token: Annotated[str, Depends(oauth2_scheme)]):
+    token_credentials_exception = HTTPException(
+        status_code = status.HTTP_401_UNAUTHORIZED,
+        detail = "User not authorised",
+        headers = { 
+            "WWW-Authenticate": "Bearer"
+        })
+    
+    try: 
+        payload = jwt.decode(jwt=token, key=ACCESS_TOKEN_SECRET, algorithms=[ALGORITHM])
+        user_id = payload.get("userId")
+        if user_id is None:
+            raise token_credentials_exception
+    except InvalidTokenError:
+        raise token_credentials_exception
+    return user_id
     

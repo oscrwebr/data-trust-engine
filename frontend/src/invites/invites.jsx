@@ -7,7 +7,7 @@ import { useState } from "react";
 
 import { InputText } from "primereact/inputtext";
 import { IconField } from "primereact/iconfield";
-import { ProgressSpinner} from "primereact/ProgressSpinner"
+import { ProgressSpinner} from "primereact/progressspinner"
 import { InputIcon } from "primereact/inputicon";
 import { Calendar } from 'primereact/calendar';
 import { Message } from 'primereact/message';
@@ -31,6 +31,10 @@ function Invite({ visible, setVisible, toast}) {
 
   const showCooldownMessage = () => {
       toast.current.show({ severity: 'error', summary: 'Error', detail: 'You are sending this employee too many invites, please try again tomorrow.', life: 4000});
+  };
+
+  const showAdminMessage = () => {
+      toast.current.show({ severity: 'error', summary: 'Error', detail: 'You cannot send an invite to yourself.', life: 4000});
   };
 
   const today = new Date();
@@ -62,6 +66,9 @@ function Invite({ visible, setVisible, toast}) {
 
       } else if (res.data.success == "cooldown") {
         showCooldownMessage();
+
+      } else if (res.data.success == "admin") {
+        showAdminMessage();
         
       } else if (res.data.success == true) {
         showSuccessMessage();
@@ -90,6 +97,8 @@ function Invite({ visible, setVisible, toast}) {
         header={<h2 className={styles.d_dialog_header}>Send your employee an invite</h2>}
         draggable={false}
         dismissableMask
+        closable={false}
+        data-testid="invite-dialog"
         >
         <p className={styles.d_description}>Send an invite to an employee by specifying the recipient's email address. You can also set an expiry date for the invitation.</p>
         

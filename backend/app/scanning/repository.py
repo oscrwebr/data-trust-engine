@@ -1,13 +1,20 @@
 from datetime import datetime
 
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 from app.scanning.models import File, NamingConvention, Scan, ScanNamingConvention, NamingConventionScanResult, Scan, ScanFile, ScanFileDetection
+from app.ingestion.models import IngestionFile
+from app.roles.models import SensitivityCategory, SensitivitySubcategory
 from datetime import datetime, timezone
+from app.scanning.scan_type import ScanType
+from app.ingestion.models import UserFiles
+from app.authentication.models import User
+from app.workspaces.models import user_workspace as UserWorkspace
 
 
-def create_scan(db: Session):
+def create_scan(db: Session, scan_type: ScanType):
     scan = Scan(
+        scan_type = scan_type,
         started_at = datetime.now(timezone.utc),
         finished_at = None
     )
@@ -74,15 +81,88 @@ def create_file(db: Session, graph_file_id: str, file_name: str, file_hash: str)
 
 
 def get_file_by_id(db: Session, file_id: int):
-    return db.query(File).filter(File.file_id == file_id).first()
+    return db.query(IngestionFile).filter(IngestionFile.ingestion_file_id == file_id).first()
 
 
 def get_all_files(db: Session):
-    return db.query(File).all()
+    return db.query(IngestionFile).all()
+
+
+def get_latest_scan_detection_summary(db: Session, file_id: int):
+    latest_scan_file = (
+        db.query(ScanFile.scan_file_id)
+        .join(Scan, Scan.scan_id == ScanFile.scan_id)
+        .filter(ScanFile.file_id == file_id)
+        .order_by(Scan.finished_at.desc())
+        .first() # Ensure we only get the most recent scan results (one that finished most recently)
+    )
+
+    if not latest_scan_file:
+        return []
+    
+    return (
+        db.query(
+            ScanFileDetection.sensitivity_subcategory,
+            func.count(ScanFileDetection.scan_file_detection_id).label("count")
+        )
+        .filter(ScanFileDetection.scan_file_id == latest_scan_file.scan_file_id)
+        .group_by(ScanFileDetection.sensitivity_subcategory)
+        .all()
+    )
+
+
+# Method for the purpose of checking if this file has a scan at all
+def check_file_has_scan(db: Session, file_id: int):
+    latest_scan = (
+        db.query(ScanFile.scan_file_id)
+        .filter(ScanFile.file_id == file_id)
+        .first()
+    )
+
+    return latest_scan is not None
+
+
+
+def get_subcategory_category_map(db: Session):
+    rows = (
+        db.query(
+            SensitivitySubcategory.name.label("subcategory_name"),
+            SensitivityCategory.name.label("category_name")
+        )
+        .join(
+            SensitivityCategory,
+            SensitivitySubcategory.sensitivity_category_id == SensitivityCategory.sensitivity_category_id
+        )
+        .all()
+    )
+
+    return {row.subcategory_name: row.category_name for row in rows}
 
 
 def get_file_by_graph_id(db: Session, graph_file_id: str):
     return db.query(File).filter(File.graph_file_id == graph_file_id).first()
+
+
+def get_file_scans(db: Session, file_id: int):
+    return (
+        db.query(
+            Scan.scan_id,
+            Scan.started_at,
+            Scan.finished_at,
+
+            # Count number of detections for this file within each scan
+            func.count(ScanFileDetection.scan_file_detection_id).label("detection_count")
+        )
+        .join(ScanFile, Scan.scan_id == ScanFile.scan_id) # Join Scan to ScanFile, links each scan to the files included in that scan
+        .outerjoin( # Outerjoin ScanFile to ScanFileDetections, so that scans are included even if number of detections is 0
+            ScanFileDetection,
+            ScanFile.scan_file_id == ScanFileDetection.scan_file_id
+        )
+        .filter(ScanFile.file_id == file_id) # Filter to only include rows where ScanFile relates to the given file_id
+        .group_by(Scan.scan_id, Scan.started_at, Scan.finished_at) # Group by scan to aggregate 
+        .order_by(Scan.started_at.desc())
+        .all()
+    )
 
 
 def set_file_hash(db: Session, file: File, new_hash: str):
@@ -107,15 +187,8 @@ def set_naming_convention_scan_result(db: Session, scan_file_id: int, scan_namin
     db.refresh(naming_convention_scan_result)
     return naming_convention_scan_result
 
-def create_scan(db: Session):
-    scan = Scan(started_at=datetime.now())
-    db.add(scan)
-    db.commit()
-    db.refresh(scan)
-    return scan
-
 def end_scan(db: Session, scan: Scan):
-    scan.finished_at = datetime.now()
+    scan.finished_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(scan)
     return scan
@@ -144,14 +217,153 @@ def get_scan_naming_convention_by_scan_id(db: Session, scan_id: int):
     return db.query(ScanNamingConvention).filter(ScanNamingConvention.scan_id == scan_id).all()
 
 def get_scan_files_with_file(db: Session, scan_id: int):
-    return db.query(ScanFile, File).join(File, ScanFile.file_id == File.file_id).filter(ScanFile.scan_id == scan_id).all()
+    return db.query(ScanFile, IngestionFile).join(IngestionFile, ScanFile.file_id == IngestionFile.ingestion_file_id).filter(ScanFile.scan_id == scan_id).all()
 
 def get_naming_convention_ids(db: Session):
         return db.execute(select(NamingConvention.naming_convention_id)).scalars().all()
 
-def create_test_file(db: Session, graph_file_id: str, file_name: str, hash: str):
-    file = File(graph_file_id=graph_file_id, file_name= file_name, hash=hash)
+def create_test_file(db: Session, graph_file_id: str, file_name: str, extension: str, hash: str, last_modified: datetime, web_url: str, drive_id: str):
+    file = IngestionFile(graph_id=graph_file_id, name=file_name, extension=extension, hash=hash, last_modified=last_modified, web_url=web_url, drive_id=drive_id)
     db.add(file)
     db.commit()
     db.refresh(file)
     return file
+
+def get_all_scans(db: Session):
+    return db.query(Scan).all()
+
+def get_scan_file_count(db: Session, scan_id: int):
+    return db.query(ScanFile).filter(ScanFile.scan_id == scan_id).count()
+
+def get_scans_with_file_count(db: Session):
+    return db.query(Scan, func.count(ScanFile.scan_file_id)).outerjoin(ScanFile, Scan.scan_id == ScanFile.scan_id).group_by(Scan.scan_id).all()
+
+def get_naming_convention_scan_results_by_scan_id(db: Session, scan_id: int):
+    return(
+        db.query(
+        
+        NamingConventionScanResult, 
+        NamingConvention.name,
+        ScanFile.scan_file_id
+    )
+    .join(
+        # Join to first get the ScanNamingConvention result
+        ScanNamingConvention, NamingConventionScanResult.scan_naming_convention_id == ScanNamingConvention.scan_naming_convention_id
+    )
+    .join(
+        # Then join to get the actual NamingConvention
+        NamingConvention, ScanNamingConvention.naming_convention_id == NamingConvention.naming_convention_id
+    )
+    .join(
+        # Join to get the ScanFile so that we can filter by scan_file_id
+        ScanFile, NamingConventionScanResult.scan_file_id == ScanFile.scan_file_id
+    )
+    # Then get all the files that are part of the scan
+    .filter(ScanFile.scan_id == scan_id).all()
+    )
+
+def get_scan_detection_totals_by_scan_id(db: Session, scan_id: int):
+    return (
+        db.query(
+            SensitivityCategory.name.label("category_name"),
+            func.count(ScanFileDetection.scan_file_detection_id).label("detection_count")
+        )
+        .join(
+            # ScanFileDetection uses the name rather than ID to link to sensitivity subcategory
+            SensitivitySubcategory,
+            ScanFileDetection.sensitivity_subcategory == SensitivitySubcategory.name
+        )
+        .join(
+            # Then join to get the sensitivity category of the subcategory
+            SensitivityCategory,
+            SensitivitySubcategory.sensitivity_category_id == SensitivityCategory.sensitivity_category_id
+        )
+        .join(
+            # Then join to get the ScanFile so that we can filter by scan_id
+            ScanFile,
+            ScanFileDetection.scan_file_id == ScanFile.scan_file_id
+        )
+        .filter(ScanFile.scan_id == scan_id).group_by(SensitivityCategory.name).all()
+
+    )
+
+# Can't use '.scalars()' as we are using an older SQLAlchemy version (just to extract the names)
+# If I used SensitivityCategory.name, it would return tuples and would make code messy and harder to read
+def get_sensitivity_category_names(db: Session):
+    return db.query(SensitivityCategory).all()
+
+def get_basic_sensitivity_scan_results_by_scan_id(db: Session, scan_id: int):
+    return (
+        db.query(
+            ScanFile.scan_file_id,
+            SensitivitySubcategory.name.label("subcategory_name"),
+            SensitivityCategory.name.label("category_name"),
+        )
+        # Join to get detections for each ScanFile
+        .join(
+            ScanFileDetection, 
+            ScanFile.scan_file_id == ScanFileDetection.scan_file_id
+        )
+        # Then join to get the sensitivity subcategory for each detection
+        # ScanFileDetection uses the name rather than ID to link to sensitivity subcategory
+        .join(
+            SensitivitySubcategory, 
+            ScanFileDetection.sensitivity_subcategory == SensitivitySubcategory.name
+        )
+        # Then join to get the sensitivity category of each subcategory
+        .join(
+            SensitivityCategory, 
+            SensitivitySubcategory.sensitivity_category_id == SensitivityCategory.sensitivity_category_id
+        )
+        .filter(ScanFile.scan_id == scan_id)
+        # Group the rows together
+        # Only want to find the UNIQUE detections that occur on the scanned file
+        .group_by(ScanFile.scan_file_id, SensitivitySubcategory.name, SensitivityCategory.name)
+        .order_by(
+            SensitivityCategory.name.asc(),
+        )
+        .all()
+    )
+
+def create_naming_convention_scan_result(db: Session, scan_file_id: int, scan_naming_convention_id: int, passed: bool, suggested_name: str):
+    naming_convention_scan_result = NamingConventionScanResult(scan_file_id=scan_file_id, scan_naming_convention_id=scan_naming_convention_id, passed=passed, suggested_name=suggested_name)
+    db.add(naming_convention_scan_result)
+    db.commit()
+    db.refresh(naming_convention_scan_result)
+    return naming_convention_scan_result
+
+def create_scan_naming_convention(db: Session, scan_id: int, naming_convention_id: int):
+    scan_naming_convention = ScanNamingConvention(scan_id=scan_id, naming_convention_id=naming_convention_id)
+    db.add(scan_naming_convention)
+    db.commit()
+    db.refresh(scan_naming_convention)
+    return scan_naming_convention
+
+
+# UserWorkspace is imported as a table rather than a class (need to use .c for columns)
+def get_workspace_files_by_user_id(db: Session, user_id: int):
+    
+    # Get the workspace ID for the user
+    workspace_id = (
+        db.query(UserWorkspace.c.workspace_id)
+        .filter(UserWorkspace.c.user_id == user_id)
+        # Just get the value not a tuple
+        .scalar()
+    )
+
+    # Validation incase the user is not inside a workspace (testing)
+    if workspace_id is None:
+        return []
+
+    return (
+        db.query(IngestionFile)
+        # Join to get files related to a user
+        .join(UserFiles, IngestionFile.ingestion_file_id == UserFiles.file_id)
+        # Then join to get the workspace of the user
+        .join(UserWorkspace, UserWorkspace.c.user_id == UserFiles.user_id)
+        # Filter using the workspace_id query to only get files that are part of the user's workspace
+        .filter(UserWorkspace.c.workspace_id == workspace_id)
+        # Remove duplicates as multiple users can have access to one file
+        .distinct()
+        .all()
+    )

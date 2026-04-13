@@ -1,0 +1,212 @@
+services:
+  # Setting up the dev environment
+  frontend-dev:
+    build:
+      context: ./frontend
+      args: # Ensures that this env variable is available during BUILD!
+        VITE_BACKEND_HOST: http://localhost:8000
+      target: dev
+    image: dte-frontend-dev:latest
+    profiles: ["dev"]
+    ports:
+      - 5173:5173
+    develop:
+      watch:
+        - action: sync
+          path: ./frontend
+          target: /app
+
+  database-dev:
+    image: mariadb:11.8-noble
+    profiles: ["dev"]
+    environment:
+      - MARIADB_ROOT_PASSWORD=${DB_PASSWORD}
+      - MARIADB_DATABASE=${DB_NAME}
+    volumes:
+      - dte-dev-db-volume:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"] # https://mariadb.com/docs/server/server-management/automated-mariadb-deployment-and-administration/docker-and-mariadb/using-healthcheck-sh
+      start_period: 40s
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  alembic_migrations-dev:
+    build: ./backend
+    image: fastapi-backend-dev:latest
+    profiles: ["dev"]
+    environment:
+      - DB_HOST=database-dev
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_TEST_NAME=${DB_TEST_NAME}
+    command: ["python", "-m", "alembic", "-c", "alembic.ini", "upgrade", "head"]
+    depends_on:
+      database-dev:
+        condition: service_healthy
+
+  backend-dev: # Ensure that this also has watch!
+    build:
+      context: ./backend
+    image: fastapi-backend-dev:latest
+    profiles: ["dev"]
+    pull_policy: never
+    ports:
+      - 8000:8000
+    environment:
+      - CLIENT_ID=${CLIENT_ID}
+      - CLIENT_SECRET=${CLIENT_SECRET}
+      - AUTHORITY=${AUTHORITY}
+      - SCOPES=${SCOPES}
+      - DB_HOST=database-dev
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_TEST_NAME=${DB_TEST_NAME}
+      - ACCESS_TOKEN_SECRET=${ACCESS_TOKEN_SECRET}
+      - ALGORITHM=${ALGORITHM}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      - ZEROBOUNCE_API_KEY=${ZEROBOUNCE_API_KEY}
+      - FERNET_KEY=${FERNET_KEY}
+      - FRONTEND_HOST=${FRONTEND_HOST} #  THESE MUST ALWAYS BE TO WHATEVER THE USER'S CLIENT SHOULD BE! FOR DEV, THAT IS LOCALHOST
+      - REDIRECT_URI=${REDIRECT_URI}
+    command: ["fastapi", "dev", "app/main.py", "--host", "0.0.0.0", "--port", "8000"]
+    develop:
+      watch:
+        - action: rebuild
+          path: ./backend/pyproject.toml
+        - action: sync+restart
+          path: ./backend
+          target: /app
+          ignore:
+            - pyproject.toml
+    depends_on:
+      alembic_migrations-dev:
+        condition: service_completed_successfully
+
+# Setting up the prod env -- TO BE PROPERLY CONFIGURED WHEN SETTING UP CLOUD DEPLOYMENT
+  database-prod:
+    image: mariadb:11.8-noble
+    profiles: ["prod"]
+    environment:
+      - MARIADB_ROOT_PASSWORD=${DB_PASSWORD}
+      - MARIADB_DATABASE=${DB_NAME}
+    volumes:
+      - dte-prod-db-volume:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"] # https://mariadb.com/docs/server/server-management/automated-mariadb-deployment-and-administration/docker-and-mariadb/using-healthcheck-sh
+      start_period: 40s
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  alembic_migrations-prod:
+    build: ./backend
+    image: fastapi-backend-prod:latest
+    profiles: ["prod"]
+    environment:
+      - DB_HOST=database-prod
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_TEST_NAME=${DB_TEST_NAME}
+    command: ["python", "-m", "alembic", "-c", "alembic.ini", "upgrade", "head"]
+    depends_on:
+      database-prod:
+        condition: service_healthy
+
+  backend-prod:
+    image: fastapi-backend-prod:latest
+    profiles: ["prod"]
+    pull_policy: never
+    environment:
+      - CLIENT_ID=${CLIENT_ID}
+      - CLIENT_SECRET=${CLIENT_SECRET}
+      - AUTHORITY=${AUTHORITY}
+      - SCOPES=${SCOPES}
+      - DB_HOST=database-prod
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_TEST_NAME=${DB_TEST_NAME}
+      - ACCESS_TOKEN_SECRET=${ACCESS_TOKEN_SECRET}
+      - ALGORITHM=${ALGORITHM}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      - ZEROBOUNCE_API_KEY=${ZEROBOUNCE_API_KEY}
+      - FERNET_KEY=${FERNET_KEY}
+      - FRONTEND_HOST=http://localhost #  THESE MUST ALWAYS BE TO WHATEVER THE USER'S CLIENT SHOULD BE! FOR DEV, THAT IS LOCALHOST
+      - REDIRECT_URI=http://localhost/api
+    depends_on:
+      alembic_migrations-prod:
+        condition: service_completed_successfully
+
+  frontend-prod:
+    build:
+      context: ./frontend
+      target: prod
+      args: # Ensures that this env variable is available during BUILD!
+        VITE_BACKEND_HOST: /api
+    image: dte-frontend-prod:latest
+    profiles: ["prod"]
+    ports:
+      - 80:80
+    depends_on:
+      - backend-prod
+
+
+  # Setting up the frontend test environment
+  frontend-test:
+    build:
+      context: ./frontend
+      target: test
+    volumes:
+      - ./frontend_coverage:/app/frontend_coverage/
+    profiles: ["test-frontend"]
+
+
+  # Setting up the backend test environment
+  database-test:
+    image: mariadb:11.8-noble
+    profiles: ["test-backend"]
+    environment:
+      - MARIADB_ROOT_PASSWORD=${DB_PASSWORD}
+      - MARIADB_DATABASE=${DB_TEST_NAME}
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"] # https://mariadb.com/docs/server/server-management/automated-mariadb-deployment-and-administration/docker-and-mariadb/using-healthcheck-sh
+      start_period: 40s
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend-test:
+    build:
+      context: ./backend
+    # image: fastapi-backend-test:latest
+    profiles: ["test-backend"]
+    environment:
+      - CLIENT_ID=${CLIENT_ID}
+      - CLIENT_SECRET=${CLIENT_SECRET}
+      - AUTHORITY=${AUTHORITY}
+      - SCOPES=${SCOPES}
+      - DB_HOST=database-test
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_TEST_NAME=${DB_TEST_NAME}
+      - ACCESS_TOKEN_SECRET=${ACCESS_TOKEN_SECRET}
+      - ALGORITHM=${ALGORITHM}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      - ZEROBOUNCE_API_KEY=${ZEROBOUNCE_API_KEY}
+      - FERNET_KEY=${FERNET_KEY}
+      - FRONTEND_HOST=${FRONTEND_HOST} # This literally could be anything - should be mocking the calls!
+      - REDIRECT_URI=${REDIRECT_URI}
+    command: pytest --cov-fail-under=90 --cov-report=html --cov=app
+    depends_on:
+      database-test:
+        condition: service_healthy
+
+
+volumes:
+  dte-dev-db-volume:
+  dte-prod-db-volume:

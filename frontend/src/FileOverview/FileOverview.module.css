@@ -1,0 +1,265 @@
+.file_overview_page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+
+.file_header_card {
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 2rem;
+}
+
+.file_header_top {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.file_icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    background-color: #f3f4f6;
+    border-radius: 12px;
+    font-size: 36px;
+}
+
+.file_name {
+    font-weight: 700;
+    margin: 0;
+    line-height: 1;
+}
+
+.file_hash_section {
+    background-color: #f9fafb;
+    border-radius: 10px;
+}
+
+.hash_label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.file_hash {
+    font-size: 0.8rem;
+    font-family: monospace;
+    word-break: break-all;
+    color: #374151;
+}
+
+.section_title {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+}
+
+.section_icon {
+    font-size: 1.2rem;
+    transform: translateY(-1px);
+}
+
+.section_title h2 {
+    margin: 0;
+    line-height: 1;
+}
+
+
+.scan_history_container {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 20px 20px 16px 20px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
+}
+
+.scan_history_title {
+    margin: 0 0 16px 0;
+    font-weight: 700;
+    color: #111827;
+}
+
+.scan_history_list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.file_scan_history_item {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+
+    padding: 12px 12px;
+    background: #f8f9fb;
+    border: 1px solid #e4e7ec;
+    border-radius: 12px;
+
+    width: 100%;
+    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.file_scan_history_item:hover {
+    background: #f1f4f8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.item_left_section {
+    flex: 1;
+}
+
+.item_date_wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.item_date_icon {
+    font-size: 1rem;
+    color: #6b7280;
+    flex-shrink: 0;
+}
+
+.item_date {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #1f2937;
+}
+
+.item_right_section {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.item_detection_count {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #111827;
+}
+
+.item_status {
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.completed {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.in_progress {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.latest_scan_results_container {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 24px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
+}
+
+.latest_scan_results_title {
+    margin: 0 0 16px 0;
+    font-weight: 700;
+    color: #111827;
+}
+
+.latest_scan_results_list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+}
+
+.result_card {
+    padding: 16px;
+    border-radius: 12px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+}
+
+.result_subcategory {
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+}
+
+.result_label {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 6px;
+}
+
+.result_count {
+    margin-top: 8px;
+    font-size: 0.85rem;
+    color: #4b5563;
+}
+
+.latest_scan_category_section {
+    margin-top: 24px;
+}
+
+.latest_scan_category_title {
+    margin-bottom: 1rem;
+    color: #111827;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.employees_with_access_title {
+    margin: 0 0 16px 0;
+    font-weight: 700;
+    color: #111827;
+}
+
+.employees_with_access_container {
+    max-width: 900px;
+
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+
+    padding: 20px;
+    margin-bottom: 24px;
+
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
+}
+
+.file_overview_page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.file_overview_content {
+    display: grid;
+    grid-template-columns: 1.8fr 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+.file_overview_main_column {
+    min-width: 0;
+}
+
+.file_overview_sidebar {
+    min-width: 0;
+}

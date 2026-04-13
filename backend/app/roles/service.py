@@ -1,10 +1,6 @@
 from sqlalchemy.orm import Session
 from app.roles import repository
 
-
-from sqlalchemy.orm import Session
-from app.roles import repository
-
 # Existing functions
 def get_roles(db: Session):
     roles = repository.get_all_roles(db)
@@ -23,8 +19,8 @@ def get_roles(db: Session):
         result.append(r_dict)
     return result
 
-def create_role(db: Session, name: str, thresholds: list[dict]):
-    role = repository.create_role(db, name)
+def create_role(db: Session, name: str, thresholds: list[dict], workspace_id: None):
+    role = repository.create_role(db, name, workspace_id)
     for t in thresholds:
         repository.create_role_permission(
             db, role.role_id, t["sensitivity_subcategory_id"]
@@ -48,3 +44,12 @@ def get_sensitivity_categories(db: Session):
 
 def get_sensitivity_subcategories(db: Session):
     return repository.get_all_sensitivity_subcategories(db)
+
+def get_users(db: Session, role_id: int):
+    return repository.get_all_users_by_role(db, role_id)
+
+def update_user_role(db: Session, user_id: int, role_id: int | None):
+    repository.set_user_role(db, user_id, role_id)
+    
+def get_role_by_name(db: Session, name: str):
+    return repository.get_role_by_name(db, name)
