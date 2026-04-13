@@ -1,0 +1,48 @@
+stages:
+  - test-frontend
+  - test-backend
+  - test-frontend-build
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_BRANCH == "development"
+    - when: never
+
+default:
+  before_script:
+    - docker compose --profile frontend-test down -v || true
+    - docker info
+  after_script:
+    - docker compose --profile frontend-test down -v
+
+
+test-frontend:
+  stage: test-frontend
+  when: always
+  tags:
+   - docker-tests
+  script:
+    - docker compose --profile test-frontend up --build --exit-code-from frontend-test # --exit-code-from frontend-test = compose will exit with whatever exit code the service exited with (wont pass a failing pipeline)
+  # artifacts:
+  #   reports:
+  #     coverage_report:
+  #       coverage_format: cobertura
+  #       path: frontend_coverage/coverage/cobertura-coverage.xml
+
+test-backend:
+  stage: test-backend
+  when: always
+  tags:
+    - docker-tests
+  script:
+    - docker compose --profile test-backend up --build --abort-on-container-exit --exit-code-from backend-test # --abort-on-container-exit = when backend container exits, db container be forced to exit
+
+test-frontend-build:
+  stage: test-frontend-build
+  when: always
+  tags:
+   - docker-tests
+  script:
+    - docker build ./frontend/ --target prod

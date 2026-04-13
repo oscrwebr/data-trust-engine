@@ -7,6 +7,7 @@ import SidebarDropdown from "../dropdown/dropdown";
 import DropdownItem from "./DropdownItem";
 import api from "../../api/axiosConfig";
 import { Avatar } from "primereact/avatar";
+import { BiFileFind } from "react-icons/bi";
         
 function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role}){
     const [openDropdown, setOpenDropdown] = useState(null);
@@ -49,11 +50,14 @@ function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role
                     </div>
                     <DropdownItem className={styles.navbar_item} url="/dashboard" text="Dashboard" icon="pi pi-th-large"/>
                     <div className={styles.line}/>
-
+                    <SidebarDropdown className={styles.dropdown} icon="pi pi-file" label="Files" openDropdown={openDropdown} setOpenDropdown={setOpenDropdown}>
+            
+                    </SidebarDropdown>
                     {/* Add a dropdown menu item using SidebarDropdown - choose your own label, an icon from PrimeReact and everything else can be kept the same*/}
-                    <SidebarDropdown className={styles.dropdown} icon="pi pi-folder" label="Scanning" openDropdown={openDropdown} setOpenDropdown={setOpenDropdown} basePaths={["/files"]}>
+                    <SidebarDropdown className={styles.dropdown} icon="pi pi-search" label="Scanning" openDropdown={openDropdown} setOpenDropdown={setOpenDropdown} basePaths={["/files"]}>
                         {/* Add your scanning pages here */}
                         {/* Make sure to add the paths of these scanning pages to the basePaths array inside SidebarDropdown props*/}
+                        <DropdownItem url="/scans" text="View Scans"/>
                     </SidebarDropdown>
 
                     <SidebarDropdown data-testid="my-employees-element" className={styles.dropdown} icon="pi pi-users" label="My Employees" openDropdown={openDropdown} setOpenDropdown={setOpenDropdown} basePaths={["/view-employees", "/manage-employees"]}>

@@ -6,6 +6,13 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: './src/setupTests.js',
+    coverage: {
+      provider: 'istanbul',
+      reportOnFailure: true,
+      exclude: ['src/assets', 'src/App.{css,jsx}', 'src/Test/', 'src/Errors/', '**.css'],
+      reporter: ['cobertura', 'html'],
+      reportsDirectory: './frontend_coverage/coverage'
+    }
   },
   server: {
     watch: {
