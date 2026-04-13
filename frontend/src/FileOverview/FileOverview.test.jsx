@@ -85,7 +85,10 @@ describe("FileOverviewPageTests", () => {
             })
             .mockResolvedValueOnce({
                 json: async () => mockLatestScanResults
-            });
+            })
+            .mockResolvedValueOnce({
+                json: async () => []
+            })
 
         renderComponent();
 
@@ -143,7 +146,10 @@ describe("FileOverviewPageTests", () => {
             })
             .mockResolvedValueOnce({
                 json: async () => []
-            });
+            })
+            .mockResolvedValueOnce({
+                json: async () => []
+            })
 
         renderComponent();
 
@@ -167,6 +173,9 @@ describe("FileOverviewPageTests", () => {
         vi.spyOn(global, "fetch")
             .mockResolvedValueOnce({
                 json: async () => mockFile
+            })
+            .mockResolvedValueOnce({
+                json: async () => []
             })
             .mockResolvedValueOnce({
                 json: async () => []
