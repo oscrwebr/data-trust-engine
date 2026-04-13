@@ -1,6 +1,9 @@
 from sqlalchemy.orm import Session
 from app.access_mapping import repository
+from app.access_mapping.schemas import conf, SendViolationsEmailRequest
 from app.scanning.service import get_file_latest_scan_results, check_file_has_scan
+from fastapi_mail import FastMail, MessageSchema
+from starlette.responses import JSONResponse
 
 
 # Method for getting all employees with access to a file
@@ -114,3 +117,18 @@ def get_failed_detections(latest_scan_results: list[dict], effective_thresholds:
             })
 
     return failed_detections
+
+
+# Method for sending the email containing the violations
+async def send_email_with_violations(admin_name: str, employee_name: str, employee_email: str, detections: list):
+    
+    message = MessageSchema(
+        subject="Action Required: Unauthorized File Access Identified",
+        recipients=[employee_email], 
+        body=template,
+        subtype="html"
+    )
+
+    fm = FastMail(conf)
+    #await fm.send_message(message)
+    return JSONResponse(status_code=200, content={"message": "email has been sent"})

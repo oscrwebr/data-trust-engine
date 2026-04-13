@@ -20,6 +20,8 @@ def get_file_employees_with_access(file_id: int, db: Session = Depends(get_datab
 # Route for sending an email with the violations
 @router.post("/send-violations-email")
 async def send_email_with_violations(employee: SendViolationsEmailRequest, db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)]):
+    user = test_route(current_user.user_id, db)
+    admin_name = (user.firstname + user.surname)
     detections = employee.employee.failed_detections
     all_detections = []
 
@@ -32,5 +34,4 @@ async def send_email_with_violations(employee: SendViolationsEmailRequest, db: A
         dict["category"] = category.name
         all_detections.append(dict)
         
-    return
-    # return await service.send_violations_email()
+    return await service.send_email_with_violations(admin_name, employee.employee.name, employee.employee.email, all_detections)
