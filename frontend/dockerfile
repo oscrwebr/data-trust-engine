@@ -24,7 +24,7 @@ CMD ["npm", "run", "dev"]
 # This is the target of the frontend test profile
 FROM base AS test
 
-CMD ["npm", "run", "test"]
+CMD ["npm", "run", "test:coverage"]
 
 
 # This will sets up the production environment

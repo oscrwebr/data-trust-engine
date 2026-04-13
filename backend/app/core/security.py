@@ -63,4 +63,21 @@ def decrypt_refresh(encrypted_token: bytes) -> str:
     f = Fernet(KEY)
     token = f.decrypt(encrypted_token).decode()
     return token
+
+def get_user_id_from_access_token(token: Annotated[str, Depends(oauth2_scheme)]):
+    token_credentials_exception = HTTPException(
+        status_code = status.HTTP_401_UNAUTHORIZED,
+        detail = "User not authorised",
+        headers = { 
+            "WWW-Authenticate": "Bearer"
+        })
+    
+    try: 
+        payload = jwt.decode(jwt=token, key=ACCESS_TOKEN_SECRET, algorithms=[ALGORITHM])
+        user_id = payload.get("userId")
+        if user_id is None:
+            raise token_credentials_exception
+    except InvalidTokenError:
+        raise token_credentials_exception
+    return user_id
     

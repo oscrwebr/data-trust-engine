@@ -11,6 +11,7 @@ from app.org_chart.router import router as org_chart_router
 from app.ingestion.router import router as ingestion_router
 from app.file_dashboard.router import router as files_dashboard_router
 from app.org_chart.router import router as org_chart_router
+from app.access_mapping.router import router as access_mapping_router
 
 app = FastAPI()
 app.include_router(invite_router)
@@ -21,6 +22,8 @@ app.include_router(auth_router)
 app.include_router(org_chart_router)
 app.include_router(ingestion_router)
 app.include_router(files_dashboard_router)
+app.include_router(org_chart_router)
+app.include_router(access_mapping_router)
 
 app.add_middleware(SessionMiddleware, secret_key="data-trust-engine-21a")
 

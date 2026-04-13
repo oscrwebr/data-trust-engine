@@ -85,7 +85,10 @@ describe("FileOverviewPageTests", () => {
             })
             .mockResolvedValueOnce({
                 json: async () => mockLatestScanResults
-            });
+            })
+            .mockResolvedValueOnce({
+                json: async () => []
+            })
 
         renderComponent();
 
@@ -115,7 +118,7 @@ describe("FileOverviewPageTests", () => {
         expect(screen.getByText("Scan History Item: 102")).toBeInTheDocument();
 
         // Ensure correct API calls were made
-        expect(global.fetch).toHaveBeenCalledTimes(3);
+        expect(global.fetch).toHaveBeenCalledTimes(4);
         expect(global.fetch).toHaveBeenNthCalledWith(
             1,
             "http://localhost:8000/scanning/get_file/1"
@@ -143,7 +146,10 @@ describe("FileOverviewPageTests", () => {
             })
             .mockResolvedValueOnce({
                 json: async () => []
-            });
+            })
+            .mockResolvedValueOnce({
+                json: async () => []
+            })
 
         renderComponent();
 
@@ -167,6 +173,9 @@ describe("FileOverviewPageTests", () => {
         vi.spyOn(global, "fetch")
             .mockResolvedValueOnce({
                 json: async () => mockFile
+            })
+            .mockResolvedValueOnce({
+                json: async () => []
             })
             .mockResolvedValueOnce({
                 json: async () => []

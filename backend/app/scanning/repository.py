@@ -7,6 +7,9 @@ from app.ingestion.models import IngestionFile
 from app.roles.models import SensitivityCategory, SensitivitySubcategory
 from datetime import datetime, timezone
 from app.scanning.scan_type import ScanType
+from app.ingestion.models import UserFiles
+from app.authentication.models import User
+from app.workspaces.models import user_workspace as UserWorkspace
 
 
 def create_scan(db: Session, scan_type: ScanType):
@@ -108,6 +111,18 @@ def get_latest_scan_detection_summary(db: Session, file_id: int):
     )
 
 
+# Method for the purpose of checking if this file has a scan at all
+def check_file_has_scan(db: Session, file_id: int):
+    latest_scan = (
+        db.query(ScanFile.scan_file_id)
+        .filter(ScanFile.file_id == file_id)
+        .first()
+    )
+
+    return latest_scan is not None
+
+
+
 def get_subcategory_category_map(db: Session):
     rows = (
         db.query(
@@ -173,7 +188,7 @@ def set_naming_convention_scan_result(db: Session, scan_file_id: int, scan_namin
     return naming_convention_scan_result
 
 def end_scan(db: Session, scan: Scan):
-    scan.finished_at = datetime.now()
+    scan.finished_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(scan)
     return scan
@@ -323,3 +338,32 @@ def create_scan_naming_convention(db: Session, scan_id: int, naming_convention_i
     db.commit()
     db.refresh(scan_naming_convention)
     return scan_naming_convention
+
+
+# UserWorkspace is imported as a table rather than a class (need to use .c for columns)
+def get_workspace_files_by_user_id(db: Session, user_id: int):
+    
+    # Get the workspace ID for the user
+    workspace_id = (
+        db.query(UserWorkspace.c.workspace_id)
+        .filter(UserWorkspace.c.user_id == user_id)
+        # Just get the value not a tuple
+        .scalar()
+    )
+
+    # Validation incase the user is not inside a workspace (testing)
+    if workspace_id is None:
+        return []
+
+    return (
+        db.query(IngestionFile)
+        # Join to get files related to a user
+        .join(UserFiles, IngestionFile.ingestion_file_id == UserFiles.file_id)
+        # Then join to get the workspace of the user
+        .join(UserWorkspace, UserWorkspace.c.user_id == UserFiles.user_id)
+        # Filter using the workspace_id query to only get files that are part of the user's workspace
+        .filter(UserWorkspace.c.workspace_id == workspace_id)
+        # Remove duplicates as multiple users can have access to one file
+        .distinct()
+        .all()
+    )

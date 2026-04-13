@@ -34,4 +34,6 @@ __pycache__
 
 # Coverage
 htmlcov/
+coverage/
 .coverage
+.frontend_coverage/

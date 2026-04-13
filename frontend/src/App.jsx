@@ -2,7 +2,7 @@ import "./App.css"
 import { useRef } from "react";
 
 import { BrowserRouter, Routes, Router, Route , useLocation} from "react-router-dom";
-import Dashboard from './dashboard/Dashboard';
+import Dashboard from './Dashboard/Dashboard';
 import EmployeeInviteError from './invites/error.jsx';
 import Roles from "./roles/roles";
 import CreateWorkspace from "./workspace/CreateWorkspace";
@@ -21,6 +21,7 @@ import OrgChart from "./org_chart/orgChart";
 import ViewEmployees from "./employees/ViewEmployees.jsx";
 import ManageEmployees from "./employees/ManageEmployees.jsx";
 import ScanPage from "./scans/ScanPage.jsx";
+import OrganisationalDevTest from "./scan_dev_test/OrganisationalDevTest.jsx";
 
 
 
@@ -45,8 +46,10 @@ function App() {
           <Route path="/settings" element={null} />
           <Route path="/dashboard" element={<Dashboard toast={toast}/>} />
           <Route path="/dashboard-files" element={<FilesDashboard toast={toast}/>} />
+          <Route path="/files/:file_id" element={<FileOverviewPage />} />
           <Route path="/scans" element={<Scans />} />
           <Route path="/scans/:scanId" element={<ScanPage/>} />
+          <Route path="/org-scan-dev" element={<OrganisationalDevTest />} />
         </Route>
 
         {/* Elements in here will not inherit the sidebar */}
@@ -54,13 +57,13 @@ function App() {
         <Route path="/roles" element={<Roles />} />
         <Route path="/dashboard" element={<Dashboard toast={toast}/>} />
         <Route path="/create-workspace" element={<CreateWorkspace  toast={toast}/>} />
-        <Route path="/files/:file_id" element={<FileOverviewPage />} />
         <Route path="/test" element={<Test/>} />
         <Route path="/error/422" element={<Unprocessable422/>}/>
         <Route path="/error/403" element={<Forbidden403/>}/>
         <Route path="/invite-error/:type" element={<EmployeeInviteError toast={toast}/>} />
         <Route path="/workspace-joined" element={<WorkspaceJoinedError />} />
         <Route path="/upload-org-chart" element={<OrgChart toast={toast} />} />
+        
       </Routes>
 
     </>
