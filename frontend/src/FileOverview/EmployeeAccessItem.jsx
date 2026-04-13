@@ -1,7 +1,7 @@
 import { useState } from "react";
 import styles from "./EmployeeAccessItem.module.css";
 import EmployeeAccessDetailsModal from "./EmployeeAccessDetailsModal";
-
+import { Button } from "primereact/button"
 import { FaCheckCircle, FaExclamationCircle, FaQuestionCircle } from "react-icons/fa";
 
 function EmployeeAccessItem({ employee }) {
@@ -10,26 +10,30 @@ function EmployeeAccessItem({ employee }) {
     return (
         <>
             <div className={styles.employee_access_item}>
-                <div className={styles.employee_access_status_icon}>
-                    {employee.access_allowed === null || employee.access_allowed === undefined ? (
-                        <FaQuestionCircle 
-                            className={styles.unknown_icon}
-                            data-testid="unknown-icon"
-                        />
-                    ) : employee.access_allowed ? (
-                        <FaCheckCircle 
-                            className={styles.allowed_icon}
-                            data-testid="allowed-icon"
-                        />
-                    ) : (
-                        <FaExclamationCircle 
-                            className={styles.denied_icon}
-                            data-testid="denied-icon"
-                        />
-                    )}
+                <div className={styles.employee_actions_container}>
+                    <div className={styles.employee_access_status_icon}>
+                        {employee.access_allowed === null || employee.access_allowed === undefined ? (
+                            <FaQuestionCircle 
+                                className={styles.unknown_icon}
+                                data-testid="unknown-icon"
+                            />
+                        ) : employee.access_allowed ? (
+                            <FaCheckCircle 
+                                className={styles.allowed_icon}
+                                data-testid="allowed-icon"
+                            />
+                        ) : (
+                            <FaExclamationCircle 
+                                className={styles.denied_icon}
+                                data-testid="denied-icon"
+                            />
+                        )}
+                    </div>
+                    <Button className={styles.alert_button}>Send Alert</Button>
                 </div>
-
+                
                 <div className={styles.employee_content}>
+
                     <div className={styles.employee_information}>
                         <div className={styles.employee_name}>{employee.name}</div>
                         <div className={styles.employee_email}>{employee.email}</div>
@@ -45,6 +49,7 @@ function EmployeeAccessItem({ employee }) {
                         <button className={styles.more_details_button} onClick={() => set_show_modal(true)}>More Details →</button>
                     )}
                 </div>
+
             </div>
 
             {show_modal && (

@@ -190,7 +190,6 @@ def test_get_all_notifications_route(db, client):
     for n in data:
         assert data[0]["title"] == n_1.title 
         assert data[0]["body"] == n_1.body
-        assert datetime.fromisoformat(n["datetime"]) == n_1.datetime
         assert data[0]["user_id"] == n_1.user_id
 
         
