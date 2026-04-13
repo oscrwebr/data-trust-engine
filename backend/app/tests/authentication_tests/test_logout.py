@@ -55,11 +55,13 @@ def test_valid_refresh_gets_disconnected(db, client):
         cookies={"dte_refresh_token": refresh.opaque_token}
     )
     response = client.send(request = req)
+
     # Getting the updated values for the refresh_family entry
     select_statement = select(RefreshFamily).where(RefreshFamily.refresh_family_id == refresh_family.refresh_family_id)
     latest_refresh = db.execute(select_statement).scalar_one()
 
     # ASSERTIONS
+    assert len(response.cookies) == 0
     assert latest_refresh.is_disconnected == True
     assert latest_refresh.is_revoked == False
 
@@ -104,6 +106,7 @@ def test_200_returned_if_multiple_log_out_in_30_seconds(db, client):
     latest_refresh = db.execute(select_statement).scalar_one()
 
     # ASSERTIONS
+    assert len(response_2.cookies) == 0
     assert response_2.status_code == 200
     assert latest_refresh.is_disconnected == True
     assert latest_refresh.is_revoked == False
@@ -154,6 +157,7 @@ def test_revoked_if_multiple_log_outs_outside_30_seconds(db, client):
     latest_refresh = db.execute(select_statement).scalar_one()
 
     # ASSERTIONS
+    assert len(response_2.cookies) == 0
     assert response_2.status_code == 200
     assert latest_refresh.is_disconnected == True
     assert latest_refresh.is_revoked == True
@@ -214,6 +218,7 @@ def test_old_refresh_causes_family_revokation(db, client):
     latest_refresh = db.execute(select_statement).scalar_one()
     assert latest_refresh.is_revoked == True
     assert latest_refresh.is_disconnected == False
+    assert len(res.cookies) == 0
 
 # Test that if a refresh_family is already revoked, nothing changes and it DOESN'T get disconnected
 def test_revoked_refresh_does_not_get_disconnected(db, client):
@@ -249,5 +254,6 @@ def test_revoked_refresh_does_not_get_disconnected(db, client):
 
     # Assert that there were no errors with the request
     assert res.status_code == 200
+    assert len(res.cookies) == 0
     assert refresh_family_latest.is_disconnected == False
     assert refresh_family_latest.is_revoked == True
