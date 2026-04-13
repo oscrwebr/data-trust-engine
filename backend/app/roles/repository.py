@@ -144,3 +144,17 @@ def migrate_pending_roles(db: Session, pending_user_id: int, new_user_id: int):
     ).delete()
 
     db.commit()
+
+def get_category_by_subcategory_name(db: Session, name: str):
+
+    subcategory = db.query(SensitivitySubcategory).filter(
+        SensitivitySubcategory.name == name
+    ).first()
+
+    category = db.query(SensitivityCategory).filter(
+        SensitivityCategory.sensitivity_category_id == subcategory.sensitivity_category_id
+    ).first()
+    
+    return category
+
+

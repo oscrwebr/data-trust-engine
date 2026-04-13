@@ -14,3 +14,7 @@ class FileEmployeeAccessResponse(BaseModel):
     roles: list[str]
     access_allowed: bool | None
     failed_detections: list[FailedDetectionResponse]
+
+class SendViolationsEmailRequest(BaseModel):
+    file_name: str
+    employee: FileEmployeeAccessResponse

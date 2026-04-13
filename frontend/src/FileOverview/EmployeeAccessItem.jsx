@@ -4,7 +4,7 @@ import EmployeeAccessDetailsModal from "./EmployeeAccessDetailsModal";
 import { Button } from "primereact/button"
 import { FaCheckCircle, FaExclamationCircle, FaQuestionCircle } from "react-icons/fa";
 
-function EmployeeAccessItem({ employee }) {
+function EmployeeAccessItem({ employee, sendEmail }) {
     const [show_modal, set_show_modal] = useState(false);
 
     return (
@@ -29,7 +29,7 @@ function EmployeeAccessItem({ employee }) {
                             />
                         )}
                     </div>
-                    {employee.access_allowed === false && (<Button className={styles.alert_button}>Send Alert</Button>)}
+                    {employee.access_allowed === false && (<Button onClick={() => sendEmail(employee.user_id)} className={styles.alert_button}>Send Alert</Button>)}
                 </div>
                 
                 <div className={styles.employee_content}>

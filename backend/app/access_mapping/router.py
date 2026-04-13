@@ -2,7 +2,12 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.core.database import get_database
 from app.access_mapping import service, repository
-from app.access_mapping.schemas import FileEmployeeAccessResponse
+from app.access_mapping.schemas import FileEmployeeAccessResponse, SendViolationsEmailRequest
+from app.roles.repository import get_category_by_subcategory_name
+from app.authentication.service import test_route
+from typing import Annotated
+from ..core.security_schemas import User
+from ..core.security import get_user_from_access_token
 
 router = APIRouter(prefix="/access_mapping", tags=["access_mapping"])
 
@@ -14,5 +19,18 @@ def get_file_employees_with_access(file_id: int, db: Session = Depends(get_datab
 
 # Route for sending an email with the violations
 @router.post("/send-violations-email")
-def send_email_with_violations(employee: list[FileEmployeeAccessResponse]):
-    return service.send_violations_email(employee)
+async def send_email_with_violations(employee: SendViolationsEmailRequest, db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)]):
+    detections = employee.employee.failed_detections
+    all_detections = []
+
+    for detection in detections:
+        dict = {}
+        category = get_category_by_subcategory_name(db, detection.subcategory)
+        dict["subcategory"] = detection.subcategory
+        dict["count"] = detection.count
+        dict["threshold"] = detection.threshold
+        dict["category"] = category.name
+        all_detections.append(dict)
+        
+    return
+    # return await service.send_violations_email()

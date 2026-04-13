@@ -11,6 +11,8 @@ import { FaShieldAlt } from "react-icons/fa";
 import { FaHistory } from "react-icons/fa";
 import { FaUserFriends } from "react-icons/fa";
 
+import api from "../api/axiosConfig"
+
 
 function FileOverviewPage() {
     const { file_id } = useParams();
@@ -58,7 +60,17 @@ function FileOverviewPage() {
 
     if (!file) return <p>File not found.</p>
 
-    
+    const handleSendEmail = (id) => {
+        const user = employees_with_access.find(
+            employee => employee.user_id === id
+        );
+
+        api.post("/access_mapping/send-violations-email", {
+            file_name: file.file_name,
+            employee: user
+        })
+    }
+
     const grouped_latest_scan_results = (latest_scan_results || []).reduce((acc, item) => {
         if (!acc[item.category]) {
             acc[item.category] = [];
@@ -133,6 +145,7 @@ function FileOverviewPage() {
                                 <EmployeeAccessItem
                                     key={employee.user_id}
                                     employee={employee}
+                                    sendEmail={(value) => handleSendEmail(value)}
                                 />
                             ))
                         )}
