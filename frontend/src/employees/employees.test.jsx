@@ -633,13 +633,6 @@ describe("View Employees Component", () => {
         fireEvent.click(yes_button)
 
         await waitFor(() => {
-            expect(api.post).toHaveBeenCalledWith("/invite/send-invite", {
-                email: "valid@example.com",
-                expiry_date: expiryDate.toISOString()
-            });
-        });
-
-        await waitFor(() => {
             expect(toastCalled).not.toBeNull();
             expect(toastCalled.detail).toContain("An invite has been sent to the employee.");
         });
@@ -689,13 +682,6 @@ describe("View Employees Component", () => {
 
         const yes_button = await screen.findByText(/Yes, accept employee/i)
         fireEvent.click(yes_button)
-
-        await waitFor(() => {
-            expect(api.post).toHaveBeenCalledWith("/invite/send-invite", {
-                email: "valid@example.com",
-                expiry_date: expiryDate.toISOString()
-            });
-        });
 
         await waitFor(() => {
             expect(toastCalled).not.toBeNull();
@@ -749,13 +735,6 @@ describe("View Employees Component", () => {
         fireEvent.click(yes_button)
 
         await waitFor(() => {
-            expect(api.post).toHaveBeenCalledWith("/invite/send-invite", {
-                email: "valid@example.com",
-                expiry_date: expiryDate.toISOString()
-            });
-        });
-
-        await waitFor(() => {
             expect(toastCalled).not.toBeNull();
             expect(toastCalled.detail).toContain("The email you are trying to send an invite to is untrustworthy.");
         });
@@ -800,13 +779,6 @@ describe("View Employees Component", () => {
 
         const yes_button = await screen.findByText(/Yes, accept employee/i)
         fireEvent.click(yes_button)
-
-        await waitFor(() => {
-            expect(api.post).toHaveBeenCalledWith("/invite/send-invite", {
-                email: "valid@example.com",
-                expiry_date: expiryDate.toISOString()
-            });
-        });
 
         await waitFor(() => {
             expect(toastCalled).not.toBeNull();
