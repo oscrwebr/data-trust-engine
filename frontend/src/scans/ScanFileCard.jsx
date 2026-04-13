@@ -14,6 +14,8 @@ function ScanFileCard({scan_file, scan_type}) {
 
     const navigate = useNavigate();
 
+    const [showPopUp, setShowPopup] = useState(false);
+
     const issues = []
     // Issue check for organisational scan files
     if(scan_type === "organisation") {
@@ -64,6 +66,7 @@ function ScanFileCard({scan_file, scan_type}) {
                             
 
     return (
+        <>
         <div className={`scan-page-file-card ${cardClass} scan-page-link-fix`} onClick={() => navigate(`/files/${scan_file.file_id}`)}>
             <div className="scan-file-top">
                 <div className="scan-file-top-left">
@@ -85,7 +88,7 @@ function ScanFileCard({scan_file, scan_type}) {
                 <span>{scan_file.file_name}</span>
             </div>
             {scan_type === "organisation" && issues.length > 0 && (
-                <div>
+                <div className="scan-file-details-wrapper">
                     {issues.map((issue, index) => (
                         <div key={index} className="scan-file-details">
                             {issue.type === "Naming Issue" && (
@@ -129,7 +132,8 @@ function ScanFileCard({scan_file, scan_type}) {
                                     <button className="duplicate-scan-file-button"
                                     // Link inside a link code adapted from: 
                                     // https://stackoverflow.com/a/30362416
-                                            onClick={(event) => {event.preventDefault(); event.stopPropagation(); navigate(`/scan_file/${scan_file.scan_file_id}`)}}
+                                    // Opens pop up to view duplicate files related to the scanned file
+                                            onClick={(event) => {event.preventDefault(); event.stopPropagation(); setShowPopup(true)}}
                                     >
                                         <PiCopySimpleBold /> View Duplicates
                                     </button>
@@ -176,6 +180,11 @@ function ScanFileCard({scan_file, scan_type}) {
             )}
 
         </div>
+
+        {showPopUp && (
+            <DuplicatePopUp duplicates={[]} onClose={() => setShowPopup(false)} />
+        )}
+        </>
     )
 }
 

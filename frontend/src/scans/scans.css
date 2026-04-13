@@ -498,3 +498,7 @@
 .duplicate-scan-file-button:hover {
     background: #E07040;
 }
+
+.scan-file-details-wrapper {
+    width: 100%;
+}

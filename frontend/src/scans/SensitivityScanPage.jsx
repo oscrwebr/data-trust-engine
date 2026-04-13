@@ -76,7 +76,7 @@ function SensitivityScanPage({ scan }) {
 
         <div className="scan-page-file-container">
             {scan.files.map(scan_file => (
-                <ScanFileCard key={scan_file.scan_file_id} scan_file={scan_file} scan_type={scan.scan_type}/>
+                <ScanFileCard key={scan_file.scan_file_id} scan_file={scan_file} scan_type={scan.scan_type} scan_files={scan.files} />
             ))}
         </div>
         </>
