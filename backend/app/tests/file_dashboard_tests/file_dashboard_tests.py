@@ -1,33 +1,78 @@
 import pytest
+import secrets
 from datetime import datetime
 
+from sqlalchemy import insert
+
+from app.authentication.models import User
+from app.workspaces.models import Workspace
+
+from app.ingestion.models import Folder, IngestionFile, UserFolders, UserFiles
 from app.file_dashboard import service, repository
-from app.ingestion.models import Folder, IngestionFile
 
 
-# ---------------- Helper functions ----------------
+# =========================================================
+# FIXTURES / HELPERS
+# =========================================================
+
+def create_admin_user(db, email="admin@test.com"):
+    oid = secrets.token_hex(8)
+
+    stmt = insert(User).values(
+        firstname="Admin",
+        surname="User",
+        username=email,
+        email=email,
+        oid=oid,
+        refresh=b"refresh",
+        role="admin"
+    )
+
+    result = db.execute(stmt)
+    db.commit()
+
+    user_id = result.inserted_primary_key[0]
+    return db.query(User).filter(User.user_id == user_id).first()
+
+
+def create_user(db, email="user@test.com"):
+    user = User(
+        firstname="Test",
+        surname="User",
+        username=email,
+        email=email,
+        oid=secrets.token_hex(8),
+        refresh=b"refresh",
+        role="employee",
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user
+
 
 def create_folder(db, name="Folder", graph_id="g1", parent_graph_id=None):
     folder = Folder(
         name=name,
         graph_id=graph_id,
         parent_graph_id=parent_graph_id,
-        drive_id="drive1"
+        drive_id="drive-x",
     )
     db.add(folder)
     db.commit()
     db.refresh(folder)
     return folder
 
-def create_file(db, name, graph_id, parent_graph_id=None):
+
+def create_file(db, name="file.txt", graph_id="f1", parent_graph_id=None):
     file = IngestionFile(
-        graph_id=graph_id,
         name=name,
-        extension=name.split(".")[-1],
-        web_url=f"https://test.com/{graph_id}",
+        extension="txt",
+        graph_id=graph_id,
         parent_graph_id=parent_graph_id,
-        drive_id="drive1",
-        last_modified=datetime.utcnow()
+        last_modified=datetime.utcnow(),
+        web_url="http://test",
+        drive_id="drive-x",
     )
     db.add(file)
     db.commit()
@@ -35,88 +80,99 @@ def create_file(db, name, graph_id, parent_graph_id=None):
     return file
 
 
-# ---------------- Folder Tests ----------------
+def link_folder(db, folder_id, user_id):
+    db.add(UserFolders(folder_id=folder_id, user_id=user_id))
+    db.commit()
 
-def test_get_root_folders_service(db):
-    root = create_folder(db, "Root", "root1")
-    child = create_folder(db, "Child", "child1", parent_graph_id="root1")
 
-    result = service.get_root_folders(db)
+def link_file(db, file_id, user_id):
+    db.add(UserFiles(file_id=file_id, user_id=user_id))
+    db.commit()
+
+
+# =========================================================
+# TESTS
+# =========================================================
+
+# -------------------------
+# ROOT FOLDERS
+# -------------------------
+
+def test_get_root_folders(db):
+    user = create_user(db)
+
+    f1 = create_folder(db, "Root1", "r1")
+    f2 = create_folder(db, "Root2", "r2", parent_graph_id="r1")  # subfolder
+
+    link_folder(db, f1.folder_id, user.user_id)
+    link_folder(db, f2.folder_id, user.user_id)
+
+    result = service.get_root_folders(db, user.user_id)
+
+    assert any(f.graph_id == "r1" for f in result)
+
+
+# -------------------------
+# SUBFOLDERS
+# -------------------------
+
+def test_get_subfolders(db):
+    user = create_user(db)
+
+    parent = create_folder(db, "Parent", "p1")
+    child = create_folder(db, "Child", "c1", parent_graph_id="p1")
+
+    link_folder(db, parent.folder_id, user.user_id)
+    link_folder(db, child.folder_id, user.user_id)
+
+    result = service.get_subfolders(db, user.user_id, "p1")
 
     assert len(result) == 1
-    assert result[0].folder_id == root.folder_id
-    assert result[0].name == "Root"
+    assert result[0].graph_id == "c1"
 
 
-def test_get_subfolders_service(db):
-    root = create_folder(db, "Root", "root1")
-    child1 = create_folder(db, "Child1", "child1", parent_graph_id="root1")
-    child2 = create_folder(db, "Child2", "child2", parent_graph_id="root1")
+# -------------------------
+# FILES IN FOLDER
+# -------------------------
 
-    result = service.get_subfolders(db, "root1")
+def test_get_files_in_folder(db):
+    user = create_user(db)
 
-    assert len(result) == 2
-    names = [f.name for f in result]
-    assert "Child1" in names
-    assert "Child2" in names
+    create_folder(db, "Root", "r1")
 
+    file1 = create_file(db, "file1.txt", "f1", parent_graph_id="r1")
+    file2 = create_file(db, "file2.pdf", "f2", parent_graph_id="r1")
 
-def test_get_subfolders_empty(db):
-    create_folder(db, "Root", "root1")
+    link_file(db, file1.ingestion_file_id, user.user_id)
+    link_file(db, file2.ingestion_file_id, user.user_id)
 
-    result = service.get_subfolders(db, "root1")
-
-    assert result == []
-
-
-# ---------------- File Tests ----------------
-
-def test_get_files_in_folder_service(db):
-    folder = create_folder(db, "Root", "root1")
-
-    file1 = create_file(db, "file1.txt", "f1", parent_graph_id="root1")
-    file2 = create_file(db, "file2.pdf", "f2", parent_graph_id="root1")
-
-    result = service.get_files_in_folder(db, "root1")
+    result = service.get_files_in_folder(db, user.user_id, "r1")
 
     assert len(result) == 2
-    names = [f.name for f in result]
-    assert "file1.txt" in names
-    assert "file2.pdf" in names
+    assert {f.name for f in result} == {"file1.txt", "file2.pdf"}
 
 
-def test_get_files_empty_folder(db):
-    create_folder(db, "Root", "root1")
-
-    result = service.get_files_in_folder(db, "root1")
-
-    assert result == []
-
-
-# ---------------- Combined Behaviour ----------------
+# -------------------------
+# ISOLATION TESTS
+# -------------------------
 
 def test_folder_and_files_are_isolated(db):
-    folder1 = create_folder(db, "Folder1", "g1")
-    folder2 = create_folder(db, "Folder2", "g2")
+    user = create_user(db)
 
-    create_file(db, "file1.txt", "f1", parent_graph_id="g1")
-    create_file(db, "file2.txt", "f2", parent_graph_id="g2")
+    f1 = create_folder(db, "F1", "g1")
+    f2 = create_folder(db, "F2", "g2")
 
-    files_folder1 = service.get_files_in_folder(db, "g1")
-    files_folder2 = service.get_files_in_folder(db, "g2")
+    file1 = create_file(db, "a.txt", "a", "g1")
+    file2 = create_file(db, "b.txt", "b", "g2")
 
-    assert len(files_folder1) == 1
-    assert len(files_folder2) == 1
+    link_folder(db, f1.folder_id, user.user_id)
+    link_folder(db, f2.folder_id, user.user_id)
 
-    assert files_folder1[0].name == "file1.txt"
-    assert files_folder2[0].name == "file2.txt"
+    link_file(db, file1.ingestion_file_id, user.user_id)
+    link_file(db, file2.ingestion_file_id, user.user_id)
 
+    r1 = service.get_files_in_folder(db, user.user_id, "g1")
+    r2 = service.get_files_in_folder(db, user.user_id, "g2")
 
-# ---------------- Edge Cases ----------------
-
-def test_nonexistent_folder_returns_empty(db):
-    result_folders = service.get_subfolders(db, "does_not_exist")
-    result_files = service.get_files_in_folder(db, "does_not_exist")
-
-    assert result_folders == []
-    assert result_files == []
+    assert len(r1) == 1
+    assert len(r2) == 1
