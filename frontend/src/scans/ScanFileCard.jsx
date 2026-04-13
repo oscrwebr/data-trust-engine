@@ -4,6 +4,8 @@ import { formatNamingConventionName } from "./utils/formatNamingConventionName";
 import { formatSubcategoryText } from "./utils/formatSubcategoryText";
 import { PiMagnifyingGlassBold } from "react-icons/pi";
 import { useNavigate } from "react-router-dom";
+import { PiCopySimpleBold } from "react-icons/pi";
+
 
 
 
@@ -118,6 +120,19 @@ function ScanFileCard({scan_file, scan_type}) {
                                     <div className="scan-file-issue-text">
                                         <span>File is a duplicate</span>
                                     </div>
+                                </div>
+
+                                <div className="scan-file-suggested">
+                                    <div className="scan-file-duplicates-heading">
+                                        <span>Manage Duplicates</span>
+                                    </div>
+                                    <button className="duplicate-scan-file-button"
+                                    // Link inside a link code adapted from: 
+                                    // https://stackoverflow.com/a/30362416
+                                            onClick={(event) => {event.preventDefault(); event.stopPropagation(); navigate(`/scan_file/${scan_file.scan_file_id}`)}}
+                                    >
+                                        <PiCopySimpleBold /> View Duplicates
+                                    </button>
                                 </div>
                                 </>
                             )}
