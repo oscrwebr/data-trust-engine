@@ -252,3 +252,55 @@ def test_evaluate_employee_access_allows_employee_when_no_failed_detections(monk
     # Ensure access allowed is true and there are no failed detections
     assert employee["access_allowed"] is True
     assert employee["failed_detections"] == []
+
+
+def test_evaluate_employee_access_denies_employee_when_failed_detections_exist(monkeypatch):
+    # Mock employee
+    employee = {
+        "user_id": 1,
+        "name": "Test Account",
+        "email": "testaccount@test.com",
+        "roles": ["PII Role"],
+        "access_allowed": True,
+        "failed_detections": []
+    }
+
+    # Mock repository method for get_user_role_ids
+    monkeypatch.setattr(service.repository, "get_user_role_ids", lambda db, user_id: [1])
+
+    # Mock build_effective_threshold logic (simulate that employee is allowed up to 5 name detections)
+    monkeypatch.setattr(
+        service,
+        "build_effective_thresholds",
+        lambda db, role_ids: {"NAME": 5}
+    )
+
+    # Mock get_failed_detections logic (simulate that employee is failing in the 'NAME' subcategory, 
+    # because the detection amount exceeds their threshold)
+    monkeypatch.setattr(
+        service,
+        "get_failed_detections",
+        lambda latest_scan_results, effective_thresholds: [
+            {
+                "subcategory": "NAME",
+                "count": 8,
+                "threshold": 5
+            }
+        ]
+    )
+
+    service.evaluate_employee_access(
+        db=Mock(),
+        employee=employee,
+        latest_scan_results=[{"subcategory": "NAME", "count": 8}]
+    )
+
+    # Ensure access_allowed is false and ensure that failed_detections has NAME subcategory
+    assert employee["access_allowed"] is False
+    assert employee["failed_detections"] == [
+        {
+            "subcategory": "NAME",
+            "count": 8,
+            "threshold": 5
+        }
+    ]
