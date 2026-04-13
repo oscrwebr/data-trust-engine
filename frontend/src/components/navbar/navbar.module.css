@@ -66,6 +66,8 @@
     margin: 5px;
     border-radius: 5px;
     padding: 10px;
+    width: calc(100% - 10px);
+    box-sizing: border-box;
 }
 
 .navbar_link:hover {
