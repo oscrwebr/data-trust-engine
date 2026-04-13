@@ -5,16 +5,28 @@ import { formatSubcategoryText } from "./utils/formatSubcategoryText";
 import { PiMagnifyingGlassBold } from "react-icons/pi";
 import { useNavigate } from "react-router-dom";
 import { PiCopySimpleBold } from "react-icons/pi";
+import { useState } from "react";
+import DuplicatePopUp from "./DuplicatePopUp";
 
 
 
 
 
-function ScanFileCard({scan_file, scan_type}) {
+function ScanFileCard({scan_file, scan_type, scan_files}) {
 
     const navigate = useNavigate();
 
     const [showPopUp, setShowPopup] = useState(false);
+
+    const duplicateFiles = scan_file.duplicate_group_id ?
+                            scan_files.filter(file => 
+                            // Check for scan files with the same duplicate group id
+                            file.duplicate_group_id === scan_file.duplicate_group_id 
+                            // Don't display the scanned file as a duplicate of itself in the pop up (only want other files)
+                            && file.scan_file_id !== scan_file.scan_file_id)
+                        // Check whether the file has a duplicate group (first line), otherwise return an empty array
+                        : [];
+            
 
     const issues = []
     // Issue check for organisational scan files
@@ -182,7 +194,7 @@ function ScanFileCard({scan_file, scan_type}) {
         </div>
 
         {showPopUp && (
-            <DuplicatePopUp duplicates={[]} onClose={() => setShowPopup(false)} />
+            <DuplicatePopUp duplicates={duplicateFiles} onClose={() => setShowPopup(false)} />
         )}
         </>
     )
