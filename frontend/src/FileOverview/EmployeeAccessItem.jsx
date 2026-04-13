@@ -29,7 +29,7 @@ function EmployeeAccessItem({ employee }) {
                             />
                         )}
                     </div>
-                    <Button className={styles.alert_button}>Send Alert</Button>
+                    {employee.access_allowed === false && (<Button className={styles.alert_button}>Send Alert</Button>)}
                 </div>
                 
                 <div className={styles.employee_content}>
