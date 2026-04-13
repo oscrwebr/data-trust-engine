@@ -1,4 +1,4 @@
-import { Avatar } from "primereact/Avatar";
+import { Avatar } from "primereact/avatar";
 import { Checkbox } from 'primereact/checkbox';
 import styles from "./view_employees.module.css"
 

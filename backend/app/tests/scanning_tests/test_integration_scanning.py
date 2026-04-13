@@ -5,9 +5,17 @@ from app.scanning.detectors import *
 
 FIXTURES_DIRECTORY = Path(__file__).resolve().parent / "fixtures"
 
+# Helper method that reads a test file into bytes by using its path from the fixtures folder
+def read_file_bytes(file_name: str):
+    file_path = FIXTURES_DIRECTORY / file_name
+
+    with open(file_path, "rb") as file:
+        return file.read()
+
 
 def test_supplier_agreement_contains_phone_detections():
-    extracted_text = extract_text_from_pdf(FIXTURES_DIRECTORY / "supplier_agreement_document.pdf")
+    file_bytes = read_file_bytes("supplier_agreement_document.pdf")
+    extracted_text = extract_text_from_pdf(file_bytes=file_bytes)
     detections = detect_phone_numbers(extracted_text)
 
     print(extracted_text)
@@ -18,7 +26,8 @@ def test_supplier_agreement_contains_phone_detections():
 
 
 def test_supplier_agreement_contains_email_detections():
-    extracted_text = extract_text_from_pdf(FIXTURES_DIRECTORY / "supplier_agreement_document.pdf")
+    file_bytes = read_file_bytes("supplier_agreement_document.pdf")
+    extracted_text = extract_text_from_pdf(file_bytes=file_bytes)
     detections = detect_emails(extracted_text)
 
     # Assert that detections are made for EMAIL
@@ -27,7 +36,8 @@ def test_supplier_agreement_contains_email_detections():
 
 
 def test_operational_report_contains_name_and_address_detections():
-    extracted_text = extract_text_from_pdf(FIXTURES_DIRECTORY / "operational_report_document.pdf")
+    file_bytes = read_file_bytes("operational_report_document.pdf")
+    extracted_text = extract_text_from_pdf(file_bytes=file_bytes)
 
     name_detections = detect_named_entities(extracted_text)
     address_detections = detect_addresses(extracted_text)
@@ -40,7 +50,8 @@ def test_operational_report_contains_name_and_address_detections():
 
 
 def test_operational_report_contains_multiple_phone_detections_across_pages():
-    extracted_text = extract_text_from_pdf(FIXTURES_DIRECTORY / "operational_report_document.pdf")
+    file_bytes = read_file_bytes("operational_report_document.pdf")
+    extracted_text = extract_text_from_pdf(file_bytes=file_bytes)
     detections = detect_phone_numbers(extracted_text)
 
     assert len(detections) > 1
@@ -49,7 +60,8 @@ def test_operational_report_contains_multiple_phone_detections_across_pages():
 
 
 def test_operational_report_contains_multiple_email_detections_across_pages():
-    extracted_text = extract_text_from_pdf(FIXTURES_DIRECTORY / "operational_report_document.pdf")
+    file_bytes = read_file_bytes("operational_report_document.pdf")
+    extracted_text = extract_text_from_pdf(file_bytes=file_bytes)
     detections = detect_emails(extracted_text)
 
     assert len(detections) > 1
@@ -58,7 +70,8 @@ def test_operational_report_contains_multiple_email_detections_across_pages():
 
 
 def test_operational_report_contains_postcode_detections_on_multiple_pages():
-    extracted_text = extract_text_from_pdf(FIXTURES_DIRECTORY / "operational_report_document.pdf")
+    file_bytes = read_file_bytes("operational_report_document.pdf")
+    extracted_text = extract_text_from_pdf(file_bytes=file_bytes)
     detections = detect_postcodes(extracted_text)
 
     assert len(detections) > 1
@@ -68,7 +81,8 @@ def test_operational_report_contains_postcode_detections_on_multiple_pages():
 
 
 def test_supplier_agreement_contains_iban_and_vat_detections():
-    extracted_text = extract_text_from_pdf(FIXTURES_DIRECTORY / "supplier_agreement_document.pdf")
+    file_bytes = read_file_bytes("supplier_agreement_document.pdf")
+    extracted_text = extract_text_from_pdf(file_bytes=file_bytes)
 
     iban_detections = detect_ibans(extracted_text)
     vat_detections = detect_vats(extracted_text)
@@ -81,7 +95,8 @@ def test_supplier_agreement_contains_iban_and_vat_detections():
 
 
 def test_supplier_agreement_contains_multiple_name_detections_across_pages():
-    extracted_text = extract_text_from_pdf(FIXTURES_DIRECTORY / "supplier_agreement_document.pdf")
+    file_bytes = read_file_bytes("supplier_agreement_document.pdf")
+    extracted_text = extract_text_from_pdf(file_bytes=file_bytes)
     detections = detect_named_entities(extracted_text)
 
     assert len(detections) > 1
@@ -91,7 +106,8 @@ def test_supplier_agreement_contains_multiple_name_detections_across_pages():
 
 
 def test_supplier_agreement_contains_address_and_postcode_detections():
-    extracted_text = extract_text_from_pdf(FIXTURES_DIRECTORY / "supplier_agreement_document.pdf")
+    file_bytes = read_file_bytes("supplier_agreement_document.pdf")
+    extracted_text = extract_text_from_pdf(file_bytes=file_bytes)
 
     address_detections = detect_addresses(extracted_text)
     postcode_detections = detect_postcodes(extracted_text)
@@ -104,7 +120,8 @@ def test_supplier_agreement_contains_address_and_postcode_detections():
 
 
 def test_realistic_contract_contains_multiple_detector_types():
-    extracted_text = extract_text_from_pdf(FIXTURES_DIRECTORY / "realistic_contract_document.pdf")
+    file_bytes = read_file_bytes("realistic_contract_document.pdf")
+    extracted_text = extract_text_from_pdf(file_bytes=file_bytes)
 
     name_detections = detect_named_entities(extracted_text)
     phone_detections = detect_phone_numbers(extracted_text)
@@ -120,7 +137,8 @@ def test_realistic_contract_contains_multiple_detector_types():
 
 
 def test_realistic_contract_contains_detections_on_last_page():
-    extracted_text = extract_text_from_pdf(FIXTURES_DIRECTORY / "realistic_contract_document.pdf")
+    file_bytes = read_file_bytes("realistic_contract_document.pdf")
+    extracted_text = extract_text_from_pdf(file_bytes=file_bytes)
 
     phone_detections = detect_phone_numbers(extracted_text)
     email_detections = detect_emails(extracted_text)
@@ -130,7 +148,8 @@ def test_realistic_contract_contains_detections_on_last_page():
 
 
 def test_realistic_contract_contains_address_and_postcode_detections_across_pages():
-    extracted_text = extract_text_from_pdf(FIXTURES_DIRECTORY / "realistic_contract_document.pdf")
+    file_bytes = read_file_bytes("realistic_contract_document.pdf")
+    extracted_text = extract_text_from_pdf(file_bytes=file_bytes)
 
     address_detections = detect_addresses(extracted_text)
     postcode_detections = detect_postcodes(extracted_text)
@@ -145,7 +164,8 @@ def test_realistic_contract_contains_address_and_postcode_detections_across_page
 
 
 def test_legal_case_report_1_contains_citations_and_acts_and_case_names():
-    extracted_text = extract_text_from_pdf(FIXTURES_DIRECTORY / "legal_case_report_1.pdf")
+    file_bytes = read_file_bytes("legal_case_report_1.pdf")
+    extracted_text = extract_text_from_pdf(file_bytes=file_bytes)
 
     citation_detections = detect_citations(extracted_text)
     act_detections = detect_acts(extracted_text)
@@ -177,7 +197,8 @@ def test_legal_case_report_1_contains_citations_and_acts_and_case_names():
 
 
 def test_legal_case_report_2_contains_citations_and_acts_and_case_names():
-    extracted_text = extract_text_from_pdf(FIXTURES_DIRECTORY / "legal_case_report_2.pdf")
+    file_bytes = read_file_bytes("legal_case_report_2.pdf")
+    extracted_text = extract_text_from_pdf(file_bytes=file_bytes)
 
     citation_detections = detect_citations(extracted_text)
     act_detections = detect_acts(extracted_text)

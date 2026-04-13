@@ -20,13 +20,22 @@ function FilesDashboard() {
   const [expanded, setExpanded] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [user, setUser] = useState(null);
+  const isAdmin = user?.role === "admin";
 
-  // ✅ Selected files (graph_id)
   const [selectedFiles, setSelectedFiles] = useState([]);
 
   const navigate = useNavigate();
-
   useEffect(() => {
+    
+    api.get("/workspace/dashboard")
+    .then(res => {
+        if (res.data.user) {
+          setUser(res.data.user);
+        }
+    })
+    .catch(error => console.log(error))
+
     async function fetchRoot() {
       try {
         const res = await api.get("/files/folders");
@@ -110,8 +119,12 @@ function FilesDashboard() {
     );
   };
 
-  // ✅ Scan selected files
   const scanSelected = async () => {
+    if (!isAdmin) {
+      alert("Unauthorized");
+      return;
+    }
+
     console.log("SELECTED FILES:", selectedFiles);
 
     if (selectedFiles.length === 0) {
@@ -123,8 +136,8 @@ function FilesDashboard() {
       await api.post("/scanning/scan_files", {
         graph_file_ids: selectedFiles
       });
+      alert(selectedFiles);
 
-      alert("Scan started successfully!");
       setSelectedFiles([]);
     } catch (err) {
       console.error(err.response?.data || err);
@@ -171,15 +184,15 @@ function FilesDashboard() {
           {folder.files.map(file => (
             <div key={file.file_id} className={styles.file}>
 
-              {/* ✅ Checkbox (FIXED) */}
-              <input
-                type="checkbox"
-                checked={selectedFiles.includes(file.graph_id)}
-                onChange={() => toggleFile(file.graph_id)}
-                onClick={(e) => e.stopPropagation()}
-              />
+              {isAdmin && (
+                <input
+                  type="checkbox"
+                  checked={selectedFiles.includes(file.graph_id)}
+                  onChange={() => toggleFile(file.graph_id)}
+                  onClick={(e) => e.stopPropagation()}
+                />
+              )}
 
-              {/* File click */}
               <div
                 onClick={(e) => {
                   e.stopPropagation();
@@ -203,14 +216,15 @@ function FilesDashboard() {
     <div className={styles.pageContainer}>
       <h2 className={styles.title}>Files & Folders</h2>
 
-      {/* ✅ Scan Button */}
-      <button
-        onClick={scanSelected}
-        disabled={selectedFiles.length === 0}
-        className={styles.scanButton}
-      >
-        Scan Selected Files
-      </button>
+      {isAdmin && (
+        <button
+          onClick={scanSelected}
+          disabled={selectedFiles.length === 0}
+          className={styles.scanButton}
+        >
+          Scan Selected Files
+        </button>
+      )}
 
       {tree.length === 0 ? (
         <p className={styles.message}>No files or folders found</p>

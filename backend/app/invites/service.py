@@ -12,6 +12,7 @@ from app.invites.repository import get_invite_for_cooldown, get_invite_by_pendin
 from app.workspaces.models import Workspace
 from app.authentication.repository import get_pending_user_by_email, set_pending_user_type
 from app.authentication.models import User, PendingUser
+from app.core.config import REDIRECT_URI
 import base64
 
 
@@ -125,7 +126,7 @@ async def send_invite_service(db: Session, email: str, expiry: str, token: str, 
                             <tr>
                             <td align="center">
                                 <a 
-                                href="http://localhost:8000/invite/invite-processing?token={token}"
+                                href="{REDIRECT_URI}/invite/invite-processing?token={token}"
                                 style="background-color:#007bff; color:#ffffff; padding:12px 24px; text-decoration:none; font-weight:bold; font-size:16px; border-radius:4px; display:inline-block;">
                                 Accept Invite
                                 </a>

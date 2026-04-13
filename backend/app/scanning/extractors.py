@@ -4,8 +4,8 @@ import pymupdf
 
 
 # Extract text from PDF into dict
-def extract_text_from_pdf(filepath: str) -> dict:
-    file = pymupdf.open(filepath)
+def extract_text_from_pdf(file_bytes: bytes) -> dict:
+    file = pymupdf.open(stream=file_bytes, filetype="pdf")
     extracted_text = {}
 
     # Make page numbers 1 indexed, because user think in page 1, 2, 3 not 0, 1, 2

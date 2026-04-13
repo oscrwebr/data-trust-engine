@@ -10,6 +10,7 @@ from app.workspaces.router import router as workspaces_router
 from app.org_chart.router import router as org_chart_router
 from app.ingestion.router import router as ingestion_router
 from app.file_dashboard.router import router as files_dashboard_router
+from app.org_chart.router import router as org_chart_router
 
 app = FastAPI()
 app.include_router(invite_router)

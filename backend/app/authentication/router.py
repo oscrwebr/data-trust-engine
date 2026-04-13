@@ -37,7 +37,7 @@ async def sign_in(application: Annotated[ConfidentialClientApplication, Depends(
     if not next.startswith("/"):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
     
-    flow = application.initiate_auth_code_flow(scopes=config.SCOPES)
+    flow = application.initiate_auth_code_flow(scopes=config.SCOPES, redirect_uri=f"{config.REDIRECT_URI}/auth/success/")
     # print(flow)
     request.session["flow"] = flow
     request.session["next"] = next
@@ -56,6 +56,7 @@ async def sign_in(application: Annotated[ConfidentialClientApplication, Depends(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
 
     # print(f"\n\n request.session: {request.session}")
+    print("This is the redirect response auth_uri: ", flow["auth_uri"])
     return RedirectResponse(flow['auth_uri'])
 
 @router.get("/success/")

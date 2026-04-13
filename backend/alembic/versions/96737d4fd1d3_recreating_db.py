@@ -1,8 +1,8 @@
-"""user roles
+"""recreating db
 
-Revision ID: 5ef452858228
-Revises: d76718253a80
-Create Date: 2026-03-30 22:25:56.848432
+Revision ID: 96737d4fd1d3
+Revises: 
+Create Date: 2026-04-08 16:17:03.203193
 
 """
 from typing import Sequence, Union
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision: str = '5ef452858228'
-down_revision: Union[str, Sequence[str], None] = 'd76718253a80'
+revision: str = '96737d4fd1d3'
+down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -52,6 +52,7 @@ def upgrade() -> None:
     op.create_table('pending_users',
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('email', sa.String(length=254), nullable=False),
+    sa.Column('type', sa.String(length=10), nullable=False),
     sa.PrimaryKeyConstraint('user_id')
     )
     op.create_index(op.f('ix_pending_users_user_id'), 'pending_users', ['user_id'], unique=False)
@@ -139,6 +140,13 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_notifications_id'), 'notifications', ['id'], unique=False)
+    op.create_table('pending_user_workspace',
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('workspace_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['user_id'], ['pending_users.user_id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['workspace_id'], ['workspaces.id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('user_id', 'workspace_id')
+    )
     op.create_table('refresh',
     sa.Column('refresh_id', sa.Integer(), nullable=False),
     sa.Column('token', sa.Text(), nullable=False),
@@ -164,15 +172,6 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('role_id')
     )
     op.create_index(op.f('ix_role_role_id'), 'role', ['role_id'], unique=False)
-    op.create_table('scan_file',
-    sa.Column('scan_file_id', sa.Integer(), nullable=False),
-    sa.Column('scan_id', sa.Integer(), nullable=False),
-    sa.Column('file_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['file_id'], ['file.file_id'], ),
-    sa.ForeignKeyConstraint(['scan_id'], ['scans.scan_id'], ),
-    sa.PrimaryKeyConstraint('scan_file_id')
-    )
-    op.create_index(op.f('ix_scan_file_scan_file_id'), 'scan_file', ['scan_file_id'], unique=False)
     op.create_table('scan_naming_convention',
     sa.Column('scan_naming_convention_id', sa.Integer(), nullable=False),
     sa.Column('scan_id', sa.Integer(), nullable=False),
@@ -201,21 +200,10 @@ def upgrade() -> None:
     op.create_table('user_workspace',
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('workspace_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['user_id'], ['user.user_id'], ),
-    sa.ForeignKeyConstraint(['workspace_id'], ['workspaces.id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['user.user_id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['workspace_id'], ['workspaces.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('user_id', 'workspace_id')
     )
-    op.create_table('naming_convention_scan_result',
-    sa.Column('naming_convention_scan_result_id', sa.Integer(), nullable=False),
-    sa.Column('scan_file_id', sa.Integer(), nullable=False),
-    sa.Column('scan_naming_convention_id', sa.Integer(), nullable=False),
-    sa.Column('passed', sa.Boolean(), nullable=False),
-    sa.Column('suggested_name', sa.String(length=128), nullable=True),
-    sa.ForeignKeyConstraint(['scan_file_id'], ['scan_file.scan_file_id'], ),
-    sa.ForeignKeyConstraint(['scan_naming_convention_id'], ['scan_naming_convention.scan_naming_convention_id'], ),
-    sa.PrimaryKeyConstraint('naming_convention_scan_result_id')
-    )
-    op.create_index(op.f('ix_naming_convention_scan_result_naming_convention_scan_result_id'), 'naming_convention_scan_result', ['naming_convention_scan_result_id'], unique=False)
     op.create_table('pending_user_role',
     sa.Column('pending_user_role_id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
@@ -235,15 +223,15 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('role_permission_id')
     )
     op.create_index(op.f('ix_role_permission_role_permission_id'), 'role_permission', ['role_permission_id'], unique=False)
-    op.create_table('scan_file_detection',
-    sa.Column('scan_file_detection_id', sa.Integer(), nullable=False),
-    sa.Column('scan_file_id', sa.Integer(), nullable=True),
-    sa.Column('sensitivity_subcategory', sa.String(length=64), nullable=True),
-    sa.Column('page_number', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['scan_file_id'], ['scan_file.scan_file_id'], ),
-    sa.PrimaryKeyConstraint('scan_file_detection_id')
+    op.create_table('scan_file',
+    sa.Column('scan_file_id', sa.Integer(), nullable=False),
+    sa.Column('scan_id', sa.Integer(), nullable=False),
+    sa.Column('file_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['file_id'], ['ingestion_file.ingestion_file_id'], ),
+    sa.ForeignKeyConstraint(['scan_id'], ['scans.scan_id'], ),
+    sa.PrimaryKeyConstraint('scan_file_id')
     )
-    op.create_index(op.f('ix_scan_file_detection_scan_file_detection_id'), 'scan_file_detection', ['scan_file_detection_id'], unique=False)
+    op.create_index(op.f('ix_scan_file_scan_file_id'), 'scan_file', ['scan_file_id'], unique=False)
     op.create_table('user_files',
     sa.Column('file_id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
@@ -256,29 +244,51 @@ def upgrade() -> None:
     sa.Column('user_role_id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
     sa.Column('role_id', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['role_id'], ['role.role_id'], ),
-    sa.ForeignKeyConstraint(['user_id'], ['user.user_id'], ),
+    sa.ForeignKeyConstraint(['role_id'], ['role.role_id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['user_id'], ['user.user_id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('user_role_id')
     )
     op.create_index(op.f('ix_user_role_user_role_id'), 'user_role', ['user_role_id'], unique=False)
+    op.create_table('naming_convention_scan_result',
+    sa.Column('naming_convention_scan_result_id', sa.Integer(), nullable=False),
+    sa.Column('scan_file_id', sa.Integer(), nullable=False),
+    sa.Column('scan_naming_convention_id', sa.Integer(), nullable=False),
+    sa.Column('passed', sa.Boolean(), nullable=False),
+    sa.Column('suggested_name', sa.String(length=128), nullable=True),
+    sa.ForeignKeyConstraint(['scan_file_id'], ['scan_file.scan_file_id'], ),
+    sa.ForeignKeyConstraint(['scan_naming_convention_id'], ['scan_naming_convention.scan_naming_convention_id'], ),
+    sa.PrimaryKeyConstraint('naming_convention_scan_result_id')
+    )
+    op.create_index(op.f('ix_naming_convention_scan_result_naming_convention_scan_result_id'), 'naming_convention_scan_result', ['naming_convention_scan_result_id'], unique=False)
+    op.create_table('scan_file_detection',
+    sa.Column('scan_file_detection_id', sa.Integer(), nullable=False),
+    sa.Column('scan_file_id', sa.Integer(), nullable=True),
+    sa.Column('sensitivity_subcategory', sa.String(length=64), nullable=True),
+    sa.Column('page_number', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['scan_file_id'], ['scan_file.scan_file_id'], ),
+    sa.PrimaryKeyConstraint('scan_file_detection_id')
+    )
+    op.create_index(op.f('ix_scan_file_detection_scan_file_detection_id'), 'scan_file_detection', ['scan_file_detection_id'], unique=False)
     # ### end Alembic commands ###
 
 
 def downgrade() -> None:
     """Downgrade schema."""
     # ### commands auto generated by Alembic - please adjust! ###
+    op.drop_index(op.f('ix_scan_file_detection_scan_file_detection_id'), table_name='scan_file_detection')
+    op.drop_table('scan_file_detection')
+    op.drop_index(op.f('ix_naming_convention_scan_result_naming_convention_scan_result_id'), table_name='naming_convention_scan_result')
+    op.drop_table('naming_convention_scan_result')
     op.drop_index(op.f('ix_user_role_user_role_id'), table_name='user_role')
     op.drop_table('user_role')
     op.drop_index('rev_idx_user_files', table_name='user_files')
     op.drop_table('user_files')
-    op.drop_index(op.f('ix_scan_file_detection_scan_file_detection_id'), table_name='scan_file_detection')
-    op.drop_table('scan_file_detection')
+    op.drop_index(op.f('ix_scan_file_scan_file_id'), table_name='scan_file')
+    op.drop_table('scan_file')
     op.drop_index(op.f('ix_role_permission_role_permission_id'), table_name='role_permission')
     op.drop_table('role_permission')
     op.drop_index(op.f('ix_pending_user_role_pending_user_role_id'), table_name='pending_user_role')
     op.drop_table('pending_user_role')
-    op.drop_index(op.f('ix_naming_convention_scan_result_naming_convention_scan_result_id'), table_name='naming_convention_scan_result')
-    op.drop_table('naming_convention_scan_result')
     op.drop_table('user_workspace')
     op.drop_index('rev_idx_user_folders', table_name='user_folders')
     op.drop_table('user_folders')
@@ -286,14 +296,13 @@ def downgrade() -> None:
     op.drop_table('sensitivity_subcategory')
     op.drop_index(op.f('ix_scan_naming_convention_scan_naming_convention_id'), table_name='scan_naming_convention')
     op.drop_table('scan_naming_convention')
-    op.drop_index(op.f('ix_scan_file_scan_file_id'), table_name='scan_file')
-    op.drop_table('scan_file')
     op.drop_index(op.f('ix_role_role_id'), table_name='role')
     op.drop_table('role')
     op.drop_index(op.f('ix_refresh_token'), table_name='refresh')
     op.drop_index(op.f('ix_refresh_refresh_id'), table_name='refresh')
     op.drop_index(op.f('ix_refresh_refresh_family_id'), table_name='refresh')
     op.drop_table('refresh')
+    op.drop_table('pending_user_workspace')
     op.drop_index(op.f('ix_notifications_id'), table_name='notifications')
     op.drop_table('notifications')
     op.drop_index(op.f('ix_invites_invite_id'), table_name='invites')

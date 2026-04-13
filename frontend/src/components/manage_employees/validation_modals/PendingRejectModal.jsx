@@ -1,4 +1,4 @@
-import { Dialog } from "primereact/Dialog"
+import { Dialog } from "primereact/dialog"
 import { Button } from "primereact/button";
 import styles from "./modal.module.css"
 

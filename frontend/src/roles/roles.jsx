@@ -164,16 +164,9 @@ function Roles() {
         >
           Roles Management
         </button>
-        <button
-          onClick={() => setActivePanel("users")}
-          className={activePanel === "users" ? styles.activeTab : ""}
-        >
-          User Assignment
-        </button>
       </div>
 
       {/* ---------------- Panel ---------------- */}
-      {activePanel === "roles" ? (
         <main className={styles.main}>
           {/* Left panel: existing roles */}
           <div className={styles.leftPanel}>
@@ -258,57 +251,6 @@ function Roles() {
             </div>
           </div>
         </main>
-      ) : (
-        <main className={styles.main}>
-          <div className={styles.rightPanel} style={{ width: "100%" }}>
-            <h2>User Assignment</h2>
-
-            {/* Filter + Search */}
-            <div className={styles.filterBar}>
-              <input
-                type="text"
-                placeholder="Search by username..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className={styles.searchInput}
-              />
-              <select
-                value={roleFilter}
-                onChange={(e) => setRoleFilter(e.target.value)}
-                className={styles.roleFilter}
-              >
-                <option value="">All Roles</option>
-                {roles.map((role) => (
-                  <option key={role.role_id} value={role.role_id}>
-                    {role.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* User List */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-              {filteredUsers.map((user) => (
-                <div key={user.user_id} className={styles.userRow}>
-                  <span title={`${user.firstname} ${user.surname}`}>
-                    {user.firstname} {user.surname}
-                  </span>
-                  <select
-                    value={user.role_id || ""}
-                    onChange={(e) => handleUserRoleChange(user.user_id, e.target.value)}
-                  >
-                    {roles.map((role) => (
-                      <option key={role.role_id} value={role.role_id}>
-                        {role.name}  {/* now shows PII / Financial / Legal */}
-                      </option>
-                    ))}
-                  </select>                
-                </div>
-              ))}
-            </div>
-          </div>
-        </main>
-      )}
     </div>
   );
 }

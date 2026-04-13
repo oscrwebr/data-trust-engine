@@ -1,14 +1,59 @@
 from sqlalchemy.orm import Session
-from app.ingestion.models import Folder, IngestionFile
+from app.ingestion.models import Folder, IngestionFile, UserFolders, UserFiles
 
-# Get root folders (parent_graph_id is None)
-def get_root_folders(db: Session):
-    return db.query(Folder).filter(Folder.parent_graph_id == None).all()
 
-# Get subfolders of a folder
-def get_subfolders(db: Session, parent_graph_id: str):
-    return db.query(Folder).filter(Folder.parent_graph_id == parent_graph_id).all()
+# -------------------------
+# ROOT FOLDERS (USER SCOPED)
+# -------------------------
+def get_root_folders(db: Session, user_id: int):
+    if not user_id:
+        return []
 
-# Get files in a folder
-def get_files(db: Session, parent_graph_id: str):
-    return db.query(IngestionFile).filter(IngestionFile.parent_graph_id == parent_graph_id).all()
+    return (
+        db.query(Folder)
+        .join(UserFolders, UserFolders.folder_id == Folder.folder_id)
+        .filter(
+            UserFolders.user_id == user_id,
+            Folder.parent_graph_id.is_(None)
+        )
+        .distinct()
+        .all()
+    )
+
+
+# -------------------------
+# SUBFOLDERS (USER SCOPED)
+# -------------------------
+def get_subfolders(db: Session, user_id: int, parent_graph_id: str):
+    if not user_id:
+        return []
+
+    return (
+        db.query(Folder)
+        .join(UserFolders, UserFolders.folder_id == Folder.folder_id)
+        .filter(
+            UserFolders.user_id == user_id,
+            Folder.parent_graph_id == parent_graph_id
+        )
+        .distinct()
+        .all()
+    )
+
+
+# -------------------------
+# FILES (USER SCOPED)
+# -------------------------
+def get_files(db: Session, user_id: int, parent_graph_id: str):
+    if not user_id:
+        return []
+
+    return (
+        db.query(IngestionFile)
+        .join(UserFiles, UserFiles.file_id == IngestionFile.ingestion_file_id)
+        .filter(
+            UserFiles.user_id == user_id,
+            IngestionFile.parent_graph_id == parent_graph_id
+        )
+        .distinct()
+        .all()
+    )

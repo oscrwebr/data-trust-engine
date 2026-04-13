@@ -1,6 +1,6 @@
 import { Button } from "primereact/button";
 import styles from "./view_employees.module.css";
-import { Dialog } from "primereact/Dialog";
+import { Dialog } from "primereact/dialog";
 import { InputTextarea } from 'primereact/inputtextarea';
 import api from "../../api/axiosConfig";
 import { useState } from "react";

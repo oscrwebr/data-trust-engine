@@ -2,7 +2,7 @@ import { cleanup, fireEvent, render, screen, within, waitFor } from "@testing-li
 import { MemoryRouter, redirect, Route, Routes, Outlet } from "react-router-dom";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import EmployeeInviteError from "./error.jsx";
-import Dashboard from "../dashboard/Dashboard.jsx";
+import Dashboard from "../Dashboard/Dashboard.jsx";
 import WorkspaceJoinedError from "./WorkspaceJoined.jsx";
 import Home from "../home/home.jsx"
 
@@ -474,7 +474,7 @@ describe("Invite Component", () => {
         };
 
         render(
-            <MemoryRouter initialEntries={["/invite-error/expired?date=2026-03-03&workspace=1"]}>
+            <MemoryRouter initialEntries={["/invite-error/expired?date=2026-03-03&workspace=1&pending_user_id=1"]}>
                 <Routes>
                     <Route path="/invite-error/:type" element={<EmployeeInviteError toast={mockToast}/>} />
                 </Routes>
@@ -487,7 +487,7 @@ describe("Invite Component", () => {
         expect(request_button).toBeDisabled();
 
         await waitFor(() => {
-            expect(api.post).toHaveBeenCalledWith("/workspace/request-join-workspace",
+            expect(api.post).toHaveBeenCalledWith(`/workspace/invite/request-join-workspace/1`,
                 {
                     title: title,
                     body: body,

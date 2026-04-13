@@ -1,6 +1,6 @@
 import styles from "../manage_employees.module.css"
 import api from "../../../api/axiosConfig"
-import { Avatar } from "primereact/Avatar";
+import { Avatar } from "primereact/avatar";
 import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
 
