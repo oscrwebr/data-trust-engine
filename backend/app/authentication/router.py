@@ -125,7 +125,7 @@ async def refresh_access(db: Annotated[Session, Depends(get_database)], response
 @router.post("/logout")
 async def logout(db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)], response: Response, dte_refresh_token: Annotated[str | None, Cookie()] = None):
     if not dte_refresh_token:
-        return # This will
+        return
     # Update the refresh family
     service.log_out_flow(db=db, client_refresh=dte_refresh_token, current_time=datetime.now(timezone.utc))
     response.delete_cookie("dte_refresh_token")
