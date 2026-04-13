@@ -121,3 +121,62 @@ def test_build_effective_thresholds_keeps_most_permissive_threshold_across_roles
         "NAME": 5,
         "EMAIL": 3
     }
+
+
+def test_get_failed_detections_returns_only_detections_exceeding_thresholds():
+    # Mock latest scan results list
+    latest_scan_results = [
+        {"subcategory": "NAME", "count": 6},
+        {"subcategory": "EMAIL", "count": 2},
+        {"subcategory": "PHONE", "count": 1}
+    ]
+
+    # Mock effective thresholds dictionary
+    effective_thresholds = {
+        "NAME": 5,
+        "EMAIL": 2,
+        "PHONE": 3
+    }
+
+    failed_detections = get_failed_detections(latest_scan_results, effective_thresholds)
+
+    # Ensure failed detections are those ONLY where count is greater than threshold
+    assert failed_detections == [
+        {
+            "subcategory": "NAME",
+            "count": 6,
+            "threshold": 5
+        }
+    ]
+
+
+def test_get_failed_detections_does_not_fail_when_detection_equals_threshold():
+     # Mock latest scan results list
+    latest_scan_results = [
+        {"subcategory": "NAME", "count": 5}
+    ]
+
+    # Mock effective thresholds dictionary
+    effective_thresholds = {
+        "NAME": 5
+    }
+
+    failed_detections = get_failed_detections(latest_scan_results, effective_thresholds)
+
+    # Ensure theres no failed detections, because the detection count equals to the threshold, which is allowed
+    assert failed_detections == []
+
+
+def test_get_failed_detections_does_not_fail_when_subcategory_has_no_threshold():
+    # Mock latest scan results list
+    latest_scan_results = [
+        {"subcategory": "NAME", "count": 999}
+    ]
+
+    # Mock effective thresholds dictionary
+    effective_thresholds = {}
+
+    failed_detections = get_failed_detections(latest_scan_results, effective_thresholds)
+
+    # Ensure theres no failed detections, because no threshold exists for NAME subcategory, therefore unlimited amount of detections allowed
+    assert failed_detections == []
