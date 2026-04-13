@@ -115,7 +115,7 @@ describe("FileOverviewPageTests", () => {
         expect(screen.getByText("Scan History Item: 102")).toBeInTheDocument();
 
         // Ensure correct API calls were made
-        expect(global.fetch).toHaveBeenCalledTimes(3);
+        expect(global.fetch).toHaveBeenCalledTimes(4);
         expect(global.fetch).toHaveBeenNthCalledWith(
             1,
             "http://localhost:8000/scanning/get_file/1"
