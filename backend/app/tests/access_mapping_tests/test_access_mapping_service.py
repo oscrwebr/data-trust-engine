@@ -1,5 +1,6 @@
 from app.access_mapping.service import *
 from types import SimpleNamespace
+from unittest.mock import Mock
 
 
 def test_build_employees_from_record_groups_roles_for_same_employee():
@@ -75,3 +76,48 @@ def test_build_employees_from_records_handles_employee_with_no_role_name():
     # Ensure only one item in employees dictionary, ensure roles list is empty
     assert len(employees) == 1
     assert employees[1]["roles"] == []
+
+
+def test_build_effective_thresholds_returns_thresholds_for_single_role(monkeypatch):
+    # Mock return value of get_role_permissions function
+    def mock_get_role_permissions(db, role_id):
+        return [
+            SimpleNamespace(subcategory="NAME", threshold=5),
+            SimpleNamespace(subcategory="EMAIL", threshold=2)
+        ]
+
+    monkeypatch.setattr(repository, "get_role_permissions", mock_get_role_permissions)
+
+    thresholds = build_effective_thresholds(db=Mock(), role_ids=[1])
+
+    # Ensure the correct thresholds are returned
+    assert thresholds == {
+        "NAME": 5,
+        "EMAIL": 2
+    }
+
+
+def test_build_effective_thresholds_keeps_most_permissive_threshold_across_roles(monkeypatch):
+    # Mock return value of get_role_permissions function for both role id 1 and 2
+    def mock_get_role_permissions(db, role_id):
+        if role_id == 1:
+            return [
+                SimpleNamespace(subcategory="NAME", threshold=2),
+                SimpleNamespace(subcategory="EMAIL", threshold=3)
+            ]
+        if role_id == 2:
+            return [
+                SimpleNamespace(subcategory="NAME", threshold=5),
+                SimpleNamespace(subcategory="EMAIL", threshold=1)
+            ]
+        return []
+
+    monkeypatch.setattr(repository, "get_role_permissions", mock_get_role_permissions)
+
+    thresholds = build_effective_thresholds(db=Mock(), role_ids=[1, 2])
+
+    # Ensure only the MOST PERMISSIVE thresholds are returned (name threshold: 5 | email threshold: 3)
+    assert thresholds == {
+        "NAME": 5,
+        "EMAIL": 3
+    }
