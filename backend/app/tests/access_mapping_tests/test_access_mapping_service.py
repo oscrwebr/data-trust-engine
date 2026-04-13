@@ -304,3 +304,40 @@ def test_evaluate_employee_access_denies_employee_when_failed_detections_exist(m
             "threshold": 5
         }
     ]
+
+
+def test_get_file_employees_with_access_sets_unknown_when_file_not_scanned(monkeypatch):
+    # Mock employee records
+    test_employee_records = [
+        SimpleNamespace(
+            user_id=1,
+            firstname="Szymon",
+            surname="Wodkiewicz",
+            email="szymon@test.com",
+            role_name="PII Role"
+        )
+    ]
+
+    # Mock the get_file_employees_with_access repository method
+    monkeypatch.setattr(
+        service.repository,
+        "get_file_employees_with_access",
+        lambda db, file_id: test_employee_records
+    )
+
+    # Mock the check_file_has_scan service method (simulates that it returns False)
+    monkeypatch.setattr(service, "check_file_has_scan", lambda db, file_id: False)
+
+    # Mock the get_file_latest_scan_results service method (simulates that it has no scan results at all)
+    monkeypatch.setattr(service, "get_file_latest_scan_results", lambda db, file_id: [])
+
+    result = service.get_file_employees_with_access(db=Mock(), file_id=123)
+
+    # Ensure that access_allowed is None and there are no failed detections
+    # access_allowed None means that the file has not been scanned ever 
+    assert len(result) == 1
+    assert result[0]["user_id"] == 1
+    assert result[0]["access_allowed"] is None
+    assert result[0]["failed_detections"] == []
+
+
