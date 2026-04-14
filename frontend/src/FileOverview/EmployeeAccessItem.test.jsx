@@ -10,7 +10,7 @@ describe("EmployeeAccessItemTests", () => {
     })
 
     // Test to ensure employee access item card renders employee details correctly
-    test("employeeAccessItemRendersNameEmailAndRoles", () => {
+    test("employeeAccessItemRendersNameEmailAndRoles", async () => {
         // Create a mock employee for test
         const employee = {
             user_id: 1,
@@ -26,11 +26,15 @@ describe("EmployeeAccessItemTests", () => {
         expect(screen.getByText("Test Employee")).toBeInTheDocument();
         expect(screen.getByText("testemployee@test.com")).toBeInTheDocument();
         expect(screen.getByText("Test Role")).toBeInTheDocument();
+
+        expect(
+            screen.queryByRole("button", { name: /send alert/i })
+        ).not.toBeInTheDocument();
     });
 
 
     // Test to ensure employee access item card does not render any roles when employee has no roles
-    test("employeeAccessItemRendersNoRolesWhenEmployeeHasNoRoles", () => {
+    test("employeeAccessItemRendersNoRolesWhenEmployeeHasNoRoles", async () => {
         // Create a mock employee for test
         const employee = {
             user_id: 1,
@@ -45,10 +49,14 @@ describe("EmployeeAccessItemTests", () => {
 
         // No roles assigned message should be present
         expect(screen.getByText("No roles assigned")).toBeInTheDocument();
+
+        expect(
+            screen.queryByRole("button", { name: /send alert/i })
+        ).not.toBeInTheDocument();
     });
 
     // Test to ensure employee access item card renders allowed icon when access is allowed
-    test("employeeAccessItemRendersAllowedIcon", () => {
+    test("employeeAccessItemRendersAllowedIcon", async () => {
         // Create a mock employee for test
         const employee = {
             user_id: 1,
@@ -63,10 +71,14 @@ describe("EmployeeAccessItemTests", () => {
 
         // Allowed icon should be present
         expect(screen.getByTestId("allowed-icon")).toBeInTheDocument();
+
+        expect(
+            screen.queryByRole("button", { name: /send alert/i })
+        ).not.toBeInTheDocument();
     });
 
     // Test to ensure employee access item card renders denied icon when access is denied
-    test("employeeAccessItemRendersDeniedIcon", () => {
+    test("employeeAccessItemRendersDeniedIcon", async () => {
         // Create a mock employee for test
         const employee = {
             user_id: 1,
@@ -74,12 +86,16 @@ describe("EmployeeAccessItemTests", () => {
             email: "testemployee@test.com",
             roles: ["Test Role"],
             access_allowed: false,
-            failed_detections: []
+            failed_detections: [{ "subcategory":null }]
         };
 
         render(<EmployeeAccessItem employee={employee}/>)
 
         // Denied icon should be present
         expect(screen.getByTestId("denied-icon")).toBeInTheDocument();
+
+        expect(
+            screen.queryByRole("button", { name: /send alert/i })
+        ).toBeInTheDocument();
     });
 })
