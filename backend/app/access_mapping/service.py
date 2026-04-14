@@ -27,6 +27,28 @@ def get_file_employees_with_access(db: Session, file_id: int):
     return list(employees.values())
 
 
+# Method for getting a file's risk details
+def get_file_risk_details(db: Session, file_id: int, file_name: str):
+    latest_scan_results = get_file_latest_scan_results(db=db, file_id=file_id)
+    employees_with_access = get_file_employees_with_access(db=db, file_id=file_id)
+
+    # Sum the number of 'counts' of every detection result from latest_scan_results
+    detection_count = sum(result["count"] for result in latest_scan_results)
+
+    employees_with_access_count = len(employees_with_access)
+    valid_access_count = 0
+    invalid_access_count = 0
+
+    # Iterate through every employee and check 'access_allowed' boolean value and increment valid or invalid
+    # access count variables
+    for employee in employees_with_access:
+        if employee["access_allowed"] is True:
+            valid_access_count += 1
+        elif employee["access_allowed"] is False:
+            invalid_access_count += 1
+
+
+
 # Method for building employees dictionary from fetched employee records
 def build_employees_from_records(fetched_employees_records):
     employees = {}
