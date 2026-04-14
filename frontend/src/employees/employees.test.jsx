@@ -617,15 +617,6 @@ describe("View Employees Component", () => {
             </MemoryRouter>
         );
 
-        const expiryDate = new Date();
-        expiryDate.setDate(expiryDate.getDate() + 7);
-        if (expiryDate.getSeconds() >=500) {
-            expiryDate.setMilliseconds(0);
-            expiryDate.setSeconds(expiryDate.getSeconds() + 1);
-        } else {
-            expiryDate.setMilliseconds(0);
-        }
-
         const accept_button = await screen.findByTestId("accept-button-valid@example.com")
         fireEvent.click(accept_button)
 
@@ -668,15 +659,6 @@ describe("View Employees Component", () => {
             </MemoryRouter>
         );
 
-        const expiryDate = new Date();
-        expiryDate.setDate(expiryDate.getDate() + 7);
-        if (expiryDate.getSeconds() >=500) {
-            expiryDate.setMilliseconds(0);
-            expiryDate.setSeconds(expiryDate.getSeconds() + 1);
-        } else {
-            expiryDate.setMilliseconds(0);
-        }
-
         const accept_button = await screen.findByTestId("accept-button-valid@example.com")
         fireEvent.click(accept_button)
 
@@ -718,15 +700,6 @@ describe("View Employees Component", () => {
                 <ManageEmployees toast={mockToast}/>
             </MemoryRouter>
         );
-
-        const expiryDate = new Date();
-        expiryDate.setDate(expiryDate.getDate() + 7);
-        if (expiryDate.getSeconds() >=500) {
-            expiryDate.setMilliseconds(0);
-            expiryDate.setSeconds(expiryDate.getSeconds() + 1);
-        } else {
-            expiryDate.setMilliseconds(0);
-        }
 
         const accept_button = await screen.findByTestId("accept-button-valid@example.com")
         fireEvent.click(accept_button)

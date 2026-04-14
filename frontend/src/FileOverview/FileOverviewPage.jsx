@@ -11,8 +11,10 @@ import { FaShieldAlt } from "react-icons/fa";
 import { FaHistory } from "react-icons/fa";
 import { FaUserFriends } from "react-icons/fa";
 
+import api from "../api/axiosConfig"
 
-function FileOverviewPage() {
+
+function FileOverviewPage({toast}) {
     const { file_id } = useParams();
     const backend_uri = import.meta.env.VITE_BACKEND_HOST || "http://localhost:8000"
 
@@ -58,7 +60,23 @@ function FileOverviewPage() {
 
     if (!file) return <p>File not found.</p>
 
-    
+    const handleSendEmail = (id) => {
+        const user = employees_with_access.find(
+            employee => employee.user_id === id
+        );
+
+        api.post("/access_mapping/send-violations-email", {
+            file_name: file.file_name,
+            employee: user
+        }).then(res => {
+            if(res.data == "cooldown"){
+                showErrorMessage();
+            } else {
+                showSuccessMessage();
+            }
+        })
+    }
+
     const grouped_latest_scan_results = (latest_scan_results || []).reduce((acc, item) => {
         if (!acc[item.category]) {
             acc[item.category] = [];
@@ -67,6 +85,14 @@ function FileOverviewPage() {
         acc[item.category].push(item);
         return acc;
     }, {});
+
+    const showSuccessMessage = () => {
+        toast.current.show({ severity: 'info', summary: 'Info', detail: 'An email containing the violations was sent to the employee.', life: 4000});
+    };
+
+    const showErrorMessage = () => {
+        toast.current.show({ severity: 'error', summary: 'Error', detail: 'You are sending this employee too many emails, please try again later.', life: 4000});
+    };
 
     return (
         <div className={styles.file_overview_page}>
@@ -133,6 +159,7 @@ function FileOverviewPage() {
                                 <EmployeeAccessItem
                                     key={employee.user_id}
                                     employee={employee}
+                                    sendEmail={(value) => handleSendEmail(value)}
                                 />
                             ))
                         )}
