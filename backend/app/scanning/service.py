@@ -310,6 +310,11 @@ def duplicate_scan(db: Session, scan_id: int):
     for scan_file, file in scan_files:
         hash = file.hash
 
+        # So files with no hash aren't grouped as duplicates
+        # Mainly for testing edge cases
+        if hash is None:
+            continue
+
         if hash not in hashes_found:
             hashes_found[hash] = []
         hashes_found[hash].append(scan_file.scan_file_id)
