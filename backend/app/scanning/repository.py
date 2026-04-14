@@ -2,7 +2,7 @@ from datetime import datetime
 
 from sqlalchemy import select, func
 from sqlalchemy.orm import Session
-from app.scanning.models import File, NamingConvention, Scan, ScanNamingConvention, NamingConventionScanResult, Scan, ScanFile, ScanFileDetection
+from app.scanning.models import File, NamingConvention, Scan, ScanNamingConvention, NamingConventionScanResult, Scan, ScanFile, ScanFileDetection, DuplicateGroup, DuplicateScanResult 
 from app.ingestion.models import IngestionFile
 from app.roles.models import SensitivityCategory, SensitivitySubcategory
 from datetime import datetime, timezone
@@ -365,5 +365,34 @@ def get_workspace_files_by_user_id(db: Session, user_id: int):
         .filter(UserWorkspace.c.workspace_id == workspace_id)
         # Remove duplicates as multiple users can have access to one file
         .distinct()
+        .all()
+    )
+
+def create_duplicate_group(db: Session, scan_id: int):
+    duplicate_group = DuplicateGroup(scan_id=scan_id)
+    db.add(duplicate_group)
+    db.commit()
+    db.refresh(duplicate_group)
+    return duplicate_group
+
+def create_duplicate_scan_result(db: Session, duplicate_group_id: int, scan_file_id: int):
+    duplicate_scan_result = DuplicateScanResult(duplicate_group_id=duplicate_group_id, scan_file_id=scan_file_id)
+    db.add(duplicate_scan_result)
+    db.commit()
+    db.refresh(duplicate_scan_result)
+    return duplicate_scan_result
+
+def get_duplicate_scan_result_by_scan_id(db: Session, scan_id: int):
+    return (
+        db.query(
+            DuplicateScanResult
+        )
+        # Join duplicate group to get scan ID
+        .join(
+            DuplicateGroup,
+            DuplicateScanResult.duplicate_group_id == DuplicateGroup.duplicate_group_id
+        )
+        # Only get results for this scan
+        .filter(DuplicateGroup.scan_id == scan_id)
         .all()
     )
