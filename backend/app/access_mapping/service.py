@@ -1,7 +1,9 @@
 from sqlalchemy.orm import Session
 from app.access_mapping import repository
+from app.ingestion import repository as ingestion_repository
 from app.access_mapping.schemas import FileRiskDetailsResponse
 from app.scanning.service import get_file_latest_scan_results, check_file_has_scan
+from operator import attrgetter
 
 
 # Method for getting all employees with access to a file
@@ -26,6 +28,26 @@ def get_file_employees_with_access(db: Session, file_id: int):
         evaluate_employee_access(db, employee, latest_scan_results)
 
     return list(employees.values())
+
+
+# Method for getting the 10 highest risk files
+def get_highest_risk_files(db: Session, limit: int, offset: int):
+    files = ingestion_repository.get_all_files(db=db)
+
+    highest_risk_files = []
+
+    for file in files:
+        highest_risk_files.append(
+            get_file_risk_details(
+                db=db, 
+                file_id=file.ingestion_file_id, 
+                file_name=file.name
+            )
+        )
+
+    highest_risk_files.sort(key=attrgetter("risk_score"), reverse=True)
+
+    return highest_risk_files[offset: offset + limit]
 
 
 # Method for getting a file's risk details
