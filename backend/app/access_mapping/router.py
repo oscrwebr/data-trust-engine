@@ -8,6 +8,7 @@ from app.authentication.service import test_route
 from typing import Annotated
 from ..core.security_schemas import User
 from ..core.security import get_user_from_access_token
+from datetime import datetime, timezone
 
 router = APIRouter(prefix="/access_mapping", tags=["access_mapping"])
 
@@ -21,7 +22,7 @@ def get_file_employees_with_access(file_id: int, db: Session = Depends(get_datab
 @router.post("/send-violations-email")
 async def send_email_with_violations(employee: SendViolationsEmailRequest, db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)]):
     user = test_route(current_user.user_id, db)
-    admin_name = (user.firstname + " " + user.surname)
+    now = datetime.now()
     detections = employee.employee.failed_detections
     all_detections = []
 
@@ -33,5 +34,5 @@ async def send_email_with_violations(employee: SendViolationsEmailRequest, db: A
         dict["threshold"] = detection.threshold
         dict["category"] = category.name
         all_detections.append(dict)
-        
-    return await service.send_email_with_violations(admin_name, employee.employee.name, employee.employee.email, employee.file_name, all_detections)
+
+    return await service.send_email_with_violations(db, user, employee, all_detections, now)

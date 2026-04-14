@@ -4,6 +4,8 @@ from app.access_mapping.schemas import conf, SendViolationsEmailRequest
 from app.scanning.service import get_file_latest_scan_results, check_file_has_scan
 from fastapi_mail import FastMail, MessageSchema
 from starlette.responses import JSONResponse
+from datetime import datetime, timedelta
+from app.authentication.models import User
 
 
 # Method for getting all employees with access to a file
@@ -43,6 +45,7 @@ def build_employees_from_records(fetched_employees_records):
                 "email": fetched_employee.email,
                 "roles": [],
                 "access_allowed": True,
+                "last_sent": None,
                 "failed_detections": []
             }
 
@@ -120,7 +123,7 @@ def get_failed_detections(latest_scan_results: list[dict], effective_thresholds:
 
 
 # Method for sending the email containing the violations
-async def send_email_with_violations(admin_name: str, employee_name: str, employee_email: str, file_name: str, detection_list: list):
+async def send_email_with_violations(db: Session, admin: User, employee: SendViolationsEmailRequest, detection_list: list, now: datetime):
     template = f"""
         <html>
         <body style="margin:0; padding:0; font-family:Arial, sans-serif; background-color:#f5f5f5;">
@@ -137,7 +140,7 @@ async def send_email_with_violations(admin_name: str, employee_name: str, employ
             <tr>
                 <td style="padding:20px;">
                 <p style="font-size:14px; color:#333333;">
-                    Hi {employee_name},
+                    Hi {employee.employee.name},
                 </p>
 
                 <p style="font-size:14px; color:#333333;">
@@ -155,7 +158,7 @@ async def send_email_with_violations(admin_name: str, employee_name: str, employ
     # Loop through files
     template += f"""
     <h3 style="font-size:16px; color:#222222; margin-top:20px;">
-        Detections identified for: <span style="color:#007bff;">{file_name}</span>
+        Detections identified for: <span style="color:#007bff;">{employee.file_name}</span>
     </h3>
     """
 
@@ -212,7 +215,7 @@ async def send_email_with_violations(admin_name: str, employee_name: str, employ
 
             <p style="font-size:14px; color:#333333;">
                 Best regards, <br/><br/>
-                <strong>{admin_name}</strong>
+                <strong>{admin.firstname} {admin.surname}</strong>
             </p>
             </td>
         </tr>
@@ -230,11 +233,31 @@ async def send_email_with_violations(admin_name: str, employee_name: str, employ
 
     message = MessageSchema(
         subject="Action Required: Unauthorized File Access Identified",
-        recipients=[employee_email], 
+        recipients=[employee.employee.email], 
         body=template,
         subtype="html"
     )
 
     fm = FastMail(conf)
-    await fm.send_message(message)
-    return JSONResponse(status_code=200, content={"message": "email has been sent"})
+    if (check_admin_cooldown_for_sending_email(db, now, employee, admin.user_id) == True):
+
+        repository.create_violation_email_record(db, now, admin.user_id, employee.employee.user_id)
+        #await fm.send_message(message)
+        return JSONResponse(status_code=200, content={"message": "email has been sent"})
+    
+    return check_admin_cooldown_for_sending_email(db, now, employee, admin.user_id)
+
+
+# Method for checking whether admin is able to send an email (cooldown)
+def check_admin_cooldown_for_sending_email(db: Session, time_now: datetime, employee: SendViolationsEmailRequest, admin_id: int):
+    cooldown = timedelta(minutes=1)
+
+    latest_email = repository.get_latest_violation_email_for_cooldown(db, admin_id, employee.employee.user_id)
+    if latest_email is None:
+        return True
+    
+    time_difference = time_now - latest_email.created_at
+    if(time_difference < cooldown):
+        return "cooldown"
+        
+    return True

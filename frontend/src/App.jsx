@@ -43,7 +43,7 @@ function App() {
           <Route path="/upload-org-chart" element={<OrgChart toast={toast} />} />
           <Route path="/settings" element={null} />
           <Route path="/dashboard" element={<Dashboard toast={toast}/>} />
-          <Route path="/files/:file_id" element={<FileOverviewPage />} />
+          <Route path="/files/:file_id" element={<FileOverviewPage toast={toast}/>} />
           <Route path="/scans" element={<Scans />} />
           <Route path="/scans/:scanId" element={<ScanPage/>} />
           <Route path="/org-scan-dev" element={<OrganisationalDevTest />} />

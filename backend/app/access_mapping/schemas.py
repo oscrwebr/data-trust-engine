@@ -5,6 +5,8 @@ from fastapi_mail import ConnectionConfig
 
 from dotenv import load_dotenv
 
+from datetime import datetime
+
 
 load_dotenv()
 
@@ -23,6 +25,7 @@ class FileEmployeeAccessResponse(BaseModel):
     email: str
     roles: list[str]
     access_allowed: bool | None
+    last_sent: datetime | None
     failed_detections: list[FailedDetectionResponse]
 
 class SendViolationsEmailRequest(BaseModel):

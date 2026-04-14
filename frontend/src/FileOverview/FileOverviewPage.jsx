@@ -14,7 +14,7 @@ import { FaUserFriends } from "react-icons/fa";
 import api from "../api/axiosConfig"
 
 
-function FileOverviewPage() {
+function FileOverviewPage({toast}) {
     const { file_id } = useParams();
     const backend_uri = import.meta.env.VITE_BACKEND_HOST || "http://localhost:8000"
 
@@ -68,6 +68,12 @@ function FileOverviewPage() {
         api.post("/access_mapping/send-violations-email", {
             file_name: file.file_name,
             employee: user
+        }).then(res => {
+            if(res.data == "cooldown"){
+                showErrorMessage();
+            } else {
+                showSuccessMessage();
+            }
         })
     }
 
@@ -79,6 +85,14 @@ function FileOverviewPage() {
         acc[item.category].push(item);
         return acc;
     }, {});
+
+    const showSuccessMessage = () => {
+        toast.current.show({ severity: 'info', summary: 'Info', detail: 'An email containing the violations was sent to the employee.', life: 4000});
+    };
+
+    const showErrorMessage = () => {
+        toast.current.show({ severity: 'error', summary: 'Error', detail: 'You are sending this employee too many emails, please try again later.', life: 4000});
+    };
 
     return (
         <div className={styles.file_overview_page}>
