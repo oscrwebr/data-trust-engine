@@ -1,6 +1,8 @@
 from sqlalchemy.orm import Session
 from app.access_mapping import repository
+from app.access_mapping.schemas import FileRiskDetailsResponse
 from app.scanning.service import get_file_latest_scan_results, check_file_has_scan
+
 
 
 # Method for getting all employees with access to a file
@@ -46,6 +48,31 @@ def get_file_risk_details(db: Session, file_id: int, file_name: str):
             valid_access_count += 1
         elif employee["access_allowed"] is False:
             invalid_access_count += 1
+
+    # Calculate the valid and invalid access percentages
+    if employees_with_access_count > 0:
+        valid_access_percentage = (valid_access_count / employees_with_access_count) * 100
+        invalid_access_percentage = (invalid_access_count / employees_with_access_count) * 100
+    else:
+        valid_access_percentage = 0.0
+        invalid_access_percentage = 0.0
+
+    return FileRiskDetailsResponse(
+        file_id=file_id
+        file_name=file_name,
+        employees_with_access_count=employees_with_access_count,
+        valid_access_count=valid_access_count,
+        invalid_access_count=invalid_access_count,
+        valid_access_percentage=round(valid_access_percentage, 2),
+        invalid_access_percentage=round(invalid_access_percentage, 2),
+        detection_count=detection_count,
+        risk_score=round(risk_score, 2),
+    )
+
+    
+
+        
+    
 
 
 
