@@ -120,8 +120,114 @@ def get_failed_detections(latest_scan_results: list[dict], effective_thresholds:
 
 
 # Method for sending the email containing the violations
-async def send_email_with_violations(admin_name: str, employee_name: str, employee_email: str, detections: list):
-    
+async def send_email_with_violations(admin_name: str, employee_name: str, employee_email: str, file_name: str, detection_list: list):
+    template = f"""
+        <html>
+        <body style="margin:0; padding:0; font-family:Arial, sans-serif; background-color:#f5f5f5;">
+            <table align="center" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px; background:#ffffff;">
+
+            <!-- Header -->
+            <tr>
+                <td align="center" style="padding:20px;">
+                <h2 style="margin:0; color:#333333;">Risk Detection Alert</h2>
+                </td>
+            </tr>
+
+            <!-- Intro -->
+            <tr>
+                <td style="padding:20px;">
+                <p style="font-size:14px; color:#333333;">
+                    Hi {employee_name},
+                </p>
+
+                <p style="font-size:14px; color:#333333;">
+                    The Data Trust Engine has identified files in your possession that may not align with your current access permissions.
+                    Please review the following detections and take appropriate action.
+                </p>
+                </td>
+            </tr>
+
+            <!-- Detections Section -->
+            <tr>
+                <td style="padding:0 20px 20px 20px;">
+        """
+
+    # Loop through files
+    template += f"""
+    <h3 style="font-size:16px; color:#222222; margin-top:20px;">
+        Detections identified for: <span style="color:#007bff;">{file_name}</span>
+    </h3>
+    """
+
+    # Group detections by category
+    grouped = {}
+    for detections in detection_list:
+        category = detections.get("category", "Other")
+        grouped.setdefault(category, []).append(detections)
+
+    # Loop through categories
+    for category, items in grouped.items():
+        template += f"""
+            <h4 style="font-size:14px; color:#333333; margin-top:25px;">
+                {category} Information
+            </h4>
+
+            <table width="100%" cellpadding="8" cellspacing="0" style="border-collapse:collapse; margin-top:5px;">
+                <tr style="background-color:#f0f0f0; text-align:left;">
+                    <th style="border:1px solid #dddddd; font-size:13px;">Subcategory</th>
+                    <th style="border:1px solid #dddddd; font-size:13px;">Detections</th>
+                    <th style="border:1px solid #dddddd; font-size:13px;">Threshold</th>
+                </tr>
+        """
+
+        for d in items:
+            template += f"""
+                <tr>
+                    <td style="border:1px solid #dddddd; font-size:13px;">
+                        {d.get("subcategory")}
+                    </td>
+                    <td style="border:1px solid #dddddd; font-size:13px; color:#d9534f; font-weight:bold;">
+                        {d.get("count")}
+                    </td>
+                    <td style="border:1px solid #dddddd; font-size:13px;">
+                        {d.get("threshold")}
+                    </td>
+                </tr>
+            """
+
+        template += """
+            </table>
+        """
+
+    template += f"""
+            </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+            <td style="padding:20px;">
+            <p style="font-size:14px; color:#333333;">
+                Please ensure any sensitive or restricted data is handled in accordance with company policies.
+            </p>
+
+            <p style="font-size:14px; color:#333333;">
+                Best regards, <br/><br/>
+                <strong>{admin_name}</strong>
+            </p>
+            </td>
+        </tr>
+
+        <tr>
+            <td style="padding:15px; font-size:12px; color:#777777; text-align:center;">
+            If you believe this was flagged in error, please contact your administrator.
+            </td>
+        </tr>
+
+        </table>
+      </body>
+    </html>
+    """
+
     message = MessageSchema(
         subject="Action Required: Unauthorized File Access Identified",
         recipients=[employee_email], 
@@ -130,5 +236,5 @@ async def send_email_with_violations(admin_name: str, employee_name: str, employ
     )
 
     fm = FastMail(conf)
-    #await fm.send_message(message)
+    await fm.send_message(message)
     return JSONResponse(status_code=200, content={"message": "email has been sent"})
