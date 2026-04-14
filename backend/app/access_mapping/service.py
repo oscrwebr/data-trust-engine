@@ -4,7 +4,6 @@ from app.access_mapping.schemas import FileRiskDetailsResponse
 from app.scanning.service import get_file_latest_scan_results, check_file_has_scan
 
 
-
 # Method for getting all employees with access to a file
 def get_file_employees_with_access(db: Session, file_id: int):
     fetched_employees_records = repository.get_file_employees_with_access(db=db, file_id=file_id)
@@ -57,8 +56,11 @@ def get_file_risk_details(db: Session, file_id: int, file_name: str):
         valid_access_percentage = 0.0
         invalid_access_percentage = 0.0
 
+    # Calculate a 'risk score' to help determine the highest risk files when listed
+    risk_score = ((invalid_access_count * 2) +  invalid_access_percentage + (detection_count * 0.05))
+
     return FileRiskDetailsResponse(
-        file_id=file_id
+        file_id=file_id,
         file_name=file_name,
         employees_with_access_count=employees_with_access_count,
         valid_access_count=valid_access_count,
@@ -68,12 +70,6 @@ def get_file_risk_details(db: Session, file_id: int, file_name: str):
         detection_count=detection_count,
         risk_score=round(risk_score, 2),
     )
-
-    
-
-        
-    
-
 
 
 # Method for building employees dictionary from fetched employee records
