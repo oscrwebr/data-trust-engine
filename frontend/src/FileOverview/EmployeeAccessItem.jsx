@@ -6,7 +6,6 @@ import { FaCheckCircle, FaExclamationCircle, FaQuestionCircle } from "react-icon
 
 function EmployeeAccessItem({ employee, sendEmail }) {
     const [show_modal, set_show_modal] = useState(false);
-
     return (
         <>
             <div className={styles.employee_access_item}>
@@ -29,7 +28,7 @@ function EmployeeAccessItem({ employee, sendEmail }) {
                             />
                         )}
                     </div>
-                    {employee.access_allowed === false && (<Button onClick={() => sendEmail(employee.user_id)} className={styles.alert_button}>Send Alert</Button>)}
+                    {employee.access_allowed === false && employee.failed_detections[0]["subcategory"] != "NO_ROLES_ASSIGNED" && (<Button onClick={() => sendEmail(employee.user_id)} className={styles.alert_button}>Send Alert</Button>)}
                 </div>
                 
                 <div className={styles.employee_content}>

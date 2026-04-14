@@ -6,6 +6,8 @@ from fastapi_mail import FastMail, MessageSchema
 from starlette.responses import JSONResponse
 from datetime import datetime, timedelta
 from app.authentication.models import User
+from app.roles.repository import get_category_by_subcategory_name
+from app.authentication.service import test_route
 
 
 # Method for getting all employees with access to a file
@@ -120,6 +122,25 @@ def get_failed_detections(latest_scan_results: list[dict], effective_thresholds:
             })
 
     return failed_detections
+
+
+# Method for processing the data before it is used in the email template
+async def process_data_for_violation_email_template(db: Session, admin_id: int, employee: SendViolationsEmailRequest):
+    user = test_route(admin_id, db)
+    now = datetime.now()
+    detections = employee.employee.failed_detections
+    all_detections = []
+
+    for detection in detections:
+        dict = {}
+        category = get_category_by_subcategory_name(db, detection.subcategory)
+        dict["subcategory"] = detection.subcategory
+        dict["count"] = detection.count
+        dict["threshold"] = detection.threshold
+        dict["category"] = category.name
+        all_detections.append(dict)
+
+    return await send_email_with_violations(db, user, employee, all_detections, now)
 
 
 # Method for sending the email containing the violations
@@ -242,8 +263,8 @@ async def send_email_with_violations(db: Session, admin: User, employee: SendVio
     if (check_admin_cooldown_for_sending_email(db, now, employee, admin.user_id) == True):
 
         repository.create_violation_email_record(db, now, admin.user_id, employee.employee.user_id)
-        #await fm.send_message(message)
-        return JSONResponse(status_code=200, content={"message": "email has been sent"})
+        await fm.send_message(message)
+        return True
     
     return check_admin_cooldown_for_sending_email(db, now, employee, admin.user_id)
 
