@@ -89,7 +89,7 @@ def get_uid_from_refresh_id(db: Session, refresh_id: int) -> int:
     return db.execute(select_statement).scalar_one_or_none()
     # return db.query(Refresh.user_id).filter(Refresh.refresh_id == refresh_id).first()
 
-def update_prev_refresh_entry(db: Session, prev_id, new_id) -> None:
+def update_prev_refresh_entry(db: Session, prev_id: int, new_id: int) -> None:
     update_statement = update(Refresh).where(Refresh.refresh_id == prev_id).values({
         Refresh.replaced_by : new_id,
         Refresh.replaced_at : datetime.now(timezone.utc)
@@ -97,9 +97,21 @@ def update_prev_refresh_entry(db: Session, prev_id, new_id) -> None:
     db.execute(update_statement)
     db.commit()
 
+def update_refresh_replaced_at(db: Session, refresh_id: int) -> None:
+    update_statement = update(Refresh).where(Refresh.refresh_id == refresh_id).values(replaced_at = datetime.now(timezone.utc))
+    db.execute(update_statement)
+    db.commit()
+
 def revoke_refresh_family(db: Session, refresh_family_id: int) -> None:
     update_statement = update(RefreshFamily).where(RefreshFamily.refresh_family_id == refresh_family_id).values({
         RefreshFamily.is_revoked : True
+    })
+    db.execute(update_statement)
+    db.commit()
+
+def disconnect_refresh_family(db: Session, refresh_family_id: int) -> None:
+    update_statement = update(RefreshFamily).where(RefreshFamily.refresh_family_id == refresh_family_id).values({
+        RefreshFamily.is_disconnected : True
     })
     db.execute(update_statement)
     db.commit()
@@ -113,8 +125,3 @@ def update_delta_link(id: int, delta_link: str, db: Session) -> None:
     update_statement = update(User).where(User.user_id == id).values(deltaLink = delta_link)
     db.execute(update_statement)
     db.commit()
-
-# def update_user_drive_data(user_id: int, drive_id: str, db: Session) -> None:
-#     update_statement = update(User).where(User.user_id == user_id).values(driveId = drive_id)
-#     db.execute(update_statement)
-#     db.commit()

@@ -157,6 +157,11 @@ def get_file_latest_scan_results(db: Session, file_id: int):
     return latest_scan_results
 
 
+# Check if the provided file has been scanned at all
+def check_file_has_scan(db: Session, file_id: int):
+    return repository.check_file_has_scan(db, file_id)
+
+
 # Get hash of a file
 def get_file_hash(file):
     # Create hash object

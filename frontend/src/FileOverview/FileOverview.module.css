@@ -75,14 +75,10 @@
 
 
 .scan_history_container {
-    max-width: 900px;
-
     background: #ffffff;
     border: 1px solid #e5e7eb;
     border-radius: 16px;
-
     padding: 20px 20px 16px 20px;
-
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
 }
 
@@ -170,15 +166,11 @@
 }
 
 .latest_scan_results_container {
-    max-width: 900px;
-
     background: #ffffff;
     border: 1px solid #e5e7eb;
     border-radius: 16px;
-
     padding: 20px;
     margin-bottom: 24px;
-
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
 }
 
@@ -230,4 +222,44 @@
     color: #111827;
     font-size: 1.1rem;
     font-weight: 700;
+}
+
+.employees_with_access_title {
+    margin: 0 0 16px 0;
+    font-weight: 700;
+    color: #111827;
+}
+
+.employees_with_access_container {
+    max-width: 900px;
+
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+
+    padding: 20px;
+    margin-bottom: 24px;
+
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
+}
+
+.file_overview_page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.file_overview_content {
+    display: grid;
+    grid-template-columns: 1.8fr 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+.file_overview_main_column {
+    min-width: 0;
+}
+
+.file_overview_sidebar {
+    min-width: 0;
 }
