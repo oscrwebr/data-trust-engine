@@ -36,17 +36,20 @@ def get_highest_risk_files(db: Session, limit: int, offset: int):
 
     highest_risk_files = []
 
+    # Iterate through every file and get its risk details and append to list
     for file in files:
-        highest_risk_files.append(
-            get_file_risk_details(
+        file_risk_details = get_file_risk_details(
                 db=db, 
                 file_id=file.ingestion_file_id, 
                 file_name=file.name
             )
-        )
 
+        highest_risk_files.append(file_risk_details)
+
+    # Sort list by risk score from highest to lowest
     highest_risk_files.sort(key=attrgetter("risk_score"), reverse=True)
 
+    # Return the highest risk files with offset for pagination
     return highest_risk_files[offset: offset + limit]
 
 
