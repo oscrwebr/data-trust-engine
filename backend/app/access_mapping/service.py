@@ -6,6 +6,21 @@ import app.scanning.service as scanning_service
 from operator import attrgetter
 
 
+# Method for getting all employees with access to a file
+def get_file_employees_with_access(db: Session, file_id: int):
+    fetched_employees_records = repository.get_file_employees_with_access(db=db, file_id=file_id)
+    has_been_scanned = scanning_service.check_file_has_scan(db=db, file_id=file_id)
+    latest_scan_results = scanning_service.get_file_latest_scan_results(db=db, file_id=file_id)
+
+    return get_file_employees_with_access_from_data(
+        db=db,
+        fetched_employees_records=fetched_employees_records,
+        has_been_scanned=has_been_scanned,
+        latest_scan_results=latest_scan_results
+    )
+
+
+# INTERNAL HELPER METHOD:
 # Method for getting all employees with access to a file from preloaded data
 def get_file_employees_with_access_from_data(db: Session, fetched_employees_records: list, has_been_scanned: bool, latest_scan_results: list):
     # Build employees dictionary from fetched employees records
