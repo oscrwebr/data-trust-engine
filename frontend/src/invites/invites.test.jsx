@@ -308,7 +308,7 @@ describe("Invite Component", () => {
         )
         
         fireEvent.click(screen.getByText("Return to home"));
-        expect(await screen.findByText("Create a workspace")).toBeInTheDocument();
+        expect(await screen.findByText("Create a Workspace")).toBeInTheDocument();
 
     })
 
@@ -333,7 +333,7 @@ describe("Invite Component", () => {
             </MemoryRouter>
         )
         
-        expect(await screen.findByText("Create a workspace")).toBeInTheDocument();
+        expect(await screen.findByText("Create a Workspace")).toBeInTheDocument();
         await waitFor(() => {
             if (!toastCalled) {
                 throw new Error("Toast was not triggered");
