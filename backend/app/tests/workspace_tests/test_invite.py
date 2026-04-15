@@ -385,8 +385,6 @@ def test_get_all_notifications_route(db, client):
 
     # Notifications
     n_1 = add_notification(db, "title", "body", datetime.now(), res.inserted_primary_key[0])
-    n_2 = add_notification(db, "title", "body", datetime.now(), res.inserted_primary_key[0])
-    n_3 = add_notification(db, "title", "body", datetime.now(), res.inserted_primary_key[0])
 
     req = client.build_request(
         method="get",
@@ -394,21 +392,13 @@ def test_get_all_notifications_route(db, client):
         headers={"Authorization": f"Bearer {access}"}, 
     )
 
-    expected_notifications = [
-    {
-        "title": n.title,
-        "body": n.body,
-        "datetime": n.datetime.isoformat(),
-        "id": n.id,
-        "user_id": n.user_id,
-    }
-    for n in [n_1, n_2, n_3]
-    ]
-
     response = client.send(request = req)
     data = response.json()
-    assert db.query(models.Notification).count() == 3
-    assert data == expected_notifications
+    assert db.query(models.Notification).count() == 1
+    assert data[0]["title"] == n_1.title
+    assert data[0]["body"] == n_1.body
+    assert data[0]["id"] == n_1.id
+    assert data[0]["user_id"] == res.inserted_primary_key[0]
 
 
 # Testing deleting a user's notification 

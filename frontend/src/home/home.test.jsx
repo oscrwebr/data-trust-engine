@@ -31,19 +31,24 @@ describe("Home Component", () => {
     });
 
     // Test 1
-    test("Test that signup button is on home screen and that when clicked, correct navigate is called", async () => {
-        render(
+    test("Test that all major components of the home screen load correctly", async () => {
+      render(
             <MemoryRouter>
                 <Home/>
             </MemoryRouter>
         );
 
-        expect(await screen.findByText("Sign in")).toBeInTheDocument();
-        const button = screen.getByText("Sign in");
-        fireEvent.click(button);
-        
-        expect(mockNavigate).toHaveBeenCalledWith("/dashboard");
+        expect(await screen.findByText("The Data Trust Engine")).toBeInTheDocument();
+        expect(await screen.findByText("Building Trust in Every Data Interaction")).toBeInTheDocument();
+        expect(await screen.findByText("Enable secure collaboration and controlled access between organizations. Create trusted data environments where teams can work together with confidence.")).toBeInTheDocument();
+        expect(await screen.findByText("Secure")).toBeInTheDocument();
+        expect(await screen.findByText("Scalable")).toBeInTheDocument();
+        expect(await screen.findByText("Compliant")).toBeInTheDocument();
+        expect(await screen.findByText("Automated Classification System")).toBeInTheDocument();
+        expect(await screen.findByText("Security Noise Filter")).toBeInTheDocument();
+        expect(await screen.findByText("Universal Trust Score")).toBeInTheDocument();
     })
+
 
     // Test 2
     test("Test that when create workspace is clicked, user is redirected to correct window location", async () => {
@@ -57,8 +62,8 @@ describe("Home Component", () => {
             </MemoryRouter>
         );
 
-        expect(await screen.findByText("Create a workspace")).toBeInTheDocument();
-        const button = screen.getByText("Create a workspace");
+        expect(await screen.findByText("Create a Workspace")).toBeInTheDocument();
+        const button = screen.getByText("Create a Workspace");
         fireEvent.click(button);
         
         expect(window.location.href).toBe(
@@ -68,4 +73,43 @@ describe("Home Component", () => {
 
     })
 
+
+    // Test 3
+    test("Test that when get started is clicked, user is redirected to correct window location", async () => {
+        const originalLocation = window.location;
+        delete window.location;
+        window.location = { href: "" };
+
+        render(
+            <MemoryRouter>
+                <Home/>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByText("Get Started")).toBeInTheDocument();
+        const button = screen.getByText("Get Started");
+        fireEvent.click(button);
+        
+        expect(window.location.href).toBe(
+            "http://localhost:8000/auth/sign-in?next=/dashboard&signup=true&role=2"
+        );
+        window.location = originalLocation
+
+    })
+
+
+    // Test 4
+    test("Test that sign-in button is on home screen and that when clicked, correct navigate is called", async () => {
+        render(
+            <MemoryRouter>
+                <Home/>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByText("Sign in")).toBeInTheDocument();
+        const button = screen.getByText("Sign in");
+        fireEvent.click(button);
+        
+        expect(mockNavigate).toHaveBeenCalledWith("/dashboard");
+    })
 })
