@@ -112,7 +112,8 @@ def get_latest_scan_detection_summary(db: Session, file_id: int):
 
 
 # Get latest scan results for all files provided in bulk
-def get_latest_scan_detection_summary_for_files(db: Session, file_ids: list[int]):
+def get_latest_scan_detection_summary_for_all_files(db: Session, file_ids: list[int]):
+    # Get the most recent scan for each file (max scan.started_at)
     latest_scan_subquery = (
         db.query(
             ScanFile.file_id.label("file_id"),
@@ -124,6 +125,8 @@ def get_latest_scan_detection_summary_for_files(db: Session, file_ids: list[int]
         .subquery()
     )
 
+    # Get detection counts ONLY for the latest scan using the latest_scan_subquery
+    # Group by file_id and sensitivity_subcategory to aggregate counts per subcategory
     rows = (
         db.query(
             ScanFile.file_id.label("file_id"),
@@ -131,6 +134,7 @@ def get_latest_scan_detection_summary_for_files(db: Session, file_ids: list[int]
             func.count(ScanFileDetection.scan_file_detection_id).label("count")
         )
         .join(Scan, Scan.scan_id == ScanFile.scan_id)
+        # Join with latest_scan_subquery so that it ONLY uses the latest scan per file
         .join(
             latest_scan_subquery,
             and_(
@@ -138,10 +142,14 @@ def get_latest_scan_detection_summary_for_files(db: Session, file_ids: list[int]
                 latest_scan_subquery.c.latest_started_at == Scan.started_at
             )
         )
+
+        # Join detections to count them
         .join(
             ScanFileDetection,
             ScanFileDetection.scan_file_id == ScanFile.scan_file_id
         )
+
+        # Group to get counts per (file, subcategory)
         .group_by(
             ScanFile.file_id,
             ScanFileDetection.sensitivity_subcategory
@@ -149,6 +157,8 @@ def get_latest_scan_detection_summary_for_files(db: Session, file_ids: list[int]
         .all()
     )
 
+    # The final output is a list of rows which each represents a file, a subcategory and
+    # the number of detections for that subcategory ONLY IN THE LATEST SCAN
     return rows
 
 
