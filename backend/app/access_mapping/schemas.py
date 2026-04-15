@@ -26,3 +26,10 @@ class FileRiskDetailsResponse(BaseModel):
     invalid_access_percentage: float
     detection_count: int
     risk_score: float
+
+
+class PaginatedFileRiskDetailsResponse(BaseModel):
+    items: list[FileRiskDetailsResponse]
+    total: int
+    limit: int
+    offset: int

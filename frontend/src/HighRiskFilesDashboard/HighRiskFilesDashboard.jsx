@@ -30,7 +30,7 @@ function HighRiskFilesDashboard() {
                 const files_response = await fetch(`${backend_uri}/access_mapping/get_highest_risk_files?limit=${page_size}&offset=${offset}`);
                 const files_data = await files_response.json();
 
-                set_files(files_data);
+                set_files(files_data.items);
                 set_total_files(files_data.total);
             } catch (error) {
                 set_error("Failed to load high risk files.")

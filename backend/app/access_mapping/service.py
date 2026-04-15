@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from app.access_mapping import repository
 from app.ingestion import repository as ingestion_repository
-from app.access_mapping.schemas import FileRiskDetailsResponse
+from app.access_mapping.schemas import FileRiskDetailsResponse, PaginatedFileRiskDetailsResponse
 import app.scanning.service as scanning_service
 from operator import attrgetter
 
@@ -81,8 +81,16 @@ def get_highest_risk_files(db: Session, limit: int, offset: int):
     # Sort list by risk score from highest to lowest
     highest_risk_files.sort(key=attrgetter("risk_score"), reverse=True)
 
+    # Calculate total (to be used for pagination)
+    total_files = len(highest_risk_files)
+
     # Return the highest risk files with offset for pagination
-    return highest_risk_files[offset: offset + limit]
+    return PaginatedFileRiskDetailsResponse(
+        items= highest_risk_files[offset: offset + limit],
+        total=total_files,
+        limit=limit,
+        offset=offset
+    )
 
 
 # Method for getting a file's risk details from preloaded data
