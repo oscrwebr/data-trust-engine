@@ -56,7 +56,7 @@ function HighRiskFileRow({ file }) {
             </div>
 
             <div className={styles.file_actions}>
-                <button onClick={() => navigate(`/files/${file.file_id}`)}>
+                <button data-testid="more-details-button" onClick={() => navigate(`/files/${file.file_id}`)}>
                     More Details →
                 </button>
             </div>
