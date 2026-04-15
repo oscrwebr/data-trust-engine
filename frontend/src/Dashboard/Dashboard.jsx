@@ -1,7 +1,5 @@
-import Invite from "../invites/invites";
 import api from "../api/axiosConfig.js";
 import styles from "./dashboard.module.css"
-import { Toast } from "primereact/toast";
 import { useOutletContext } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Button } from "primereact/button";
@@ -9,7 +7,7 @@ import RequestJoinWorkspaceModal from "../components/modals/RequestJoinWorkspace
 
 function Dashboard({toast}) {
 
-  const { toastNotifications, setNotifications, user, workspace } = useOutletContext();
+  const { user, workspace } = useOutletContext();
   const [requestJoinWorkspaceVisible, setRequestJoinWorkspaceVisible] = useState(false);
   const [pendingUser, setPendingUser] = useState([])
 
@@ -19,18 +17,6 @@ function Dashboard({toast}) {
       setPendingUser(res.data.pending)
     })
   }, [])
-
-  // Function to handle removing notifications
-  const handleRemove = async (id) => {
-    try {
-      await api.post("/workspace/delete-notification", {
-        notification_id: id, 
-      })
-        setNotifications((prev) => prev.filter(n => n.id !== id));
-    } catch (error){
-      console.log(error)
-    }
-  }
 
   return (
     <div className={styles.container}>
@@ -52,7 +38,6 @@ function Dashboard({toast}) {
         )}
         
         {/* This is how and where the notifications are loaded */}
-        <Toast className={styles.d_toast} ref={toastNotifications} onRemove={(message) => handleRemove(message.id)} position="top-right" />
     </div>
   );
 }

@@ -3,7 +3,7 @@ import styles from "./header.module.css"
 import { FiSidebar } from "react-icons/fi";
 import Notification from "../notifications/Notification.jsx";
 import { Button } from "primereact/button";
-import { Badge } from "primereact/badge"
+import { Badge } from "primereact/badge";
 
 function Header({firstname, lastname, workspace, sidebarVisible, setSidebarVisible, toastRef, notifications = []}){
     const [isNotificationsVisible, setIsNotificationsVisible] = useState(false);
