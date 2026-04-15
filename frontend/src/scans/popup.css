@@ -19,3 +19,67 @@
     padding: 20px;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
 }
+
+.popup-header {
+    width: 100%;
+    margin-bottom: 16px;
+}
+
+.popup-header-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.popup-file-name {
+    font-size: 26px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.popup-file-hash {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.popup-hash-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.popup-hash-value {
+    margin-top: 4px;
+    padding: 8px 10px;
+
+    background: #F9FAFB;
+    border: 1px solid #E5E7EB;
+    border-radius: 6px;
+
+    font-size: 13px;
+    font-family: "Courier New", Courier, monospace;
+    color: black;
+
+    word-break: break-all;
+}
+
+
+
+.popup-duplicates-heading {
+    display: block;
+    margin-top: 16px;
+    margin-bottom: 8px;
+
+    font-size: 16px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.duplicate-popup-card {
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    padding: 12px;
+    background: white;
+}

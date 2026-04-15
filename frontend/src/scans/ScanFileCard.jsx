@@ -194,7 +194,7 @@ function ScanFileCard({scan_file, scan_type, scan_files}) {
         </div>
 
         {showPopUp && (
-            <DuplicatePopUp duplicates={duplicateFiles} onClose={() => setShowPopup(false)} />
+            <DuplicatePopUp scan_file={scan_file}duplicates={duplicateFiles} onClose={() => setShowPopup(false)} />
         )}
         </>
     )
