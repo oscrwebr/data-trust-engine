@@ -158,7 +158,7 @@ def get_file_latest_scan_results(db: Session, file_id: int):
 
 # Get latest scan results of all files provided in bulk
 def get_latest_scan_results_for_files(db: Session, file_ids: list[int]):
-    rows = repository.get_latest_scan_detection_summary_for_all_files(db=db, file_ids=file_ids)
+    rows = repository.get_latest_scan_detection_summary_for_files(db=db, file_ids=file_ids)
     subcategory_category_map = repository.get_subcategory_category_map(db=db)
     
     results_by_file = {}
