@@ -15,7 +15,7 @@ import {
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
-function FilesDashboard(toast) {
+function FilesDashboard({ toast }) {
   const [tree, setTree] = useState([]);
   const [expanded, setExpanded] = useState({});
   const [loading, setLoading] = useState(true);
@@ -137,14 +137,14 @@ function FilesDashboard(toast) {
         graph_file_ids: selectedFiles
       });
   
-      toast.current.show({ severity: 'info', summary: 'Info', detail: '.', life: 4000});
+      toast.current.show({ severity: 'info', summary: 'Info', detail: 'Scanned.', life: 4000});
       setSelectedFiles([]);
     } catch (err) {
       console.error(err.response?.data || err);
             toast.current.show({ severity: 'error', summary: 'Error', detail: 'Failed to start scan.', life: 4000});
     } finally {
       setScanning(false);
-    }
+      }
   };
 
   const getFileIcon = (file) => {
