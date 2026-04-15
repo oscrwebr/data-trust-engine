@@ -1,8 +1,8 @@
-"""recreating db
+"""Added new table ViolationEmaiL
 
-Revision ID: 96737d4fd1d3
+Revision ID: 8d2c4568cf0d
 Revises: 
-Create Date: 2026-04-08 16:17:03.203193
+Create Date: 2026-04-14 14:05:40.033428
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision: str = '96737d4fd1d3'
+revision: str = '8d2c4568cf0d'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None

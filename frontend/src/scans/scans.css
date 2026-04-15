@@ -271,6 +271,7 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
     gap: 10px;
+    align-items: start;
 }
 
 .sensitivity-scan-page-file-container {
@@ -362,6 +363,7 @@
     column-gap: 40px;
     width: 100%;
     margin-top: 6px;
+    min-width: 0;
 }
 
 .scan-file-issue {
@@ -377,6 +379,19 @@
     
 }
 
+.scan-file-suggested-text span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    max-width: 250px;
+}
+
+.scan-file-duplicates-heading {
+    color: #bd461f;
+    font-size: 13px;
+    font-weight: 600;
+}
 
 .scan-file-issue-text {
     font-size: 14px;
@@ -389,6 +404,7 @@
     display: flex;
     flex-direction: column;
     gap: 2px;
+    align-items: flex-start;
 }
 
 .scan-file-suggested-heading {
@@ -464,4 +480,25 @@
 
 .sensitivity-scan-file-button:hover {
     background: #555555;
+}
+
+.duplicate-scan-file-button {
+    align-items: center;
+    display: flex;
+    gap: 5px;
+    font-size: 13px;
+    padding: 4px 10px;
+    border-radius: 5px;
+    border: none;
+    background: #BB4D00;
+    color: white;
+    cursor: pointer;
+}
+
+.duplicate-scan-file-button:hover {
+    background: #E07040;
+}
+
+.scan-file-details-wrapper {
+    width: 100%;
 }

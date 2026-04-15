@@ -1,20 +1,23 @@
 import { FiSidebar } from "react-icons/fi";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import logo from "../../assets/CIH_long_logo.png";
 import styles from "./navbar.module.css"
 import SidebarDropdown from "../dropdown/dropdown";
 import DropdownItem from "./DropdownItem";
+import DropdownItemNoLink from "./DropdownItemNoLink.jsx";
 import api from "../../api/axiosConfig";
 import { Avatar } from "primereact/avatar";
+import { setAccessToken, getAccessToken } from "../../Auth/authStore.js";
 import { BiFileFind } from "react-icons/bi";
         
 function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role}){
     const [openDropdown, setOpenDropdown] = useState(null);
-    const [pendingEmployees, setPendingEmployees] = useState([])
-    const [workspace_id, setWorkspaceId] = useState(null)
+    const [pendingEmployees, setPendingEmployees] = useState([]);
+    const [workspace_id, setWorkspaceId] = useState(null);
     const backend_uri = import.meta.env.VITE_BACKEND_HOST || "http://localhost:8000"
     const user_initials = (firstname?.[0]?.toUpperCase() || "?") + (surname?.[0]?.toUpperCase() || "?");
+    const nav = useNavigate();
 
     useEffect(() => {
         api.get("/workspace/dashboard")
@@ -27,6 +30,22 @@ function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role
             setPendingEmployees(res.data)
         })
     }, []);
+
+    async function signOut() {
+        console.log(`This is the access token before removal${getAccessToken()}`);
+        // Hitting the signout endpoint to remove refresh token 
+        let logoutStatus = 400
+        await api.post("/auth/logout")
+        .then(res => {
+            logoutStatus = res.status
+        })
+        .catch(err => {
+        });
+        // Clearing the access token from local memory
+        setAccessToken(null);
+        // redirecting user to the homepage
+        nav("/", {state: {status_code: logoutStatus}})
+    }
 
     return(
         <div className={styles.container}>
@@ -77,7 +96,7 @@ function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role
 
                     {/* Add regular navbar items here, specifying the url and the text you want displayed on the navbar */}
                     <DropdownItem url="/settings" text="Settings" icon="pi pi-cog"/>
-                    <DropdownItem text="Sign-out" icon="pi pi-sign-out"/>
+                    <DropdownItemNoLink onClick={() => signOut()} text="Sign-out" icon="pi pi-sign-out"/>
                     <div className={styles.line}/>
                 </div> 
                 <div className={styles.user_info_container}>
@@ -111,7 +130,7 @@ function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role
                     <DropdownItem className={styles.navbar_item} url="/dashboard" text="Dashboard" icon="pi pi-th-large"/>
                     <div className={styles.line}/>
                     <DropdownItem url="/settings" text="Settings" icon="pi pi-cog"/>
-                    <DropdownItem text="Sign-out" icon="pi pi-sign-out"/>
+                    <DropdownItemNoLink onClick={() => signOut()} text="Sign-out" icon="pi pi-sign-out"/>
                     <div className={styles.line}/>
                 </div> 
                 <div className={styles.user_info_container}>

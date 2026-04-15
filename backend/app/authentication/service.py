@@ -86,16 +86,6 @@ def create_access_refresh(db: Session, data: dict, refresh_family_id: int | None
     
     new_entry = repository.create_refresh(db=db, uid=data['userId'], hashed_token=hashed_token, expiry=refresh_token.expiry_date, refresh_family_id=refresh_family_id, access_token=access_token)
     return access_token, refresh_token, new_entry
-
-def update_refresh(refresh_token: str, expiry_date: datetime, db): # This doesn't seem to be used anywhere??
-    hashed_token = hash_user_refresh_token(refresh_token)
-    print(f"refresh token from client: {refresh_token} -- hashed token: {hashed_token}")
-    matched_refresh = repository.verify_refresh(hashed_token=hashed_token, expiry=expiry_date, db=db)
-    # check if the refresh has been used before
-    if matched_refresh.replaced_by:
-        return "This has been replaced! Compromised tokens! Delete chain immediately!"
-    else:
-        return "We are ready to roll baby!"
     
 def refresh_flow(db, client_refresh: str, current_time: datetime):
     """
@@ -114,9 +104,14 @@ def refresh_flow(db, client_refresh: str, current_time: datetime):
     # Check if there is a family, and whether it has been revoked
     if refresh_family_id := refresh_details.refresh_family_id: # checks whether there is anything in that column for the row
         refresh_family = repository.get_by_refresh_family_id(db=db, refresh_family_id=refresh_family_id)
-        if refresh_family.is_revoked: # Does this need to be nested?
+        if refresh_family.is_revoked:
             print("This token family is revoked!")
             return return_dict
+        if refresh_family.is_disconnected:
+            repository.revoke_refresh_family(db, refresh_details.refresh_family_id)
+            print("this family is disconnected! It is now revoked!")
+            return return_dict
+
     # Check that the token has not been replaced by another token yet
     if refresh_details.replaced_by:
         # These are checks incase the client has sent multiple requests at once within the grace period of 30 seconds
@@ -221,5 +216,33 @@ def get_pending_by_email(db: Session, email: str):
 def add_pending_user(db: Session, email: str, type: str):
     return repository.add_user(db, email, type)
 
+def log_out_flow(db: Session, client_refresh: str, current_time: datetime):
+    '''
+    Function that will handle user's when they log out. 
+    - Checks that refresh token is the latest by checking whether it has been replaced ('by' and 'at')
+    - Checks that the associated refresh_family is not revoked and is not also logged out
+    - If there are multiple logouts with the same refresh token - it will allow a grace period of 30 seconds in case of repeat requests to log out by the client - if > 30 seconds, the refresh family will be revoked
+    '''
+    # Getting the refresh token by from the string obtained by the visiting user
+    hashed_token = hash_user_refresh_token(client_refresh)
+    refresh_details = repository.get_refresh_details_by_token(db=db, hashed_token=hashed_token)
 
-    
+    # Checking that this is the latest version of the refresh token - if not, time delay doesn't matter here. The refresh family must be revoked!
+    if refresh_details.replaced_by:
+        repository.revoke_refresh_family(db, refresh_details.refresh_family_id)
+        return
+    # Checking whether the token has been revoked
+    refresh_family_details = repository.get_by_refresh_family_id(db=db, refresh_family_id=refresh_details.refresh_family_id)
+    if refresh_family_details.is_revoked:
+        return
+    # Checking whether the token has been disconnected
+    if refresh_family_details.is_disconnected:
+        # Check whether the token has been disconnected in the last 30 seconds
+        if refresh_details.replaced_at.replace(tzinfo=timezone.utc) + timedelta(seconds=30) > current_time:
+            return
+        # This means that someone is reusing an old refresh token to logout - must revoke refresh_family!
+        repository.revoke_refresh_family(db, refresh_details.refresh_family_id)
+        return
+    # If this point is reached, all checks have passed - can update the replaced_at time and set the refresh_family 'is_disconnected' value to true
+    repository.disconnect_refresh_family(db=db, refresh_family_id=refresh_details.refresh_family_id)
+    repository.update_refresh_replaced_at(db=db, refresh_id=refresh_details.refresh_id)

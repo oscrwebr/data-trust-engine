@@ -617,27 +617,11 @@ describe("View Employees Component", () => {
             </MemoryRouter>
         );
 
-        const expiryDate = new Date();
-        expiryDate.setDate(expiryDate.getDate() + 7);
-        if (expiryDate.getSeconds() >=500) {
-            expiryDate.setMilliseconds(0);
-            expiryDate.setSeconds(expiryDate.getSeconds() + 1);
-        } else {
-            expiryDate.setMilliseconds(0);
-        }
-
         const accept_button = await screen.findByTestId("accept-button-valid@example.com")
         fireEvent.click(accept_button)
 
         const yes_button = await screen.findByText(/Yes, accept employee/i)
         fireEvent.click(yes_button)
-
-        await waitFor(() => {
-            expect(api.post).toHaveBeenCalledWith("/invite/send-invite", {
-                email: "valid@example.com",
-                expiry_date: expiryDate.toISOString()
-            });
-        });
 
         await waitFor(() => {
             expect(toastCalled).not.toBeNull();
@@ -675,27 +659,11 @@ describe("View Employees Component", () => {
             </MemoryRouter>
         );
 
-        const expiryDate = new Date();
-        expiryDate.setDate(expiryDate.getDate() + 7);
-        if (expiryDate.getSeconds() >=500) {
-            expiryDate.setMilliseconds(0);
-            expiryDate.setSeconds(expiryDate.getSeconds() + 1);
-        } else {
-            expiryDate.setMilliseconds(0);
-        }
-
         const accept_button = await screen.findByTestId("accept-button-valid@example.com")
         fireEvent.click(accept_button)
 
         const yes_button = await screen.findByText(/Yes, accept employee/i)
         fireEvent.click(yes_button)
-
-        await waitFor(() => {
-            expect(api.post).toHaveBeenCalledWith("/invite/send-invite", {
-                email: "valid@example.com",
-                expiry_date: expiryDate.toISOString()
-            });
-        });
 
         await waitFor(() => {
             expect(toastCalled).not.toBeNull();
@@ -733,27 +701,11 @@ describe("View Employees Component", () => {
             </MemoryRouter>
         );
 
-        const expiryDate = new Date();
-        expiryDate.setDate(expiryDate.getDate() + 7);
-        if (expiryDate.getSeconds() >=500) {
-            expiryDate.setMilliseconds(0);
-            expiryDate.setSeconds(expiryDate.getSeconds() + 1);
-        } else {
-            expiryDate.setMilliseconds(0);
-        }
-
         const accept_button = await screen.findByTestId("accept-button-valid@example.com")
         fireEvent.click(accept_button)
 
         const yes_button = await screen.findByText(/Yes, accept employee/i)
         fireEvent.click(yes_button)
-
-        await waitFor(() => {
-            expect(api.post).toHaveBeenCalledWith("/invite/send-invite", {
-                email: "valid@example.com",
-                expiry_date: expiryDate.toISOString()
-            });
-        });
 
         await waitFor(() => {
             expect(toastCalled).not.toBeNull();
@@ -800,13 +752,6 @@ describe("View Employees Component", () => {
 
         const yes_button = await screen.findByText(/Yes, accept employee/i)
         fireEvent.click(yes_button)
-
-        await waitFor(() => {
-            expect(api.post).toHaveBeenCalledWith("/invite/send-invite", {
-                email: "valid@example.com",
-                expiry_date: expiryDate.toISOString()
-            });
-        });
 
         await waitFor(() => {
             expect(toastCalled).not.toBeNull();

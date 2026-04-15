@@ -18,7 +18,7 @@ function Dashboard({toast}) {
     .then(res => {
       setPendingUser(res.data.pending)
     })
-  })
+  }, [])
 
   // Function to handle removing notifications
   const handleRemove = async (id) => {

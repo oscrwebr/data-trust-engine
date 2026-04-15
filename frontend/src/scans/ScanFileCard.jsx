@@ -4,13 +4,29 @@ import { formatNamingConventionName } from "./utils/formatNamingConventionName";
 import { formatSubcategoryText } from "./utils/formatSubcategoryText";
 import { PiMagnifyingGlassBold } from "react-icons/pi";
 import { useNavigate } from "react-router-dom";
+import { PiCopySimpleBold } from "react-icons/pi";
+import { useState } from "react";
+import DuplicatePopUp from "./DuplicatePopUp";
 
 
 
 
-function ScanFileCard({scan_file, scan_type}) {
+
+function ScanFileCard({scan_file, scan_type, scan_files}) {
 
     const navigate = useNavigate();
+
+    const [showPopUp, setShowPopup] = useState(false);
+
+    const duplicateFiles = scan_file.duplicate_group_id ?
+                            scan_files.filter(file => 
+                            // Check for scan files with the same duplicate group id
+                            file.duplicate_group_id === scan_file.duplicate_group_id 
+                            // Don't display the scanned file as a duplicate of itself in the pop up (only want other files)
+                            && file.scan_file_id !== scan_file.scan_file_id)
+                        // Check whether the file has a duplicate group (first line), otherwise return an empty array
+                        : [];
+            
 
     const issues = []
     // Issue check for organisational scan files
@@ -26,6 +42,12 @@ function ScanFileCard({scan_file, scan_type}) {
                 naming_convention: scan_file.naming_convention_scan_results.map(result => result.naming_convention_name),
                 suggested_name: scan_file.naming_convention_scan_results.map(result => result.suggested_name)
             });
+        }
+
+        if (scan_file.duplicate_group_id != null) {
+            issues.push({
+                type: "Duplicate File"
+            })
         }
         
     }
@@ -56,6 +78,7 @@ function ScanFileCard({scan_file, scan_type}) {
                             
 
     return (
+        <>
         <div className={`scan-page-file-card ${cardClass} scan-page-link-fix`} onClick={() => navigate(`/files/${scan_file.file_id}`)}>
             <div className="scan-file-top">
                 <div className="scan-file-top-left">
@@ -77,7 +100,7 @@ function ScanFileCard({scan_file, scan_type}) {
                 <span>{scan_file.file_name}</span>
             </div>
             {scan_type === "organisation" && issues.length > 0 && (
-                <div>
+                <div className="scan-file-details-wrapper">
                     {issues.map((issue, index) => (
                         <div key={index} className="scan-file-details">
                             {issue.type === "Naming Issue" && (
@@ -103,12 +126,40 @@ function ScanFileCard({scan_file, scan_type}) {
                                     
                             )}
 
+                            {issue.type === "Duplicate File" && (
+                                <>
+                                <div className="scan-file-issue">
+                                    <div className="scan-file-issue-text-heading">
+                                        <span>Issue:</span>
+                                    </div>
+                                    <div className="scan-file-issue-text">
+                                        <span>File is a duplicate</span>
+                                    </div>
+                                </div>
+
+                                <div className="scan-file-suggested">
+                                    <div className="scan-file-duplicates-heading">
+                                        <span>Manage Duplicates</span>
+                                    </div>
+                                    <button className="duplicate-scan-file-button"
+                                    // Link inside a link code adapted from: 
+                                    // https://stackoverflow.com/a/30362416
+                                    // Opens pop up to view duplicate files related to the scanned file
+                                            onClick={(event) => {event.preventDefault(); event.stopPropagation(); setShowPopup(true)}}
+                                    >
+                                        <PiCopySimpleBold /> View Duplicates
+                                    </button>
+                                </div>
+                                </>
+                            )}
+
                         </div>
                     ))}
 
                 </div>
                 
             )}
+
 
             {scan_type === "sensitivity" && issues.length > 0 && (
                 <>
@@ -141,6 +192,11 @@ function ScanFileCard({scan_file, scan_type}) {
             )}
 
         </div>
+
+        {showPopUp && (
+            <DuplicatePopUp duplicates={duplicateFiles} onClose={() => setShowPopup(false)} />
+        )}
+        </>
     )
 }
 
