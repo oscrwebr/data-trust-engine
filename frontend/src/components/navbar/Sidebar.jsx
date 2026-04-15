@@ -71,6 +71,7 @@ function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role
                     <div className={styles.line}/>
                     <SidebarDropdown className={styles.dropdown} icon="pi pi-file" label="Files" openDropdown={openDropdown} setOpenDropdown={setOpenDropdown}>
                        <DropdownItem url="/dashboard-files" text="View Files"/>
+                       <DropdownItem url="/admin-files" text="Admin Files"/>
                     </SidebarDropdown>
                     {/* Add a dropdown menu item using SidebarDropdown - choose your own label, an icon from PrimeReact and everything else can be kept the same*/}
                     <SidebarDropdown className={styles.dropdown} icon="pi pi-search" label="Scanning" openDropdown={openDropdown} setOpenDropdown={setOpenDropdown} basePaths={["/files"]}>

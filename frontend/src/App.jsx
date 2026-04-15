@@ -11,7 +11,7 @@ import FileOverviewPage from "./FileOverview/FileOverviewPage.jsx";
 import { Toast } from 'primereact/toast';
 import Scans from "./scans/Scans.jsx";
 import FilesDashboard from "./FilesDashboard/filesDashboard.jsx";
-
+import AdminFiles from "./AdminFiles/adminFiles.jsx"
 import Test from "./Test/Test.jsx";
 import Unprocessable422 from "./Errors/Unprocessable422.jsx";
 import WorkspaceJoinedError from "./invites/WorkspaceJoined.jsx";
@@ -46,6 +46,7 @@ function App() {
           <Route path="/settings" element={null} />
           <Route path="/dashboard" element={<Dashboard toast={toast}/>} />
           <Route path="/dashboard-files" element={<FilesDashboard toast={toast}/>} />
+          <Route path="/admin-files" element={<AdminFiles toast={toast}/>} />
           <Route path="/files/:file_id" element={<FileOverviewPage toast={toast}/>} />
           <Route path="/scans" element={<Scans />} />
           <Route path="/scans/:scanId" element={<ScanPage/>} />
