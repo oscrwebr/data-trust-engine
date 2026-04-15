@@ -7,9 +7,9 @@ def test_get_file_employees_with_access_sets_unknown_when_file_not_scanned(monke
     test_employee_records = [
         SimpleNamespace(
             user_id=1,
-            firstname="Szymon",
-            surname="Wodkiewicz",
-            email="szymon@test.com",
+            firstname="Test",
+            surname="Account",
+            email="testaccount@test.com",
             role_name="PII Role"
         )
     ]
@@ -22,10 +22,10 @@ def test_get_file_employees_with_access_sets_unknown_when_file_not_scanned(monke
     )
 
     # Mock the check_file_has_scan service method (simulates that it returns False)
-    monkeypatch.setattr(service, "check_file_has_scan", lambda db, file_id: False)
+    monkeypatch.setattr(service.scanning_service, "check_file_has_scan", lambda db, file_id: False)
 
     # Mock the get_file_latest_scan_results service method (simulates that it has no scan results at all)
-    monkeypatch.setattr(service, "get_file_latest_scan_results", lambda db, file_id: [])
+    monkeypatch.setattr(service.scanning_service, "get_file_latest_scan_results", lambda db, file_id: [])
 
     result = service.get_file_employees_with_access(db=Mock(), file_id=123)
 
@@ -42,9 +42,9 @@ def test_get_file_employees_with_access_returns_failed_detections_for_denied_emp
     test_employee_records = [
         SimpleNamespace(
             user_id=1,
-            firstname="Szymon",
-            surname="Wodkiewicz",
-            email="szymon@test.com",
+            firstname="Test",
+            surname="Account",
+            email="testaccount@test.com",
             role_name="PII Role"
         )
     ]
@@ -57,11 +57,11 @@ def test_get_file_employees_with_access_returns_failed_detections_for_denied_emp
     )
 
     # Mock check_file_has_scan service method to return True
-    monkeypatch.setattr(service, "check_file_has_scan", lambda db, file_id: True)
+    monkeypatch.setattr(service.scanning_service, "check_file_has_scan", lambda db, file_id: True)
 
     # Mock get_file_latest_scan_results service method to return 8 name detections
     monkeypatch.setattr(
-        service,
+        service.scanning_service,
         "get_file_latest_scan_results",
         lambda db, file_id: [{"subcategory": "NAME", "count": 8}]
     )
@@ -96,9 +96,9 @@ def test_get_file_employees_with_access_allows_employee_when_threshold_not_excee
     test_employee_records = [
         SimpleNamespace(
             user_id=1,
-            firstname="Szymon",
-            surname="Wodkiewicz",
-            email="szymon@test.com",
+            firstname="Test",
+            surname="Account",
+            email="testaccount@test.com",
             role_name="PII Role"
         )
     ]
@@ -111,11 +111,11 @@ def test_get_file_employees_with_access_allows_employee_when_threshold_not_excee
     ) 
 
     # Mock check_file_has_scan service method to return True
-    monkeypatch.setattr(service, "check_file_has_scan", lambda db, file_id: True)
+    monkeypatch.setattr(service.scanning_service, "check_file_has_scan", lambda db, file_id: True)
 
     # Mock get_file_latest_scan_results service method to return 3 name detections
     monkeypatch.setattr(
-        service,
+        service.scanning_service,
         "get_file_latest_scan_results",
         lambda db, file_id: [{"subcategory": "NAME", "count": 3}]
     )
