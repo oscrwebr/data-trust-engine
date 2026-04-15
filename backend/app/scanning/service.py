@@ -156,6 +156,38 @@ def get_file_latest_scan_results(db: Session, file_id: int):
     return latest_scan_results
 
 
+# Get latest scan results of all files provided in bulk
+def get_latest_scan_results_for_all_files(db: Session, file_ids: list[int]):
+    rows = repository.get_latest_scan_detection_summary_for_all_files(db=db, file_ids=file_ids)
+    subcategory_category_map = repository.get_subcategory_category_map(db=db)
+    
+    results_by_file = {}
+
+    # Iterate through all results and append to results_by_file dictionary
+    for row in rows:
+        if row.file_id not in results_by_file:
+            results_by_file[row.file_id] = []
+
+        results_by_file[row.file_id].append({
+            "category": subcategory_category_map.get(row.sensitivity_subcategory, "Other"),
+            "subcategory": row.sensitivity_subcategory,
+            "count": row.count
+        })
+
+    return results_by_file
+
+
+# Get scan status for all files provided in bulk
+def get_scan_statuses_for_all_files(db: Session, file_ids: list[int]):
+    scanned_file_ids = repository.get_scanned_file_ids(db=db, file_ids=file_ids)
+    scanned_file_ids_set = set(scanned_file_ids)
+
+    return {
+        file_id: file_id in scanned_file_ids_set
+        for file_id in file_ids
+    }
+
+
 # Check if the provided file has been scanned at all
 def check_file_has_scan(db: Session, file_id: int):
     return repository.check_file_has_scan(db, file_id)
