@@ -88,6 +88,7 @@
 .progress_row {
     display: flex;
     align-items: center;
+    gap: 0.6rem;
 }
 
 .progress_bar {
@@ -95,8 +96,8 @@
     height: 8px;
     border-radius: 999px;
     background-color: #e5e7eb;
-    position: relative;
     overflow: hidden;
+    flex-shrink: 0;
 }
 
 .progress_fill {
@@ -106,11 +107,10 @@
 }
 
 .progress_text {
-    position: absolute;
-    top: -18px;
-    right: 0;
     font-size: 0.75rem;
     color: #6b7280;
+    margin: 0;
+    min-width: 32px;
 }
 
 .file_access_counts {

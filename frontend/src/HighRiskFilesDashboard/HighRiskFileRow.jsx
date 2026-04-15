@@ -40,10 +40,11 @@ function HighRiskFileRow({ file }) {
                 <div className={styles.progress_row}>
                     <div className={styles.progress_bar}>
                         <div className={styles.progress_fill} style={{ width: `${file.valid_access_percentage}%` }}/>
-                        <p className={styles.progress_text}>
-                            {Math.round(file.valid_access_percentage)}%
-                        </p>
                     </div>
+
+                    <p className={styles.progress_text}>
+                        {Math.round(file.valid_access_percentage)}%
+                    </p>
                 </div>
                 <div className={styles.file_access_counts}>
                     {file.valid_access_count} valid, {file.invalid_access_count} invalid
