@@ -62,3 +62,6 @@ function HighRiskFileRow({ file }) {
         </div>
     )
 }
+
+
+export default HighRiskFileRow;

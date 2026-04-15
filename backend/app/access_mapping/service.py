@@ -38,6 +38,7 @@ def get_highest_risk_files(db: Session, limit: int, offset: int):
 
     # Iterate through every file and get its risk details and append to list
     for file in files:
+        print("file:", file.name)
         file_risk_details = get_file_risk_details(
                 db=db, 
                 file_id=file.ingestion_file_id, 

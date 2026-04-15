@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import HighRiskFileRow from "./HighRiskFileRow";
 
 import styles from "./HighRiskFilesDashboard.module.css";
 import { FaShieldAlt } from "react-icons/fa";
@@ -46,6 +47,27 @@ function HighRiskFilesDashboard() {
                     <h1 className={styles.page_title}>High-Risk Files Dashboard</h1>
                 </div>
                 <p className={styles.page_subtitle}>Your organisation's files ranked by access risk and sensitivity detections</p>
+            </div>
+
+            <div className={styles.high_risk_files_table}>
+                <div className={styles.high_risk_files_table_header}>
+                    <div>Risk</div>
+                    <div>File Name</div>
+                    <div>Employees with Access</div>
+                    <div>Valid Access</div>
+                    <div>Detections</div>
+                    <div></div>
+                </div>
+
+                {files.length > 0 ? (
+                    files.map((file) => (
+                        <HighRiskFileRow key={file.file_id}file={file}/>
+                    ))
+                ) : (
+                    <div className={styles.empty_state}>
+                        No high-risk files found.
+                    </div>
+                )}
             </div>
         </div>
     )
