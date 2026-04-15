@@ -2,6 +2,7 @@ import { useRef, useEffect } from "react";
 import { Button } from "primereact/button";
 import { useLocation, useNavigate } from "react-router-dom";
 import styles from "./home.module.css";
+import FeatureCard from "./FeatureCard";
 
 function Home({toast}) {
   const location = useLocation();
@@ -87,9 +88,34 @@ function Home({toast}) {
         </div>
         <div className={styles.line}/>
         <span className={styles.how_it_works}>How it Works</span>
-        <div className={styles.feature_card_container}>
-          
-        </div>
+          <div className={styles.feature_card_container}>
+            <FeatureCard
+              icon="pi pi-folder"
+              title="Automated Classification System"
+              description="Your digital librarian for unstructured company data. It scans files across drives, email, and cloud storage to detect sensitive information and provide instant visibility and control."
+              bullet_1="Automatically detects and tags sensitive files"
+              bullet_2="Builds an access map of user permissions"
+              bullet_3="Continuous monitoring for data exposure risks"
+            />
+
+            <FeatureCard
+              icon="pi pi-filter"
+              title="Security Noise Filter"
+              description="An intelligent alert system that cuts through thousands of daily security signals and surfaces only what truly matters. It turns overwhelming tool output into a clean, actionable security view."
+              bullet_1="Aggregates alerts into one unified stream"
+              bullet_2="Filters out irrelevant noise"
+              bullet_3="Highlights the top 3 most critical threats"
+            />
+
+            <FeatureCard
+              icon="pi pi-chart-line"
+              title="Universal Trust Score"
+              description="A single, executive-friendly score that translates complex security and compliance data into a clear measure of trust. Built for leadership, clients, and auditors who require clarity."
+              bullet_1="Unifies classification and threat detection data"
+              bullet_2="Accurate Trust Score or risk level indicator"
+              bullet_3="Converts security posture into simple reports"
+            />
+          </div>
       </div>
     </div>
   );
