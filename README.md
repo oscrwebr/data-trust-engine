@@ -31,7 +31,7 @@ There are two test profiles that are used in the pipelines. The primary use of t
 - Frontend:
     - `docker compose -- profile test-frontend up --build`
 - Backend:
-    - `docker compose --env-file <path/to/.env/file> -- profile test-frontend up --build`
+    - `docker compose --env-file <path/to/.env/file> -- profile test-backend up --build`
 
 
 ## Support
