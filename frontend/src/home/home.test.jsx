@@ -57,8 +57,8 @@ describe("Home Component", () => {
             </MemoryRouter>
         );
 
-        expect(await screen.findByText("Create a workspace")).toBeInTheDocument();
-        const button = screen.getByText("Create a workspace");
+        expect(await screen.findByText("Create a Workspace")).toBeInTheDocument();
+        const button = screen.getByText("Create a Workspace");
         fireEvent.click(button);
         
         expect(window.location.href).toBe(
