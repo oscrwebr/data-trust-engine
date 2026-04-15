@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { FaExclamationTriangle, FaRegFileAlt } from "react-icons/fa";
-import styles from "./HighRisKFileRow.module.css";
+import styles from "./HighRiskFileRow.module.css";
 
 function HighRiskFileRow({ file }) {
     const navigate = useNavigate();

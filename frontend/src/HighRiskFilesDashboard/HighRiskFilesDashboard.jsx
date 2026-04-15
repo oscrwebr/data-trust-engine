@@ -9,10 +9,13 @@ function HighRiskFilesDashboard() {
     const [files, set_files] = useState([]);
     const [loading, set_loading] = useState(true);
     const [error, set_error] = useState(true);
+    const [current_page, set_current_page] = useState(1);
+    const [total_files, set_total_files] = useState(0);
 
     const backend_uri = import.meta.env.VITE_BACKEND_HOST || "http://localhost:8000"
 
-    const navigate = useNavigate();
+    // Number of files to how per page
+    const page_size = 10;
 
     useEffect(() => {
         const fetch_high_risk_files = async() => {
@@ -21,10 +24,14 @@ function HighRiskFilesDashboard() {
                 set_loading(true);
                 set_error(null);
 
-                const files_response = await fetch(`${backend_uri}/access_mapping/get_highest_risk_files`);
+                // Offset determines the "page" to show (which set of 10 files)
+                const offset = (current_page - 1) * page_size;
+
+                const files_response = await fetch(`${backend_uri}/access_mapping/get_highest_risk_files?limit=${page_size}&offset=${offset}`);
                 const files_data = await files_response.json();
 
                 set_files(files_data);
+                set_total_files(files_data.total);
             } catch (error) {
                 set_error("Failed to load high risk files.")
             } finally {
@@ -33,7 +40,21 @@ function HighRiskFilesDashboard() {
         }
 
         fetch_high_risk_files();
-    }, []);
+    }, [backend_uri, current_page]);
+
+    const total_pages = Math.ceil(total_files / page_size);
+
+    function go_to_previous_page() {
+        if (current_page > 1) {
+            set_current_page(current_page - 1);
+        }
+    }
+
+    function go_to_next_page() {
+        if (current_page < total_pages) {
+            set_current_page(current_page + 1);
+        }
+    }
 
     if (loading) return <p>High risk files loading...</p>
 
@@ -68,6 +89,20 @@ function HighRiskFilesDashboard() {
                         No high-risk files found.
                     </div>
                 )}
+            </div>
+
+            <div className={styles.pagination_controls}>
+                <button className={styles.pagination_button} onClick={go_to_previous_page} disabled={current_page === 1}>
+                    Previous
+                </button>
+
+                <p className={styles.pagination_text}>
+                    Page {current_page} of {total_pages || 1}
+                </p>
+
+                <button className={styles.pagination_button} onClick={go_to_next_page} disabled={current_page >= total_pages}>
+                    Next
+                </button>
             </div>
         </div>
     )
