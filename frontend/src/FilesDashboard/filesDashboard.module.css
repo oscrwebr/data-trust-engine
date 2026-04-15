@@ -1,0 +1,149 @@
+.pageContainer {
+  padding: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* Title */
+.title {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+/* Tree wrapper */
+.treeContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Folder */
+.folder {
+  margin-left: 6px;
+}
+
+/* Folder header */
+.folderHeader {
+  cursor: pointer;
+  font-weight: 500;
+  padding: 6px 10px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.folderHeader:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+/* Children container */
+.children {
+  margin-left: 18px;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px dashed rgba(0, 0, 0, 0.1);
+  padding-left: 10px;
+}
+
+/* File row */
+.file {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: 10px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.15s ease;
+}
+
+/* Hover effect */
+.file:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* File name clickable area */
+.file span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Checkbox spacing */
+.file input[type="checkbox"] {
+  cursor: pointer;
+  transform: scale(1.05);
+}
+
+/* Scan button */
+.scanButton {
+  margin-bottom: 16px;
+  padding: 10px 16px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Hover */
+.scanButton:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+/* Disabled state */
+.scanButton:disabled {
+  background: #cbd5e1;
+  cursor: not-allowed;
+}
+
+/* Messages */
+.message {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.error {
+  color: #dc2626;
+  font-weight: 500;
+}
+
+/* Optional: subtle card feel */
+.treeContainer {
+  padding: 12px;
+  border-radius: 12px;
+  background: #fafafa;
+  border: 1px solid #eee;
+}
+
+.sharedFile {
+  background-color: #e6f0ff; /* light blue */
+  border-left: 4px solid #007bff;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #ccc;
+  border-top: 2px solid #333;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 8px;
+  animation: spin 0.8s linear infinite;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
