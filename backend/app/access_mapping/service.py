@@ -34,6 +34,12 @@ def get_file_employees_with_access(db: Session, file_id: int):
 def get_highest_risk_files(db: Session, limit: int, offset: int):
     files = ingestion_repository.get_all_files(db=db)
 
+    # Get file id of every fetched files and put into list
+    file_ids = [file.ingestion_file_id for file in files]
+
+    # Fetch all scan results and employee records in bulk so that only one call is performed instead of one PER file
+    latest_scan_results_by_files = 
+
     highest_risk_files = []
 
     # Iterate through every file and get its risk details and append to list
