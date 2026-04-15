@@ -182,8 +182,10 @@ function FilesDashboard() {
           {folder.children.map(renderFolder)}
 
           {folder.files.map(file => (
-            <div key={file.file_id} className={styles.file}>
-
+            <div
+              key={file.file_id}
+              className={`${styles.file} ${file.is_shared ? styles.sharedFile : ""}`}
+            >
               {isAdmin && (
                 <input
                   type="checkbox"

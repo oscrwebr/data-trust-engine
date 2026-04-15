@@ -11,7 +11,7 @@ INSERT INTO `user` (`user_id`, `firstname`, `surname`, `username`, `email`, `oid
 (6, 'Margaret', 'Plums', 'margaret@example.com', 'margaret@example.com', 'oid5', 'kasdjfh', 'employee'),
 (7, 'Daiyan', 'Khan', 'daiyan@example.com', 'daiyan@example.com', 'oid6', 'kasdjfh', 'employee'),
 (8, 'Oscar', 'Webster', 'oscar@example.com', 'oscar@example.com', 'oid7', 'kasdjfh', 'employee'),
-(9, 'Sam', 'Carter', 'samtc.1107@gmail.com', 'samtc.1107@gmail.com', '00000000-0000-0000-e24b-a6db04ddcd03', 'kasdjfh', 'admin'),
+(9, 'Sam', 'Carter', 'samtc.1107.11@gmail.com', 'samtc.1107.11@gmail.com', 'oid8', 'kasdjfh', 'employee'),
 (10, 'Elizabeth', 'Palmer', 'elizabeth@example.com', 'elizabeth@example.com', 'oid9', 'kasdjfh', 'employee'),
 (11, 'Susan', 'Younger', 'susan@example.com', 'susan@example.com', 'oid10', 'kasdjfh', 'employee');
 

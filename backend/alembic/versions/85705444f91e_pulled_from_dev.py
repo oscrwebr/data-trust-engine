@@ -1,8 +1,8 @@
-"""Added new table ViolationEmaiL
+"""pulled from dev
 
-Revision ID: 8d2c4568cf0d
+Revision ID: 85705444f91e
 Revises: 
-Create Date: 2026-04-14 14:05:40.033428
+Create Date: 2026-04-15 18:25:42.705587
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision: str = '8d2c4568cf0d'
+revision: str = '85705444f91e'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -58,7 +58,8 @@ def upgrade() -> None:
     op.create_index(op.f('ix_pending_users_user_id'), 'pending_users', ['user_id'], unique=False)
     op.create_table('refresh_family',
     sa.Column('refresh_family_id', sa.Integer(), nullable=False),
-    sa.Column('is_revoked', sa.Boolean(), nullable=True),
+    sa.Column('is_revoked', sa.Boolean(), nullable=False),
+    sa.Column('is_disconnected', sa.Boolean(), nullable=False),
     sa.PrimaryKeyConstraint('refresh_family_id')
     )
     op.create_index(op.f('ix_refresh_family_refresh_family_id'), 'refresh_family', ['refresh_family_id'], unique=False)
@@ -99,6 +100,13 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_workspaces_id'), 'workspaces', ['id'], unique=False)
+    op.create_table('duplicate_group',
+    sa.Column('duplicate_group_id', sa.Integer(), nullable=False),
+    sa.Column('scan_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['scan_id'], ['scans.scan_id'], ),
+    sa.PrimaryKeyConstraint('duplicate_group_id')
+    )
+    op.create_index(op.f('ix_duplicate_group_duplicate_group_id'), 'duplicate_group', ['duplicate_group_id'], unique=False)
     op.create_table('ingestion_file',
     sa.Column('ingestion_file_id', sa.Integer(), nullable=False),
     sa.Column('graph_id', sa.String(length=100), nullable=False),
@@ -204,6 +212,16 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['workspace_id'], ['workspaces.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('user_id', 'workspace_id')
     )
+    op.create_table('violation_emails',
+    sa.Column('violation_email_id', sa.Integer(), nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.Column('admin_id', sa.Integer(), nullable=True),
+    sa.Column('employee_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['admin_id'], ['user.user_id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['employee_id'], ['user.user_id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('violation_email_id')
+    )
+    op.create_index(op.f('ix_violation_emails_violation_email_id'), 'violation_emails', ['violation_email_id'], unique=False)
     op.create_table('pending_user_role',
     sa.Column('pending_user_role_id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
@@ -249,6 +267,15 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('user_role_id')
     )
     op.create_index(op.f('ix_user_role_user_role_id'), 'user_role', ['user_role_id'], unique=False)
+    op.create_table('duplicate_scan_result',
+    sa.Column('duplicate_scan_result_id', sa.Integer(), nullable=False),
+    sa.Column('duplicate_group_id', sa.Integer(), nullable=True),
+    sa.Column('scan_file_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['duplicate_group_id'], ['duplicate_group.duplicate_group_id'], ),
+    sa.ForeignKeyConstraint(['scan_file_id'], ['scan_file.scan_file_id'], ),
+    sa.PrimaryKeyConstraint('duplicate_scan_result_id')
+    )
+    op.create_index(op.f('ix_duplicate_scan_result_duplicate_scan_result_id'), 'duplicate_scan_result', ['duplicate_scan_result_id'], unique=False)
     op.create_table('naming_convention_scan_result',
     sa.Column('naming_convention_scan_result_id', sa.Integer(), nullable=False),
     sa.Column('scan_file_id', sa.Integer(), nullable=False),
@@ -279,6 +306,8 @@ def downgrade() -> None:
     op.drop_table('scan_file_detection')
     op.drop_index(op.f('ix_naming_convention_scan_result_naming_convention_scan_result_id'), table_name='naming_convention_scan_result')
     op.drop_table('naming_convention_scan_result')
+    op.drop_index(op.f('ix_duplicate_scan_result_duplicate_scan_result_id'), table_name='duplicate_scan_result')
+    op.drop_table('duplicate_scan_result')
     op.drop_index(op.f('ix_user_role_user_role_id'), table_name='user_role')
     op.drop_table('user_role')
     op.drop_index('rev_idx_user_files', table_name='user_files')
@@ -289,6 +318,8 @@ def downgrade() -> None:
     op.drop_table('role_permission')
     op.drop_index(op.f('ix_pending_user_role_pending_user_role_id'), table_name='pending_user_role')
     op.drop_table('pending_user_role')
+    op.drop_index(op.f('ix_violation_emails_violation_email_id'), table_name='violation_emails')
+    op.drop_table('violation_emails')
     op.drop_table('user_workspace')
     op.drop_index('rev_idx_user_folders', table_name='user_folders')
     op.drop_table('user_folders')
@@ -311,6 +342,8 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_ingestion_file_graph_id'), table_name='ingestion_file')
     op.drop_index(op.f('ix_ingestion_file_drive_id'), table_name='ingestion_file')
     op.drop_table('ingestion_file')
+    op.drop_index(op.f('ix_duplicate_group_duplicate_group_id'), table_name='duplicate_group')
+    op.drop_table('duplicate_group')
     op.drop_index(op.f('ix_workspaces_id'), table_name='workspaces')
     op.drop_table('workspaces')
     op.drop_index(op.f('ix_user_user_id'), table_name='user')

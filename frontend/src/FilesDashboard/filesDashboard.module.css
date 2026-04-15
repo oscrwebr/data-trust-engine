@@ -121,3 +121,8 @@
   background: #fafafa;
   border: 1px solid #eee;
 }
+
+.sharedFile {
+  background-color: #e6f0ff; /* light blue */
+  border-left: 4px solid #007bff;
+}
