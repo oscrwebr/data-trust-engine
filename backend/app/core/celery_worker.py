@@ -1,9 +1,15 @@
 from celery import Celery
-import app.authentication.service
-import app.ingestion.service
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+REDIS_HOST = os.environ.get("REDIS_HOST")
 
 celery = Celery(
     "worker",
-    broker="redis://localhost:6379/0",
-    backend="redis://localhost:6379/0"
+    broker=f"redis://{REDIS_HOST}:6379/0",
+    backend=f"redis://{REDIS_HOST}:6379/0"
 )
+
+celery.autodiscover_tasks(["app.authentication.service"])
