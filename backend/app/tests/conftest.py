@@ -2,6 +2,7 @@ import pytest, os
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
+from unittest.mock import patch
 
 
 from app.main import app
@@ -51,3 +52,8 @@ def client(db):
     with TestClient(app) as client: # This creates a http client so that response.get, response.post can be used
         yield client # This passes that client into the test
     app.dependency_overrides.clear() # This clears the override for 'get_database'
+
+@pytest.fixture()
+def mock_delay():
+    with patch("app.authentication.service.setup_ingestion_celery.delay") as mock_delay:
+        yield mock_delay
