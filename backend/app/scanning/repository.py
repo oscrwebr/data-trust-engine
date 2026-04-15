@@ -112,7 +112,7 @@ def get_latest_scan_detection_summary(db: Session, file_id: int):
 
 
 # Get latest scan results for all files provided in bulk
-def get_latest_scan_detection_summary_for_all_files(db: Session, file_ids: list[int]):
+def get_latest_scan_detection_summary_for_files(db: Session, file_ids: list[int]):
     # Get the most recent scan for each file (max scan.started_at)
     latest_scan_subquery = (
         db.query(
