@@ -22,7 +22,7 @@ function FilesDashboard() {
   const [error, setError] = useState(null);
   const [user, setUser] = useState(null);
   const isAdmin = user?.role === "admin";
-
+  const [scanning, setScanning] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
 
   const navigate = useNavigate();
@@ -124,24 +124,26 @@ function FilesDashboard() {
       alert("Unauthorized");
       return;
     }
-
-    console.log("SELECTED FILES:", selectedFiles);
-
+  
     if (selectedFiles.length === 0) {
       alert("No files selected");
       return;
     }
-
+  
+    setScanning(true); // ✅ start spinner
+  
     try {
       await api.post("/scanning/scan_files", {
         graph_file_ids: selectedFiles
       });
-      alert(selectedFiles);
-
+  
+      alert("Scan started");
       setSelectedFiles([]);
     } catch (err) {
       console.error(err.response?.data || err);
       alert("Failed to start scan");
+    } finally {
+      setScanning(false);
     }
   };
 
@@ -221,10 +223,16 @@ function FilesDashboard() {
       {isAdmin && (
         <button
           onClick={scanSelected}
-          disabled={selectedFiles.length === 0}
+          disabled={selectedFiles.length === 0 || scanning}
           className={styles.scanButton}
         >
-          Scan Selected Files
+          {scanning ? (
+            <>
+              <span className={styles.spinner}></span> Scanning...
+            </>
+          ) : (
+            "Scan Selected Files"
+          )}
         </button>
       )}
 
