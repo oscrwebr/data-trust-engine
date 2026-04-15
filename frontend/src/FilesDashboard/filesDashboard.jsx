@@ -15,7 +15,7 @@ import {
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
-function FilesDashboard() {
+function FilesDashboard(toast) {
   const [tree, setTree] = useState([]);
   const [expanded, setExpanded] = useState({});
   const [loading, setLoading] = useState(true);
@@ -121,12 +121,12 @@ function FilesDashboard() {
 
   const scanSelected = async () => {
     if (!isAdmin) {
-      alert("Unauthorized");
+      toast.current.show({ severity: 'error', summary: 'Error', detail: 'Unauthorised.', life: 4000});
       return;
     }
   
     if (selectedFiles.length === 0) {
-      alert("No files selected");
+      toast.current.show({ severity: 'error', summary: 'Error', detail: 'No files detected.', life: 4000});
       return;
     }
   
@@ -137,11 +137,11 @@ function FilesDashboard() {
         graph_file_ids: selectedFiles
       });
   
-      alert("Scan started");
+      toast.current.show({ severity: 'info', summary: 'Info', detail: '.', life: 4000});
       setSelectedFiles([]);
     } catch (err) {
       console.error(err.response?.data || err);
-      alert("Failed to start scan");
+            toast.current.show({ severity: 'error', summary: 'Error', detail: 'Failed to start scan.', life: 4000});
     } finally {
       setScanning(false);
     }
