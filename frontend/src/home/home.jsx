@@ -56,7 +56,7 @@ function Home({toast}) {
   }
 
   return (
-    <div>
+    <div className={styles.body}>
       <div className={styles.container}>
         <div className={styles.hero}>
           <span className={styles.primary_title}>The Data Trust Engine</span>
