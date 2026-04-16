@@ -63,7 +63,7 @@ function OrganisationScanPage({ scan }) {
                     
                 </div>
                 <div>
-                    <PiFileBold size={50}/>
+                    <PiFileBold size={30}/>
                 </div>
             </div>
             <div className={`scan-page-card ${getScanPageCardClass(namingIssues, scan.file_count)}`}>
@@ -74,7 +74,7 @@ function OrganisationScanPage({ scan }) {
                     
                 </div>
                 <div>
-                    <PiTextAaBold size={50}/>
+                    <PiTextAaBold size={30}/>
                 </div>
             </div>
             <div className={`scan-page-card ${getScanPageCardClass(duplicateCount, scan.file_count)}`}>
@@ -84,7 +84,7 @@ function OrganisationScanPage({ scan }) {
                     
                 </div>
                 <div>
-                    <PiCardsBold size={50}/>
+                    <PiCardsBold size={30}/>
                 </div>
             </div>
             <div className={`scan-page-card ${getCleanFilesClass(cleanFilesPercentage)}`}>
@@ -94,7 +94,7 @@ function OrganisationScanPage({ scan }) {
                     
                 </div>
                 <div className="scan-page-card-image">
-                    <PiCheckCircleBold size={50}/>
+                    <PiCheckCircleBold size={30}/>
                 </div>
             </div>
             

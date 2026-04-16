@@ -210,17 +210,17 @@
 /* variations for card */
 .clean {
     background: #ffffff;
-    /* border: 1px solid #B9F8CF; */
+    border: 1px solid #B9F8CF;
 }
 .issues {
 
-    background: #FFF7ED;
+    background: #ffffff;
     border: 1px solid #FFD6A7;
 }
 
 .critical {
-    background: #FEF2F2;
-    border: 1px solid #FECACA;
+    background: #ffffff;
+    border: 1px solid #FECACA; 
 }
 
 /* variations for images */
