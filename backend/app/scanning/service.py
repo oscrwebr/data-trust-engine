@@ -466,6 +466,14 @@ def get_sensitivity_scan_details(db: Session, scan):
             "category": category_name
         })
 
+    scan_file_detection_counts_query = repository.get_scan_file_detection_counts(db=db, scan_id=scan.scan_id)
+
+    scan_file_detection_counts = {}
+
+    for scan_file_id, detection_count in scan_file_detection_counts_query:
+        scan_file_detection_counts[scan_file_id] = detection_count
+
+
     return {
         "scan_id": scan.scan_id,
         "scan_type": scan.scan_type,
@@ -478,6 +486,7 @@ def get_sensitivity_scan_details(db: Session, scan):
             "file_id": file.ingestion_file_id,
             "file_name": file.name,
             "hash": file.hash,
+            "detection_count": scan_file_detection_counts.get(scan_file.scan_file_id, 0),
             "sensitivity_scan_results": results.get(scan_file.scan_file_id, [])
         } for scan_file, file in files
         ]
