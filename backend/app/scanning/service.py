@@ -538,3 +538,55 @@ def get_scan_details(db: Session, scan_id: int):
     
     if scan.scan_type == ScanType.SENSITIVITY:
         return get_sensitivity_scan_details(db=db, scan=scan)
+    
+def get_scan_file_details(db: Session, scan_file_id: int):
+    query = repository.get_scan_file_details(db=db, scan_file_id=scan_file_id)
+    # Get file details with the scan file 
+    scan_file, file = repository.get_scan_file_with_file(db=db, scan_file_id=scan_file_id)
+
+    if not query:
+        return None
+
+    categories = repository.get_sensitivity_category_names(db=db)
+
+    category_counts = {}
+
+    # Loop through categories to create 'detection_counts' entries with 0 as default count
+    # Built to allow easy integration of new categories in future
+    for category in categories:
+        # Format each category key to stay consistent (needed for matching actual count to each category later on)
+        key = category.name.lower().replace(" ", "_")
+        category_counts[key] = 0
+    
+    detections = []
+
+    for detection, category_name in query:
+        # Add to the count for this detection's overarching category
+        key = category_name.lower().replace(" ", "_")
+        category_counts[key] += 1
+
+        # Then append detection details
+        detections.append({
+            "scan_file_detection_id": detection.scan_file_detection_id,
+            "category": category_name,
+            "subcategory": detection.sensitivity_subcategory,
+            "scan_file_detection_id": detection.scan_file_detection_id,
+            "page_number": detection.page_number
+
+        })
+
+    return {
+        "scan_file_id": scan_file.scan_file_id,
+        "file_id": file.ingestion_file_id,
+        "file_name": file.name,
+        "hash": file.hash,
+        "total_detections": len(query),
+        "category_counts": category_counts,
+        "detections": detections
+    }
+
+
+
+    
+
+    
