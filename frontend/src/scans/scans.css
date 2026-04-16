@@ -28,13 +28,13 @@
 
 
 .scan-type-organisation {
-    background: #F4F8FD;
-    border-color: #BEDBFF;
+    background: #ffffff;
+    border-color: #E6E8EC;
 }
 
 .scan-type-sensitivity {
-    background: #FAF8FD;
-    border-color: #E9D4FF;
+    background: #ffffff;
+    border-color: #E6E8EC;
 }
 
 .scan-card-top {
@@ -56,27 +56,27 @@
 }
 
 .scan-type-text {
-    color: white;
+    color: #314158;
     padding: 4px 10px;
-    border-radius: 15px;
+    border-radius: 4px;
     font-size: 14px;
     font-weight: 600;
 }
 
 .scan-type-icon-organisation {
-    color: #2563eb;
+    color: #45556C;
 }
 
 .scan-type-text-organisation {
-    background: #2563eb;
+    background: #F1F5F9;
 }
 
 .scan-type-icon-sensitivity {
-    color: #9810FA;
+    color: #45556C;
 }
 
 .scan-type-text-sensitivity {
-    background: #9810FA;
+    background: #F1F5F9;
 }
 
 .scan-card-top-right {
@@ -89,7 +89,7 @@
     align-items: center;
     color: white;
     padding: 4px 10px;
-    border-radius: 15px;
+    border-radius: 4px;
     font-size: 14px;
     font-weight: 500;
 }
@@ -98,11 +98,13 @@
 .scan-status-completed {
     background: #d9f5df;
     color: #11823b;
+    border: #A4F4CF 1px solid;
 }
 
 .scan-status-ongoing {
     background: #FEF3C6;
     color: #BB4D00;
+    border: #FCD34D 1px solid;
 }
 
 .scan-status-text svg {
@@ -179,27 +181,32 @@
 
 .scan-page-card-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, 250px);
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 20px;
     margin-top: 20px;
+    width: 100%;
 }
 
 .scan-page-card {
     background: #ffffff;
-    border: 1px solid #d9d9d9;
+    border: 1px solid #E6E8EC;
     display: flex;
     align-items: center;
     justify-content: space-between;
     border-radius: 16px;
-    padding: 28px 20px;
+    padding: 5px 20px;
     min-height: 120px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+}
+
+.scan-page-card:hover {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 /* variations for card */
 .clean {
-    background: #F0FDF4;
-    border: 1px solid #B9F8CF;
+    background: #ffffff;
+    /* border: 1px solid #B9F8CF; */
 }
 .issues {
 
