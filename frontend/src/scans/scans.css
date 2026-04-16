@@ -194,9 +194,13 @@
     align-items: center;
     justify-content: space-between;
     border-radius: 16px;
-    padding: 5px 20px;
-    min-height: 120px;
+    padding: 10px 20px;
+    min-height: 90px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+}
+
+.scan-page-card-image {
+    font-size: 16px;
 }
 
 .scan-page-card:hover {
@@ -264,13 +268,13 @@
 }
 
 .scan-page-card-title {
-    font-size: 30px;
+    font-size: 24px;
     font-weight: 800;
     color: #111827;
 }
 
 .scan-page-card-subtitle {
-    font-size: 14px;
+    font-size: 13px;
     color: #6B7280;
 }
 

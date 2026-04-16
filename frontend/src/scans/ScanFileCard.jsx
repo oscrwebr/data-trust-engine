@@ -63,6 +63,8 @@ function ScanFileCard({scan_file, scan_type, scan_files}) {
         
     }
 
+    const detectionCount = scan_file.detection_count
+
     const cardClass = issues.length === 0 ?
         "card-clean" :
         "card-issue";
@@ -74,7 +76,7 @@ function ScanFileCard({scan_file, scan_type, scan_files}) {
                             ? 'Clean' : 
                             scan_type === "organisation"
                             ? issues.map(i => i.type).join(", ")
-                            : 'Detections Found'
+                            : `${detectionCount} Detections Found`
                             
 
     return (

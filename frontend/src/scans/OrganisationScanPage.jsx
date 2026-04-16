@@ -93,7 +93,7 @@ function OrganisationScanPage({ scan }) {
                     <span className="scan-page-card-title">{cleanFilesPercentage}%</span>
                     
                 </div>
-                <div>
+                <div className="scan-page-card-image">
                     <PiCheckCircleBold size={50}/>
                 </div>
             </div>
