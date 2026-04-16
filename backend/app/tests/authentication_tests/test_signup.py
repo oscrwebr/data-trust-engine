@@ -45,7 +45,7 @@ def create_test_image():
     return buffer.getvalue()
 
 # Tests to ensure that an employee is added correctly when the create_user service is run
-def test_create_user_service_adds_employee_correctly(db):
+def test_create_user_service_adds_employee_correctly(db, mock_delay):
     image = create_test_image()
 
     dummy_user = {
@@ -72,7 +72,7 @@ def test_create_user_service_adds_employee_correctly(db):
     
 
 # Tests to ensure that an admin is added correctly when the create_user service is run
-def test_create_user_service_adds_admin_correctly(db):
+def test_create_user_service_adds_admin_correctly(db, mock_delay):
     image = create_test_image()
     dummy_user = {
         "name": "John Katherine Smith",
@@ -113,7 +113,7 @@ def test_signup_fails_with_bad_role(client):
     assert response.status_code == 400
 
 # Integration test that ensures a user's refresh token and driveId are added when they sign up'
-def test_drive_id_and_refresh_added_for_user(client, db, requests_mock):
+def test_drive_id_and_refresh_added_for_user(client, db, requests_mock, mock_delay):
     # Setting up FakeRequests class for dependency injection override
     fake_requests = FakeRequests()
     fake_requests.session["flow"] = "flow"
@@ -156,3 +156,24 @@ def test_drive_id_and_refresh_added_for_user(client, db, requests_mock):
 
     # ensure that the request for driveId was made with the access token
     assert mock_get.request_history[0]._request.headers.get("Authorization") == "Bearer access_from_dummy_MSAL_class"
+
+# Tests to ensure that 'delay' for the celery function is called with the correct variables
+def test_delay_called_correctly(db, mock_delay):
+    image = create_test_image()
+
+    dummy_user = {
+        "name": "John Katherine Smith",
+        "email": "jkatherinesmith@outlook.com",
+        "preferred_username": "jkatherinesmith@outlook.com",
+        "oid": "00000000-0000-0000-476j-987sdf88se", # This is random
+    }
+
+    oid = "000000-7sdf77-88asdf8-9sdiy99"
+    admin = insert(User).values(firstname="John", surname="Smith", username="johnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", refresh="ms-refresh-token".encode(), oid=oid, role="employee")
+    admin_instance=db.execute(admin)
+
+    workspace = add_workspace(db=db, name="Test Workspace", image=image)
+    user = create_user(db=db, details=dummy_user, refresh="ms-refresh-token", ms_access_token="ms-access-token", role="employee", workspace_id=workspace.id)
+
+    # assertions
+    mock_delay.assert_called_once_with("ms-access-token", user.user_id)

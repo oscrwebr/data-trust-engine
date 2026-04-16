@@ -1,0 +1,172 @@
+.body::before {
+    content: "";
+    position: absolute;
+    inset: -20%;
+    background: radial-gradient(
+        circle at center,
+        rgba(75, 138, 240, 0.25),
+        transparent 60%
+    );
+    filter: blur(80px);
+    z-index: -1;
+}
+
+.body::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+        circle at center,
+        rgba(255, 255, 255, 0.6),
+        rgba(255, 255, 255, 0.95)
+    );
+    z-index: -2;
+}
+
+.hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+    scroll-behavior: smooth;
+
+}
+
+.primary_title {
+    font-size: 60px;
+    font-weight: 600;
+    font-family: 'Sora', sans-serif;
+    letter-spacing: -0.02em;
+    margin-bottom: 15px;
+}
+
+.secondary_title {
+    color: rgb(64, 63, 63);
+    font-size: 25px;
+    font-family: 'Segoe UI', sans-serif;
+    margin-bottom: 25px;
+}
+
+.tertiary_title {
+    color: rgb(88, 86, 86);
+    font-size: 20px;
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-weight: 400;
+    margin-bottom: 45px;
+}
+
+.chip_container, .chip {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.chip_container {
+    gap: 35px;
+    margin-bottom: 45px;
+}
+
+.chip_container i {
+    color: rgb(190, 182, 182);
+    font-size: 5px;
+}
+
+.chip {
+    gap: 6px;
+}
+
+.chip span {
+    color: rgb(88, 86, 86);
+    font-size: 15px;
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-weight: 400;
+}
+
+.chip i {
+    color: rgb(11, 11, 195);
+    font-weight: 500;
+    font-size: 15px;
+}
+
+.create_a_workspace, .get_started, .sign_in {
+    gap: 15px;
+    padding: 14px 14px;
+    border-radius: 15px;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.create_a_workspace {
+    background-color: rgba(33, 33, 255, 0.861);
+    margin-right: 15px;
+    transition: background-color 0.2s ease;
+}
+
+.create_a_workspace:hover {
+    background-color: rgba(25, 25, 197, 0.861);
+}
+
+.get_started {
+    background-color: white;
+    color:rgb(64, 63, 63);
+    border: 2px solid rgb(216, 208, 208);
+    transition: all 0.2s ease;
+}
+
+.get_started:hover {
+    color: rgba(33, 33, 255, 0.861);
+    border: 2px solid rgba(33, 33, 255, 0.861);
+    background-color: rgba(117, 149, 202, 0.08);
+}
+
+.sign_in {
+    background-color: transparent;
+    color:rgb(64, 63, 63);
+    margin-top: 30px;
+    margin-bottom: 100px;
+    transition: background-color 0.2s ease;
+}
+
+.sign_in i {
+  transition: transform 0.2s ease;
+}
+
+.sign_in:hover i {
+  color: black;
+  transform: translateX(3px);
+}
+
+.create_a_workspace i, .sign_in i {
+    font-size: 15px;
+}
+
+.line {
+  width: 95%;
+  height: 0.5px;
+  background-color: #ccc;
+  margin-bottom: 10px;
+}
+
+.feature_card_container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.how_it_works {
+    color: black;
+    font-size: 30px;
+    font-family: 'Segoe UI', sans-serif;    
+    font-weight: 600;
+    margin: 40px 0px;
+}

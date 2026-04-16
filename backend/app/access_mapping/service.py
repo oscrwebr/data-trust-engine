@@ -1,9 +1,15 @@
 from sqlalchemy.orm import Session
 from app.access_mapping import repository
 from app.ingestion import repository as ingestion_repository
-from app.access_mapping.schemas import FileRiskDetailsResponse, PaginatedFileRiskDetailsResponse
+from app.access_mapping.schemas import FileRiskDetailsResponse, PaginatedFileRiskDetailsResponse, conf, SendViolationsEmailRequest
 import app.scanning.service as scanning_service
 from operator import attrgetter
+from fastapi_mail import FastMail, MessageSchema
+from starlette.responses import JSONResponse
+from datetime import datetime, timedelta
+from app.authentication.models import User
+from app.roles.repository import get_category_by_subcategory_name
+from app.authentication.service import test_route
 
 
 # Method for getting all employees with access to a file
@@ -153,6 +159,7 @@ def build_employees_from_records(fetched_employees_records):
                 "email": fetched_employee.email,
                 "roles": [],
                 "access_allowed": True,
+                "last_sent": None,
                 "failed_detections": []
             }
 
@@ -227,3 +234,163 @@ def get_failed_detections(latest_scan_results: list[dict], effective_thresholds:
             })
 
     return failed_detections
+
+
+# Method for processing the data before it is used in the email template
+async def process_data_for_violation_email_template(db: Session, admin_id: int, employee: SendViolationsEmailRequest):
+    user = test_route(admin_id, db)
+    now = datetime.now()
+    detections = employee.employee.failed_detections
+    all_detections = []
+
+    for detection in detections:
+        dict = {}
+        category = get_category_by_subcategory_name(db, detection.subcategory)
+        dict["subcategory"] = detection.subcategory
+        dict["count"] = detection.count
+        dict["threshold"] = detection.threshold
+        dict["category"] = category.name
+        all_detections.append(dict)
+
+    return await send_email_with_violations(db, user, employee, all_detections, now)
+
+
+# Method for sending the email containing the violations
+async def send_email_with_violations(db: Session, admin: User, employee: SendViolationsEmailRequest, detection_list: list, now: datetime):
+    template = f"""
+        <html>
+        <body style="margin:0; padding:0; font-family:Arial, sans-serif; background-color:#f5f5f5;">
+            <table align="center" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px; background:#ffffff;">
+
+            <!-- Header -->
+            <tr>
+                <td align="center" style="padding:20px;">
+                <h2 style="margin:0; color:#333333;">Risk Detection Alert</h2>
+                </td>
+            </tr>
+
+            <!-- Intro -->
+            <tr>
+                <td style="padding:20px;">
+                <p style="font-size:14px; color:#333333;">
+                    Hi {employee.employee.name},
+                </p>
+
+                <p style="font-size:14px; color:#333333;">
+                    The Data Trust Engine has identified files in your possession that may not align with your current access permissions.
+                    Please review the following detections and take appropriate action.
+                </p>
+                </td>
+            </tr>
+
+            <!-- Detections Section -->
+            <tr>
+                <td style="padding:0 20px 20px 20px;">
+        """
+
+    # Loop through files
+    template += f"""
+    <h3 style="font-size:16px; color:#222222; margin-top:20px;">
+        Detections identified for: <span style="color:#007bff;">{employee.file_name}</span>
+    </h3>
+    """
+
+    # Group detections by category
+    grouped = {}
+    for detections in detection_list:
+        category = detections.get("category", "Other")
+        grouped.setdefault(category, []).append(detections)
+
+    # Loop through categories
+    for category, items in grouped.items():
+        template += f"""
+            <h4 style="font-size:14px; color:#333333; margin-top:25px;">
+                {category} Information
+            </h4>
+
+            <table width="100%" cellpadding="8" cellspacing="0" style="border-collapse:collapse; margin-top:5px;">
+                <tr style="background-color:#f0f0f0; text-align:left;">
+                    <th style="border:1px solid #dddddd; font-size:13px;">Subcategory</th>
+                    <th style="border:1px solid #dddddd; font-size:13px;">Detections</th>
+                    <th style="border:1px solid #dddddd; font-size:13px;">Threshold</th>
+                </tr>
+        """
+
+        for d in items:
+            template += f"""
+                <tr>
+                    <td style="border:1px solid #dddddd; font-size:13px;">
+                        {d.get("subcategory")}
+                    </td>
+                    <td style="border:1px solid #dddddd; font-size:13px; color:#d9534f; font-weight:bold;">
+                        {d.get("count")}
+                    </td>
+                    <td style="border:1px solid #dddddd; font-size:13px;">
+                        {d.get("threshold")}
+                    </td>
+                </tr>
+            """
+
+        template += """
+            </table>
+        """
+
+    template += f"""
+            </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+            <td style="padding:20px;">
+            <p style="font-size:14px; color:#333333;">
+                Please ensure any sensitive or restricted data is handled in accordance with company policies.
+            </p>
+
+            <p style="font-size:14px; color:#333333;">
+                Best regards, <br/><br/>
+                <strong>{admin.firstname} {admin.surname}</strong>
+            </p>
+            </td>
+        </tr>
+
+        <tr>
+            <td style="padding:15px; font-size:12px; color:#777777; text-align:center;">
+            If you believe this was flagged in error, please contact your administrator.
+            </td>
+        </tr>
+
+        </table>
+      </body>
+    </html>
+    """
+
+    message = MessageSchema(
+        subject="Action Required: Unauthorized File Access Identified",
+        recipients=[employee.employee.email], 
+        body=template,
+        subtype="html"
+    )
+
+    fm = FastMail(conf)
+    if (check_admin_cooldown_for_sending_email(db, now, employee, admin.user_id) == True):
+
+        repository.create_violation_email_record(db, now, admin.user_id, employee.employee.user_id)
+        await fm.send_message(message)
+        return True
+    
+    return check_admin_cooldown_for_sending_email(db, now, employee, admin.user_id)
+
+
+# Method for checking whether admin is able to send an email (cooldown)
+def check_admin_cooldown_for_sending_email(db: Session, time_now: datetime, employee: SendViolationsEmailRequest, admin_id: int):
+    cooldown = timedelta(minutes=1)
+
+    latest_email = repository.get_latest_violation_email_for_cooldown(db, admin_id, employee.employee.user_id)
+    if latest_email is None:
+        return True
+    
+    time_difference = time_now - latest_email.created_at
+    if(time_difference < cooldown):
+        return "cooldown"
+        
+    return True

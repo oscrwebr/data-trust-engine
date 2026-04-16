@@ -59,3 +59,16 @@ class ScanFileDetection(Base):
 
     sensitivity_subcategory = Column(String(64))
     page_number = Column(Integer)
+
+class DuplicateScanResult(Base):
+    __tablename__ = 'duplicate_scan_result'
+
+    duplicate_scan_result_id = Column(Integer, primary_key=True, index=True)
+    duplicate_group_id = Column(Integer, ForeignKey("duplicate_group.duplicate_group_id"))
+    scan_file_id = Column(Integer, ForeignKey("scan_file.scan_file_id"))
+
+class DuplicateGroup(Base):
+    __tablename__ = 'duplicate_group'
+
+    duplicate_group_id = Column(Integer, primary_key=True, index=True)
+    scan_id = Column(Integer, ForeignKey("scans.scan_id"))

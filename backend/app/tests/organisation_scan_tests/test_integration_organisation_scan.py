@@ -169,3 +169,150 @@ def test_invalid_file_name_fails_scan(db, naming_conventions, organisation_scan_
 
     naming_convention_scan_results = db.execute(select(models.NamingConventionScanResult)).scalars().all()
     assert any(result.passed is False for result in naming_convention_scan_results)
+
+def test_files_with_same_hash_are_assigned_same_duplicate_group_id(db, naming_conventions, organisation_scan_setup):
+    # Arrange
+    user, workspace, file1 = organisation_scan_setup
+
+    # Create a file with the same hash as file 1 in the organisation scan setup fixture
+    file2 = repository.create_test_file(
+        db,
+        graph_file_id="def456",
+        file_name="test_file_2",
+        extension=".pdf",
+        hash="abc", 
+        last_modified="2024-01-01 00:00:00",
+        web_url="http://example.com/test_file_2.pdf",
+        drive_id="drive123"
+    )
+    db.add(UserFiles(user_id=user.user_id, file_id=file2.ingestion_file_id))
+    db.commit()
+
+    # Act
+    scan = service.perform_organisation_scan(db, user_id=user.user_id, naming_convention_ids=[1])
+    result = service.get_organisational_scan_details(db, scan)
+
+    # Assert
+    group_ids = []
+    for file in result["files"]:
+        group_ids.append(file["duplicate_group_id"])
+    assert group_ids[0] is not None
+    assert group_ids[0] == group_ids[1]
+
+def test_perform_organisation_scan_only_scans_files_belonging_to_user(db, naming_conventions, organisation_scan_setup):
+    # Arrange
+    user, workspace, file = organisation_scan_setup
+
+    # Create a file that doesn't belong to the user
+    repository.create_test_file(
+        db,
+        graph_file_id="xyz999",
+        file_name="other_users_file",
+        extension=".pdf",
+        hash="xyz",
+        last_modified="2024-01-01 00:00:00",
+        web_url="http://example.com/other_file.pdf",
+        drive_id="drive999"
+    )
+
+    # Act
+    scan = service.perform_organisation_scan(db, user_id=user.user_id, naming_convention_ids=[1])
+    result = service.get_organisational_scan_details(db, scan)
+
+    # Assert
+    file_names = []
+    for file in result["files"]:
+        file_names.append(file["file_name"])
+    assert "other_users_file" not in file_names
+
+
+def test_two_files_with_null_hashes_are_not_grouped_together(db, naming_conventions, organisation_scan_setup):
+    # Arrange
+    user, workspace, file1 = organisation_scan_setup
+
+    file2 = repository.create_test_file(
+        db,
+        graph_file_id="def456",
+        file_name="test_file_2",
+        extension=".pdf",
+        hash=None,  
+        last_modified="2024-01-01 00:00:00",
+        web_url="http://example.com/test_file_2.pdf",
+        drive_id="drive123"
+    )
+
+    file3 = repository.create_test_file(
+        db,
+        graph_file_id="ghi789",
+        file_name="test_file_3",
+        extension=".pdf",
+        hash=None,  
+        last_modified="2024-01-01 00:00:00",
+        web_url="http://example.com/test_file_3.pdf",
+        drive_id="drive123"
+    )
+
+    db.add(UserFiles(user_id=user.user_id, file_id=file2.ingestion_file_id))
+    db.add(UserFiles(user_id=user.user_id, file_id=file3.ingestion_file_id))
+    db.commit()
+
+    # Act
+    scan = service.perform_organisation_scan(db, user_id=user.user_id, naming_convention_ids=[1])
+    result = service.get_organisational_scan_details(db, scan)
+
+    # Assert
+    for file in result["files"]:
+        assert file["duplicate_group_id"] is None
+
+def test_duplicate_scan_for_multiple_different_duplicate_groups(db, naming_conventions, organisation_scan_setup):
+    # Arrange
+    user, workspace, file1 = organisation_scan_setup
+
+    file2 = repository.create_test_file(
+        db,
+        graph_file_id="def456",
+        file_name="test_file_2",
+        extension=".pdf",
+        hash="abc",  # same as file1
+        last_modified="2024-01-01 00:00:00",
+        web_url="http://example.com/test_file_2.pdf",
+        drive_id="drive456"
+    )
+
+    file3 = repository.create_test_file(
+        db,
+        graph_file_id="ghi789",
+        file_name="test_file_3",
+        extension=".pdf",
+        hash="xyz",
+        last_modified="2024-01-01 00:00:00",
+        web_url="http://example.com/test_file_3.pdf",
+        drive_id="drive789"
+    )
+
+    file4 = repository.create_test_file(
+        db,
+        graph_file_id="jkl012",
+        file_name="test_file_4",
+        extension=".pdf",
+        hash="xyz",  # same as file3
+        last_modified="2024-01-01 00:00:00",
+        web_url="http://example.com/test_file_4.pdf",
+        drive_id="drive012"
+    )
+
+    db.add(UserFiles(user_id=user.user_id, file_id=file2.ingestion_file_id))
+    db.add(UserFiles(user_id=user.user_id, file_id=file3.ingestion_file_id))
+    db.add(UserFiles(user_id=user.user_id, file_id=file4.ingestion_file_id))
+    db.commit()
+
+    # Act
+    scan = service.perform_organisation_scan(db, user_id=user.user_id, naming_convention_ids=[1])
+    result = service.get_organisational_scan_details(db, scan)
+
+    # Assert
+    group_ids = []
+    for file in result["files"]:
+        if file["duplicate_group_id"] is not None:
+            group_ids.append(file["duplicate_group_id"])
+    assert len(set(group_ids)) == 2

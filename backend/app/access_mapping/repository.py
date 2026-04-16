@@ -1,7 +1,10 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import desc
 from app.authentication.models import User
+from app.access_mapping.models import ViolationEmail
 from app.roles.models import UserRole, Role, RolePermission, SensitivitySubcategory
 from app.ingestion.models import UserFiles
+from datetime import datetime
 
 
 # Method to get all employees with access to a specific file
@@ -75,4 +78,26 @@ def get_role_permissions(db: Session, role_id: int):
         )
         .filter(RolePermission.role_id == role_id)
         .all()
+    )
+
+
+# Method for creating a violation email record
+def create_violation_email_record(db: Session, time_now: datetime, admin_id: int, employee_id: int):
+    violation_email = ViolationEmail(created_at=time_now, admin_id=admin_id, employee_id=employee_id)
+    db.add(violation_email)
+    db.commit()
+    db.refresh(violation_email)
+    return violation_email
+
+
+# Method for getting the latest violation email for an admin
+def get_latest_violation_email_for_cooldown(db: Session, admin_id: int, employee_id: int):
+    return (
+        db.query(ViolationEmail)
+        .filter(
+            ViolationEmail.admin_id == admin_id,
+            ViolationEmail.employee_id == employee_id
+        )
+        .order_by(desc(ViolationEmail.created_at))
+        .first() 
     )

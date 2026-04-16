@@ -164,3 +164,23 @@ def test_get_organisational_scan_details_returns_correct_number_of_results(db, n
     for file in result["files"]:    
         assert len(file["naming_convention_scan_results"]) == 2
     
+def test_get_organisational_scan_details_contains_duplicate_group_id(db, naming_conventions):
+    # Arrange
+    scan = repository.create_scan(db, scan_type=ScanType.ORGANISATION)
+    file = repository.create_test_file(
+        db,
+        graph_file_id="abc123",
+        file_name="test_file",
+        extension=".pdf",
+        hash="abc",
+        last_modified="2024-01-01 00:00:00",
+        web_url="http://example.com/test_file.pdf",
+        drive_id="drive123"
+    )
+    repository.create_scan_file(db, scan.scan_id, file.ingestion_file_id)
+
+    # Act
+    result = service.get_organisational_scan_details(db, scan)
+
+    # Assert
+    assert "duplicate_group_id" in result["files"][0]

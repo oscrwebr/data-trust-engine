@@ -39,6 +39,7 @@ from app.authentication import models
 from app.roles import models
 from app.workspaces import models
 from app.ingestion import models
+from app.access_mapping import models
 
 target_metadata = Base.metadata
 

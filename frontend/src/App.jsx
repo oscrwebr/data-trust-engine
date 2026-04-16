@@ -11,6 +11,7 @@ import FileOverviewPage from "./FileOverview/FileOverviewPage.jsx";
 import HighRiskFilesDashboard from "./HighRiskFilesDashboard/HighRiskFilesDashboard.jsx";
 import { Toast } from 'primereact/toast';
 import Scans from "./scans/Scans.jsx";
+import FilesDashboard from "./FilesDashboard/filesDashboard.jsx";
 
 import Test from "./Test/Test.jsx";
 import Unprocessable422 from "./Errors/Unprocessable422.jsx";
@@ -22,6 +23,7 @@ import ViewEmployees from "./employees/ViewEmployees.jsx";
 import ManageEmployees from "./employees/ManageEmployees.jsx";
 import ScanPage from "./scans/ScanPage.jsx";
 import OrganisationalDevTest from "./scan_dev_test/OrganisationalDevTest.jsx";
+
 
 
 function App() {
@@ -44,7 +46,8 @@ function App() {
           <Route path="/upload-org-chart" element={<OrgChart toast={toast} />} />
           <Route path="/settings" element={null} />
           <Route path="/dashboard" element={<Dashboard toast={toast}/>} />
-          <Route path="/files/:file_id" element={<FileOverviewPage />} />
+          <Route path="/dashboard-files" element={<FilesDashboard toast={toast}/>} />
+          <Route path="/files/:file_id" element={<FileOverviewPage toast={toast}/>} />
           <Route path="/scans" element={<Scans />} />
           <Route path="/scans/:scanId" element={<ScanPage/>} />
           <Route path="/org-scan-dev" element={<OrganisationalDevTest />} />

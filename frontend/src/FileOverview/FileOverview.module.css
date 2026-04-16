@@ -251,7 +251,7 @@
 
 .file_overview_content {
     display: grid;
-    grid-template-columns: 1.8fr 1fr;
+    grid-template-columns: 1.6fr 1fr;
     gap: 24px;
     align-items: start;
 }
