@@ -1,5 +1,6 @@
 import app.access_mapping.service as service
 from types import SimpleNamespace
+from app.access_mapping.schemas import FileRiskDetailsResponse
 from unittest.mock import Mock
 
 def test_get_file_employees_with_access_sets_unknown_when_file_not_scanned(monkeypatch):
@@ -138,3 +139,286 @@ def test_get_file_employees_with_access_allows_employee_when_threshold_not_excee
     assert len(result) == 1
     assert result[0]["access_allowed"] is True
     assert result[0]["failed_detections"] == []
+
+
+def test_get_file_employees_with_access_from_data_sets_unknown_when_not_scanned(monkeypatch):
+    # Mock employee records
+    test_employee_records = [
+        SimpleNamespace(
+            user_id=1,
+            firstname="Test",
+            surname="Account",
+            email="testaccount@test.com",
+            role_name="PII Role"
+        )
+    ]
+
+    # Mock employees dictionary
+    employees_dict = {
+        1: {
+            "user_id": 1,
+            "name": "Test Account",
+            "email": "testaccount@test.com",
+            "roles": ["PII Role"],
+            "failed_detections": []
+        }
+    }
+
+    # Mock build_employees_from_records method to return mocked employees dictionary
+    monkeypatch.setattr(service, "build_employees_from_records", lambda records: employees_dict)
+
+    result = service.get_file_employees_with_access_from_data(
+        db=None,
+        fetched_employees_records=test_employee_records,
+        has_been_scanned=False,
+        latest_scan_results=[]
+    )
+
+    # Ensure access allowed is Unknown since file has never been scanned
+    assert len(result) == 1
+    assert result[0]["access_allowed"] is None
+
+
+def test_get_file_employees_with_access_from_data_evaluates_access_when_scanned(monkeypatch):
+    # Mock test employee record
+    test_employee_records = [
+        SimpleNamespace(
+            user_id=1,
+            firstname="Test",
+            surname="Account",
+            email="testaccount@test.com",
+            role_name="PII Role"
+        )
+    ]
+
+    # Mock employees dictionary
+    employees_dict = {
+        1: {
+            "user_id": 1,
+            "name": "Test Account",
+            "email": "testaccount@test.com",
+            "roles": ["PII Role"],
+            "failed_detections": []
+        }
+    }
+
+    def fake_evaluate_employee_access(db, employee, latest_scan_results):
+        employee["access_allowed"] = False
+        employee["failed_detections"] = ["EMAIL"]
+
+    # Mock service method to return mocked employees dictionary
+    monkeypatch.setattr(service, "build_employees_from_records", lambda records: employees_dict)
+
+    # Mock evaluate_employee_access method to return employee access evaluaton results
+    monkeypatch.setattr(service, "evaluate_employee_access", fake_evaluate_employee_access)
+
+    result = service.get_file_employees_with_access_from_data(
+        db=None,
+        fetched_employees_records=test_employee_records,
+        has_been_scanned=True,
+        latest_scan_results=[{"category": "Personal", "subcategory": "EMAIL", "count": 2}]
+    )
+
+    # Ensure access allowed is False and that EMAIL failed detection exists
+    assert len(result) == 1
+    assert result[0]["access_allowed"] is False
+    assert result[0]["failed_detections"] == ["EMAIL"]
+
+
+def test_get_file_risk_details_from_data_calculates_values_correctly(monkeypatch):
+    # Mock employee access_allowed values
+    mock_employees = [
+        {"access_allowed": True},
+        {"access_allowed": False},
+        {"access_allowed": False},
+    ]
+
+    # Mock get_file_employes_with_access_from_data method to return mock employees access_allowed values
+    monkeypatch.setattr(
+        service,
+        "get_file_employees_with_access_from_data",
+        lambda db, fetched_employees_records, has_been_scanned, latest_scan_results: mock_employees
+    )
+
+    latest_scan_results = [
+        {"category": "Personal", "subcategory": "NAME", "count": 3},
+        {"category": "Personal", "subcategory": "EMAIL", "count": 1},
+    ]
+
+    result = service.get_file_risk_details_from_data(
+        db=None,
+        file_id=10,
+        file_name="contract.pdf",
+        latest_scan_results=latest_scan_results,
+        fetched_employees_records=[],
+        has_been_scanned=True
+    )
+
+    # Ensure the file risk details are all correct, with correctly calculated access percentage as well as correct risk score
+    assert result.file_id == 10
+    assert result.file_name == "contract.pdf"
+    assert result.employees_with_access_count == 3
+    assert result.valid_access_count == 1
+    assert result.invalid_access_count == 2
+    assert result.valid_access_percentage == 33.33
+    assert result.invalid_access_percentage == 66.67
+    assert result.detection_count == 4
+    assert result.risk_score == 70.87
+
+
+def test_get_highest_risk_files_returns_sorted_paginated_results(monkeypatch):
+    # Create mock files 
+    mock_files = [
+        SimpleNamespace(ingestion_file_id=1, name="file_a.pdf"),
+        SimpleNamespace(ingestion_file_id=2, name="file_b.pdf"),
+        SimpleNamespace(ingestion_file_id=3, name="file_c.pdf"),
+    ]
+
+    # Mock get_all_files method to return the mocked files
+    monkeypatch.setattr(service.ingestion_repository, "get_all_files", lambda db: mock_files)
+
+    # Mock get_latest_scan_results_for_files method
+    monkeypatch.setattr(
+        service.scanning_service,
+        "get_latest_scan_results_for_files",
+        lambda db, file_ids: {1: [], 2: [], 3: []}
+    )
+    
+    # Mock get_scan_statues_for_all_files to return True for all ids
+    monkeypatch.setattr(
+        service.scanning_service,
+        "get_scan_statuses_for_all_files",
+        lambda db, file_ids: {1: True, 2: True, 3: True}
+    )
+
+    # Mock get_employees_with_access_for_files method
+    monkeypatch.setattr(
+        service.repository,
+        "get_employees_with_access_for_files",
+        lambda db, file_ids: {1: [], 2: [], 3: []}
+    )
+
+    def fake_get_file_risk_details_from_data(
+        db,
+        file_id,
+        file_name,
+        latest_scan_results,
+        fetched_employees_records,
+        has_been_scanned
+    ):
+        scores = {
+            1: 10.0,
+            2: 50.0,
+            3: 30.0,
+        }
+
+        return FileRiskDetailsResponse(
+            file_id=file_id,
+            file_name=file_name,
+            employees_with_access_count=0,
+            valid_access_count=0,
+            invalid_access_count=0,
+            valid_access_percentage=0.0,
+            invalid_access_percentage=0.0,
+            detection_count=0,
+            risk_score=scores[file_id]
+        )
+
+    # Mock get_file_risk_details_from_data method to return mocked method results
+    monkeypatch.setattr(service, "get_file_risk_details_from_data", fake_get_file_risk_details_from_data)
+
+    result = service.get_highest_risk_files(db=None, limit=2, offset=0)
+
+    assert result.total == 3
+    assert result.limit == 2
+    assert result.offset == 0
+    assert len(result.items) == 2
+    assert result.items[0].file_id == 2
+    assert result.items[1].file_id == 3
+
+
+def test_get_highest_risk_files_applies_offset_and_limit(monkeypatch):
+    # Mock files for test
+    mock_files = [
+        SimpleNamespace(ingestion_file_id=1, name="file_a.pdf"),
+        SimpleNamespace(ingestion_file_id=2, name="file_b.pdf"),
+        SimpleNamespace(ingestion_file_id=3, name="file_c.pdf"),
+    ]
+
+    # Mock get_all_files method to return mock files
+    monkeypatch.setattr(service.ingestion_repository, "get_all_files", lambda db: mock_files)
+
+    # Mock get_latest_scan_results_for_files method
+    monkeypatch.setattr(
+        service.scanning_service,
+        "get_latest_scan_results_for_files",
+        lambda db, file_ids: {1: [], 2: [], 3: []}
+    )
+
+    # Mock get_scan_statuses_for_all_files method to return True for all files
+    monkeypatch.setattr(
+        service.scanning_service,
+        "get_scan_statuses_for_all_files",
+        lambda db, file_ids: {1: True, 2: True, 3: True}
+    )
+
+    # Mock get_employees_with_access_for_files method
+    monkeypatch.setattr(
+        service.repository,
+        "get_employees_with_access_for_files",
+        lambda db, file_ids: {1: [], 2: [], 3: []}
+    )
+
+    def fake_get_file_risk_details_from_data(
+        db,
+        file_id,
+        file_name,
+        latest_scan_results,
+        fetched_employees_records,
+        has_been_scanned
+    ):
+        scores = {
+            1: 10.0,
+            2: 50.0,
+            3: 30.0,
+        }
+
+        return FileRiskDetailsResponse(
+            file_id=file_id,
+            file_name=file_name,
+            employees_with_access_count=0,
+            valid_access_count=0,
+            invalid_access_count=0,
+            valid_access_percentage=0.0,
+            invalid_access_percentage=0.0,
+            detection_count=0,
+            risk_score=scores[file_id]
+        )
+
+    # Mock get_file_risk_details_from_data method to return mocked method returns
+    monkeypatch.setattr(service, "get_file_risk_details_from_data", fake_get_file_risk_details_from_data)
+
+    result = service.get_highest_risk_files(db=None, limit=1, offset=1)
+
+    # Ensure limit and offset is applied correctly, only file_id 3 should be returned
+    assert result.total == 3
+    assert result.limit == 1
+    assert result.offset == 1
+    assert len(result.items) == 1
+    assert result.items[0].file_id == 3
+
+
+def test_get_highest_risk_files_returns_empty_list_when_no_files(monkeypatch):
+    # Mock methods to take no file_ids provided
+    monkeypatch.setattr(service.ingestion_repository, "get_all_files", lambda db: [])
+    monkeypatch.setattr(service.scanning_service, "get_latest_scan_results_for_files", lambda db, file_ids: {})
+    monkeypatch.setattr(service.scanning_service, "get_scan_statuses_for_all_files", lambda db, file_ids: {})
+    monkeypatch.setattr(service.repository, "get_employees_with_access_for_files", lambda db, file_ids: {})
+
+    result = service.get_highest_risk_files(db=None, limit=10, offset=0)
+
+    # Ensure result is empty cause no files have been provided in any of the mocked methods
+    assert result.items == []
+    assert result.total == 0
+    assert result.limit == 10
+    assert result.offset == 0
