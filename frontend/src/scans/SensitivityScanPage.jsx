@@ -24,8 +24,8 @@ function SensitivityScanPage({ scan }) {
                     <span className="scan-page-card-title">{scan.file_count}</span>
                     
                 </div>
-                <div>
-                    <PiFileBold size={50}/>
+                <div className="scan-page-card-image">
+                    <PiFileBold size={30}/>
                 </div>
             </div>
             <div className={`scan-page-card ${getSensitivityScanPageCardClass(scan.detection_counts.personal, scan.file_count)}`}>
@@ -34,8 +34,8 @@ function SensitivityScanPage({ scan }) {
                     <span className="scan-page-card-title">{scan.detection_counts.personal}</span>
                     
                 </div>
-                <div>
-                    <PiUserListBold size={50}/>
+                <div className="scan-page-card-image">
+                    <PiUserListBold size={30}/>
                 </div>
             </div>
             <div className={`scan-page-card ${getSensitivityScanPageCardClass(scan.detection_counts.financial, scan.file_count)}`}>
@@ -44,8 +44,8 @@ function SensitivityScanPage({ scan }) {
                     <span className="scan-page-card-title">{scan.detection_counts.financial}</span>
                     
                 </div>
-                <div>
-                    <PiCurrencyGbpBold size={50}/>
+                <div className="scan-page-card-image">
+                    <PiCurrencyGbpBold size={30}/>
                 </div>
             </div>
 
@@ -55,8 +55,8 @@ function SensitivityScanPage({ scan }) {
                     <span className="scan-page-card-title">{scan.detection_counts.legal_case}</span>
                     
                 </div>
-                <div>
-                    <PiScalesBold size={50}/>
+                <div className="scan-page-card-image">
+                    <PiScalesBold size={30}/>
                 </div>
             </div>
             <div className={"scan-page-card critical"}>
@@ -66,8 +66,8 @@ function SensitivityScanPage({ scan }) {
                     <span className="scan-page-card-title">1</span>
                     
                 </div>
-                <div>
-                    <PiWarningCircleBold size={50}/>
+                <div className="scan-page-card-image">
+                    <PiWarningCircleBold size={30}/>
                 </div>
             </div>
             

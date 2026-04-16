@@ -398,6 +398,22 @@ def get_basic_sensitivity_scan_results_by_scan_id(db: Session, scan_id: int):
         .all()
     )
 
+def get_scan_file_details(db: Session, scan_file_id: int):
+    return (
+        db.query(ScanFileDetection, SensitivityCategory.name.label("category_name"))
+        # Subcategory linked via name rather than ID in ScanFileDetection
+        .join(
+            SensitivitySubcategory,
+            ScanFileDetection.sensitivity_subcategory == SensitivitySubcategory.name
+        )
+        .join(
+            SensitivityCategory,
+            SensitivitySubcategory.sensitivity_category_id == SensitivityCategory.sensitivity_category_id
+        )
+        .filter(ScanFileDetection.scan_file_id == scan_file_id)
+        .all()
+    )
+
 def create_naming_convention_scan_result(db: Session, scan_file_id: int, scan_naming_convention_id: int, passed: bool, suggested_name: str):
     naming_convention_scan_result = NamingConventionScanResult(scan_file_id=scan_file_id, scan_naming_convention_id=scan_naming_convention_id, passed=passed, suggested_name=suggested_name)
     db.add(naming_convention_scan_result)
@@ -467,5 +483,20 @@ def get_duplicate_scan_result_by_scan_id(db: Session, scan_id: int):
         )
         # Only get results for this scan
         .filter(DuplicateGroup.scan_id == scan_id)
+        .all()
+    )
+
+def get_scan_file_detection_counts(db: Session, scan_id: int):
+    return (
+        db.query(
+            ScanFile.scan_file_id,
+            func.count(ScanFileDetection.scan_file_detection_id).label("detection_count")
+        )
+        .join(
+            ScanFileDetection, 
+            ScanFile.scan_file_id == ScanFileDetection.scan_file_id
+        )
+        .filter(ScanFile.scan_id == scan_id)
+        .group_by(ScanFile.scan_file_id)
         .all()
     )
