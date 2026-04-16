@@ -45,8 +45,7 @@ class PaginatedFileRiskDetailsResponse(BaseModel):
     total: int
     limit: int
     offset: int
-    last_sent: datetime | None
-    failed_detections: list[FailedDetectionResponse]
+    last_sent: datetime | None = None
 
 
 class SendViolationsEmailRequest(BaseModel):
