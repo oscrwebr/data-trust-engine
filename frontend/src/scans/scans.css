@@ -196,7 +196,7 @@
     border-radius: 16px;
     padding: 10px 20px;
     min-height: 90px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.06);
 }
 
 .scan-page-card-image {
@@ -204,7 +204,7 @@
 }
 
 .scan-page-card:hover {
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
 }
 
 /* variations for card */
@@ -301,7 +301,7 @@
     border-radius: 16px;
     padding: 15px 20px;
     width: 100%;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.06);
     margin-top: 5px;
 }
 
@@ -434,7 +434,7 @@
 }
 
 .scan-page-file-card:hover {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     cursor: pointer;
 }
 
