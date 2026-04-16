@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import select, func
+from sqlalchemy import select, func, and_
 from sqlalchemy.orm import Session
 from app.scanning.models import File, NamingConvention, Scan, ScanNamingConvention, NamingConventionScanResult, Scan, ScanFile, ScanFileDetection, DuplicateGroup, DuplicateScanResult 
 from app.ingestion.models import IngestionFile
@@ -109,6 +109,79 @@ def get_latest_scan_detection_summary(db: Session, file_id: int):
         .group_by(ScanFileDetection.sensitivity_subcategory)
         .all()
     )
+
+
+# Get latest scan results for all files provided in bulk
+def get_latest_scan_detection_summary_for_files(db: Session, file_ids: list[int]):
+    # Get the most recent scan for each file (max scan.started_at)
+    latest_scan_subquery = (
+        db.query(
+            ScanFile.file_id.label("file_id"),
+            func.max(Scan.started_at).label("latest_started_at")
+        )
+        .join(Scan, Scan.scan_id == ScanFile.scan_id)
+        .filter(ScanFile.file_id.in_(file_ids))
+        .group_by(ScanFile.file_id)
+        .subquery()
+    )
+
+    # Get detection counts ONLY for the latest scan using the latest_scan_subquery
+    # Group by file_id and sensitivity_subcategory to aggregate counts per subcategory
+    rows = (
+        db.query(
+            ScanFile.file_id.label("file_id"),
+            ScanFileDetection.sensitivity_subcategory.label("sensitivity_subcategory"),
+            func.count(ScanFileDetection.scan_file_detection_id).label("count")
+        )
+        .join(Scan, Scan.scan_id == ScanFile.scan_id)
+        # Join with latest_scan_subquery so that it ONLY uses the latest scan per file
+        .join(
+            latest_scan_subquery,
+            and_(
+                latest_scan_subquery.c.file_id == ScanFile.file_id,
+                latest_scan_subquery.c.latest_started_at == Scan.started_at
+            )
+        )
+
+        # Join detections to count them
+        .join(
+            ScanFileDetection,
+            ScanFileDetection.scan_file_id == ScanFile.scan_file_id
+        )
+
+        # Group to get counts per (file, subcategory)
+        .group_by(
+            ScanFile.file_id,
+            ScanFileDetection.sensitivity_subcategory
+        )
+        .all()
+    )
+
+    # The final output is a list of rows which each represents a file, a subcategory and
+    # the number of detections for that subcategory ONLY IN THE LATEST SCAN
+    return rows
+
+
+# Get all file ids that have at least one scan
+def get_scanned_file_ids(db: Session, file_ids: list[int]):
+    rows = (
+        db.query(ScanFile.file_id)
+        .filter(ScanFile.file_id.in_(file_ids))
+        .distinct()
+        .all()
+    )
+
+    return [row.file_id for row in rows]
+
+
+# Get subcategory to category map
+def get_subcategory_category_map(db: Session):
+    rows = db.query(SensitivitySubcategory).all()
+
+    return {
+        row.name: row.category.name
+        for row in rows
+    }
 
 
 # Method for the purpose of checking if this file has a scan at all

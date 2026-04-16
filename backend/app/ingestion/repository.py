@@ -75,3 +75,6 @@ def create_ingestion_file(db: Session, graph_id: str, name: str, extension: str,
 
     return ingestion_file
 
+
+def get_all_files(db: Session):
+    return db.query(IngestionFile).all()
