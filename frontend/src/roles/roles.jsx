@@ -11,6 +11,7 @@ import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import EditRoleSidebar from "./EditRoleSidebar";
 import DeleteModal from "./DeleteModal";
+import { sortRoles } from "./utils/sortRoles";
 
 function Roles() {
   const [roles, setRoles] = useState([]);
@@ -25,6 +26,14 @@ function Roles() {
   const [editingRole, setEditingRole] = useState(null);
   const [roleName, setRoleName] = useState("");
   const [thresholds, setThresholds] = useState({});
+
+  const sortOptions = [
+      { name: "Sort By", value: "nothing"},
+      { name: "Name (A → Z)", value: "nameAscending"},
+      { name: "Name (Z → A)", value: "nameDescending"},
+  ]
+
+  const [sortOption, setSortOption] = useState("nothing")
 
   // -------------------------
   // Fetch roles, categories, subcategories, and users
@@ -58,6 +67,11 @@ function Roles() {
     }
     fetchData();
   }, []);
+
+  useEffect(() => {
+    const sortedRoles = sortRoles(roles, sortOption)
+    setRoles(sortedRoles);
+  }, [sortOption])
 
   // -------------------------
   // Role Handlers
@@ -160,8 +174,8 @@ function Roles() {
                 <InputIcon className="pi pi-search"></InputIcon>
                 <InputText onChange={(e) => setSearchValue(e.target.value)} style={{ width: '23vw'}} placeholder="Search by role name" className="p-inputtext-sm"/>
             </IconField>
-            <Dropdown optionLabel="name" 
-              placeholder="Sort by" className="p-inputtext-sm"/>
+            <Dropdown optionLabel="name" optionValue="value" options={sortOptions} value={sortOption}
+              onChange={(e) => setSortOption(e.value)} placeholder="Sort by" className="p-inputtext-sm"/>
             <Button className={styles.create_role_button}>Create Role</Button>
           </div>
           
