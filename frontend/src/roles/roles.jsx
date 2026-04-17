@@ -31,6 +31,8 @@ function Roles() {
       { name: "Sort By", value: "nothing"},
       { name: "Name (A → Z)", value: "nameAscending"},
       { name: "Name (Z → A)", value: "nameDescending"},
+      { name: "Newest First", value: "newestToOldest"},
+      { name: "Oldest First", value: "oldestToNewest"}
   ]
 
   const [sortOption, setSortOption] = useState("nothing")
