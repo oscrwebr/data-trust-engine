@@ -2,13 +2,13 @@ import styles from "./delete_modal.module.css"
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 
-function DeleteModal({visible, setVisible, onRemove}){
+function DeleteModal({visible, onClose, onRemove}){
     return (
         <div>
             <Dialog
                 className={styles.dialog}
                 visible={visible} 
-                onHide={setVisible}
+                onHide={onClose}
                 draggable={false}
                 dismissableMask={true}
                 closable={false}    
@@ -19,7 +19,7 @@ function DeleteModal({visible, setVisible, onRemove}){
                     <span>Are you sure you want to delete this role?</span>
                     <div className={styles.button_container}>
                         <Button className={styles.remove_button} onClick={onRemove}>Yes, delete role</Button>
-                        <Button className={styles.cancel_button} onClick={setVisible}>Cancel</Button>
+                        <Button className={styles.cancel_button} onClick={onClose}>Cancel</Button>
                     </div>
                 </div>
             </Dialog>

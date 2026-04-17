@@ -13,10 +13,7 @@ function SidebarDropdown({icon, label, children, openDropdown, setOpenDropdown, 
     );
 
     const shouldHighlight = isActive && !isOpen;
-
-    console.log("PATH:", location.pathname);
-    console.log("BASE:", basePaths);  
-
+    
     const toggle = () => {
       if (isOpen) {
         setOpenDropdown(null);

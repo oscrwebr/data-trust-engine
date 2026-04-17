@@ -1,10 +1,10 @@
 import { InputText } from "primereact/inputtext";
-import styles from "./edit_role_sidebar.module.css"
+import styles from "./role_sidebar.module.css"
 import { Sidebar } from "primereact/sidebar"
 import SensitivityThresholdRow from "./SensitivityThresholdRow";
 import { Button } from "primereact/button";
 
-function EditRoleSidebar({role, visible, setVisible, categories, setThresholds, thresholds, cancel, save, onChange}) {
+function RoleSidebar({role, visible, setVisible, categories, setThresholds, thresholds, cancel, save, onChange, editingRole}) {
 
     const handleThresholdChange = (subId, value) => {
         setThresholds({
@@ -14,12 +14,12 @@ function EditRoleSidebar({role, visible, setVisible, categories, setThresholds, 
     };
 
     return (
-        <Sidebar className={styles.sidebar} header={<h2 className={styles.header}>Edit Role</h2>} visible={visible} position="right" onHide={() => setVisible(false)}>
+        <Sidebar className={styles.sidebar} header={<h2 className={styles.header}>{editingRole ? "Edit Role" : "Create Role"}</h2>} visible={visible} position="right" onHide={() => setVisible()}>
             <div className={styles.sidebar_container}> 
                 <div className={styles.basic_information}>
                     <span className={styles.title}>Basic Information</span>
                     <span className={styles.label}>Role Name</span>
-                    <InputText className={styles.role_input} value={role} onChange={onChange}/>
+                    <InputText className={styles.role_input} value={editingRole ? role : null} placeholder={editingRole ? "" : "Enter the name of the role"} onChange={onChange}/>
                 </div>
                 <div className={styles.sensitivity_thresholds}>
                     <span className={styles.title}>Sensitivity Thresholds</span>
@@ -57,4 +57,4 @@ function EditRoleSidebar({role, visible, setVisible, categories, setThresholds, 
     )
 }
 
-export default EditRoleSidebar;
+export default RoleSidebar;

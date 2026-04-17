@@ -9,7 +9,7 @@ import { IconField } from "primereact/iconfield";
 import { InputIcon } from "primereact/inputicon";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
-import EditRoleSidebar from "./EditRoleSidebar";
+import RoleSidebar from "./RoleSidebar";
 import DeleteModal from "./DeleteModal";
 import { sortRoles } from "./utils/sortRoles";
 
@@ -145,23 +145,29 @@ function Roles() {
       return matchesSearch;
   });
 
+  const handleCloseModal = () => {
+    setDeleteModal(false);
+    setEditingRole(null);
+  };
+
   if (loading) return <p className={styles.message}>Loading...</p>;
   if (error) return <p className={styles.error}>{error}</p>;
 
   return (
     <div className={styles.pageContainer}>
-      <DeleteModal visible={deleteModal} setVisible={() => setDeleteModal(false)} onRemove={() => {handleDeleteRole(); setDeleteModal(false);}}/>
-      <EditRoleSidebar 
-          role={roleName} 
-          visible={editSidebar} 
-          setVisible={setEditSidebar} 
-          categories={categories} 
-          setThresholds={setThresholds} 
-          thresholds={thresholds}
-          cancel={() => handleCancelEdit()}
-          save={() => handleSaveRole()}
-          onChange={(e) => setRoleName(e.target.value)}/>
-  
+    <DeleteModal visible={deleteModal} onClose={handleCloseModal} onRemove={async () => {await handleDeleteRole(); handleCloseModal();}}/>
+    <RoleSidebar 
+        role={roleName} 
+        visible={editSidebar} 
+        setVisible={setEditSidebar} 
+        categories={categories} 
+        setThresholds={setThresholds} 
+        thresholds={thresholds}
+        cancel={() => handleCancelEdit()}
+        save={() => handleSaveRole()}
+        onChange={(e) => setRoleName(e.target.value)}
+        editingRole={editingRole}/>
+
       {/* ---------------- Buttons ---------------- */}
       <div className={styles.manage_roles_header}>
           <div className={styles.title_row}>
@@ -176,7 +182,7 @@ function Roles() {
             </IconField>
             <Dropdown optionLabel="name" optionValue="value" options={sortOptions} value={sortOption}
               onChange={(e) => setSortOption(e.value)} placeholder="Sort by" className="p-inputtext-sm"/>
-            <Button className={styles.create_role_button}>Create Role</Button>
+            <Button className={styles.create_role_button} onClick={() => {setEditSidebar(true); setEditingRole(null);}}>Create Role</Button>
           </div>
           
       </div>
