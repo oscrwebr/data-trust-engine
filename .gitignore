@@ -31,6 +31,8 @@ env/
 __pycache__
 *.egg-info/
 .vagrant
+.terraform*
+*.tfstate*
 
 # Coverage
 htmlcov/
