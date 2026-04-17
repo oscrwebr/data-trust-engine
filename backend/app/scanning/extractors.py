@@ -14,7 +14,7 @@ def normalise_text(text: str):
 
 
 # Helper method to call appropriate extractor method based on provided file_extension (file type)
-def extract_text_from_file(file_bytes: bytes, file_extension, str):
+def extract_text_from_file(file_bytes: bytes, file_extension: str):
     extension = file_extension.lower().lstrip(".")
 
     # Match the file extension to call appropriate extractor method, otherwise raise error if provided file type is unsupported
