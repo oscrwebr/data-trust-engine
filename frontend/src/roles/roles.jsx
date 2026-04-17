@@ -9,14 +9,15 @@ import { IconField } from "primereact/iconfield";
 import { InputIcon } from "primereact/inputicon";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
+import EditRoleSidebar from "./EditRoleSidebar";
 
 function Roles() {
   const [roles, setRoles] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [users, setUsers] = useState([]); // For User Assignment
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [searchValue, setSearchValue] = useState(null)
+  const [searchValue, setSearchValue] = useState(null);
+  const [editSidebar, setEditSidebar] = useState(false);
 
   // Form state for Add / Edit Role
   const [editingRole, setEditingRole] = useState(null);
@@ -37,7 +38,6 @@ function Roles() {
         ]);
   
         setRoles(rolesRes.data);
-        setUsers(usersRes.data);
   
         const groupedCategories = categoriesRes.data.map((cat) => ({
           ...cat,
@@ -69,6 +69,7 @@ function Roles() {
       }));
 
   const handleEditClick = (role) => {
+    console.log("clicked")
     setEditingRole(role);
     setRoleName(role.name);
 
@@ -77,12 +78,14 @@ function Roles() {
       initialThresholds[perm.sensitivity_subcategory_id] = perm.threshold;
     });
     setThresholds(initialThresholds);
+    setEditSidebar(true)
   };
 
   const handleCancelEdit = () => {
     setEditingRole(null);
     setRoleName("");
     setThresholds({});
+    setEditSidebar(false);
   };
 
   const handleDeleteRole = async () => {
@@ -114,43 +117,32 @@ function Roles() {
         setRoles([...roles, res.data]);
         setRoleName("");
         setThresholds({});
+        setEditSidebar(false);
       }
     } catch (err) {
       console.error(err);
     }
   };
 
-  const handleThresholdChange = (subId, value) => {
-    setThresholds({
-      ...thresholds,
-      [subId]: value === "" ? null : parseInt(value, 10),
-    });
-  };
-
   // -------------------------
   // User Assignment Handler
   // -------------------------
-  const handleUserRoleChange = async (userId, newRoleId) => {
-    try {
-      await api.put(`/roles/users/${userId}/role`, { role_id: newRoleId });
-  
-      // Update frontend state
-      const roleName = roles.find((r) => r.role_id === parseInt(newRoleId))?.name || "";
-  
-      setUsers(users.map((u) =>
-        u.user_id === userId
-          ? { ...u, role_id: parseInt(newRoleId), role_name: roleName }
-          : u
-      ));
-    } catch (err) {
-      console.error(err);
-    }
-  };
+
   if (loading) return <p className={styles.message}>Loading...</p>;
   if (error) return <p className={styles.error}>{error}</p>;
 
   return (
     <div className={styles.pageContainer}>
+      <EditRoleSidebar 
+          role={editingRole} 
+          visible={editSidebar} 
+          setVisible={setEditSidebar} 
+          categories={categories} 
+          setThresholds={setThresholds} 
+          thresholds={thresholds}
+          cancel={() => handleCancelEdit()}
+          save={() => handleSaveRole()}/>
+  
       {/* ---------------- Buttons ---------------- */}
       <div className={styles.manage_roles_header}>
           <div className={styles.title_row}>
@@ -177,9 +169,9 @@ function Roles() {
           <span>Last Updated</span>
           <span>Actions</span>
         </div>
-        <div>
+        <div className={styles.row_card_container}>
           {roles.map((role) => (
-              <RoleCard name={role.name} last_updated="Placeholder"/>
+              <RoleCard name={role.name} last_updated="Placeholder" editClick={() => handleEditClick(role)}/>
           ))}
         </div>
       </div>

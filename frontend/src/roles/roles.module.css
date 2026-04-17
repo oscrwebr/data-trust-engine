@@ -57,6 +57,8 @@
   padding: 15px 30px;
   margin-top: 20px;
   background-color: #c9ccd1;
+  border-top-left-radius: 7px;
+  border-top-right-radius: 7px;
 }
 
 /* ========== Buttons ========== */

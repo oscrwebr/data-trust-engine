@@ -2,11 +2,16 @@
   display: grid;
   grid-template-columns: 1fr 1fr auto;
   align-items: center;
-  padding: 15px 30px;
+  padding: 12px 30px;
   border-bottom: 1px solid #e5e7eb;
   border-left: 1px solid #e5e7eb;
   border-right: 1px solid #e5e7eb;
   transition: background-color 0.2s ease;
+}
+
+.role_card_container:last-child {
+  border-bottom-left-radius: 7px;
+  border-bottom-right-radius: 7px;
 }
 
 .role_card_container:hover {
