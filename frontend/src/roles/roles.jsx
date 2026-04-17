@@ -41,13 +41,13 @@ function Roles() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const [rolesRes, categoriesRes, subsRes, usersRes] = await Promise.all([
+        const [rolesRes, categoriesRes, subsRes] = await Promise.all([
           api.get("/roles/get"),
           api.get("/roles/sensitivity/categories"),
           api.get("/roles/sensitivity/subcategories"),
-          api.get("/roles/users/all")  // fetch all users once
         ]);
-  
+        
+        console.log(rolesRes.data)
         setRoles(rolesRes.data);
   
         const groupedCategories = categoriesRes.data.map((cat) => ({
@@ -118,7 +118,7 @@ function Roles() {
     if (!roleName.trim()) return;
     const payload = {
       name: roleName,
-      thresholds: mapThresholdsForAPI()
+      thresholds: mapThresholdsForAPI(),
     };
 
     try {
@@ -196,7 +196,7 @@ function Roles() {
         </div>
         <div className={styles.row_card_container}>
           {filteredRoles.map((role) => (
-              <RoleCard name={role.name} last_updated="Placeholder" editClick={() => handleEditClick(role)} deleteClick={() => {setEditingRole(role); setDeleteModal(true)}}/>
+              <RoleCard name={role.name} last_updated={role.last_updated} editClick={() => handleEditClick(role)} deleteClick={() => {setEditingRole(role); setDeleteModal(true)}}/>
           ))}
         </div>
       </div>

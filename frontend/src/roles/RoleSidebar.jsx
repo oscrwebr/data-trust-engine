@@ -51,7 +51,7 @@ function RoleSidebar({role, visible, setVisible, categories, setThresholds, thre
             </div>
             <div className={styles.footer}>
                 <Button className={styles.cancel_button} label="Cancel" onClick={cancel}/>
-                <Button className={styles.save_changes_button} label="Save Changes" onClick={save}/>
+                <Button className={styles.save_changes_button} label={editingRole ? "Save Changes" : "Create Role"} onClick={save}/>
             </div>
         </Sidebar>
     )

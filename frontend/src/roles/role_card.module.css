@@ -1,6 +1,6 @@
 .role_card_container {
   display: grid;
-  grid-template-columns: 1fr 1fr auto;
+  grid-template-columns: 0.8fr 1fr auto;
   align-items: center;
   padding: 12px 30px;
   border-bottom: 1px solid #e5e7eb;

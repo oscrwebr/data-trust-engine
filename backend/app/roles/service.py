@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from app.roles import repository
+from datetime import datetime
 
 # Existing functions
 def get_roles(db: Session):
@@ -14,13 +15,14 @@ def get_roles(db: Session):
             "role_permissions": [
                 {"sensitivity_subcategory_id": p.sensitivity_subcategory_id, "threshold": p.threshold}
                 for p in permissions
-            ]
+            ],
+            "last_updated":r.last_updated
         }
         result.append(r_dict)
     return result
 
-def create_role(db: Session, name: str, thresholds: list[dict], workspace_id: None):
-    role = repository.create_role(db, name, workspace_id)
+def create_role(db: Session, name: str, thresholds: list[dict], workspace_id: None, date: datetime):
+    role = repository.create_role(db, name, workspace_id, date)
     for t in thresholds:
         repository.create_role_permission(
             db, role.role_id, t["sensitivity_subcategory_id"]
@@ -33,8 +35,8 @@ def create_role(db: Session, name: str, thresholds: list[dict], workspace_id: No
     db.commit()
     return get_roles(db)[-1]  # return newly created role
 
-def update_role(db: Session, role_id: int, name: str, thresholds: list[dict]):
-    return repository.update_role(db, role_id, name, thresholds)
+def update_role(db: Session, role_id: int, name: str, thresholds: list[dict], date: datetime):
+    return repository.update_role(db, role_id, name, thresholds, date)
 
 def delete_role(db: Session, role_id: int):
     repository.delete_role(db, role_id)
