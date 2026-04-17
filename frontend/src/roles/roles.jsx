@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
 import api from "../api/axiosConfig";
 import styles from "./roles.module.css";
+import { RiUserSettingsLine } from "react-icons/ri";
+
+import { Button } from "primereact/button";
+import { IconField } from "primereact/iconfield";
+import { InputIcon } from "primereact/inputicon";
+import { InputText } from "primereact/inputtext";
+import { Dropdown } from "primereact/dropdown";
 
 function Roles() {
   const [roles, setRoles] = useState([]);
@@ -8,25 +15,12 @@ function Roles() {
   const [users, setUsers] = useState([]); // For User Assignment
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  const [activePanel, setActivePanel] = useState("roles"); // "roles" or "users"
+  const [searchValue, setSearchValue] = useState(null)
 
   // Form state for Add / Edit Role
   const [editingRole, setEditingRole] = useState(null);
   const [roleName, setRoleName] = useState("");
   const [thresholds, setThresholds] = useState({});
-
-  // ----------------- Filter & Search -----------------
-  const [roleFilter, setRoleFilter] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
-
-  // Filtered users
-  const filteredUsers = users.filter((user) => {
-    const matchesSearch =
-      `${user.firstname} ${user.surname}`.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesRole = !roleFilter || user.role_id === parseInt(roleFilter);
-    return matchesSearch && matchesRole;
-  });
 
   // -------------------------
   // Fetch roles, categories, subcategories, and users
@@ -157,101 +151,98 @@ function Roles() {
   return (
     <div className={styles.pageContainer}>
       {/* ---------------- Buttons ---------------- */}
-      <div style={{ display: "flex", gap: "1rem", marginBottom: "1rem" }}>
-        <button
-          onClick={() => setActivePanel("roles")}
-          className={activePanel === "roles" ? styles.activeTab : ""}
-        >
-          Roles Management
-        </button>
+      <div className={styles.manage_roles_header}>
+          <div className={styles.title_row}>
+              <RiUserSettingsLine className={styles.title_icon}/>
+              <h1 className={styles.page_title}>Manage Roles</h1>
+          </div>
+          <p className={styles.page_subtitle}>Manage roles and sensitivity thresholds for organisational data</p>
+          <div className={styles.button_container}>
+            <IconField iconPosition="left">
+                <InputIcon className="pi pi-search"></InputIcon>
+                <InputText onChange={(e) => setSearchValue(e.target.value)} style={{ width: '23vw'}} placeholder="Search by role name" className="p-inputtext-sm"/>
+            </IconField>
+            <Dropdown optionLabel="name" 
+              placeholder="Sort by" className="p-inputtext-sm"/>
+            <Button className={styles.create_role_button}>Create Role</Button>
+          </div>
+          
       </div>
 
-      {/* ---------------- Panel ---------------- */}
-        <main className={styles.main}>
-          {/* Left panel: existing roles */}
-          <div className={styles.leftPanel}>
-            <h2>Existing Roles</h2>
-            <ul className={styles.roleList}>
-              {roles.map((role) => (
-                <li key={role.role_id} className={styles.roleItem}>
-                  <span>{role.name}</span>
-                  <button
-                    onClick={() => handleEditClick(role)}
-                    className={styles.editButton}
-                  >
-                    Edit
-                  </button>
-                </li>
+      {/* ---------------- Role Cards ---------------- */}
+      <div className={styles.card_container}>
+        <div className={styles.card_header}>
+          <span>Role Name</span>
+          <span>Last Updated</span>
+          <span>Actions</span>
+        </div>
+      </div>
+
+        {/* Right panel: Add / Edit Role */}
+        {/* <div className={styles.rightPanel}>
+          <h2>{editingRole ? "Edit Role" : "Add New Role"}</h2>
+
+          <input
+            type="text"
+            placeholder="Role Name"
+            value={roleName}
+            onChange={(e) => setRoleName(e.target.value)}
+            className={styles.input}
+          />
+
+          <h3>Set Sensitivity Thresholds</h3>
+          {categories.map((cat) => (
+            <div key={cat.sensitivity_category_id}>
+              <div className={styles.sensitivityCategory}>{cat.name}</div>
+              {cat.subcategories.map((sub) => (
+                <div
+                  key={sub.sensitivity_subcategory_id}
+                  className={styles.subRow}
+                >
+                  <label>{sub.name}</label>
+                  <input
+                    type="number"
+                    min="1"
+                    placeholder="Null"
+                    value={thresholds[sub.sensitivity_subcategory_id] ?? ""}
+                    onChange={(e) =>
+                      handleThresholdChange(
+                        sub.sensitivity_subcategory_id,
+                        e.target.value
+                      )
+                    }
+                    className={styles.input}
+                  />
+                </div>
               ))}
-            </ul>
-          </div>
-
-          {/* Right panel: Add / Edit Role */}
-          <div className={styles.rightPanel}>
-            <h2>{editingRole ? "Edit Role" : "Add New Role"}</h2>
-
-            <input
-              type="text"
-              placeholder="Role Name"
-              value={roleName}
-              onChange={(e) => setRoleName(e.target.value)}
-              className={styles.input}
-            />
-
-            <h3>Set Sensitivity Thresholds</h3>
-            {categories.map((cat) => (
-              <div key={cat.sensitivity_category_id}>
-                <div className={styles.sensitivityCategory}>{cat.name}</div>
-                {cat.subcategories.map((sub) => (
-                  <div
-                    key={sub.sensitivity_subcategory_id}
-                    className={styles.subRow}
-                  >
-                    <label>{sub.name}</label>
-                    <input
-                      type="number"
-                      min="1"
-                      placeholder="Null"
-                      value={thresholds[sub.sensitivity_subcategory_id] ?? ""}
-                      onChange={(e) =>
-                        handleThresholdChange(
-                          sub.sensitivity_subcategory_id,
-                          e.target.value
-                        )
-                      }
-                      className={styles.input}
-                    />
-                  </div>
-                ))}
-              </div>
-            ))}
-
-            <div
-              style={{ display: "flex", gap: "0.5rem", marginTop: "1rem" }}
-            >
-              <button onClick={handleSaveRole} className={styles.addButton}>
-                {editingRole ? "Save Changes" : "Add Role"}
-              </button>
-              {editingRole && (
-                <>
-                  <button
-                    onClick={handleCancelEdit}
-                    className={styles.cancelButton}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleDeleteRole}
-                    className={styles.deleteButton}
-                  >
-                    Delete
-                  </button>
-                </>
-              )}
             </div>
+          ))}
+
+          <div
+            style={{ display: "flex", gap: "0.5rem", marginTop: "1rem" }}
+          >
+            <button onClick={handleSaveRole} className={styles.addButton}>
+              {editingRole ? "Save Changes" : "Add Role"}
+            </button>
+            {editingRole && (
+              <>
+                <button
+                  onClick={handleCancelEdit}
+                  className={styles.cancelButton}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteRole}
+                  className={styles.deleteButton}
+                >
+                  Delete
+                </button>
+              </>
+            )}
           </div>
-        </main>
-    </div>
+        </div> */}
+      </div>
   );
 }
 
