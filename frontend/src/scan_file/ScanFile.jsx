@@ -3,6 +3,8 @@ import { Divider } from 'primereact/divider';
 import "../scans/scans.css";
 import api from "../api/axiosConfig";
 import { Link, useParams } from "react-router-dom";
+import "./scan_file.css";
+import { useNavigate } from "react-router-dom";
 
 
 function ScanFile({ scan_file }) {
@@ -11,6 +13,8 @@ function ScanFile({ scan_file }) {
     const [error, setError] = useState(null);
     const [scanFile, setScanFile] = useState(null);
     const { scanFileId } = useParams();
+
+    const navigate = useNavigate();
 
     useEffect(() => {
         api.get(`/scanning/get_scan_file_by_id/${scanFileId}`)
@@ -35,10 +39,18 @@ function ScanFile({ scan_file }) {
                     <p className="scan-loading">No scanned file found.</p>
                 ) : (
                     <>
-                        <div className="scan-header">
-                            <h1 className="scan-heading">
-                                Scan File {scanFile.scan_file_id} Results
-                            </h1>
+                        <div className="scan-file-header">
+                            <div className="scan-file-header-left">
+                                <h1 className="scan-heading">
+                                    {scanFile.file_name}
+                                </h1>
+                                <p className="scan-loading">
+                                    Scan ID: {scanFile.scan_id} | Scan File ID: {scanFile.scan_file_id}
+                                </p>
+                            </div>
+                            <button className="back-button" onClick={() => navigate(`/scans/${scanFile.scan_id}`)}>
+                                Back
+                            </button>
                         </div>
                     </>
                 )}

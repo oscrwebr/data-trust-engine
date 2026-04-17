@@ -1,0 +1,20 @@
+.scan-file-header-left {
+    display: flex;
+    flex-direction: column;
+}
+
+.back-button {
+    cursor: pointer;
+    margin-top: 0.67em;
+    color: white;
+}
+
+.back-button:hover {
+    background-color: #323232;
+}
+
+.scan-file-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
