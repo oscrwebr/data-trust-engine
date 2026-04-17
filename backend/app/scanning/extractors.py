@@ -12,6 +12,8 @@ def normalise_text(text: str):
     text = text.replace("\n", " ")
     text = re.sub(r"\s+", " ", text).strip()
 
+    return text
+
 
 # Helper method to call appropriate extractor method based on provided file_extension (file type)
 def extract_text_from_file(file_bytes: bytes, file_extension: str):
