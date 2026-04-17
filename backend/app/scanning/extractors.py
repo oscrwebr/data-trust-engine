@@ -3,6 +3,12 @@ from app.scanning.regex_patterns import re
 import pymupdf
 
 
+# Helper method for normalising text by deleting line breaks
+def normalise_text(text: str):
+    text = text.replace("\n", " ")
+    text = re.sub(r"\s+", " ", text).strip()
+
+
 # Extract text from PDF into dict
 def extract_text_from_pdf(file_bytes: bytes) -> dict:
     file = pymupdf.open(stream=file_bytes, filetype="pdf")
@@ -11,11 +17,7 @@ def extract_text_from_pdf(file_bytes: bytes) -> dict:
     # Make page numbers 1 indexed, because user think in page 1, 2, 3 not 0, 1, 2
     for page_number in range(len(file)):
         page = file.load_page(page_number)
-        text = page.get_text("text")
-
-        # Normalisation to remove line breaks
-        text = text.replace("\n", " ")
-        text = re.sub(r"\s+", " ", text).strip()
+        text = normalise_text(page.get_text("text"))
 
         extracted_text[page_number + 1] = text
 
