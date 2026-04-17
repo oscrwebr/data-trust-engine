@@ -1,0 +1,60 @@
+.role_card_container {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  align-items: center;
+  padding: 15px 30px;
+  border-bottom: 1px solid #e5e7eb;
+  border-left: 1px solid #e5e7eb;
+  border-right: 1px solid #e5e7eb;
+  transition: background-color 0.2s ease;
+}
+
+.role_card_container:hover {
+  background-color: #dde1e68c;
+  cursor: pointer;
+}
+
+.role_card_name {
+  font-weight: 600;
+}
+
+.role_card_date {
+  justify-self: start;
+  color: #6b7280;
+}
+
+.role_card_container > div {
+  justify-self: end;
+  display: flex;
+  gap: 15px;
+}
+
+.role_card_container > div > i {
+    font-size: 16px;
+    padding: 8px;
+    border-radius: 6px;
+    cursor: pointer;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    transition: background-color 0.2s, color 0.2s;
+}
+
+#edit:hover {
+    color: rgba(26, 26, 228, 0.808);
+    background-color: rgba(59, 130, 246, 0.15);
+    border-radius: 5px;
+}
+
+#delete:hover {
+    color: red;
+    background-color: rgba(239, 68, 68, 0.15);
+    border-radius: 5px;
+}
+
+#ellipsis:hover {
+    background-color: rgba(107, 114, 128, 0.15);
+    border-radius: 5px;
+}

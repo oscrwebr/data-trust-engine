@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import api from "../api/axiosConfig";
 import styles from "./roles.module.css";
 import { RiUserSettingsLine } from "react-icons/ri";
+import RoleCard from "./RoleCard";
 
 import { Button } from "primereact/button";
 import { IconField } from "primereact/iconfield";
@@ -175,6 +176,11 @@ function Roles() {
           <span>Role Name</span>
           <span>Last Updated</span>
           <span>Actions</span>
+        </div>
+        <div>
+          {roles.map((role) => (
+              <RoleCard name={role.name} last_updated="Placeholder"/>
+          ))}
         </div>
       </div>
 
