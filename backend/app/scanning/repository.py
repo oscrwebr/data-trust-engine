@@ -400,8 +400,9 @@ def get_basic_sensitivity_scan_results_by_scan_id(db: Session, scan_id: int):
 
 def get_scan_file_with_file(db: Session, scan_file_id: int):
     return (
-        db.query(ScanFile, IngestionFile)
+        db.query(ScanFile, IngestionFile, Scan)
         .join(IngestionFile, ScanFile.file_id == IngestionFile.ingestion_file_id)
+        .join(Scan, Scan.scan_id == ScanFile.scan_id)
         .filter(ScanFile.scan_file_id == scan_file_id)
         .first()
     )

@@ -542,7 +542,7 @@ def get_scan_details(db: Session, scan_id: int):
 def get_scan_file_details(db: Session, scan_file_id: int):
     query = repository.get_scan_file_details(db=db, scan_file_id=scan_file_id)
     # Get file details with the scan file 
-    scan_file, file = repository.get_scan_file_with_file(db=db, scan_file_id=scan_file_id)
+    scan_file, file, scan = repository.get_scan_file_with_file(db=db, scan_file_id=scan_file_id)
 
     if not query:
         return None
@@ -580,6 +580,9 @@ def get_scan_file_details(db: Session, scan_file_id: int):
         "file_id": file.ingestion_file_id,
         "file_name": file.name,
         "hash": file.hash,
+        "scan_id": scan.scan_id,
+        "started_at": scan.started_at,
+        "finished_at": scan.finished_at,
         "total_detections": len(query),
         "category_counts": category_counts,
         "detections": detections
