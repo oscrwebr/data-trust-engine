@@ -1,4 +1,5 @@
 from pathlib import Path
+import pytest
 
 from app.scanning.extractors import *
 
@@ -190,3 +191,9 @@ def test_extract_text_from_file_calls_pptx_extractor():
     assert 2 in extracted_text
     assert "Sample Powerpoint" in extracted_text[1]
     assert "john.smith@example.com" in extracted_text[2]
+
+
+def test_extract_text_from_file_raises_error_for_unsupported_type():
+    # Ensure that ValueError is raised when you try to scan with an unsupported file type, for example csv
+    with pytest.raises(ValueError, match="Unsupported file type"):
+        extract_text_from_file(file_bytes=b"dummy", file_extension="csv")
