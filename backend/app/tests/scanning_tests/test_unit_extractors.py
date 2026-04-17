@@ -99,6 +99,25 @@ def test_extract_text_from_txt_sample_notepad():
     # Assert that only one page because notepad documents only have one page
     assert extracted_text[1]
 
-    # Assert that the sample name and email have been extracte from the txt file
+    # Assert that the sample name and email have been extracted from the txt file
     assert "Emma Thompson" in extracted_text[1]
     assert "emma.thompson@example.com" in extracted_text[1]
+
+
+def test_extract_text_from_xlsx_sample_workbook():
+    # Read file bytes and extract text using PPT extractor
+    file_bytes = read_file_bytes("sample_workbook.xlsx")
+    extracted_text = extract_text_from_xlsx(file_bytes=file_bytes)
+
+    # Assert extracted text is dictionary
+    assert isinstance(extracted_text, dict)
+
+    # Assert that 3 pages of workbook have been extracted
+    assert len(extracted_text) == 3
+    print(extracted_text[3])
+
+    # Assert that sample data has been extracted from the excel workbook, into correct page numbers
+    assert "James Walker" in extracted_text[2]
+    assert "GB991238217" in extracted_text[2]
+    assert "testemail@example.com" in extracted_text[3]
+    assert "1000" in extracted_text[3]
