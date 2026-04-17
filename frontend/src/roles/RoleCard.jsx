@@ -8,7 +8,6 @@ function RoleCard({id, name, last_updated, editClick, deleteClick}){
             <div>
                 <i id={styles.edit} onClick={editClick} className="pi pi-pencil"/>
                 <i id={styles.delete} onClick={deleteClick} className="pi pi-trash"/>
-                <i id={styles.ellipsis} className="pi pi-ellipsis-v"/>
             </div>
         </div>
     )

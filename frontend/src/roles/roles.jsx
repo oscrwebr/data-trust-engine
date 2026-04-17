@@ -125,6 +125,12 @@ function Roles() {
     }
   };
 
+  const filteredRoles = roles.filter(role => {
+      const search = searchValue?.toLowerCase() || "";
+      const matchesSearch = (role?.name?.toLowerCase().includes(search) || false);
+      return matchesSearch;
+  });
+
   if (loading) return <p className={styles.message}>Loading...</p>;
   if (error) return <p className={styles.error}>{error}</p>;
 
@@ -169,77 +175,12 @@ function Roles() {
           <span>Actions</span>
         </div>
         <div className={styles.row_card_container}>
-          {roles.map((role) => (
+          {filteredRoles.map((role) => (
               <RoleCard name={role.name} last_updated="Placeholder" editClick={() => handleEditClick(role)} deleteClick={() => {setEditingRole(role); setDeleteModal(true)}}/>
           ))}
         </div>
       </div>
-
-        {/* Right panel: Add / Edit Role */}
-        {/* <div className={styles.rightPanel}>
-          <h2>{editingRole ? "Edit Role" : "Add New Role"}</h2>
-
-          <input
-            type="text"
-            placeholder="Role Name"
-            value={roleName}
-            onChange={(e) => setRoleName(e.target.value)}
-            className={styles.input}
-          />
-
-          <h3>Set Sensitivity Thresholds</h3>
-          {categories.map((cat) => (
-            <div key={cat.sensitivity_category_id}>
-              <div className={styles.sensitivityCategory}>{cat.name}</div>
-              {cat.subcategories.map((sub) => (
-                <div
-                  key={sub.sensitivity_subcategory_id}
-                  className={styles.subRow}
-                >
-                  <label>{sub.name}</label>
-                  <input
-                    type="number"
-                    min="1"
-                    placeholder="Null"
-                    value={thresholds[sub.sensitivity_subcategory_id] ?? ""}
-                    onChange={(e) =>
-                      handleThresholdChange(
-                        sub.sensitivity_subcategory_id,
-                        e.target.value
-                      )
-                    }
-                    className={styles.input}
-                  />
-                </div>
-              ))}
-            </div>
-          ))}
-
-          <div
-            style={{ display: "flex", gap: "0.5rem", marginTop: "1rem" }}
-          >
-            <button onClick={handleSaveRole} className={styles.addButton}>
-              {editingRole ? "Save Changes" : "Add Role"}
-            </button>
-            {editingRole && (
-              <>
-                <button
-                  onClick={handleCancelEdit}
-                  className={styles.cancelButton}
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleDeleteRole}
-                  className={styles.deleteButton}
-                >
-                  Delete
-                </button>
-              </>
-            )}
-          </div>
-        </div> */}
-      </div>
+    </div>
   );
 }
 
