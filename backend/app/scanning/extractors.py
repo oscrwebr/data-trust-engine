@@ -1,8 +1,9 @@
 from app.scanning.detectors import re
 from app.scanning.regex_patterns import re
 import pymupdf
-from docx import Document
 from io import BytesIO
+from docx import Document
+from pptx import Presentation
 
 
 # Helper method for normalising text by deleting line breaks
@@ -11,7 +12,7 @@ def normalise_text(text: str):
     text = re.sub(r"\s+", " ", text).strip()
 
 
-# Extract text from .pdf filebytes into dict
+# Extract text from .pdf filebytes into dict (pdf files)
 def extract_text_from_pdf(file_bytes: bytes) -> dict:
     file = pymupdf.open(stream=file_bytes, filetype="pdf")
     extracted_text = {}
@@ -27,7 +28,7 @@ def extract_text_from_pdf(file_bytes: bytes) -> dict:
     return extracted_text
 
 
-# Extract text from .txt filebytes
+# Extract text from .txt filebytes (text files)
 def extract_text_from_txt(file_bytes: bytes) -> dict:
     text = file_bytes.decode("utf-8", errors="ignore")
 
@@ -37,8 +38,9 @@ def extract_text_from_txt(file_bytes: bytes) -> dict:
     }
 
 
-# Extract text from .docx filebytes
+# Extract text from .docx filebytes (word documents)
 def extract_text_from_docx(file_bytes: bytes) -> dict:
+    # Turn file_bytes into Document object
     document = Document(BytesIO(file_bytes))
 
     text_parts = []
@@ -62,3 +64,23 @@ def extract_text_from_docx(file_bytes: bytes) -> dict:
     return {
         1: normalise_text(full_text)
     }
+
+
+# Extract text from .pptx filebytes (powerpoint documents)
+def extract_text_from_pptx(file_bytes: bytes) -> dict:
+    # Turn file bytes into Presentation object
+    presentation = Presentation(BytesIO(file_bytes))
+    extracted_text = {}
+
+    # Iterate through the slides of the presentation document
+    for slide_index, slide in enumerate(presentation.slides, start=1):
+        slide_text = []
+
+        # Append to slide_text table if there is a text box instance on the current slide
+        for shape in slide.shapes:
+            if hasattr(shape, "text") and shape.text:
+                slide_text.append(shape.text)
+
+        extracted_text[slide_index] = normalise_text(" ".join(slide_text))
+
+    return extracted_text
