@@ -4,10 +4,10 @@ import { InputText } from "primereact/inputtext";
 
 function SensitivityThresholdRow({subcategory, value, setInputValue, setSliderValue}){
     return (
-        <div>
+        <div className={styles.container}>
             <span>{subcategory}</span>
-            <div>
-                <Slider value={value} onChange={setSliderValue} min={0} max={50}/> 
+            <div className={styles.input_container}>
+                <Slider style={{ width: "100%" }} value={value} onChange={setSliderValue} min={0} max={50}/> 
                 <InputText value={value} onChange={setInputValue} min={0} max={50} type="number"/>
             </div>     
         </div>

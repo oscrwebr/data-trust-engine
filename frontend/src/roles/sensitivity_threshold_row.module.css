@@ -1,0 +1,21 @@
+.container {
+  display: grid;
+  grid-template-columns: 1fr 2fr auto; 
+  align-items: center;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.container span {
+    color: rgb(88, 86, 86);
+}
+
+.input_container {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.slider {
+  width: 100%;
+}

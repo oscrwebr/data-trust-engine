@@ -69,7 +69,6 @@ function Roles() {
       }));
 
   const handleEditClick = (role) => {
-    console.log("clicked")
     setEditingRole(role);
     setRoleName(role.name);
 
@@ -124,24 +123,21 @@ function Roles() {
     }
   };
 
-  // -------------------------
-  // User Assignment Handler
-  // -------------------------
-
   if (loading) return <p className={styles.message}>Loading...</p>;
   if (error) return <p className={styles.error}>{error}</p>;
 
   return (
     <div className={styles.pageContainer}>
       <EditRoleSidebar 
-          role={editingRole} 
+          role={roleName} 
           visible={editSidebar} 
           setVisible={setEditSidebar} 
           categories={categories} 
           setThresholds={setThresholds} 
           thresholds={thresholds}
           cancel={() => handleCancelEdit()}
-          save={() => handleSaveRole()}/>
+          save={() => handleSaveRole()}
+          onChange={(e) => setRoleName(e.target.value)}/>
   
       {/* ---------------- Buttons ---------------- */}
       <div className={styles.manage_roles_header}>
