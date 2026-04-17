@@ -13,6 +13,26 @@ def normalise_text(text: str):
     text = re.sub(r"\s+", " ", text).strip()
 
 
+# Helper method to call appropriate extractor method based on provided file_extension (file type)
+def extract_text_from_file(file_bytes: bytes, file_extension, str):
+    extension = file_extension.lower().lstrip(".")
+
+    # Match the file extension to call appropriate extractor method, otherwise raise error if provided file type is unsupported
+    match extension:
+        case "pdf":
+            return extract_text_from_pdf(file_bytes=file_bytes)
+        case "txt":
+            return extract_text_from_txt(file_bytes=file_bytes)
+        case "docx":
+            return extract_text_from_docx(file_bytes=file_bytes)
+        case "xlsx":
+            return extract_text_from_xlsx(file_bytes=file_bytes)
+        case "pptx":
+            return extract_text_from_pptx(file_bytes=file_bytes)
+        case _:
+            raise ValueError(f"Unsupported file type for extraction: {file_extension}")
+
+
 # Extract text from .pdf filebytes into dict (pdf files)
 def extract_text_from_pdf(file_bytes: bytes) -> dict:
     file = pymupdf.open(stream=file_bytes, filetype="pdf")
