@@ -49,7 +49,7 @@ def test_perform_scan_sets_started_and_finished_timestamps(db):
 
 
 @patch("app.scanning.service.requests.get")
-@patch("app.scanning.service.extract_text_from_pdf")
+@patch("app.scanning.service.extract_text_from_file")
 @patch("app.scanning.service.get_download_link_by_graph_id")
 def test_scan_file_method_creates_scan_file_record_for_each_file(mock_get_download_link, mock_extract_text, mock_requests_get, db):
     # Mock the file download link to be returned
@@ -99,7 +99,7 @@ def test_scan_file_method_creates_scan_file_record_for_each_file(mock_get_downlo
 
 
 @patch("app.scanning.service.requests.get")
-@patch("app.scanning.service.extract_text_from_pdf")
+@patch("app.scanning.service.extract_text_from_file")
 @patch("app.scanning.service.get_download_link_by_graph_id")
 def test_scan_file_method_creates_scan_file_detections_for_scan_file(mock_get_download_link, mock_extract_text, mock_requests_get, db):
     # Mock file download link
