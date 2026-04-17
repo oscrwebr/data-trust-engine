@@ -4,6 +4,7 @@ import pymupdf
 from io import BytesIO
 from docx import Document
 from pptx import Presentation
+from openpyxl import load_workbook
 
 
 # Helper method for normalising text by deleting line breaks
@@ -82,5 +83,29 @@ def extract_text_from_pptx(file_bytes: bytes) -> dict:
                 slide_text.append(shape.text)
 
         extracted_text[slide_index] = normalise_text(" ".join(slide_text))
+
+    return extracted_text
+
+
+# Extract text from .xlsx filebytes (excel spreadsheet)
+def extract_text_from_xlsx(file_bytes: bytes) -> dict:
+    # Turn file bytes into a Workbook object
+    workbook = load_workbook(filename=BytesIO(file_bytes), data_only=True)
+    extracted_text = {}
+
+    sheet_number = 1
+    # Iterate through sheets of spreadsheet
+    for sheet in workbook.worksheets:
+        cell_values = []
+
+        # Append data to cell_values table only if cell value is not empty
+        for row in sheet.iter_rows(values_only=True):
+            for cell in row:
+                if cell is not None:
+                    cell_values.append(str(cell))
+
+        # Append this sheet's text into dictionary with current sheet number as key
+        extracted_text[sheet_number] = normalise_text(" ".join(cell_values))
+        sheet_number += 1
 
     return extracted_text
