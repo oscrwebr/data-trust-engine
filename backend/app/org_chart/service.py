@@ -57,7 +57,8 @@ async def confirm_orgchart(roles: list, db: Session, workspace_id: int):
                 db,
                 name=r["name"],
                 thresholds=[],
-                workspace_id=workspace_id
+                workspace_id=workspace_id,
+                date=datetime.now()
             )
         saved_roles.append(role)
 
