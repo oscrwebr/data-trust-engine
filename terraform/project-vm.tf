@@ -60,14 +60,3 @@ resource "azapi_resource" "dtl_vm-project_vm" {
      ]
   }
 }
-
-data "azurerm_virtual_machine" "project_vm" {
-  name                = local.project_vm_name
-  resource_group_name = provider::azapi::parse_resource_id(
-    "Microsoft.Compute/virtualMachines@2024-11-01", 
-    azapi_resource.dtl_vm-project_vm.output.properties.computeId).resource_group_name
-
-  depends_on = [
-    azapi_resource.dtl_vm-project_vm
-  ]
-}
