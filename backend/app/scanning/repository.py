@@ -420,6 +420,7 @@ def get_scan_file_details(db: Session, scan_file_id: int):
             SensitivitySubcategory.sensitivity_category_id == SensitivityCategory.sensitivity_category_id
         )
         .filter(ScanFileDetection.scan_file_id == scan_file_id)
+        .order_by(ScanFileDetection.page_number.asc())
         .all()
     )
 

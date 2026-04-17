@@ -7,6 +7,9 @@
     cursor: pointer;
     margin-top: 0.67em;
     color: white;
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
 .back-button:hover {
