@@ -137,3 +137,56 @@ def test_extract_text_from_pptx_sample_powerpoint():
     assert "Sample Powerpoint" in extracted_text[1]
     assert "john.smith@example.com" in extracted_text[2]
     assert "12 3456 7890" in extracted_text[3]
+
+
+def test_extract_text_from_file_calls_pdf_extractor():
+    # Read filebytes and extract test using extract_text_from_file helper method, passing in pdf file_extension
+    file_bytes = read_file_bytes("operational_report_document.pdf")
+    extracted_text = extract_text_from_file(file_bytes=file_bytes, file_extension="pdf")
+
+    # Assert sample data from document has been extracted appropriately
+    assert 1 in extracted_text
+    assert "Operational Performance Report" in extracted_text[1]
+
+
+def test_extract_text_from_file_calls_docx_extractor():
+    # Read filebytes and extract test using extract_text_from_file helper method, passing in docx file_extension
+    file_bytes = read_file_bytes("sample_document.docx")
+    extracted_text = extract_text_from_file(file_bytes=file_bytes, file_extension="docx")
+
+    # Assert sample data from document has been extracted appropriately
+    assert 1 in extracted_text
+    assert "Liam Davies" in extracted_text[1]
+
+
+def test_extract_text_from_file_calls_txt_extractor():
+    # Read filebytes and extract test using extract_text_from_file helper method, passing in txt file_extension
+    file_bytes = read_file_bytes("sample_notepad.txt")
+    extracted_text = extract_text_from_file(file_bytes=file_bytes, file_extension="txt")
+
+    # Assert sample data from document has been extracted appropriately
+    assert 1 in extracted_text
+    assert "Emma Thompson" in extracted_text[1]
+
+
+def test_extract_text_from_file_calls_xlsx_extractor():
+    # Read filebytes and extract test using extract_text_from_file helper method, passing in xlsx file_extension
+    file_bytes = read_file_bytes("sample_workbook.xlsx")
+    extracted_text = extract_text_from_file(file_bytes=file_bytes, file_extension="xlsx")
+
+    # Assert sample data from document has been extracted appropriately
+    assert 2 in extracted_text
+    assert "James Walker" in extracted_text[2]
+    assert "GB991238217" in extracted_text[2]
+
+
+def test_extract_text_from_file_calls_pptx_extractor():
+    # Read filebytes and extract test using extract_text_from_file helper method, passing in pptx file_extension
+    file_bytes = read_file_bytes("sample_powerpoint.pptx")
+    extracted_text = extract_text_from_file(file_bytes=file_bytes, file_extension="pptx")
+
+    # Assert sample data from document has been extracted appropriately
+    assert 1 in extracted_text
+    assert 2 in extracted_text
+    assert "Sample Powerpoint" in extracted_text[1]
+    assert "john.smith@example.com" in extracted_text[2]
