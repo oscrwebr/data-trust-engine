@@ -105,7 +105,7 @@ def test_extract_text_from_txt_sample_notepad():
 
 
 def test_extract_text_from_xlsx_sample_workbook():
-    # Read file bytes and extract text using PPT extractor
+    # Read file bytes and extract text using EXCEL extractor
     file_bytes = read_file_bytes("sample_workbook.xlsx")
     extracted_text = extract_text_from_xlsx(file_bytes=file_bytes)
 
@@ -114,10 +114,26 @@ def test_extract_text_from_xlsx_sample_workbook():
 
     # Assert that 3 pages of workbook have been extracted
     assert len(extracted_text) == 3
-    print(extracted_text[3])
 
     # Assert that sample data has been extracted from the excel workbook, into correct page numbers
     assert "James Walker" in extracted_text[2]
     assert "GB991238217" in extracted_text[2]
     assert "testemail@example.com" in extracted_text[3]
     assert "1000" in extracted_text[3]
+
+
+def test_extract_text_from_pptx_sample_powerpoint():
+    # Read file bytes and extract text using PPT extractor
+    file_bytes = read_file_bytes("sample_powerpoint.pptx")
+    extracted_text = extract_text_from_pptx(file_bytes=file_bytes)
+
+    # Assert extracted text is dictionary
+    assert isinstance(extracted_text, dict)
+
+    # Assert that 3 pages of powerpoint have been extracted
+    assert len(extracted_text) == 3
+
+    # Assert that the sample data have been extracted from the powerpoint into correct slide/page numbers
+    assert "Sample Powerpoint" in extracted_text[1]
+    assert "john.smith@example.com" in extracted_text[2]
+    assert "12 3456 7890" in extracted_text[3]
