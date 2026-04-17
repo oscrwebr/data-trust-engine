@@ -13,6 +13,7 @@ def read_file_bytes(file_name: str):
 
 
 def test_extract_text_from_pdf_operational_report_document():
+    # Read file bytes and extract text using PDF extractor
     file_bytes = read_file_bytes("operational_report_document.pdf")
     extracted_text = extract_text_from_pdf(file_bytes=file_bytes)
     
@@ -31,6 +32,7 @@ def test_extract_text_from_pdf_operational_report_document():
 
 
 def test_extract_text_from_pdf_realistic_contract_document():
+    # Read file bytes and extract text using PDF extractor
     file_bytes = read_file_bytes("realistic_contract_document.pdf")
     extracted_text = extract_text_from_pdf(file_bytes=file_bytes)
 
@@ -50,6 +52,7 @@ def test_extract_text_from_pdf_realistic_contract_document():
 
 
 def test_extract_text_from_pdf_supplier_agreement_document():
+    # Read file bytes and extract text using PDF extractor
     file_bytes = read_file_bytes("supplier_agreement_document.pdf")
     extracted_text = extract_text_from_pdf(file_bytes=file_bytes)
 
@@ -70,6 +73,7 @@ def test_extract_text_from_pdf_supplier_agreement_document():
 
 
 def test_extract_text_from_docx_sample_document():
+    # Read file bytes and extract text using DOCX extractor
     file_bytes = read_file_bytes("sample_document.docx")
     extracted_text = extract_text_from_docx(file_bytes=file_bytes)
 
@@ -82,3 +86,19 @@ def test_extract_text_from_docx_sample_document():
     # Assert that the sample name and email has been extracted from the docx file
     assert "Liam Davies" in extracted_text[1]
     assert "liam.davies@example.com" in extracted_text[1]
+
+
+def test_extract_text_from_txt_sample_notepad():
+    # Read file bytes and extract text using TXT extractor
+    file_bytes = read_file_bytes("sample_notepad.txt")
+    extracted_text = extract_text_from_txt(file_bytes=file_bytes)
+
+    # Assert extracted text is dictionary
+    assert isinstance(extracted_text, dict)
+
+    # Assert that only one page because notepad documents only have one page
+    assert extracted_text[1]
+
+    # Assert that the sample name and email have been extracte from the txt file
+    assert "Emma Thompson" in extracted_text[1]
+    assert "emma.thompson@example.com" in extracted_text[1]
