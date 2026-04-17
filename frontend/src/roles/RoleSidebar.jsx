@@ -13,13 +13,15 @@ function RoleSidebar({role, visible, setVisible, categories, setThresholds, thre
         });
     };
 
+    console.log(categories)
+
     return (
         <Sidebar className={styles.sidebar} header={<h2 className={styles.header}>{editingRole ? "Edit Role" : "Create Role"}</h2>} visible={visible} position="right" onHide={() => setVisible()}>
             <div className={styles.sidebar_container}> 
                 <div className={styles.basic_information}>
                     <span className={styles.title}>Basic Information</span>
                     <span className={styles.label}>Role Name</span>
-                    <InputText className={styles.role_input} value={editingRole ? role : null} placeholder={editingRole ? "" : "Enter the name of the role"} onChange={onChange}/>
+                    <InputText data-testid="role-input" className={styles.role_input} value={editingRole ? role : null} placeholder={editingRole ? "" : "Enter the name of the role"} onChange={onChange}/>
                 </div>
                 <div className={styles.sensitivity_thresholds}>
                     <span className={styles.title}>Sensitivity Thresholds</span>
@@ -30,7 +32,7 @@ function RoleSidebar({role, visible, setVisible, categories, setThresholds, thre
                             {category.subcategories.map((subcategory) => (
                                 <SensitivityThresholdRow 
                                     subcategory={subcategory.name}
-                                    value={thresholds[subcategory.sensitivity_subcategory_id]}
+                                    value={thresholds?.[subcategory.sensitivity_subcategory_id] ?? ""}
                                     setInputValue={(e) => handleThresholdChange (
                                             subcategory.sensitivity_subcategory_id,
                                             e.target.value
@@ -51,7 +53,7 @@ function RoleSidebar({role, visible, setVisible, categories, setThresholds, thre
             </div>
             <div className={styles.footer}>
                 <Button className={styles.cancel_button} label="Cancel" onClick={cancel}/>
-                <Button className={styles.save_changes_button} label={editingRole ? "Save Changes" : "Create Role"} onClick={save}/>
+                <Button data-testid="submit-button" className={styles.save_changes_button} label={editingRole ? "Save Changes" : "Create Role"} onClick={save}/>
             </div>
         </Sidebar>
     )

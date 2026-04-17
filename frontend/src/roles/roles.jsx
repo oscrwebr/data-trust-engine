@@ -49,7 +49,6 @@ function Roles() {
           api.get("/roles/sensitivity/subcategories"),
         ]);
         
-        console.log(rolesRes.data)
         setRoles(rolesRes.data);
   
         const groupedCategories = categoriesRes.data.map((cat) => ({
@@ -60,6 +59,7 @@ function Roles() {
         }));
   
         setCategories(groupedCategories);
+        console.log(groupedCategories)
       } catch (err) {
         console.error(err);
         setError("Failed to fetch roles, categories, or users");
@@ -69,11 +69,6 @@ function Roles() {
     }
     fetchData();
   }, []);
-
-  useEffect(() => {
-    const sortedRoles = sortRoles(roles, sortOption)
-    setRoles(sortedRoles);
-  }, [sortOption])
 
   // -------------------------
   // Role Handlers
@@ -131,7 +126,7 @@ function Roles() {
         handleCancelEdit();
       } else {
         const res = await api.post("/roles/create", payload);
-        setRoles([...roles, res.data]);
+        setRoles(prev => [...prev, res.data]);
         setRoleName("");
         setThresholds({});
         setEditSidebar(false);
@@ -141,11 +136,13 @@ function Roles() {
     }
   };
 
-  const filteredRoles = roles.filter(role => {
+  const processedRoles = sortRoles(
+    roles.filter(role => {
       const search = searchValue?.toLowerCase() || "";
-      const matchesSearch = (role?.name?.toLowerCase().includes(search) || false);
-      return matchesSearch;
-  });
+      return role?.name?.toLowerCase().includes(search);
+    }),
+    sortOption
+  ) || roles;
 
   const handleCloseModal = () => {
     setDeleteModal(false);
@@ -197,8 +194,8 @@ function Roles() {
           <span>Actions</span>
         </div>
         <div className={styles.row_card_container}>
-          {filteredRoles.map((role) => (
-              <RoleCard name={role.name} last_updated={role.last_updated} editClick={() => handleEditClick(role)} deleteClick={() => {setEditingRole(role); setDeleteModal(true)}}/>
+          {processedRoles.map((role) => (
+              <RoleCard key={role.role_id} name={role.name} last_updated={role.last_updated} editClick={() => handleEditClick(role)} deleteClick={() => {setEditingRole(role); setDeleteModal(true)}}/>
           ))}
         </div>
       </div>

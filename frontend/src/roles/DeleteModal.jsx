@@ -18,7 +18,7 @@ function DeleteModal({visible, onClose, onRemove}){
                     <i id={styles.info_icon} className="pi pi-exclamation-circle"/>
                     <span>Are you sure you want to delete this role?</span>
                     <div className={styles.button_container}>
-                        <Button className={styles.remove_button} onClick={onRemove}>Yes, delete role</Button>
+                        <Button data-testid="delete-button-modal" className={styles.remove_button} onClick={onRemove}>Yes, delete role</Button>
                         <Button className={styles.cancel_button} onClick={onClose}>Cancel</Button>
                     </div>
                 </div>
