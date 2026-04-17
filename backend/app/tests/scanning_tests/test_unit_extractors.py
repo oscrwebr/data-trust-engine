@@ -1,4 +1,5 @@
 from pathlib import Path
+import pytest
 
 from app.scanning.extractors import *
 
@@ -13,6 +14,7 @@ def read_file_bytes(file_name: str):
 
 
 def test_extract_text_from_pdf_operational_report_document():
+    # Read file bytes and extract text using PDF extractor
     file_bytes = read_file_bytes("operational_report_document.pdf")
     extracted_text = extract_text_from_pdf(file_bytes=file_bytes)
     
@@ -31,6 +33,7 @@ def test_extract_text_from_pdf_operational_report_document():
 
 
 def test_extract_text_from_pdf_realistic_contract_document():
+    # Read file bytes and extract text using PDF extractor
     file_bytes = read_file_bytes("realistic_contract_document.pdf")
     extracted_text = extract_text_from_pdf(file_bytes=file_bytes)
 
@@ -50,6 +53,7 @@ def test_extract_text_from_pdf_realistic_contract_document():
 
 
 def test_extract_text_from_pdf_supplier_agreement_document():
+    # Read file bytes and extract text using PDF extractor
     file_bytes = read_file_bytes("supplier_agreement_document.pdf")
     extracted_text = extract_text_from_pdf(file_bytes=file_bytes)
 
@@ -67,3 +71,129 @@ def test_extract_text_from_pdf_supplier_agreement_document():
     assert "GB236106612" in extracted_text[4]
     assert "james.walker@example.co.uk" in extracted_text[5]
     assert "WEST 4000 6247 4508 5472" in extracted_text[6]
+
+
+def test_extract_text_from_docx_sample_document():
+    # Read file bytes and extract text using DOCX extractor
+    file_bytes = read_file_bytes("sample_document.docx")
+    extracted_text = extract_text_from_docx(file_bytes=file_bytes)
+
+    # Assert that extracted text is dictionary
+    assert isinstance(extracted_text, dict)
+
+    # Assert that only one "page", because we treat docx as one single page due to its XML formatting
+    assert 1 in extracted_text
+
+    # Assert that the sample name and email has been extracted from the docx file
+    assert "Liam Davies" in extracted_text[1]
+    assert "liam.davies@example.com" in extracted_text[1]
+
+
+def test_extract_text_from_txt_sample_notepad():
+    # Read file bytes and extract text using TXT extractor
+    file_bytes = read_file_bytes("sample_notepad.txt")
+    extracted_text = extract_text_from_txt(file_bytes=file_bytes)
+
+    # Assert extracted text is dictionary
+    assert isinstance(extracted_text, dict)
+
+    # Assert that only one page because notepad documents only have one page
+    assert extracted_text[1]
+
+    # Assert that the sample name and email have been extracted from the txt file
+    assert "Emma Thompson" in extracted_text[1]
+    assert "emma.thompson@example.com" in extracted_text[1]
+
+
+def test_extract_text_from_xlsx_sample_workbook():
+    # Read file bytes and extract text using EXCEL extractor
+    file_bytes = read_file_bytes("sample_workbook.xlsx")
+    extracted_text = extract_text_from_xlsx(file_bytes=file_bytes)
+
+    # Assert extracted text is dictionary
+    assert isinstance(extracted_text, dict)
+
+    # Assert that 3 pages of workbook have been extracted
+    assert len(extracted_text) == 3
+
+    # Assert that sample data has been extracted from the excel workbook, into correct page numbers
+    assert "James Walker" in extracted_text[2]
+    assert "GB991238217" in extracted_text[2]
+    assert "testemail@example.com" in extracted_text[3]
+    assert "1000" in extracted_text[3]
+
+
+def test_extract_text_from_pptx_sample_powerpoint():
+    # Read file bytes and extract text using PPT extractor
+    file_bytes = read_file_bytes("sample_powerpoint.pptx")
+    extracted_text = extract_text_from_pptx(file_bytes=file_bytes)
+
+    # Assert extracted text is dictionary
+    assert isinstance(extracted_text, dict)
+
+    # Assert that 3 pages of powerpoint have been extracted
+    assert len(extracted_text) == 3
+
+    # Assert that the sample data have been extracted from the powerpoint into correct slide/page numbers
+    assert "Sample Powerpoint" in extracted_text[1]
+    assert "john.smith@example.com" in extracted_text[2]
+    assert "12 3456 7890" in extracted_text[3]
+
+
+def test_extract_text_from_file_calls_pdf_extractor():
+    # Read filebytes and extract test using extract_text_from_file helper method, passing in pdf file_extension
+    file_bytes = read_file_bytes("operational_report_document.pdf")
+    extracted_text = extract_text_from_file(file_bytes=file_bytes, file_extension="pdf")
+
+    # Assert sample data from document has been extracted appropriately
+    assert 1 in extracted_text
+    assert "Operational Performance Report" in extracted_text[1]
+
+
+def test_extract_text_from_file_calls_docx_extractor():
+    # Read filebytes and extract test using extract_text_from_file helper method, passing in docx file_extension
+    file_bytes = read_file_bytes("sample_document.docx")
+    extracted_text = extract_text_from_file(file_bytes=file_bytes, file_extension="docx")
+
+    # Assert sample data from document has been extracted appropriately
+    assert 1 in extracted_text
+    assert "Liam Davies" in extracted_text[1]
+
+
+def test_extract_text_from_file_calls_txt_extractor():
+    # Read filebytes and extract test using extract_text_from_file helper method, passing in txt file_extension
+    file_bytes = read_file_bytes("sample_notepad.txt")
+    extracted_text = extract_text_from_file(file_bytes=file_bytes, file_extension="txt")
+
+    # Assert sample data from document has been extracted appropriately
+    assert 1 in extracted_text
+    assert "Emma Thompson" in extracted_text[1]
+
+
+def test_extract_text_from_file_calls_xlsx_extractor():
+    # Read filebytes and extract test using extract_text_from_file helper method, passing in xlsx file_extension
+    file_bytes = read_file_bytes("sample_workbook.xlsx")
+    extracted_text = extract_text_from_file(file_bytes=file_bytes, file_extension="xlsx")
+
+    # Assert sample data from document has been extracted appropriately
+    assert 2 in extracted_text
+    assert "James Walker" in extracted_text[2]
+    assert "GB991238217" in extracted_text[2]
+
+
+def test_extract_text_from_file_calls_pptx_extractor():
+    # Read filebytes and extract test using extract_text_from_file helper method, passing in pptx file_extension
+    file_bytes = read_file_bytes("sample_powerpoint.pptx")
+    extracted_text = extract_text_from_file(file_bytes=file_bytes, file_extension="pptx")
+
+    # Assert sample data from document has been extracted appropriately
+    assert 1 in extracted_text
+    assert 2 in extracted_text
+    assert "Sample Powerpoint" in extracted_text[1]
+    assert "john.smith@example.com" in extracted_text[2]
+
+
+def test_extract_text_from_file_raises_error_for_unsupported_type():
+    # Ensure that ValueError is raised when you try to scan with an unsupported file type, for example csv
+    with pytest.raises(ValueError, match="Unsupported file type"):
+        extract_text_from_file(file_bytes=b"dummy", file_extension="csv")
