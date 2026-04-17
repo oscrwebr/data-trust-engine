@@ -10,6 +10,7 @@ import { InputIcon } from "primereact/inputicon";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import EditRoleSidebar from "./EditRoleSidebar";
+import DeleteModal from "./DeleteModal";
 
 function Roles() {
   const [roles, setRoles] = useState([]);
@@ -18,6 +19,7 @@ function Roles() {
   const [error, setError] = useState(null);
   const [searchValue, setSearchValue] = useState(null);
   const [editSidebar, setEditSidebar] = useState(false);
+  const [deleteModal, setDeleteModal] = useState(false);
 
   // Form state for Add / Edit Role
   const [editingRole, setEditingRole] = useState(null);
@@ -128,6 +130,7 @@ function Roles() {
 
   return (
     <div className={styles.pageContainer}>
+      <DeleteModal visible={deleteModal} setVisible={() => setDeleteModal(false)} onRemove={() => {handleDeleteRole(); setDeleteModal(false);}}/>
       <EditRoleSidebar 
           role={roleName} 
           visible={editSidebar} 
@@ -167,7 +170,7 @@ function Roles() {
         </div>
         <div className={styles.row_card_container}>
           {roles.map((role) => (
-              <RoleCard name={role.name} last_updated="Placeholder" editClick={() => handleEditClick(role)}/>
+              <RoleCard name={role.name} last_updated="Placeholder" editClick={() => handleEditClick(role)} deleteClick={() => {setEditingRole(role); setDeleteModal(true)}}/>
           ))}
         </div>
       </div>

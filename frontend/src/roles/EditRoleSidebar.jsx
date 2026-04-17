@@ -30,7 +30,7 @@ function EditRoleSidebar({role, visible, setVisible, categories, setThresholds, 
                             {category.subcategories.map((subcategory) => (
                                 <SensitivityThresholdRow 
                                     subcategory={subcategory.name}
-                                    value={thresholds[subcategory.sensitivity_subcategory_id] ?? "0"}
+                                    value={thresholds[subcategory.sensitivity_subcategory_id]}
                                     setInputValue={(e) => handleThresholdChange (
                                             subcategory.sensitivity_subcategory_id,
                                             e.target.value
