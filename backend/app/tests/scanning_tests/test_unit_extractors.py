@@ -67,3 +67,18 @@ def test_extract_text_from_pdf_supplier_agreement_document():
     assert "GB236106612" in extracted_text[4]
     assert "james.walker@example.co.uk" in extracted_text[5]
     assert "WEST 4000 6247 4508 5472" in extracted_text[6]
+
+
+def test_extract_text_from_docx_sample_document():
+    file_bytes = read_file_bytes("sample_document.docx")
+    extracted_text = extract_text_from_docx(file_bytes=file_bytes)
+
+    # Assert that extracted text is dictionary
+    assert isinstance(extracted_text, dict)
+
+    # Assert that only one "page", because we treat docx as one single page due to its XML formatting
+    assert 1 in extracted_text
+
+    # Assert that the sample name and email has been extracted from the docx file
+    assert "Liam Davies" in extracted_text[1]
+    assert "liam.davies@example.com" in extracted_text[1]
