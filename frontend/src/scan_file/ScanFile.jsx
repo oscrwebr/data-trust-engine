@@ -72,40 +72,48 @@ function ScanFile({ scan_file }) {
                                     
                                 </div>
                                 <div className="scan-page-card-image">
+                                    <div className="icon-box">
                                     <PiFileMagnifyingGlass size={30}/>
+                                    </div>
                                 </div>
                             </div>
                             <div className={`scan-page-card ${getSensitivityScanPageCardClass(scanFile.category_counts.personal, 1)}`}>
                                 <div className="scan-page-card-text">
-                                    <span className="scan-page-card-subtitle">PII Detections</span>
+                                    <span className="scan-page-card-subtitle">PII</span>
                                     <span className="scan-page-card-title">{scanFile.category_counts.personal}</span>
                                     
                                 </div>
                                 <div className="scan-page-card-image">
+                                    <div className="icon-box">
                                     <PiUserListBold size={30}/>
-                                </div>
-                            </div>
-                            <div className={`scan-page-card ${getSensitivityScanPageCardClass(scanFile.category_counts.legal_case, 1)}`}>
-                                <div className="scan-page-card-text">
-                                    <span className="scan-page-card-subtitle">Legal Detections</span>
-                                    <span className="scan-page-card-title">{scanFile.category_counts.legal_case}</span>
-                                    
-                                </div>
-                                <div className="scan-page-card-image">
-                                    <PiScalesBold size={30}/>
+                                    </div>
                                 </div>
                             </div>
                             <div className={`scan-page-card ${getSensitivityScanPageCardClass(scanFile.category_counts.financial, 1)}`}>
                                 <div className="scan-page-card-text">
-                                    <span className="scan-page-card-subtitle">Financial Detections</span>
+                                    <span className="scan-page-card-subtitle">Financial</span>
                                     <span className="scan-page-card-title">{scanFile.category_counts.financial}</span>
                                     
                                 </div>
                                 <div className="scan-page-card-image">
+                                    <div className="icon-box">
                                         <PiCurrencyGbpBold size={30}/>
-                                    
+                                    </div>
                                 </div>
                             </div>
+                            <div className={`scan-page-card ${getSensitivityScanPageCardClass(scanFile.category_counts.legal_case, 1)}`}>
+                                <div className="scan-page-card-text">
+                                    <span className="scan-page-card-subtitle">Legal</span>
+                                    <span className="scan-page-card-title">{scanFile.category_counts.legal_case}</span>
+                                    
+                                </div>
+                                <div className="scan-page-card-image">
+                                    <div className="icon-box">
+                                    <PiScalesBold size={30}/>
+                                    </div>
+                                </div>
+                            </div>
+                            
                         </div>
                         
                     </>

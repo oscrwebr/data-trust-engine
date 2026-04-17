@@ -241,7 +241,8 @@
 /* variations for text */
 .critical .scan-page-card-title {
     /* color: #d42121; */
-    color: #111827;
+    /* background: #fee2e2; */
+    color: #DC2626;
 }
 
 .critical .scan-page-card-subtitle {
@@ -250,8 +251,10 @@
 
 .issues .scan-page-card-title {
     /* color: #bd461f; */
-    color: #111827;
+    /* background: #ffedd5; */
+    color: #bd461f;
 }
+
 
 .issues .scan-page-card-subtitle {
     color: #6B7280;
@@ -259,7 +262,8 @@
 
 .clean .scan-page-card-title {
     /* color: #0D542B; */
-    color: #111827;
+    color: #166534;
+    /* background: #dcfce7; */
 }
 
 .clean .scan-page-card-subtitle {
@@ -523,7 +527,7 @@
 .icon-box {
     width: 40px;
     height: 40px;
-    background-color: #f5f5f5; /* light background */
+    background-color: #F1F5F9;
     border-radius: 8px; 
     border: none;
     display: flex;
@@ -533,4 +537,12 @@
 
 .clean .icon-box {
     background: #dcfce7;
+}
+
+.critical .icon-box {
+    background: #fee2e2;
+}
+
+.issues .icon-box {
+    background: #ffedd5;
 }
