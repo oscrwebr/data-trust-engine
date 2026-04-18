@@ -58,7 +58,7 @@ function OrganisationScanPage({ scan }) {
         <div className="scan-page-card-container">
             <div className="scan-page-card">
                 <div className="scan-page-card-text">
-                    <span className="scan-page-card-subtitle">Total Files Scanned</span>
+                    <span className="scan-page-card-subtitle">Total Files</span>
                     <span className="scan-page-card-title">{scan.file_count}</span>
                     
                 </div>

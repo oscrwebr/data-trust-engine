@@ -78,7 +78,7 @@ describe("ScanFileCardTests", () => {
         render(<ScanFileCard scan_file={issueSensitivityScanFile} scan_type="sensitivity"/>);
         await userEvent.click(screen.getByText("View Advanced Details"));
 
-        expect(mockNavigate).toHaveBeenCalledWith("/scan_file/3");
+        expect(mockNavigate).toHaveBeenCalledWith("/scan-file/3");
     });
 
     test("organisationalScanFileCardShowsDetailsIfIssue", () => {

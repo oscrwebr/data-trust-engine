@@ -113,8 +113,11 @@ function ScanFile({ scan_file }) {
                                     </div>
                                 </div>
                             </div>
+
                             
                         </div>
+
+                        <h2 className="scan-page-files-heading">Detections by Page</h2>
                         
                     </>
                 )}
