@@ -89,11 +89,11 @@ def determine_employee_risk_from_violated_files(db: Session, employees: list):
             employee["files"] = {"id": 2, "status": "Files not scanned yet", "flagged_files": []}
 
         # Case 3: any false overrides everything
-        if has_false:
+        elif has_false:
             employee["files"] = {"id": 3, "status": "Risk Detected", "flagged_files": flagged_files}
 
         # Case 4: at least one true, no false
-        if has_true:
+        elif has_true:
             employee["files"] = {"id": 4, "status": "No Risk Detected", "flagged_files": []}
     
     return employees_list
