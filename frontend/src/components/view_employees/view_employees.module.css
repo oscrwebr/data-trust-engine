@@ -158,3 +158,33 @@
     font-size: 12px;
     color: red;
 }
+
+.no_files_no_scan {
+    background-color: rgba(37, 37, 171, 0.76);
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px;
+    border-radius: 15px;
+}
+
+.low_risk {
+    background-color: rgba(27, 126, 63, 0.8);
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px;
+    border-radius: 15px;
+}
+
+.high_risk {
+    background-color: rgba(184, 29, 29, 0.8);
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px;
+    border-radius: 15px;
+}
+
+
+

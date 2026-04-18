@@ -4,7 +4,7 @@ import styles from "./view_employees.module.css"
 
 function RowCard({id, initials, firstname, surname, email, role, risk, checked, onChange}){
 
-    // Determine what the risk is based on the files
+    console.log(risk)
 
     return(
         <div className={styles.row_card_container} data-testid={`row-${id}`}>
@@ -13,7 +13,15 @@ function RowCard({id, initials, firstname, surname, email, role, risk, checked, 
                 <span className={styles.row_name}>{firstname} {surname}</span>
                 <span className={styles.row_email}>{email}</span>
                 <span className={styles.row_role}>{role}</span>
-                <strong className={styles.row_risk}>{risk.status}</strong>
+                <strong className={
+                    risk.id === 1
+                        ? styles.no_files_no_scan
+                        : risk.id === 2
+                        ? styles.high_risk
+                        : risk.id === 3
+                        ? styles.low_risk
+                        : ""
+                    }>{risk.status}</strong>
             </div>
             <div className="card flex justify-content-center" style={{ margin: " 0 29px" }}>
                 <Checkbox data-testid={`checkbox-${id}`} inputId={id} onChange={(e) => onChange(id, e.checked)} checked={checked} />
