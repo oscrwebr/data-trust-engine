@@ -1,8 +1,10 @@
 resource "azapi_resource" "dtl_vm-project_vm" {
   # reference: https://learn.microsoft.com/en-us/azure/templates/microsoft.devtestlab/labs/virtualmachines
+  for_each = local.vms
+  
   type = "Microsoft.DevTestLab/labs/virtualMachines@2018-09-15"
 
-  name      = local.project_vm_name
+  name      = each.value.project_vm_name
   location  = local.location
   parent_id = data.azurerm_dev_test_lab.dtl.id
 
@@ -42,7 +44,7 @@ resource "azapi_resource" "dtl_vm-project_vm" {
           parameters = [
             {
               name = "base64EncodedInlineScript"
-              value = base64gzip(file("./project.sh"))
+              value = base64gzip(file(each.value.script))
             }
           ]
         }

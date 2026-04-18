@@ -13,4 +13,15 @@ locals {
 
   subscription_id = "a918c9db-af94-4ec6-9b90-0302b7669ecc"
   location        = "uksouth"
+  
+  vms = {
+    prod = {
+      project_vm_name = "${local.user_email_name}-production"
+      script = "./project.sh"
+    }
+    pipeline = {
+      project_vm_name = "${local.user_email_name}-pipeline"
+      script = "./pipeline.sh"
+    }
+  }
 }
