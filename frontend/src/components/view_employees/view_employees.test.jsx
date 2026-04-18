@@ -4,6 +4,7 @@ import SendMessage from "./SendMessage"
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, within, waitFor } from "@testing-library/react";
+import MoreInformationPanel from "./MoreInformationPanel";
 
 const employees = [
     {user: {email:"alice@example.com", firstname: "Alice", oid: "oid1", role: "employee", surname: "Smith", user_id: 1}, role_name: 'PII Role'},
@@ -22,6 +23,10 @@ vi.mock("../../api/axiosConfig.js", () => ({
   },
 }));
 
+vi.mock("primereact/overlaypanel", () => ({
+    OverlayPanel: ({ children }) => <div>{children}</div>
+}));
+
 import api from "../../api/axiosConfig";
 
 describe("Components for View Employees", () => {
@@ -34,7 +39,7 @@ describe("Components for View Employees", () => {
     test("Check that RowCard component loads correctly with props passed through", async() => {
         render(
             <MemoryRouter>
-                <RowCard initials="TC" firstname="Tom" surname="Clapham" email="example@email.com" role="Legal Role" risk={{files: {id: 1, status: 'Risk Detected', flagged_files: []}}}/>
+                <RowCard initials="TC" firstname="Tom" surname="Clapham" email="example@email.com" role="Legal Role" risk={{ id: 1, status: "Risk Detected", flagged_files: [] }}/>
             </MemoryRouter>
         );
 
@@ -42,6 +47,7 @@ describe("Components for View Employees", () => {
         expect(await screen.findByText("Tom Clapham")).toBeInTheDocument();
         expect(await screen.findByText("example@email.com")).toBeInTheDocument();
         expect(await screen.findByText("Legal Role")).toBeInTheDocument();
+        expect(await screen.findByText("Risk Detected")).toBeInTheDocument();
     })
 
 
@@ -49,7 +55,7 @@ describe("Components for View Employees", () => {
     test("Check that SquareCard component loads correctly with props passed through", async() => {
         render(
             <MemoryRouter>
-                <SquareCard initials="TC" firstname="Tom" surname="Clapham" email="example@email.com" role="Legal Role"/>
+                <SquareCard initials="TC" firstname="Tom" surname="Clapham" email="example@email.com" role="Legal Role" risk={{ id: 1, status: "Risk Detected", flagged_files: [] }}/>
             </MemoryRouter>
         );
 
@@ -57,6 +63,7 @@ describe("Components for View Employees", () => {
         expect(await screen.findByText("Tom Clapham")).toBeInTheDocument();
         expect(await screen.findByText("example@email.com")).toBeInTheDocument();
         expect(await screen.findByText("Legal Role")).toBeInTheDocument();
+        expect(await screen.findByText("Risk Detected")).toBeInTheDocument();
     })
 
 
@@ -173,6 +180,72 @@ describe("Components for View Employees", () => {
             expect(successToast).toBeDefined();
             expect(successToast.severity).toBe("error");
         });
+    })
+
+
+    // Test 6 
+    test("Test that MoreInformationCard loads correctly with risk id 1", async () => {
+        render(
+            <MoreInformationPanel
+                risk={{ id: 1, status: "No files found", flagged_files: [] }}
+            />
+        );
+
+        expect(
+            screen.getByText(/We couldn't find any files related/i)
+        ).toBeInTheDocument();
+
+        expect(
+            screen.getByText(/to this employee in our system./i)
+        ).toBeInTheDocument();
+    })
+
+
+    // Test 7
+    test("Test that MoreInformationCard loads correctly with risk id 2", async () => {
+        render(
+            <MoreInformationPanel
+                risk={{ id: 2, status: "Files not scanned yet", flagged_files: [] }}
+            />
+        );
+
+        expect(screen.getByText("This employee's files have no been scanned yet."));
+    })
+
+
+    // Test 8
+    test("Test that MoreInformationCard loads correctly with risk id 3", async () => {
+        render(
+            <MoreInformationPanel
+                risk={{ id: 3, status: "Risk Detected", flagged_files: [] }}
+            />
+        );
+
+        expect(
+            screen.getByText(/This employee has unauthorised/i)
+        ).toBeInTheDocument();
+
+        expect(
+            screen.getByText(/access to the following files:/i)
+        ).toBeInTheDocument();
+    })
+
+
+    // Test 9 
+    test("Test that MoreInformationCard loads correctly with risk id 4", async () => {
+        render(
+            <MoreInformationPanel
+                risk={{ id: 4, status: "No Risk Detected", flagged_files: [] }}
+            />
+        );
+
+        expect(
+            screen.getByText(/This employee's files are all/i)
+        ).toBeInTheDocument();
+
+        expect(
+            screen.getByText(/compliant and up to date/i)
+        ).toBeInTheDocument();
     })
 })
 

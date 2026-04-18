@@ -30,7 +30,6 @@ function RowCard({id, initials, firstname, surname, email, role, risk, checked, 
                     </strong>
                     <MoreInformationPanel forwardRef={op} risk={risk}/>
                 </div>
-                
             </div>
             <div className="card flex justify-content-center" style={{ margin: " 0 29px" }}>
                 <Checkbox data-testid={`checkbox-${id}`} inputId={id} onChange={(e) => onChange(id, e.checked)} checked={checked} />
