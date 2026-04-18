@@ -2,7 +2,10 @@ import { Avatar } from "primereact/avatar";
 import { Checkbox } from 'primereact/checkbox';
 import styles from "./view_employees.module.css"
 
-function RowCard({id, initials, firstname, surname, email, role, checked, onChange}){
+function RowCard({id, initials, firstname, surname, email, role, files, checked, onChange}){
+
+    // Determine what the risk is based on the files
+    
     return(
         <div className={styles.row_card_container} data-testid={`row-${id}`}>
             <Avatar className={styles.row_avatar} label={initials} shape="circle" />

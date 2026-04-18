@@ -44,6 +44,7 @@ function ViewEmployees({toast}){
         api.get("/workspace/get-employees")
         .then(res => {
             setEmployees(res.data.active)
+            console.log(res.data.active)
         });
 
         api.get("/workspace/get-workspace-roles")
@@ -127,6 +128,7 @@ function ViewEmployees({toast}){
                                 surname={employee.user.surname}
                                 email={employee.user.email}
                                 role={employee.role_name || "No Role Assigned"}
+                                files={employee.files}
                                 onChange={(id, checked) => onSelectedEmployeesChange(employee, checked)}
                                 checked={selectedEmployees.some(emp => emp.user.user_id === employee.user.user_id)}
                             />

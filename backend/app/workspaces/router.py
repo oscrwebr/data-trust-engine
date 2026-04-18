@@ -7,8 +7,8 @@ from ..core.security_schemas import User
 from ..core.security import get_user_from_access_token
 from app.authentication import service
 from app.workspaces.schema import NotificationSchema, RemoveSchema, MessageSchema
-from app.invites.service import get_invite_by_pending_user_id, set_pending_user_type_invite
-from app.access_mapping.service import get_employee_violated_files
+from app.invites.service import set_pending_user_type_invite
+from app.access_mapping.service import determine_employee_risk_from_violated_files
 from datetime import datetime
 from app.roles.models import UserRole, Role
 
@@ -109,8 +109,7 @@ async def get_all_employees(db: Annotated[Session, Depends(get_database)], curre
     pending_employees = get_pending_employees(db, current_user.user_id)
 
     # This returns an employees current file access history
-    return_statement = get_employee_violated_files(db, active_employees)
-    print(return_statement)
+    active_employees = determine_employee_risk_from_violated_files(db, active_employees)
 
     return {
         "pending": pending_employees,

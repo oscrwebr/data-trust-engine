@@ -25,7 +25,7 @@ def get_file_employees_with_access(db: Session, file_id: int):
         latest_scan_results=latest_scan_results
     )
 
-# Method for returning violated files (if any) for an employee
+# Method for returning all files and their access for each employee in a list
 def get_employee_violated_files(db: Session, employees: list):
     for employee in employees:
         files = []
@@ -41,6 +41,52 @@ def get_employee_violated_files(db: Session, employees: list):
 
         employee["files"] = files
     return employees
+
+# Method for determining an employees risk and returning the files, if any
+def determine_employee_risk_from_violated_files(db: Session, employees: list):
+    employees_list = get_employee_violated_files(db, employees)
+    
+    for employee in employees_list:
+        files = employee["files"]
+
+        # Case 1: no files
+        if len(files) == 0:
+            employee["files"] = {"status": "NO_FILES", "flagged_files": []}
+            continue
+        
+        has_true = False
+        has_false = False
+        all_none = True
+
+        flagged_files = []
+
+        for f in files:
+            access = f.get("access_allowed")
+
+            if access is False:
+                has_false = True
+                flagged_files.append(f) 
+
+            elif access is True:
+                has_true = True
+                all_none = False
+
+            elif access is None:
+                continue
+
+        # Case 2: all None
+        if all(access.get("access_allowed") is None for access in files):
+            employee["files"] = {"status": "NOT_SCANNED_YET", "flagged_files": []}
+
+        # Case 3: any false overrides everything
+        if has_false:
+            employee["files"] = {"status": "HIGH_RISK", "flagged_files": flagged_files}
+
+        # Case 4: at least one true, no false
+        if has_true:
+            employee["files"] = {"status": "LOW_RISK", "flagged_files": []}
+    
+    return employees_list
 
 
 # INTERNAL HELPER METHOD:
