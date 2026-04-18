@@ -128,7 +128,7 @@ function ViewEmployees({toast}){
                                 surname={employee.user.surname}
                                 email={employee.user.email}
                                 role={employee.role_name || "No Role Assigned"}
-                                files={employee.files}
+                                risk={employee.files}
                                 onChange={(id, checked) => onSelectedEmployeesChange(employee, checked)}
                                 checked={selectedEmployees.some(emp => emp.user.user_id === employee.user.user_id)}
                             />

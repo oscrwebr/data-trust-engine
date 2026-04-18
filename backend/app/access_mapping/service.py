@@ -30,14 +30,23 @@ def get_employee_violated_files(db: Session, employees: list):
     for employee in employees:
         files = []
 
+        user_id = employee["user"].user_id
+
         # Get employee file IDs that they have access to
         user_files = ingestion_repository.get_user_files(db, employee["user"].user_id)
         
         # Run a detection on each file
         for file in user_files:
             result = get_file_employees_with_access(db, file["file"].ingestion_file_id)
-            f = {"file":file, "access_allowed":result[0]["access_allowed"]}
-            files.append(f)
+
+            matched_user = next((u for u in result if u["user_id"] == user_id), None)
+
+            if matched_user:
+                f = {
+                    "file": file,
+                    "access_allowed": matched_user["access_allowed"]
+                }
+                files.append(f)
 
         employee["files"] = files
     return employees
@@ -47,11 +56,12 @@ def determine_employee_risk_from_violated_files(db: Session, employees: list):
     employees_list = get_employee_violated_files(db, employees)
     
     for employee in employees_list:
+        print(employee)
         files = employee["files"]
 
         # Case 1: no files
         if len(files) == 0:
-            employee["files"] = {"status": "NO_FILES", "flagged_files": []}
+            employee["files"] = {"status": "No files found", "flagged_files": []}
             continue
         
         has_true = False
@@ -76,15 +86,15 @@ def determine_employee_risk_from_violated_files(db: Session, employees: list):
 
         # Case 2: all None
         if all(access.get("access_allowed") is None for access in files):
-            employee["files"] = {"status": "NOT_SCANNED_YET", "flagged_files": []}
+            employee["files"] = {"status": "Files not scanned yet", "flagged_files": []}
 
         # Case 3: any false overrides everything
         if has_false:
-            employee["files"] = {"status": "HIGH_RISK", "flagged_files": flagged_files}
+            employee["files"] = {"status": "Risk Detected", "flagged_files": flagged_files}
 
         # Case 4: at least one true, no false
         if has_true:
-            employee["files"] = {"status": "LOW_RISK", "flagged_files": []}
+            employee["files"] = {"status": "No Risk Detected", "flagged_files": []}
     
     return employees_list
 
