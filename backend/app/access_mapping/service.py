@@ -26,15 +26,21 @@ def get_file_employees_with_access(db: Session, file_id: int):
     )
 
 # Method for returning violated files (if any) for an employee
-#def get_employee_violated_files(db: Session, employees: list):
-    
-    # We have a list of employees
-    # For every employee, we need to get all their files
-    # For each of these files, we get has_been_scanned
-    # For each of these file, we get latest scan results
-    # Run a detection for each file
-    # If the file has violations, append to each employee 
-    # Otherwise dont
+def get_employee_violated_files(db: Session, employees: list):
+    for employee in employees:
+        files = []
+
+        # Get employee file IDs that they have access to
+        user_files = ingestion_repository.get_user_files(db, employee["user"].user_id)
+        
+        # Run a detection on each file
+        for file in user_files:
+            result = get_file_employees_with_access(db, file["file"].ingestion_file_id)
+            f = {"file":file, "access_allowed":result[0]["access_allowed"]}
+            files.append(f)
+
+        employee["files"] = files
+    return employees
 
 
 # INTERNAL HELPER METHOD:

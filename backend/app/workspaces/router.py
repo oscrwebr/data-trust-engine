@@ -8,6 +8,7 @@ from ..core.security import get_user_from_access_token
 from app.authentication import service
 from app.workspaces.schema import NotificationSchema, RemoveSchema, MessageSchema
 from app.invites.service import get_invite_by_pending_user_id, set_pending_user_type_invite
+from app.access_mapping.service import get_employee_violated_files
 from datetime import datetime
 from app.roles.models import UserRole, Role
 
@@ -107,6 +108,10 @@ async def get_all_employees(db: Annotated[Session, Depends(get_database)], curre
     active_employees = get_employees(db, current_user.user_id)
     pending_employees = get_pending_employees(db, current_user.user_id)
 
+    # This returns an employees current file access history
+    return_statement = get_employee_violated_files(db, active_employees)
+    print(return_statement)
+
     return {
         "pending": pending_employees,
         "active": active_employees
@@ -132,9 +137,9 @@ async def get_all_pending_employees(db: Annotated[Session, Depends(get_database)
     if user.role == "admin":
         result = get_pending_employees(db, current_user.user_id)
         
-        for p in result:
-            if p.type == "request":
-                pending_employees.append(p)
+        for pending_employee in result:
+            if pending_employee["user"].type == "request":
+                pending_employees.append(pending_employee)
 
     return pending_employees
 
