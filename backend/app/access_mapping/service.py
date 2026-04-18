@@ -25,6 +25,17 @@ def get_file_employees_with_access(db: Session, file_id: int):
         latest_scan_results=latest_scan_results
     )
 
+# Method for returning violated files (if any) for an employee
+#def get_employee_violated_files(db: Session, employees: list):
+    
+    # We have a list of employees
+    # For every employee, we need to get all their files
+    # For each of these files, we get has_been_scanned
+    # For each of these file, we get latest scan results
+    # Run a detection for each file
+    # If the file has violations, append to each employee 
+    # Otherwise dont
+
 
 # INTERNAL HELPER METHOD:
 # Method for getting all employees with access to a file from preloaded data

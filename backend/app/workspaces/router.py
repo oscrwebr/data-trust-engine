@@ -104,33 +104,8 @@ async def get_workspace_image(workspace_id: int, db: Annotated[Session, Depends(
 
 @router.get("/get-employees")
 async def get_all_employees(db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)]):
-    employees = get_employees(db, current_user.user_id)
-    pending = get_pending_employees(db, current_user.user_id)
-
-    active_employees = []
-    pending_employees = []
-
-    for e in employees:
-
-        # fetch assigned sensitivity role
-        user_role = db.query(UserRole).filter(UserRole.user_id == e.user_id).first()
-        role_id = user_role.role_id if user_role else None
-
-        # optionally fetch role name
-        role_name = None
-        if role_id:
-            role = db.query(Role).filter(Role.role_id == role_id).first()
-            role_name = role.name if role else None
-
-        active_employees.append({"user": e, "role_name": role_name})
-
-    for p in pending:
-
-        # Fetch the invite associated with the pending user where possible
-        invite = get_invite_by_pending_user_id(db, p.user_id)
-  
-        datetime = invite.created_at if invite else None
-        pending_employees.append({"pending": p, "datetime": datetime})
+    active_employees = get_employees(db, current_user.user_id)
+    pending_employees = get_pending_employees(db, current_user.user_id)
 
     return {
         "pending": pending_employees,
