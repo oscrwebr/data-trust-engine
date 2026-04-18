@@ -166,6 +166,19 @@
     font-weight: 600;
     padding: 6px;
     border-radius: 15px;
+    transition: background-color 0.2s ease;
+}
+
+.no_files_no_scan:hover {
+    background-color: rgba(25, 25, 220, 0.863);
+}
+
+.low_risk:hover {
+    background-color: rgba(8, 169, 67, 0.886);
+}
+
+.high_risk:hover {
+    background-color: rgba(238, 30, 30, 0.8);
 }
 
 .low_risk {
@@ -175,6 +188,7 @@
     font-weight: 600;
     padding: 6px;
     border-radius: 15px;
+    transition: background-color 0.2s ease;
 }
 
 .high_risk {
@@ -184,6 +198,7 @@
     font-weight: 600;
     padding: 6px;
     border-radius: 15px;
+    transition: background-color 0.2s ease;
 }
 
 .text {
