@@ -34,7 +34,7 @@ describe("Components for View Employees", () => {
     test("Check that RowCard component loads correctly with props passed through", async() => {
         render(
             <MemoryRouter>
-                <RowCard initials="TC" firstname="Tom" surname="Clapham" email="example@email.com" role="Legal Role"/>
+                <RowCard initials="TC" firstname="Tom" surname="Clapham" email="example@email.com" role="Legal Role" risk={{files: {id: 1, status: 'Risk Detected', flagged_files: []}}}/>
             </MemoryRouter>
         );
 

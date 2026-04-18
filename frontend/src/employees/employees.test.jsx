@@ -6,9 +6,9 @@ import { MemoryRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 
 const employees = [
-    { user: { email:"alice@example.com", firstname:"Alice", surname:"Smith", user_id:1 }, role_name:"PII Role" },
-    { user: { email:"bob@example.com", firstname:"Bob", surname:"Messi", user_id:2 }, role_name:"" },
-    { user: { email:"charlie@example.com", firstname:"Charlie", surname:"Brown", user_id:3 }, role_name:"Legal Role" },
+    { user: { email:"alice@example.com", firstname:"Alice", surname:"Smith", user_id:1 }, role_name:"PII Role", files: {id: 1, status: 'Risk Detected', flagged_files: []}},
+    { user: { email:"bob@example.com", firstname:"Bob", surname:"Messi", user_id:2 }, role_name:"", files: {id: 1, status: 'Risk Detected', flagged_files: []}},
+    { user: { email:"charlie@example.com", firstname:"Charlie", surname:"Brown", user_id:3 }, role_name:"Legal Role", files: {id: 1, status: 'Risk Detected', flagged_files: []}},
 ];
 
 const pending_users = [
