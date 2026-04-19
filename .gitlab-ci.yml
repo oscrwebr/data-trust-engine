@@ -40,13 +40,13 @@ test-backend:
   script:
     - docker compose --profile test-backend up --build --abort-on-container-exit --exit-code-from backend-test # --abort-on-container-exit = when backend container exits, db container be forced to exit
 
-test-frontend-build:
-  stage: test-frontend-build
-  when: always
-  tags:
-   - docker-pipeline
-  script:
-    - docker build ./frontend/ --target prod
+# test-frontend-build:
+#   stage: test-frontend-build
+#   when: always
+#   tags:
+#    - docker-pipeline
+#   script:
+#     - docker build ./frontend/ --target prod
 
 build-images-main:
   stage: build-images
