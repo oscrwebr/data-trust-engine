@@ -61,7 +61,7 @@ def determine_employee_risk_from_violated_files(db: Session, employees: list):
 
         # Case 1: no files
         if len(files) == 0:
-            employee["files"] = {"id": 1, "status": "No files found", "flagged_files": []}
+            employee["files"] = {"id": 1, "status": "No Files Found", "flagged_files": []}
             continue
         
         has_true = False
@@ -86,7 +86,7 @@ def determine_employee_risk_from_violated_files(db: Session, employees: list):
 
         # Case 2: all None
         if all(access.get("access_allowed") is None for access in files):
-            employee["files"] = {"id": 2, "status": "Files not scanned yet", "flagged_files": []}
+            employee["files"] = {"id": 2, "status": "No Files Scanned", "flagged_files": []}
 
         # Case 3: any false overrides everything
         elif has_false:
