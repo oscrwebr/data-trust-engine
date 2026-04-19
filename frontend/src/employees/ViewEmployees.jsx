@@ -98,7 +98,7 @@ function ViewEmployees({toast}){
                             placeholder="Filter by Roles" className="p-inputtext-sm"/>
                     </div>
                     <div className="card flex justify-content-center" style={{ marginRight:"15px" }}>
-                        <Dropdown value={selectedRisk} options={riskOptions} onChange={(e) => setSelectedRisk(e.value)} optionLabel="name" 
+                        <Dropdown value={selectedRisk} options={riskOptions} onChange={(e) => setSelectedRisk(e.value)}
                             placeholder="Filter by Risk Level" className="p-inputtext-sm"/>
                     </div>
                     <IconField iconPosition="left">
