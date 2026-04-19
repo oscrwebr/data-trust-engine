@@ -5,13 +5,16 @@ import api from "../api/axiosConfig";
 import { Link, useParams } from "react-router-dom";
 import "./scan_file.css";
 import { useNavigate } from "react-router-dom";
-import { PiArrowLeftBold } from "react-icons/pi";
+import { PiArrowLeftBold, PiFile } from "react-icons/pi";
 import { getSensitivityScanPageCardClass } from "../scans/utils/getSensitivityScanPageCardClass";
 import { PiScalesBold } from "react-icons/pi";
 import { PiCurrencyGbpBold } from "react-icons/pi";
 import { PiUserListBold } from "react-icons/pi";
 import { PiFileMagnifyingGlass } from "react-icons/pi";
-import { Accordion } from '@mantine/core';
+import { Accordion, AccordionTab } from 'primereact/accordion';
+import { PiFileText } from "react-icons/pi";
+
+
 
 
 
@@ -59,8 +62,8 @@ function ScanFile({ scan_file }) {
     for (const page in pageDetections) {
         pageDetectionCounts[page] = pageDetections[page].length;
     }
-
-    
+    // Sort the pages so they are in the correct order (Page 1 FIRST, Page 2 etc.)
+    const sortedPages = Object.keys(pageDetections).map(Number).sort((a, b) => a - b);
 
     return (
         <div>
@@ -143,7 +146,25 @@ function ScanFile({ scan_file }) {
                         <h2 className="scan-page-files-heading">Detections by Page</h2>
 
                         <div>
-                            <Accordion variant="separated"></Accordion>
+                            <Accordion multiple>
+                                {sortedPages.map(page => (
+                                    <AccordionTab key={page} header={
+                                        <>
+                                        <PiFileText size={20}/>
+                                        <span>{`Page ${page}`}</span>
+                                        <span>{`${pageDetectionCounts[page]} Detections`}</span>
+                                        </>
+                                    }>   
+
+                                
+                                        {pageDetections[page].map(detection => (
+                                            <div key={detection.scan_file_detection_id}>
+                                                <p>{detection.category} — {detection.subcategory}</p>
+                                            </div>
+                                        ))}
+                                    </AccordionTab>
+                                ))}
+                            </Accordion>
                         </div>                        
                     </>
                 )}

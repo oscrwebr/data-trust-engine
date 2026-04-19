@@ -21,3 +21,7 @@
     justify-content: space-between;
     align-items: center;
 }
+
+.p-accordion-header-link {
+    flex-direction: row-reverse;
+}
