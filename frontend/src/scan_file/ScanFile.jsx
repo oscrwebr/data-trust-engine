@@ -11,7 +11,7 @@ import { PiScalesBold } from "react-icons/pi";
 import { PiCurrencyGbpBold } from "react-icons/pi";
 import { PiUserListBold } from "react-icons/pi";
 import { PiFileMagnifyingGlass } from "react-icons/pi";
-
+import { Accordion } from '@mantine/core';
 
 
 
@@ -36,6 +36,29 @@ function ScanFile({ scan_file }) {
             setLoading(false);
         })
     }, [scanFileId])
+
+    // Ensure scanFile exists before mapping detections
+    if(loading || !scanFile) {
+        return <p className="scan-loading">Loading scanned file...</p>;
+    }
+
+    // Group detections by page number
+    const pageDetections = {}
+
+    // Loop through each detection and add to the dictionary
+    // ?? [] used for Organisational scan_files which don't use detections (stops crash)
+    for (const detection of scanFile.detections ?? []) {
+        const page = detection.page_number;
+        if (!pageDetections[page]) {
+            pageDetections[page] = [];
+        }
+        pageDetections[page].push(detection);
+    }
+
+    const pageDetectionCounts = {}
+    for (const page in pageDetections) {
+        pageDetectionCounts[page] = pageDetections[page].length;
+    }
 
     
 
@@ -118,7 +141,10 @@ function ScanFile({ scan_file }) {
                         </div>
 
                         <h2 className="scan-page-files-heading">Detections by Page</h2>
-                        
+
+                        <div>
+                            <Accordion variant="separated"></Accordion>
+                        </div>                        
                     </>
                 )}
         </div>
