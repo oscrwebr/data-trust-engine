@@ -1,4 +1,8 @@
 #!/usr/bin/bash
+
+exec > /var/log/artifact.log 2>&1
+set -x
+
 echo "cd to /root directory..."
 cd /root
 
@@ -30,6 +34,6 @@ apt-get update
 apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
 # Add vagrant user to docker group - means that 'sudo' command isn't required each time!
-usermod -aG docker vagrant
+# usermod -aG docker vagrant
 
 # Above was found from HashiCorp at: https://developer.hashicorp.com/vagrant/tutorials/get-started/provision
