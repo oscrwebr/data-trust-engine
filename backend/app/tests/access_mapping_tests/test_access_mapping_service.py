@@ -488,7 +488,7 @@ def test_employee_access_allowed_no_files(monkeypatch):
     result = service.determine_employee_risk_from_violated_files(None, mock_employee)
 
     assert result[0]["files"]["id"] == 1
-    assert result[0]["files"]["status"] == "No files found"
+    assert result[0]["files"]["status"] == "No Files Found"
 
 
 # Test determine_employee_risk_from_violated_files when access_allowed is None
@@ -511,7 +511,7 @@ def test_employee_access_allowed_all_none(monkeypatch):
     result = service.determine_employee_risk_from_violated_files(None, mock_employee)
 
     assert result[0]["files"]["id"] == 2
-    assert result[0]["files"]["status"] == "Files not scanned yet"
+    assert result[0]["files"]["status"] == "No Files Scanned"
 
 # Test determine_employee_risk_from_violated_files when access_allowed is False
 def test_employee_access_allowed_any_false(monkeypatch):
