@@ -32,13 +32,13 @@ class IngestionFile(Base):
 class UserFolders(Base):
     __tablename__ = 'user_folders'
 
-    folder_id = Column(ForeignKey(Folder.folder_id), primary_key=True)
-    user_id = Column(ForeignKey(User.user_id), primary_key=True)
+    folder_id = Column(ForeignKey(Folder.folder_id, ondelete="CASCADE"), primary_key=True)
+    user_id = Column(ForeignKey(User.user_id, ondelete="CASCADE"), primary_key=True)
     Index("rev_idx_user_folders", user_id, folder_id)
 
 class UserFiles(Base):
     __tablename__ = 'user_files'
 
-    file_id = Column(ForeignKey(IngestionFile.ingestion_file_id), primary_key=True)
-    user_id = Column(ForeignKey(User.user_id), primary_key=True)
+    file_id = Column(ForeignKey(IngestionFile.ingestion_file_id, ondelete="CASCADE"), primary_key=True)
+    user_id = Column(ForeignKey(User.user_id, ondelete="CASCADE"), primary_key=True)
     Index("rev_idx_user_files", user_id, file_id)

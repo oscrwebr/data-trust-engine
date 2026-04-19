@@ -9,11 +9,9 @@ import DropdownItemNoLink from "./DropdownItemNoLink.jsx";
 import api from "../../api/axiosConfig";
 import { Avatar } from "primereact/avatar";
 import { setAccessToken, getAccessToken } from "../../Auth/authStore.js";
-import { BiFileFind } from "react-icons/bi";
         
-function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role}){
+function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role, pendingEmployees}){
     const [openDropdown, setOpenDropdown] = useState(null);
-    const [pendingEmployees, setPendingEmployees] = useState([]);
     const [workspace_id, setWorkspaceId] = useState(null);
     const backend_uri = import.meta.env.VITE_BACKEND_HOST || "http://localhost:8000"
     const user_initials = (firstname?.[0]?.toUpperCase() || "?") + (surname?.[0]?.toUpperCase() || "?");
@@ -23,11 +21,6 @@ function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role
         api.get("/workspace/dashboard")
         .then(res => {
             setWorkspaceId(res.data.id)
-        })
-
-        api.get("/workspace/get-pending-employees")
-        .then(res => {
-            setPendingEmployees(res.data)
         })
     }, []);
 
@@ -84,7 +77,7 @@ function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role
 
                         {/* SidebarDropdowns have their own children for styling purposes - specify the url and text displayed */}
                         <DropdownItem url="/view-employees" text="View Employees"/>
-                        <DropdownItem url="/manage-employees" text="Manage Employees" value={pendingEmployees.length}/>
+                        <DropdownItem url="/manage-employees" text="Manage Employees" value={pendingEmployees?.length}/>
                     </SidebarDropdown>
 
                     <SidebarDropdown className={styles.dropdown} icon="pi pi-pen-to-square" label="Configure" openDropdown={openDropdown} setOpenDropdown={setOpenDropdown} basePaths={["/roles", "/upload-org-chart"]}>

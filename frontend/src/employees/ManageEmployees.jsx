@@ -17,6 +17,7 @@
     import PendingRejectModal from "../components/manage_employees/validation_modals/PendingRejectModal";
     import PendingAcceptModal from "../components/manage_employees/validation_modals/PendingAcceptModal";
     import Invite from "../invites/invites";
+import { useOutletContext } from "react-router-dom";
 
     function ManageEmployees({toast}){
         const [employeeRoles, setEmployeeRoles] = useState({});
@@ -27,7 +28,6 @@
         const [employees, setEmployees] = useState([])
         const [roles, setRoles] = useState([])
         const [status, _] = useState(["View All Employees", "Active", "Pending"])
-        const [pendingEmployees, setPendingEmployees] = useState([])
         const [mixedUsers, setMixedUsers] = useState([]);
         const [user, setUser] = useState(null)
         const [removeEmployeeModal, setRemoveEmployeeModal] = useState(false)
@@ -35,6 +35,8 @@
         const [acceptPendingModal, setAcceptPendingModal] = useState(false)
         const [saving, setSaving] = useState(false);
         const [sendInviteModal, setSendInviteModal] = useState(false)
+        const [allPendingUsers, setAllPendingUsers] = useState([])
+        const { pendingEmployees, setPendingEmployees } = useOutletContext();
 
         const expiryDate = new Date();
         expiryDate.setDate(expiryDate.getDate() + 7);
@@ -53,7 +55,7 @@
                     }
 
                     setEmployees(active);
-                    setPendingEmployees(pending);
+                    setAllPendingUsers(pending);
                     setMixedUsers(combined);
                 }
             );
@@ -213,7 +215,7 @@
                 <div className={styles.header}>
                     <div className={styles.count_container}>
                         <strong className={styles.active_employee_count}>{employees.length} Active Employees</strong>
-                        <strong className={styles.pending_employee_count}>{pendingEmployees.length} Pending Employees</strong>
+                        <strong className={styles.pending_employee_count}>{allPendingUsers.length} Pending Employees</strong>
                     </div>
                     <div className={styles.search_dropdown_icon_container}>
                         <div className="card flex justify-content-center" style={{ marginRight:"15px" }}>
