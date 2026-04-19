@@ -57,7 +57,7 @@ build-images-main:
     # - if: $CI_COMMIT_BRANCH == "main"
   script:
     - echo "Logging into registry..."
-    - echo "This is the registry: $CI_REGISTRY"
+    - echo "$CI_REGISTRY"
     - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
     - echo "Building the frontend image..."
     - docker build -t $CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_REF_SLUG ./frontend/ --target prod
