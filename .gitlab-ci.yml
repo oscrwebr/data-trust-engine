@@ -57,13 +57,12 @@ build-images-main:
     # - if: $CI_COMMIT_BRANCH == "main"
   script:
     - echo "Logging into registry..."
-    - echo "$DOCKER_PAT" | docker login -u $DOCKER_USER --password-stdin
-    - echo "This is the docker registry image value - $DOCKER_REGISTRY_IMAGE"
-    # - echo "Building the frontend image..."
-    # - docker build -t $DOCKER_REGISTRY_IMAGE/frontend:$CI_COMMIT_REF_SLUG ./frontend/ --target prod
+    - echo "$DOCKER_PASS" | docker login -u $DOCKER_USER --password-stdin
+    - echo "Building the frontend image..."
+    - docker build -t $DOCKER_REGISTRY_IMAGE/frontend:$CI_COMMIT_REF_SLUG ./frontend/ --target prod
     # - echo "Building the backend image..."
     # - docker build -t $DOCKER_REGISTRY_IMAGE/backend:$CI_COMMIT_REF_SLUG ./backend/
-    # - echo "Pushing the frontend image to the container registry..."
-    # - docker push $DOCKER_REGISTRY_IMAGE/frontend:$CI_COMMIT_REF_SLUG
+    - echo "Pushing the frontend image to the container registry..."
+    - docker push $DOCKER_REGISTRY_IMAGE/frontend:$CI_COMMIT_REF_SLUG
     # - echo "Pushing the backend image to the container registry..."
     # - docker push $DOCKER_REGISTRY_IMAGE/backend:$CI_COMMIT_REF_SLUG
