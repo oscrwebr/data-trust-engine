@@ -1,8 +1,8 @@
 stages:
-  # - test-frontend
-  # - test-backend
-  # - test-frontend-build
-  - build-images
+  - test-frontend
+  - test-backend
+  - test-frontend-build
+  # - build-images
 
 workflow:
   rules:
@@ -19,51 +19,50 @@ default:
     - docker compose --profile frontend-test down -v
 
 
-# test-frontend:
-#   stage: test-frontend
-#   when: always
-#   tags:
-#    - docker-pipeline
-#   script:
-#     - docker compose --profile test-frontend up --build --exit-code-from frontend-test # --exit-code-from frontend-test = compose will exit with whatever exit code the service exited with (wont pass a failing pipeline)
-#   artifacts:
-#     reports:
-#       coverage_report:
-#         coverage_format: cobertura
-#         path: frontend_coverage/coverage/cobertura-coverage.xml
+test-frontend:
+  stage: test-frontend
+  when: always
+  tags:
+   - docker-pipeline
+  script:
+    - docker compose --profile test-frontend up --build --exit-code-from frontend-test # --exit-code-from frontend-test = compose will exit with whatever exit code the service exited with (wont pass a failing pipeline)
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: frontend_coverage/coverage/cobertura-coverage.xml
 
-# test-backend:
-#   stage: test-backend
-#   when: always
-#   tags:
-#     - docker-pipeline
-#   script:
-#     - docker compose --profile test-backend up --build --abort-on-container-exit --exit-code-from backend-test # --abort-on-container-exit = when backend container exits, db container be forced to exit
-
-# test-frontend-build:
-#   stage: test-frontend-build
-#   when: always
-#   tags:
-#    - docker-pipeline
-#   script:
-#     - docker build ./frontend/ --target prod
-
-build-images-main:
-  stage: build-images
+test-backend:
+  stage: test-backend
   when: always
   tags:
     - docker-pipeline
-  rules:
-    # - if: $CI_COMMIT_BRANCH == "main"
   script:
-    - echo "Logging into registry..."
-    - echo "$CI_REGISTRY"
-    - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
-    - echo "Building the frontend image..."
-    - docker build -t $CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_REF_SLUG ./frontend/ --target prod
-    - echo "Building the backend image..."
-    - docker build -t $CI_REGISTRY_IMAGE/backend:$CI_COMMIT_REF_SLUG ./backend/
-    - echo "Pushing the frontend image to the container registry..."
-    - docker push $CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_REF_SLUG
-    - echo "Pushing the backend image to the container registry..."
-    - docker push $CI_REGISTRY_IMAGE/backend:$CI_COMMIT_REF_SLUG
+    - docker compose --profile test-backend up --build --abort-on-container-exit --exit-code-from backend-test # --abort-on-container-exit = when backend container exits, db container be forced to exit
+
+test-frontend-build:
+  stage: test-frontend-build
+  when: always
+  tags:
+   - docker-pipeline
+  script:
+    - docker build ./frontend/ --target prod
+
+# build-images-main:
+#   stage: build-images
+#   when: always
+#   tags:
+#     - docker-pipeline
+#   rules:
+#     # - if: $CI_COMMIT_BRANCH == "main"
+#   script:
+#     - echo "Logging into registry..."
+#     - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
+#     - echo "Building the frontend image..."
+#     - docker build -t $CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_REF_SLUG ./frontend/ --target prod
+#     - echo "Building the backend image..."
+#     - docker build -t $CI_REGISTRY_IMAGE/backend:$CI_COMMIT_REF_SLUG ./backend/
+#     - echo "Pushing the frontend image to the container registry..."
+#     - docker push $CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_REF_SLUG
+#     - echo "Pushing the backend image to the container registry..."
+#     - docker push $CI_REGISTRY_IMAGE/backend:$CI_COMMIT_REF_SLUG
