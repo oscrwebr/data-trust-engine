@@ -1,6 +1,7 @@
     import styles from "./employees.module.css"
     import api from "../api/axiosConfig"
-    import { useEffect } from "react";
+    import { useEffect, useRef, useCallback } from "react";
+
 
     import { IconField } from "primereact/iconfield";
     import { InputIcon } from "primereact/inputicon";
@@ -17,7 +18,6 @@
     import PendingRejectModal from "../components/manage_employees/validation_modals/PendingRejectModal";
     import PendingAcceptModal from "../components/manage_employees/validation_modals/PendingAcceptModal";
     import Invite from "../invites/invites";
-import { useOutletContext } from "react-router-dom";
 
     function ManageEmployees({toast}){
         const [employeeRoles, setEmployeeRoles] = useState({});
@@ -36,30 +36,48 @@ import { useOutletContext } from "react-router-dom";
         const [saving, setSaving] = useState(false);
         const [sendInviteModal, setSendInviteModal] = useState(false)
         const [allPendingUsers, setAllPendingUsers] = useState([])
-        const { pendingEmployees, setPendingEmployees } = useOutletContext();
+        const orderRef = useRef([]);
 
         const expiryDate = new Date();
         expiryDate.setDate(expiryDate.getDate() + 7);
         expiryDate.setMilliseconds(0);
 
-        const fetchEmployees = () => {
+        const fetchEmployees = useCallback(() => {
             return api.get("/workspace/get-employees")
                 .then(res => {
                     const active = (res.data.active || []).map(u => ({ ...u, status: "Active" }));
                     const pending = (res.data.pending || []).map(u => ({ ...u, status: "Pending" }));
                     const combined = [...active, ...pending];
                     
-                    for (let i = combined.length - 1; i > 0; i--) {
-                        const j = Math.floor(Math.random() * (i + 1));
-                        [combined[i], combined[j]] = [combined[j], combined[i]];
+                    const getId = (u) => u.user?.user_id || u.pending?.email;
+
+                    if (orderRef.current.length === 0) {
+                        const ids = combined.map(getId);
+
+                        for (let i = ids.length - 1; i > 0; i--) {
+                            const j = Math.floor(Math.random() * (i + 1));
+                            [ids[i], ids[j]] = [ids[j], ids[i]];
+                        }
+
+                        orderRef.current = ids;
                     }
+
+                    combined.sort((a, b) => {
+                        const idA = getId(a);
+                        const idB = getId(b);
+
+                        return (
+                            orderRef.current.indexOf(idA) -
+                            orderRef.current.indexOf(idB)
+                        );
+                    });
 
                     setEmployees(active);
                     setAllPendingUsers(pending);
                     setMixedUsers(combined);
                 }
             );
-        };
+        }, []);
 
         useEffect(() => {
             fetchEmployees();
@@ -201,10 +219,10 @@ import { useOutletContext } from "react-router-dom";
 
         return(
             <div className={styles.page}>
+                <Invite className={styles.d_invite_dialog} visible={sendInviteModal} setVisible={setSendInviteModal} toast={toast} fetchEmployees={fetchEmployees}/>
                 <EmployeeRemoveModal firstname={user?.firstname || ""} surname={user?.surname || ""} visible={removeEmployeeModal} setVisible={() => setRemoveEmployeeModal(false)} onRemove={() => {setRemoveEmployeeModal(false); handleRemoveEmployee();}}/>
                 <PendingRejectModal email={user?.email || ""} visible={rejectPendingModal} setVisible={() => setRejectPendingModal(false)} onReject={() => {setRejectPendingModal(false); handleRejectPending();}}/>
                 <PendingAcceptModal email={user?.email || ""} visible={acceptPendingModal} setVisible={() => setAcceptPendingModal(false)} onAccept={() => {setAcceptPendingModal(false); handleAcceptPending();}} date={expiryDate}/>
-                <Invite className={styles.d_invite_dialog} visible={sendInviteModal} setVisible={setSendInviteModal} toast={toast}/>
                 <div className={styles.container}>
                     <h1 className={styles.title}>Manage Employees</h1>
                     <div>

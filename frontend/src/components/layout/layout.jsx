@@ -39,7 +39,7 @@ const Layout = () => {
       .then(res => {
           setPendingEmployees(res.data)
       })
-  }, [pendingEmployees])
+  }, [])
 
   // Function to handle removing notifications
   const handleRemove = async (id) => {

@@ -101,15 +101,12 @@ describe("Sidebar Component", () => {
     // Test 4
     test("Check that correct badge number displays to indicate number of pending employees", async () => {
         const pendingEmployeesMock = [
-        { id: 1, name: "Alice" },
-        { id: 2, name: "Bob" },
-        { id: 3, name: "Charlie" },
+            { id: 1, name: "Alice" },
+            { id: 2, name: "Bob" },
+            { id: 3, name: "Charlie" },
         ];
 
         api.get.mockImplementation((url) => {
-        if (url === "/workspace/get-pending-employees") {
-            return Promise.resolve({ data: pendingEmployeesMock });
-        }
         if (url === "/workspace/get-workspace-image") {
             return Promise.resolve({ data: new Blob(["image"]) });
         }
@@ -126,6 +123,7 @@ describe("Sidebar Component", () => {
             email="test@example.com"
             setVisible={vi.fn()}
             role="admin"
+            pendingEmployees={pendingEmployeesMock}
             />
         </MemoryRouter>
         );
