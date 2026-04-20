@@ -44,17 +44,12 @@ function ScanFile({ scan_file }) {
         })
     }, [scanFileId])
 
-    // Ensure scanFile exists before mapping detections
-    if(loading || !scanFile) {
-        return <p className="scan-loading">Loading scanned file...</p>;
-    }
-
     // Group detections by page number
     const pageDetections = {}
 
     // Loop through each detection and add to the dictionary
     // ?? [] used for Organisational scan_files which don't use detections (stops crash)
-    for (const detection of scanFile.detections ?? []) {
+    for (const detection of scanFile?.detections ?? []) {
         const page = detection.page_number;
         if (!pageDetections[page]) {
             pageDetections[page] = [];
