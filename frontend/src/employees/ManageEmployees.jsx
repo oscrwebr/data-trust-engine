@@ -75,6 +75,7 @@
                     setEmployees(active);
                     setAllPendingUsers(pending);
                     setMixedUsers(combined);
+                    console.log(combined)
                 }
             );
         }, []);
@@ -110,7 +111,7 @@
                     (employee.user?.email?.toLowerCase().includes(search) || false)
                 )
                 : (
-                    employee.pending?.email?.toLowerCase().includes(search) || false
+                    employee.user?.email?.toLowerCase().includes(search) || false
                 );
 
             return matchesRole && matchesStatus && matchesSearch;
@@ -224,12 +225,16 @@
                 <PendingRejectModal email={user?.email || ""} visible={rejectPendingModal} setVisible={() => setRejectPendingModal(false)} onReject={() => {setRejectPendingModal(false); handleRejectPending();}}/>
                 <PendingAcceptModal email={user?.email || ""} visible={acceptPendingModal} setVisible={() => setAcceptPendingModal(false)} onAccept={() => {setAcceptPendingModal(false); handleAcceptPending();}} date={expiryDate}/>
                 <div className={styles.container}>
-                    <h1 className={styles.title}>Manage Employees</h1>
+                    <div className={styles.icon_and_title}>
+                        <i id={styles.title_icon} className="pi pi-user-edit"/>
+                        <h1 className={styles.title}>Manage Employees</h1>
+                    </div>
                     <div>
                         <Button data-testid="send-invite" style={{ marginRight: '10px'}} onClick={() => setSendInviteModal(true)} >Send an Invite</Button>
                         <Button data-testid="save-information" onClick={() => handleSaveInformation()} disabled={Object.keys(employeeRoles).length === 0 || saving}>Save Information</Button>
                     </div>
                 </div>
+                <span className={styles.subheader}>Assign roles to your employees, manage pending users and remove employees</span>
                 <div className={styles.header}>
                     <div className={styles.count_container}>
                         <strong className={styles.active_employee_count}>{employees.length} Active Employees</strong>
@@ -278,7 +283,7 @@
 
                             {employee.status === "Pending" && (
                                 <PendingEmployeeRow 
-                                    email={employee.pending.email} status={employee.pending.type} datetime={employee.datetime} onReject={() => {setRejectPendingModal(true); setUser(employee.pending);}} onAccept={() => {setAcceptPendingModal(true); setUser(employee.pending);}}/>
+                                    email={employee.user.email} status={employee.user.type} datetime={employee.datetime} onReject={() => {setRejectPendingModal(true); setUser(employee.user);}} onAccept={() => {setAcceptPendingModal(true); setUser(employee.user);}}/>
                             )}
                         </div>
                         ))
@@ -304,7 +309,7 @@
                                 if(employee.status === "Pending") {
                                     return (
                                         <PendingEmployeeSquare
-                                        email={employee.pending.email} status={employee.pending.type} datetime={employee.datetime} onReject={() => {setRejectPendingModal(true); setUser(employee.pending);}} onAccept={() => {setAcceptPendingModal(true); setUser(employee.pending);}}/>
+                                        email={employee.user.email} status={employee.user.type} datetime={employee.datetime} onReject={() => {setRejectPendingModal(true); setUser(employee.user);}} onAccept={() => {setAcceptPendingModal(true); setUser(employee.user);}}/>
                                     )
                                 }
                             })}

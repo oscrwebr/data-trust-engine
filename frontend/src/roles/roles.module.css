@@ -36,6 +36,14 @@
     color: #6b7280;
 }
 
+.header_container {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
 
 /* ========== Search, Fitler, Create Role ========== */
 .button_container {
@@ -43,8 +51,11 @@
   flex-direction: row;
   align-items: center;
   justify-content: end;
-  margin-top: 20px;
   gap: 10px;
+}
+
+.num_roles {
+  font-weight: 600;
 }
 
 .create_role_button {
