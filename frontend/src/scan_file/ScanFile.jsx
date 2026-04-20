@@ -13,6 +13,10 @@ import { PiUserListBold } from "react-icons/pi";
 import { PiFileMagnifyingGlass } from "react-icons/pi";
 import { Accordion, AccordionTab } from 'primereact/accordion';
 import { PiFileText } from "react-icons/pi";
+import { PiMagnifyingGlassBold } from "react-icons/pi";
+import { PiFileBold } from "react-icons/pi";
+import { PiHash } from "react-icons/pi";
+
 
 
 
@@ -91,9 +95,20 @@ function ScanFile({ scan_file }) {
                                 <h1 className="scan-heading">
                                     {scanFile.file_name}
                                 </h1>
-                                <p className="scan-loading">
-                                    Scan ID: {scanFile.scan_id} | Scan File ID: {scanFile.scan_file_id}
-                                </p>
+                                <div className="pills">
+                                    <button className="header-pill" onClick={() => navigate(`/scan-file/${scanFile.scan_file_id}`)}>
+                                        <PiHash />
+                                        Scan File ID: {scanFile.scan_file_id}
+                                    </button>
+                                    <button className="header-pill" onClick={() => navigate(`/scans/${scanFile.scan_id}`)}>
+                                        <PiMagnifyingGlassBold />
+                                        Scan ID: {scanFile.scan_id}
+                                    </button>
+                                    <button className="header-pill" onClick={() => navigate(`/files/${scanFile.file_id}`)}>
+                                        <PiFileBold />
+                                        File ID: {scanFile.file_id}
+                                    </button>
+                                </div>
                             </div>
                             <button className="back-button" onClick={() => navigate(`/scans/${scanFile.scan_id}`)}>
                                 <PiArrowLeftBold />
@@ -175,16 +190,18 @@ function ScanFile({ scan_file }) {
                                         </div>
                                     }>   
 
-                                
-                                        {pageDetections[page].map(detection => (
-                                        
-                                            <div key={detection.scan_file_detection_id}>
+                                        <div className="detection-rows">
+                                        {pageDetections[page].map((detection, index) => (
+                                            <div key={detection.scan_file_detection_id} className="detection-row">
                                                 <span className="pill">
                                                     {categoryIcons[detection.category.toUpperCase()]}
                                                     {detection.category}
                                                 </span>
+                                                <span className="detection-text">{detection.subcategory}</span>
+                                                <span>Line {index+1}</span>
                                             </div>
                                         ))}
+                                        </div>
                                     </AccordionTab>
                                 ))}
                             </Accordion>
