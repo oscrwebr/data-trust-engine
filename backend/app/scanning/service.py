@@ -45,9 +45,9 @@ def perform_scan(db: Session, graph_file_ids: list[str]):
 
 # Scan one individual file
 def scan_file(db: Session, graph_file_id: str, scan_id: int):
-
-    # Fetch file (for now using the testing method) using its graph_file_id (ingestion component will be integrated here later)
-    # file_path = fetch_graph_file(graph_file_id=graph_file_id)
+    # Get file's extension type
+    file = get_ingestion_file_by_graph_id(db=db, graph_id=graph_file_id)
+    file_extension = file.extension
 
     # Get file's download link via its graph id
     download_url = get_download_link_by_graph_id(application=application(), db=db, graph_id=graph_file_id)
@@ -71,8 +71,8 @@ def scan_file(db: Session, graph_file_id: str, scan_id: int):
         file_id=file.ingestion_file_id
     )
 
-    # Extract text from fetched file
-    file_extracted_text = extract_text_from_pdf(file_bytes=file_bytes)
+    # Extract text from fetched file using its extension
+    file_extracted_text = extract_text_from_file(file_bytes=file_bytes, file_extension=file_extension)
 
     # Detect sensitive data in file's extracted text
     detections = []

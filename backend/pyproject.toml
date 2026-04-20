@@ -98,7 +98,9 @@ dependencies = [
     "redis>=6.4.0",
     "tzlocal>=5.3.1",
     "vine>=5.1.0",
-    "wcwidth>=0.6.0"
+    "wcwidth>=0.6.0",
+    "python-docx",
+    "python-pptx",
 ]
 
 [tool.setuptools.packages.find]

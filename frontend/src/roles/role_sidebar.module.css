@@ -1,0 +1,80 @@
+.sidebar {
+    width: 70vw;
+}
+
+.header {
+    margin: 0;
+    font-size: 20px;
+}   
+
+:global(.p-sidebar .p-sidebar-header) {
+  border-bottom: 1px solid #e5e7eb;
+  padding: 18px 25px;
+}
+
+.basic_information, .sensitivity_thresholds {
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+    margin: 30px 0px;
+}
+
+.basic_information .title {
+    color: black;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.sensitivity_thresholds .title {
+    color: black;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.basic_information .label, .sensitivity_thresholds .label {
+    color: rgb(69, 66, 66);
+    margin-bottom: 8px;
+}
+
+.sidebar_container {
+    padding-left: 5px;
+}
+
+.sensitivity_threshold_container {
+    padding: 20px;
+    background-color: #d3d6db6c;
+    border-radius: 15px;
+    color: black;
+    font-weight: 600;
+    margin-top: 15px;
+}
+
+.footer {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.save_changes_button {
+    background-color: rgba(33, 33, 255, 0.861);
+    margin-right: 15px;
+    transition: background-color 0.2s ease;
+}
+
+.save_changes_button:hover {
+    background-color: rgba(25, 25, 197, 0.861);
+}
+
+.cancel_button {
+    background-color: white;
+    color:rgb(64, 63, 63);
+    border: 1px solid rgb(216, 208, 208);
+    transition: all 0.2s ease;
+}
+
+.cancel_button:hover {
+    background-color:  rgba(170, 164, 164, 0.32);
+}

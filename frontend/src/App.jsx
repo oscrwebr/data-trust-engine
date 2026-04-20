@@ -58,16 +58,13 @@ function App() {
 
         {/* Elements in here will not inherit the sidebar */}
         <Route path="/" element={<Home toast={toast}/>} />
-        <Route path="/roles" element={<Roles />} />
         <Route path="/dashboard" element={<Dashboard toast={toast}/>} />
         <Route path="/create-workspace" element={<CreateWorkspace  toast={toast}/>} />
         <Route path="/test" element={<Test/>} />
         <Route path="/error/422" element={<Unprocessable422/>}/>
         <Route path="/error/403" element={<Forbidden403/>}/>
         <Route path="/invite-error/:type" element={<EmployeeInviteError toast={toast}/>} />
-        <Route path="/workspace-joined" element={<WorkspaceJoinedError />} />
-        <Route path="/upload-org-chart" element={<OrgChart toast={toast} />} />
-        
+        <Route path="/workspace-joined" element={<WorkspaceJoinedError />} />        
       </Routes>
 
     </>

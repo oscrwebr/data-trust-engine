@@ -1,32 +1,41 @@
 import { useEffect, useState } from "react";
 import api from "../api/axiosConfig";
 import styles from "./roles.module.css";
+import { RiUserSettingsLine } from "react-icons/ri";
+import RoleCard from "./RoleCard";
+
+import { Button } from "primereact/button";
+import { IconField } from "primereact/iconfield";
+import { InputIcon } from "primereact/inputicon";
+import { InputText } from "primereact/inputtext";
+import { Dropdown } from "primereact/dropdown";
+import RoleSidebar from "./RoleSidebar";
+import DeleteModal from "./DeleteModal";
+import { sortRoles } from "./utils/sortRoles";
 
 function Roles() {
   const [roles, setRoles] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [users, setUsers] = useState([]); // For User Assignment
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  const [activePanel, setActivePanel] = useState("roles"); // "roles" or "users"
+  const [searchValue, setSearchValue] = useState(null);
+  const [editSidebar, setEditSidebar] = useState(false);
+  const [deleteModal, setDeleteModal] = useState(false);
 
   // Form state for Add / Edit Role
   const [editingRole, setEditingRole] = useState(null);
   const [roleName, setRoleName] = useState("");
   const [thresholds, setThresholds] = useState({});
 
-  // ----------------- Filter & Search -----------------
-  const [roleFilter, setRoleFilter] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
+  const sortOptions = [
+      { name: "Sort By", value: "nothing"},
+      { name: "Name (A → Z)", value: "nameAscending"},
+      { name: "Name (Z → A)", value: "nameDescending"},
+      { name: "Newest First", value: "newestToOldest"},
+      { name: "Oldest First", value: "oldestToNewest"}
+  ]
 
-  // Filtered users
-  const filteredUsers = users.filter((user) => {
-    const matchesSearch =
-      `${user.firstname} ${user.surname}`.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesRole = !roleFilter || user.role_id === parseInt(roleFilter);
-    return matchesSearch && matchesRole;
-  });
+  const [sortOption, setSortOption] = useState("nothing")
 
   // -------------------------
   // Fetch roles, categories, subcategories, and users
@@ -34,15 +43,13 @@ function Roles() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const [rolesRes, categoriesRes, subsRes, usersRes] = await Promise.all([
+        const [rolesRes, categoriesRes, subsRes] = await Promise.all([
           api.get("/roles/get"),
           api.get("/roles/sensitivity/categories"),
           api.get("/roles/sensitivity/subcategories"),
-          api.get("/roles/users/all")  // fetch all users once
         ]);
-  
+        
         setRoles(rolesRes.data);
-        setUsers(usersRes.data);
   
         const groupedCategories = categoriesRes.data.map((cat) => ({
           ...cat,
@@ -52,6 +59,7 @@ function Roles() {
         }));
   
         setCategories(groupedCategories);
+        console.log(groupedCategories)
       } catch (err) {
         console.error(err);
         setError("Failed to fetch roles, categories, or users");
@@ -82,12 +90,14 @@ function Roles() {
       initialThresholds[perm.sensitivity_subcategory_id] = perm.threshold;
     });
     setThresholds(initialThresholds);
+    setEditSidebar(true)
   };
 
   const handleCancelEdit = () => {
     setEditingRole(null);
     setRoleName("");
     setThresholds({});
+    setEditSidebar(false);
   };
 
   const handleDeleteRole = async () => {
@@ -105,7 +115,7 @@ function Roles() {
     if (!roleName.trim()) return;
     const payload = {
       name: roleName,
-      thresholds: mapThresholdsForAPI()
+      thresholds: mapThresholdsForAPI(),
     };
 
     try {
@@ -116,141 +126,79 @@ function Roles() {
         handleCancelEdit();
       } else {
         const res = await api.post("/roles/create", payload);
-        setRoles([...roles, res.data]);
+        setRoles(prev => [...prev, res.data]);
         setRoleName("");
         setThresholds({});
+        setEditSidebar(false);
       }
     } catch (err) {
       console.error(err);
     }
   };
 
-  const handleThresholdChange = (subId, value) => {
-    setThresholds({
-      ...thresholds,
-      [subId]: value === "" ? null : parseInt(value, 10),
-    });
+  const processedRoles = sortRoles(
+    roles.filter(role => {
+      const search = searchValue?.toLowerCase() || "";
+      return role?.name?.toLowerCase().includes(search);
+    }),
+    sortOption
+  ) || roles;
+
+  const handleCloseModal = () => {
+    setDeleteModal(false);
+    setEditingRole(null);
   };
 
-  // -------------------------
-  // User Assignment Handler
-  // -------------------------
-  const handleUserRoleChange = async (userId, newRoleId) => {
-    try {
-      await api.put(`/roles/users/${userId}/role`, { role_id: newRoleId });
-  
-      // Update frontend state
-      const roleName = roles.find((r) => r.role_id === parseInt(newRoleId))?.name || "";
-  
-      setUsers(users.map((u) =>
-        u.user_id === userId
-          ? { ...u, role_id: parseInt(newRoleId), role_name: roleName }
-          : u
-      ));
-    } catch (err) {
-      console.error(err);
-    }
-  };
   if (loading) return <p className={styles.message}>Loading...</p>;
   if (error) return <p className={styles.error}>{error}</p>;
 
   return (
     <div className={styles.pageContainer}>
+    <DeleteModal visible={deleteModal} onClose={handleCloseModal} onRemove={async () => {await handleDeleteRole(); handleCloseModal();}}/>
+    <RoleSidebar 
+        role={roleName} 
+        visible={editSidebar} 
+        setVisible={setEditSidebar} 
+        categories={categories} 
+        setThresholds={setThresholds} 
+        thresholds={thresholds}
+        cancel={() => handleCancelEdit()}
+        save={() => handleSaveRole()}
+        onChange={(e) => setRoleName(e.target.value)}
+        editingRole={editingRole}/>
+
       {/* ---------------- Buttons ---------------- */}
-      <div style={{ display: "flex", gap: "1rem", marginBottom: "1rem" }}>
-        <button
-          onClick={() => setActivePanel("roles")}
-          className={activePanel === "roles" ? styles.activeTab : ""}
-        >
-          Roles Management
-        </button>
+      <div className={styles.manage_roles_header}>
+          <div className={styles.title_row}>
+              <RiUserSettingsLine className={styles.title_icon}/>
+              <h1 className={styles.page_title}>Manage Roles</h1>
+          </div>
+          <p className={styles.page_subtitle}>Manage roles and sensitivity thresholds for organisational data</p>
+          <div className={styles.button_container}>
+            <IconField iconPosition="left">
+                <InputIcon className="pi pi-search"></InputIcon>
+                <InputText onChange={(e) => setSearchValue(e.target.value)} style={{ width: '23vw'}} placeholder="Search by role name" className="p-inputtext-sm"/>
+            </IconField>
+            <Dropdown optionLabel="name" optionValue="value" options={sortOptions} value={sortOption}
+              onChange={(e) => setSortOption(e.value)} placeholder="Sort by" className="p-inputtext-sm"/>
+            <Button className={styles.create_role_button} onClick={() => {setEditSidebar(true); setEditingRole(null);}}>Create Role</Button>
+          </div>
+          
       </div>
 
-      {/* ---------------- Panel ---------------- */}
-        <main className={styles.main}>
-          {/* Left panel: existing roles */}
-          <div className={styles.leftPanel}>
-            <h2>Existing Roles</h2>
-            <ul className={styles.roleList}>
-              {roles.map((role) => (
-                <li key={role.role_id} className={styles.roleItem}>
-                  <span>{role.name}</span>
-                  <button
-                    onClick={() => handleEditClick(role)}
-                    className={styles.editButton}
-                  >
-                    Edit
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Right panel: Add / Edit Role */}
-          <div className={styles.rightPanel}>
-            <h2>{editingRole ? "Edit Role" : "Add New Role"}</h2>
-
-            <input
-              type="text"
-              placeholder="Role Name"
-              value={roleName}
-              onChange={(e) => setRoleName(e.target.value)}
-              className={styles.input}
-            />
-
-            <h3>Set Sensitivity Thresholds</h3>
-            {categories.map((cat) => (
-              <div key={cat.sensitivity_category_id}>
-                <div className={styles.sensitivityCategory}>{cat.name}</div>
-                {cat.subcategories.map((sub) => (
-                  <div
-                    key={sub.sensitivity_subcategory_id}
-                    className={styles.subRow}
-                  >
-                    <label>{sub.name}</label>
-                    <input
-                      type="number"
-                      min="1"
-                      placeholder="Null"
-                      value={thresholds[sub.sensitivity_subcategory_id] ?? ""}
-                      onChange={(e) =>
-                        handleThresholdChange(
-                          sub.sensitivity_subcategory_id,
-                          e.target.value
-                        )
-                      }
-                      className={styles.input}
-                    />
-                  </div>
-                ))}
-              </div>
-            ))}
-
-            <div
-              style={{ display: "flex", gap: "0.5rem", marginTop: "1rem" }}
-            >
-              <button onClick={handleSaveRole} className={styles.addButton}>
-                {editingRole ? "Save Changes" : "Add Role"}
-              </button>
-              {editingRole && (
-                <>
-                  <button
-                    onClick={handleCancelEdit}
-                    className={styles.cancelButton}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleDeleteRole}
-                    className={styles.deleteButton}
-                  >
-                    Delete
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-        </main>
+      {/* ---------------- Role Cards ---------------- */}
+      <div className={styles.card_container}>
+        <div className={styles.card_header}>
+          <span>Role Name</span>
+          <span>Last Updated</span>
+          <span>Actions</span>
+        </div>
+        <div className={styles.row_card_container}>
+          {processedRoles.map((role) => (
+              <RoleCard key={role.role_id} name={role.name} last_updated={role.last_updated} editClick={() => handleEditClick(role)} deleteClick={() => {setEditingRole(role); setDeleteModal(true)}}/>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
