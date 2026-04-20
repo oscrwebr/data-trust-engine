@@ -1,6 +1,8 @@
 from sqlalchemy.orm import Session
 from app.workspaces.models import Workspace, Notification, user_workspace, pending_user_workspace
 from app.authentication.models import User, PendingUser
+from app.invites.models import Invite
+from app.roles.models import Role, UserRole
 from datetime import datetime
 from sqlalchemy import desc, insert
 
@@ -67,15 +69,25 @@ def get_all_employees(db: Session, user_id: int):
         user_workspace.c.user_id == user_id
     ).first()
     
-    users = (
-        db.query(User)
-        .join(user_workspace)
+    results = (
+        db.query(User, Role.name.label("role_name"))
+        .join(user_workspace, user_workspace.c.user_id == User.user_id)
+        .outerjoin(UserRole, UserRole.user_id == User.user_id)
+        .outerjoin(Role, Role.role_id == UserRole.role_id)
         .filter(user_workspace.c.workspace_id == workspace.id)
         .filter(User.role == "employee")
         .all()
     )
 
-    return users
+    # shape into clean response
+    employees = []
+    for user, role_name in results:
+        employees.append({
+        "user": user,
+        "role_name": role_name
+    })
+
+    return employees
 
 def get_workspace_by_user(db: Session, user_id: int) -> int | None:
 
@@ -89,11 +101,20 @@ def get_all_pending_employees(db: Session, user_id: int):
         user_workspace.c.user_id == user_id
     ).first()
     
-    pending_users = (
-        db.query(PendingUser)
-        .join(pending_user_workspace)
+    results = (
+        db.query(PendingUser, Invite.created_at.label("datetime"))
+        .join(pending_user_workspace, pending_user_workspace.c.user_id == PendingUser.user_id)
+        .outerjoin(Invite, Invite.user_id == PendingUser.user_id)
         .filter(pending_user_workspace.c.workspace_id == workspace.id)
         .all()
     )
+
+    # shape into clean response
+    pending_users = []
+    for pending_user, datetime_value in results:
+        pending_users.append({
+        "user": pending_user,
+        "datetime": datetime_value
+    })
 
     return pending_users

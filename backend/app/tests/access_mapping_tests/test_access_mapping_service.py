@@ -422,3 +422,140 @@ def test_get_highest_risk_files_returns_empty_list_when_no_files(monkeypatch):
     assert result.total == 0
     assert result.limit == 10
     assert result.offset == 0
+
+
+# Test that get employee violated files returns employees with correct file mapping (access_allowed=True)
+def test_get_employee_violated_files_access_allowed_true(monkeypatch):
+    mock_employee = [{"user": SimpleNamespace(user_id=1)}]
+
+    def mock_employee_files(db, user_id):
+        return [
+            {"file": SimpleNamespace(ingestion_file_id=101)},
+            {"file": SimpleNamespace(ingestion_file_id=102)}
+        ]
+
+    def mock_employee_files_with_access(db, file_id):
+        return [
+            {"user_id": 1, "access_allowed": True}
+        ]
+
+    monkeypatch.setattr(service.ingestion_repository, "get_user_files", mock_employee_files)
+    monkeypatch.setattr(service, "get_file_employees_with_access", mock_employee_files_with_access)
+
+    result = service.get_employee_violated_files(db=None, employees=mock_employee)
+
+    assert len(result[0]["files"]) == 2
+    assert result[0]["files"][0]["access_allowed"] is True
+
+# Test that get employee violated files returns employees with correct file mapping (access_allowed=False)
+def test_get_employee_violated_files_access_allowed_false(monkeypatch):
+    mock_employee = [{"user": SimpleNamespace(user_id=1)}]
+
+    def mock_employee_files(db, user_id):
+        return [
+            {"file": SimpleNamespace(ingestion_file_id=101)},
+            {"file": SimpleNamespace(ingestion_file_id=102)}
+        ]
+
+    def mock_employee_files_with_access(db, file_id):
+        return [
+            {"user_id": 1, "access_allowed": False}
+        ]
+
+    monkeypatch.setattr(service.ingestion_repository, "get_user_files", mock_employee_files)
+    monkeypatch.setattr(service, "get_file_employees_with_access", mock_employee_files_with_access)
+
+    result = service.get_employee_violated_files(db=None, employees=mock_employee)
+
+    assert len(result[0]["files"]) == 2
+    assert result[0]["files"][0]["access_allowed"] is False
+
+# Test determine_employee_risk_from_violated_files when employee has no files
+def test_employee_access_allowed_no_files(monkeypatch):
+    mock_employee = [{"user": SimpleNamespace(user_id=1)}]
+
+    def mock_get_employee_violated_files(db, employees):
+        return [
+            {"user": employees[0]["user"], "files": []}
+        ]
+
+    monkeypatch.setattr(
+        service,
+        "get_employee_violated_files",
+        mock_get_employee_violated_files
+    )
+
+    result = service.determine_employee_risk_from_violated_files(None, mock_employee)
+
+    assert result[0]["files"]["id"] == 1
+    assert result[0]["files"]["status"] == "No Files Found"
+
+
+# Test determine_employee_risk_from_violated_files when access_allowed is None
+def test_employee_access_allowed_all_none(monkeypatch):
+    mock_employee = [{"user": SimpleNamespace(user_id=1)}]
+
+    def mock_get_employee_violated_files(db, employees):
+        return [
+            {
+                "user": employees[0]["user"],
+                "files": [
+                    {"access_allowed": None},
+                    {"access_allowed": None}
+                ]
+            }
+        ]
+
+    monkeypatch.setattr(service, "get_employee_violated_files", mock_get_employee_violated_files)
+
+    result = service.determine_employee_risk_from_violated_files(None, mock_employee)
+
+    assert result[0]["files"]["id"] == 2
+    assert result[0]["files"]["status"] == "No Files Scanned"
+
+# Test determine_employee_risk_from_violated_files when access_allowed is False
+def test_employee_access_allowed_any_false(monkeypatch):
+    mock_employee = [{"user": SimpleNamespace(user_id=1)}]
+
+    def mock_get_employee_violated_files(db, employees):
+        return [
+            {
+                "user": employees[0]["user"],
+                "files": [
+                    {"access_allowed": True},
+                    {"access_allowed": False},
+                    {"access_allowed": None}
+                ]
+            }
+        ]
+
+    monkeypatch.setattr(service, "get_employee_violated_files", mock_get_employee_violated_files)
+
+    result = service.determine_employee_risk_from_violated_files(None,  mock_employee)
+
+    assert result[0]["files"]["id"] == 3
+    assert result[0]["files"]["status"] == "Risk Detected"
+    assert len(result[0]["files"]["flagged_files"]) == 1
+
+# Test determine_employee_risk_from_violated_files when access_allowed is True (no false)
+def test_employee_access_allowed_true_no_false(monkeypatch):
+    mock_employee = [{"user": SimpleNamespace(user_id=1)}]
+
+    def mock_get_employee_violated_files(db, employees):
+        return [
+            {
+                "user": employees[0]["user"],
+                "files": [
+                    {"access_allowed": True},
+                    {"access_allowed": True}
+                ]
+            }
+        ]
+
+    monkeypatch.setattr(service, "get_employee_violated_files", mock_get_employee_violated_files)
+
+    result = service.determine_employee_risk_from_violated_files(None, mock_employee)
+
+    assert result[0]["files"]["id"] == 4
+    assert result[0]["files"]["status"] == "No Risk Detected"
+    assert result[0]["files"]["flagged_files"] == []
