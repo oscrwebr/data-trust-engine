@@ -32,6 +32,10 @@ def get_invite_by_workspace_id(db: Session, workspace_id: int):
     invite = db.query(Invite).filter(Invite.workspace_id == workspace_id).first()
     return invite
 
+def get_invite_by_token(db: Session, token: str):
+    invite = db.query(Invite).filter(Invite.token == token).first()
+    return invite
+
 def get_invite_by_pending_user_id(db: Session, user_id: int):
     return (
         db.query(Invite)
