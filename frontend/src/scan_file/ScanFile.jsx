@@ -58,12 +58,23 @@ function ScanFile({ scan_file }) {
         pageDetections[page].push(detection);
     }
 
+    // Get the counts for each page
     const pageDetectionCounts = {}
+
     for (const page in pageDetections) {
         pageDetectionCounts[page] = pageDetections[page].length;
     }
+
     // Sort the pages so they are in the correct order (Page 1 FIRST, Page 2 etc.)
     const sortedPages = Object.keys(pageDetections).map(Number).sort((a, b) => a - b);
+
+    // Rendering icons depending on value returned
+    // Adapted from: https://stackoverflow.com/a/53727367
+    const categoryIcons = {
+        "PERSONAL": <PiUserListBold size={20} />,
+        "LEGAL CASE": <PiScalesBold size={20} />,
+        "FINANCIAL": <PiCurrencyGbpBold size={20}/>
+    }
 
     return (
         <div>
@@ -149,17 +160,29 @@ function ScanFile({ scan_file }) {
                             <Accordion multiple>
                                 {sortedPages.map(page => (
                                     <AccordionTab key={page} header={
-                                        <>
-                                        <PiFileText size={20}/>
-                                        <span>{`Page ${page}`}</span>
-                                        <span>{`${pageDetectionCounts[page]} Detections`}</span>
-                                        </>
+                                        <div className="accordion-header">
+                                            <div className="accordion-icon">
+                                                <PiFileText size={35}/>
+                                            </div>
+                                            <div className="accordion-header-text">
+                                                <div className="accordion-heading">
+                                                    <span>{`Page ${page}`}</span>
+                                                </div>
+                                                <div className="accordion-heading-detections">
+                                                    <span>{pageDetectionCounts[page]} {pageDetectionCounts[page] === 1 ? 'Detection' : 'Detections'}</span>
+                                                </div>
+                                            </div>
+                                        </div>
                                     }>   
 
                                 
                                         {pageDetections[page].map(detection => (
+                                        
                                             <div key={detection.scan_file_detection_id}>
-                                                <p>{detection.category} — {detection.subcategory}</p>
+                                                <span className="pill">
+                                                    {categoryIcons[detection.category.toUpperCase()]}
+                                                    {detection.category}
+                                                </span>
                                             </div>
                                         ))}
                                     </AccordionTab>
