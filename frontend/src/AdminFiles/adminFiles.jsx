@@ -20,15 +20,22 @@ function AdminFiles() {
 
   const fetchFiles = async () => {
     setLoading(true);
+
     try {
       const res = await api.get("/admin/files", {
-        params: { search, sensitivity, sort, page, page_size: pageSize }
+        params: {
+          search,
+          sensitivity,
+          sort,
+          page,
+          page_size: pageSize
+        }
       });
 
       setFiles(res.data.data);
       setTotal(res.data.total);
     } catch (err) {
-      console.error(err);
+      console.error("Failed to fetch admin files:", err);
     } finally {
       setLoading(false);
     }
@@ -38,10 +45,23 @@ function AdminFiles() {
     fetchFiles();
   }, [search, sensitivity, sort, page]);
 
-  const toggleFile = (id) => {
+  // ✅ SAFE ID RESOLVER (prevents null forever)
+  const getGraphId = (file) => {
+    return file?.graph_id ?? file?.file_id ?? null;
+  };
+
+  // ✅ FIXED TO NEVER STORE NULL
+  const toggleFile = (file) => {
+    const id = getGraphId(file);
+
+    if (!id) {
+      console.warn("Skipping file with missing ID:", file);
+      return;
+    }
+
     setSelected(prev =>
       prev.includes(id)
-        ? prev.filter(f => f !== id)
+        ? prev.filter(x => x !== id)
         : [...prev, id]
     );
   };
@@ -49,70 +69,92 @@ function AdminFiles() {
   const scanSelected = async () => {
     if (selected.length === 0) return;
 
+    // 🛑 FINAL SAFETY CHECK
+    const cleaned = selected.filter(id => id != null);
+
+    if (cleaned.length === 0) {
+      console.warn("No valid graph_file_ids to scan");
+      return;
+    }
+
     setScanning(true);
 
     try {
       await api.post("/scanning/scan_files", {
-        file_ids: selected
+        graph_file_ids: cleaned
       });
 
       setSelected([]);
       fetchFiles();
     } catch (err) {
-      console.error(err);
+      console.error("Scan failed:", err);
     } finally {
       setScanning(false);
     }
   };
 
   const getSensitivityStyle = (value) => {
-    if (!value) {
-      return { label: "N/A", className: styles.na };
-    }
-  
-    switch (value.toLowerCase()) {
+    switch (value?.toLowerCase()) {
       case "safe":
         return { label: "Safe", className: styles.safe };
-  
       case "low":
         return { label: "Low", className: styles.low };
-  
       case "medium":
         return { label: "Medium", className: styles.medium };
-  
       case "high":
         return { label: "High", className: styles.high };
-  
+      case "critical":
+        return { label: "Critical", className: styles.high };
       default:
         return { label: "N/A", className: styles.na };
     }
   };
 
+  const totalPages = Math.ceil(total / pageSize);
+
   return (
     <div className={styles.container}>
       <h2>Admin Files</h2>
 
-      {/* 🔍 Filters */}
+      {/* Filters */}
       <div className={styles.filters}>
         <input
           placeholder="Search files..."
           value={search}
-          onChange={e => setSearch(e.target.value)}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(1);
+          }}
         />
 
-        <select onChange={e => setSensitivity(e.target.value)}>
+        <select
+          value={sensitivity}
+          onChange={(e) => {
+            setSensitivity(e.target.value);
+            setPage(1);
+          }}
+        >
           <option value="">All</option>
-          <option value="high">High Risk</option>
-          <option value="low">Low Risk</option>
+          <option value="safe">Safe</option>
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+          <option value="critical">Critical</option>
         </select>
 
-        <select onChange={e => setSort(e.target.value)}>
+        <select
+          value={sort}
+          onChange={(e) => {
+            setSort(e.target.value);
+            setPage(1);
+          }}
+        >
           <option value="desc">Most Recent</option>
           <option value="asc">Least Recent</option>
         </select>
       </div>
 
-      {/* 🔄 Scan button */}
+      {/* Scan button */}
       <button
         onClick={scanSelected}
         disabled={selected.length === 0 || scanning}
@@ -120,7 +162,7 @@ function AdminFiles() {
         {scanning ? "Scanning..." : "Scan Selected"}
       </button>
 
-      {/* 📄 Table */}
+      {/* Table */}
       {loading ? (
         <p>Loading...</p>
       ) : (
@@ -131,55 +173,61 @@ function AdminFiles() {
               <th>Name</th>
               <th>Sensitivity</th>
               <th>Last Scanned</th>
+              <th>Detections</th>
             </tr>
           </thead>
 
           <tbody>
-            {files.map(file => (
-              <tr key={file.file_id}>
-                <td>
-                  <input
-                    type="checkbox"
-                    checked={selected.includes(file.file_id)}
-                    onChange={() => toggleFile(file.file_id)}
-                  />
-                </td>
+            {files.map((file) => {
+              const id = getGraphId(file);
+              const s = getSensitivityStyle(file.sensitivity);
 
-                <td>{file.name}</td>
+              return (
+                <tr key={id ?? file.name}>
+                  <td>
+                    <input
+                      type="checkbox"
+                      checked={selected.includes(id)}
+                      onChange={() => toggleFile(file)}
+                      disabled={!id}
+                    />
+                  </td>
 
-                <td>
-                {(() => {
-                    const s = getSensitivityStyle(file.sensitivity);
+                  <td>{file.name}</td>
 
-                    return (
+                  <td>
                     <span className={`${styles.badge} ${s.className}`}>
-                        {s.label}
+                      {s.label}
                     </span>
-                    );
-                })()}
-                </td>
-                
-                <td>
-                  {file.last_scanned
-                    ? new Date(file.last_scanned).toLocaleString()
-                    : "Never"}
-                </td>
-              </tr>
-            ))}
+                  </td>
+
+                  <td>
+                    {file.last_scanned
+                      ? new Date(file.last_scanned).toLocaleString()
+                      : "Never"}
+                  </td>
+
+                  <td>{file.detections ?? 0}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       )}
 
-      {/* 📄 Pagination */}
+      {/* Pagination */}
       <div className={styles.pagination}>
-        <button disabled={page === 1} onClick={() => setPage(p => p - 1)}>
+        <button
+          disabled={page === 1}
+          onClick={() => setPage(p => p - 1)}
+        >
           Prev
         </button>
 
-        <span>Page {page}</span>
+        <span>Page {page} of {totalPages || 1}</span>
 
         <button
-          disabled={page * pageSize >= total}
+          disabled={page >= totalPages}
           onClick={() => setPage(p => p + 1)}
         >
           Next
