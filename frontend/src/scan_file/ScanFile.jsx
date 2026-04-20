@@ -110,7 +110,7 @@ function ScanFile({ scan_file }) {
                                     </button>
                                 </div>
                             </div>
-                            <button className="back-button" onClick={() => navigate(`/scans/${scanFile.scan_id}`)}>
+                            <button className="back-button" onClick={() => navigate(-1)}>
                                 <PiArrowLeftBold />
                                 Back
                             </button>
