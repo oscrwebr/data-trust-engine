@@ -542,9 +542,14 @@ def get_scan_details(db: Session, scan_id: int):
 def get_scan_file_details(db: Session, scan_file_id: int):
     query = repository.get_scan_file_details(db=db, scan_file_id=scan_file_id)
     # Get file details with the scan file 
-    scan_file, file, scan = repository.get_scan_file_with_file(db=db, scan_file_id=scan_file_id)
+    scan_file_with_file = repository.get_scan_file_with_file(db=db, scan_file_id=scan_file_id)
 
-    if not query:
+    if not scan_file_with_file:
+        return None
+    
+    scan_file, file, scan = scan_file_with_file
+
+    if scan.scan_type == ScanType.ORGANISATION:
         return None
 
     categories = repository.get_sensitivity_category_names(db=db)
@@ -570,7 +575,6 @@ def get_scan_file_details(db: Session, scan_file_id: int):
             "scan_file_detection_id": detection.scan_file_detection_id,
             "category": category_name,
             "subcategory": detection.sensitivity_subcategory,
-            "scan_file_detection_id": detection.scan_file_detection_id,
             "page_number": detection.page_number
 
         })
