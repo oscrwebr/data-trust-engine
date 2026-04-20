@@ -1,16 +1,7 @@
+from sqlalchemy.orm import Session
 from app.admin_files import repository
 
 
-def get_admin_files(search, sensitivity, sort, page, page_size):
-    data, total = repository.get_admin_files(
-        search=search,
-        sensitivity=sensitivity,
-        sort=sort,
-        page=page,
-        page_size=page_size,
-    )
-
-    return {
-        "data": data,
-        "total": total
-    }
+def get_last_scanned(db: Session, file_ids: list[int]):
+    return repository.get_last_scanned_for_files(db, file_ids)
+    

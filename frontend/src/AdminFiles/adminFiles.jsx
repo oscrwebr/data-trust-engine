@@ -1,14 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import api from "../api/axiosConfig";
 import styles from "./adminFiles.module.css";
+import { useNavigate } from "react-router-dom";
 
 function AdminFiles() {
   const [files, setFiles] = useState([]);
   const [selected, setSelected] = useState([]);
-
-  const [search, setSearch] = useState("");
-  const [sensitivity, setSensitivity] = useState("");
-  const [sort, setSort] = useState("desc");
 
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
@@ -16,26 +13,46 @@ function AdminFiles() {
   const [loading, setLoading] = useState(false);
   const [scanning, setScanning] = useState(false);
 
-  const pageSize = 20;
+  // 🔎 SEARCH + SORT STATE
+  const [search, setSearch] = useState("");
+  const [sensitivityFilter, setSensitivityFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("risk");
 
+  const pageSize = 10;
+
+  const backend_uri =
+    import.meta.env.VITE_BACKEND_HOST || "http://localhost:8000";
+
+  const navigate = useNavigate();
+
+  // ----------------------------
+  // RISK LOGIC (UNCHANGED)
+  // ----------------------------
+  const getRiskLevel = (file) => {
+    if (file.invalid_access_percentage >= 50) return "high";
+    if (file.invalid_access_percentage >= 25) return "medium";
+    return "low";
+  };
+
+  // ----------------------------
+  // FETCH DATA
+  // ----------------------------
   const fetchFiles = async () => {
     setLoading(true);
 
     try {
-      const res = await api.get("/admin/files", {
-        params: {
-          search,
-          sensitivity,
-          sort,
-          page,
-          page_size: pageSize
-        }
-      });
+      const offset = (page - 1) * pageSize;
 
-      setFiles(res.data.data);
-      setTotal(res.data.total);
+      const res = await fetch(
+        `${backend_uri}/admin/files/get_highest_risk_files?limit=${pageSize}&offset=${offset}`
+      );
+
+      const data = await res.json();
+
+      setFiles(data.items || []);
+      setTotal(data.total);
     } catch (err) {
-      console.error("Failed to fetch admin files:", err);
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -43,72 +60,96 @@ function AdminFiles() {
 
   useEffect(() => {
     fetchFiles();
-  }, [search, sensitivity, sort, page]);
+  }, [page]);
 
-  // ✅ SAFE ID RESOLVER (prevents null forever)
-  const getGraphId = (file) => {
-    return file?.graph_id ?? file?.file_id ?? null;
-  };
-
-  // ✅ FIXED TO NEVER STORE NULL
-  const toggleFile = (file) => {
-    const id = getGraphId(file);
-
-    if (!id) {
-      console.warn("Skipping file with missing ID:", file);
-      return;
-    }
-
-    setSelected(prev =>
-      prev.includes(id)
-        ? prev.filter(x => x !== id)
-        : [...prev, id]
+  // ----------------------------
+  // SELECT FILES
+  // ----------------------------
+  const toggleFile = (fileId) => {
+    setSelected((prev) =>
+      prev.includes(fileId)
+        ? prev.filter((id) => id !== fileId)
+        : [...prev, fileId]
     );
   };
 
+  // ----------------------------
+  // SCAN
+  // ----------------------------
   const scanSelected = async () => {
     if (selected.length === 0) return;
-
-    // 🛑 FINAL SAFETY CHECK
-    const cleaned = selected.filter(id => id != null);
-
-    if (cleaned.length === 0) {
-      console.warn("No valid graph_file_ids to scan");
-      return;
-    }
 
     setScanning(true);
 
     try {
       await api.post("/scanning/scan_files", {
-        graph_file_ids: cleaned
+        graph_file_ids: selected
       });
 
       setSelected([]);
       fetchFiles();
     } catch (err) {
-      console.error("Scan failed:", err);
+      console.error(err);
     } finally {
       setScanning(false);
     }
   };
 
-  const getSensitivityStyle = (value) => {
-    switch (value?.toLowerCase()) {
-      case "safe":
-        return { label: "Safe", className: styles.safe };
-      case "low":
-        return { label: "Low", className: styles.low };
-      case "medium":
-        return { label: "Medium", className: styles.medium };
-      case "high":
-        return { label: "High", className: styles.high };
-      case "critical":
-        return { label: "Critical", className: styles.high };
-      default:
-        return { label: "N/A", className: styles.na };
-    }
+  // ----------------------------
+  // SENSITIVITY LABEL
+  // ----------------------------
+  const getSensitivity = (file) => {
+    const risk = getRiskLevel(file);
+
+    if (risk === "high") return "high";
+    if (risk === "medium") return "medium";
+    return "low";
   };
+
+  // ----------------------------
+  // FILTER + SORT (CLIENT SIDE)
+  // ----------------------------
+  const filteredAndSortedFiles = useMemo(() => {
+    let result = [...files];
+
+    // 🔎 SEARCH BY NAME
+    if (search.trim()) {
+      result = result.filter((f) =>
+        f.file_name.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+
+    // 🎯 FILTER BY SENSITIVITY
+    if (sensitivityFilter !== "all") {
+      result = result.filter(
+        (f) => getSensitivity(f) === sensitivityFilter
+      );
+    }
+
+    // ↕️ SORTING
+    result.sort((a, b) => {
+      switch (sortBy) {
+        case "name":
+          return a.file_name.localeCompare(b.file_name);
+
+        case "sensitivity":
+          return (
+            getRiskLevel(b) - getRiskLevel(a)
+          );
+
+        case "detections":
+          return b.detection_count - a.detection_count;
+
+        case "last_scanned":
+          return new Date(b.last_scanned || 0) - new Date(a.last_scanned || 0);
+
+        default:
+          return 0;
+      }
+    });
+
+    return result;
+  }, [files, search, sensitivityFilter, sortBy]);
 
   const totalPages = Math.ceil(total / pageSize);
 
@@ -116,45 +157,34 @@ function AdminFiles() {
     <div className={styles.container}>
       <h2>Admin Files</h2>
 
-      {/* Filters */}
+      {/* ---------------- FILTER BAR ---------------- */}
       <div className={styles.filters}>
         <input
-          placeholder="Search files..."
+          placeholder="Search file name..."
           value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setPage(1);
-          }}
+          onChange={(e) => setSearch(e.target.value)}
         />
 
         <select
-          value={sensitivity}
-          onChange={(e) => {
-            setSensitivity(e.target.value);
-            setPage(1);
-          }}
+          value={sensitivityFilter}
+          onChange={(e) => setSensitivityFilter(e.target.value)}
         >
-          <option value="">All</option>
-          <option value="safe">Safe</option>
+          <option value="all">All Sensitivity</option>
           <option value="low">Low</option>
           <option value="medium">Medium</option>
           <option value="high">High</option>
-          <option value="critical">Critical</option>
         </select>
 
-        <select
-          value={sort}
-          onChange={(e) => {
-            setSort(e.target.value);
-            setPage(1);
-          }}
-        >
-          <option value="desc">Most Recent</option>
-          <option value="asc">Least Recent</option>
+        <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+          <option value="risk">Default (Risk)</option>
+          <option value="name">Name</option>
+          <option value="sensitivity">Sensitivity</option>
+          <option value="last_scanned">Last Scanned</option>
+          <option value="detections">Detections</option>
         </select>
       </div>
 
-      {/* Scan button */}
+      {/* ---------------- SCAN BUTTON ---------------- */}
       <button
         onClick={scanSelected}
         disabled={selected.length === 0 || scanning}
@@ -162,7 +192,7 @@ function AdminFiles() {
         {scanning ? "Scanning..." : "Scan Selected"}
       </button>
 
-      {/* Table */}
+      {/* ---------------- TABLE ---------------- */}
       {loading ? (
         <p>Loading...</p>
       ) : (
@@ -178,28 +208,28 @@ function AdminFiles() {
           </thead>
 
           <tbody>
-            {files.map((file) => {
-              const id = getGraphId(file);
-              const s = getSensitivityStyle(file.sensitivity);
+            {filteredAndSortedFiles.map((file) => {
+              const sensitivity = getSensitivity(file);
 
               return (
-                <tr key={id ?? file.name}>
+                <tr key={file.file_id}>
                   <td>
                     <input
                       type="checkbox"
-                      checked={selected.includes(id)}
-                      onChange={() => toggleFile(file)}
-                      disabled={!id}
+                      checked={selected.includes(file.file_id)}
+                      onChange={() => toggleFile(file.file_id)}
                     />
                   </td>
 
-                  <td>{file.name}</td>
-
-                  <td>
-                    <span className={`${styles.badge} ${s.className}`}>
-                      {s.label}
-                    </span>
+                  {/* clickable name */}
+                  <td
+                    className={styles.fileLink}
+                    onClick={() => navigate(`/files/${file.file_id}`)}
+                  >
+                    {file.file_name}
                   </td>
+
+                  <td>{sensitivity}</td>
 
                   <td>
                     {file.last_scanned
@@ -207,7 +237,7 @@ function AdminFiles() {
                       : "Never"}
                   </td>
 
-                  <td>{file.detections ?? 0}</td>
+                  <td>{file.detection_count}</td>
                 </tr>
               );
             })}
@@ -215,16 +245,15 @@ function AdminFiles() {
         </table>
       )}
 
-      {/* Pagination */}
+      {/* ---------------- PAGINATION ---------------- */}
       <div className={styles.pagination}>
-        <button
-          disabled={page === 1}
-          onClick={() => setPage(p => p - 1)}
-        >
+        <button disabled={page === 1} onClick={() => setPage(p => p - 1)}>
           Prev
         </button>
 
-        <span>Page {page} of {totalPages || 1}</span>
+        <span>
+          Page {page} of {totalPages || 1}
+        </span>
 
         <button
           disabled={page >= totalPages}
