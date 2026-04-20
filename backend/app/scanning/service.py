@@ -45,9 +45,9 @@ def perform_scan(db: Session, graph_file_ids: list[str]):
 
 # Scan one individual file
 def scan_file(db: Session, graph_file_id: str, scan_id: int):
-
-    # Fetch file (for now using the testing method) using its graph_file_id (ingestion component will be integrated here later)
-    # file_path = fetch_graph_file(graph_file_id=graph_file_id)
+    # Get file's extension type
+    file = get_ingestion_file_by_graph_id(db=db, graph_id=graph_file_id)
+    file_extension = file.extension
 
     # Get file's download link via its graph id
     download_url = get_download_link_by_graph_id(application=application(), db=db, graph_id=graph_file_id)
@@ -71,8 +71,8 @@ def scan_file(db: Session, graph_file_id: str, scan_id: int):
         file_id=file.ingestion_file_id
     )
 
-    # Extract text from fetched file
-    file_extracted_text = extract_text_from_pdf(file_bytes=file_bytes)
+    # Extract text from fetched file using its extension
+    file_extracted_text = extract_text_from_file(file_bytes=file_bytes, file_extension=file_extension)
 
     # Detect sensitive data in file's extracted text
     detections = []
@@ -155,6 +155,38 @@ def get_file_latest_scan_results(db: Session, file_id: int):
         })
 
     return latest_scan_results
+
+
+# Get latest scan results of all files provided in bulk
+def get_latest_scan_results_for_files(db: Session, file_ids: list[int]):
+    rows = repository.get_latest_scan_detection_summary_for_files(db=db, file_ids=file_ids)
+    subcategory_category_map = repository.get_subcategory_category_map(db=db)
+    
+    results_by_file = {}
+
+    # Iterate through all results and append to results_by_file dictionary
+    for row in rows:
+        if row.file_id not in results_by_file:
+            results_by_file[row.file_id] = []
+
+        results_by_file[row.file_id].append({
+            "category": subcategory_category_map.get(row.sensitivity_subcategory, "Other"),
+            "subcategory": row.sensitivity_subcategory,
+            "count": row.count
+        })
+
+    return results_by_file
+
+
+# Get scan status for all files provided in bulk
+def get_scan_statuses_for_all_files(db: Session, file_ids: list[int]):
+    scanned_file_ids = repository.get_scanned_file_ids(db=db, file_ids=file_ids)
+    scanned_file_ids_set = set(scanned_file_ids)
+
+    return {
+        file_id: file_id in scanned_file_ids_set
+        for file_id in file_ids
+    }
 
 
 # Check if the provided file has been scanned at all
@@ -466,6 +498,14 @@ def get_sensitivity_scan_details(db: Session, scan):
             "category": category_name
         })
 
+    scan_file_detection_counts_query = repository.get_scan_file_detection_counts(db=db, scan_id=scan.scan_id)
+
+    scan_file_detection_counts = {}
+
+    for scan_file_id, detection_count in scan_file_detection_counts_query:
+        scan_file_detection_counts[scan_file_id] = detection_count
+
+
     return {
         "scan_id": scan.scan_id,
         "scan_type": scan.scan_type,
@@ -478,6 +518,7 @@ def get_sensitivity_scan_details(db: Session, scan):
             "file_id": file.ingestion_file_id,
             "file_name": file.name,
             "hash": file.hash,
+            "detection_count": scan_file_detection_counts.get(scan_file.scan_file_id, 0),
             "sensitivity_scan_results": results.get(scan_file.scan_file_id, [])
         } for scan_file, file in files
         ]

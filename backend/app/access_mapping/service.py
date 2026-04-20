@@ -1,7 +1,9 @@
 from sqlalchemy.orm import Session
 from app.access_mapping import repository
-from app.access_mapping.schemas import conf, SendViolationsEmailRequest
-from app.scanning.service import get_file_latest_scan_results, check_file_has_scan
+from app.ingestion import repository as ingestion_repository
+from app.access_mapping.schemas import FileRiskDetailsResponse, PaginatedFileRiskDetailsResponse, conf, SendViolationsEmailRequest
+import app.scanning.service as scanning_service
+from operator import attrgetter
 from fastapi_mail import FastMail, MessageSchema
 from starlette.responses import JSONResponse
 from datetime import datetime, timedelta
@@ -13,9 +15,20 @@ from app.authentication.service import test_route
 # Method for getting all employees with access to a file
 def get_file_employees_with_access(db: Session, file_id: int):
     fetched_employees_records = repository.get_file_employees_with_access(db=db, file_id=file_id)
-    has_been_scanned = check_file_has_scan(db=db, file_id=file_id)
-    latest_scan_results = get_file_latest_scan_results(db=db, file_id=file_id)
+    has_been_scanned = scanning_service.check_file_has_scan(db=db, file_id=file_id)
+    latest_scan_results = scanning_service.get_file_latest_scan_results(db=db, file_id=file_id)
 
+    return get_file_employees_with_access_from_data(
+        db=db,
+        fetched_employees_records=fetched_employees_records,
+        has_been_scanned=has_been_scanned,
+        latest_scan_results=latest_scan_results
+    )
+
+
+# INTERNAL HELPER METHOD:
+# Method for getting all employees with access to a file from preloaded data
+def get_file_employees_with_access_from_data(db: Session, fetched_employees_records: list, has_been_scanned: bool, latest_scan_results: list):
     # Build employees dictionary from fetched employees records
     employees = build_employees_from_records(fetched_employees_records)
 
@@ -32,6 +45,105 @@ def get_file_employees_with_access(db: Session, file_id: int):
         evaluate_employee_access(db, employee, latest_scan_results)
 
     return list(employees.values())
+
+
+# Method for getting the 10 highest risk files
+def get_highest_risk_files(db: Session, limit: int, offset: int):
+    files = ingestion_repository.get_all_files(db=db)
+
+    # Get file id of every fetched files and put into list
+    file_ids = [file.ingestion_file_id for file in files]
+
+    # Get all scan results and employee records in bulk so that only one call is performed instead of one PER file
+    latest_scan_results_by_file = scanning_service.get_latest_scan_results_for_files(db=db, file_ids=file_ids)
+
+    # Get all scan statuses by files for all file ids
+    scan_status_by_file = scanning_service.get_scan_statuses_for_all_files(db=db, file_ids=file_ids)
+
+    # Get all employees with access for all file ids
+    employee_access_by_file = repository.get_employees_with_access_for_files(db=db, file_ids=file_ids)
+
+    highest_risk_files = []
+
+    # Iterate through every file and get its risk details and append to list
+    for file in files:
+        file_id = file.ingestion_file_id
+
+        latest_scan_results = latest_scan_results_by_file.get(file_id, [])
+        employees_with_access = employee_access_by_file.get(file_id, [])
+        has_been_scanned = scan_status_by_file.get(file_id, False)
+
+        file_risk_details = get_file_risk_details_from_data(
+                db=db, 
+                file_id=file.ingestion_file_id, 
+                file_name=file.name,
+                latest_scan_results=latest_scan_results,
+                fetched_employees_records=employees_with_access,
+                has_been_scanned=has_been_scanned
+            )
+
+        highest_risk_files.append(file_risk_details)
+
+    # Sort list by risk score from highest to lowest
+    highest_risk_files.sort(key=attrgetter("risk_score"), reverse=True)
+
+    # Calculate total (to be used for pagination)
+    total_files = len(highest_risk_files)
+
+    # Return the highest risk files with offset for pagination
+    return PaginatedFileRiskDetailsResponse(
+        items= highest_risk_files[offset: offset + limit],
+        total=total_files,
+        limit=limit,
+        offset=offset
+    )
+
+
+# Method for getting a file's risk details from preloaded data
+def get_file_risk_details_from_data(db: Session, file_id: int, file_name: str, latest_scan_results: list, fetched_employees_records: list, has_been_scanned: bool):
+    employees_with_access = get_file_employees_with_access_from_data(
+        db=db, 
+        fetched_employees_records=fetched_employees_records,
+        has_been_scanned=has_been_scanned,
+        latest_scan_results=latest_scan_results)
+
+    # Sum the number of 'counts' of every detection result from latest_scan_results
+    detection_count = sum(result["count"] for result in latest_scan_results)
+
+    employees_with_access_count = len(employees_with_access)
+    valid_access_count = 0
+    invalid_access_count = 0
+
+    # Iterate through every employee and check 'access_allowed' boolean value and increment valid or invalid
+    # access count variables
+    for employee in employees_with_access:
+        if employee["access_allowed"] is True:
+            valid_access_count += 1
+        elif employee["access_allowed"] is False:
+            invalid_access_count += 1
+
+    # Calculate the valid and invalid access percentages
+    if employees_with_access_count > 0:
+        valid_access_percentage = (valid_access_count / employees_with_access_count) * 100
+        invalid_access_percentage = (invalid_access_count / employees_with_access_count) * 100
+    else:
+        valid_access_percentage = 0.0
+        invalid_access_percentage = 0.0
+
+    # Calculate a 'risk score' to help determine the highest risk files when listed
+    risk_score = ((invalid_access_count * 2) +  invalid_access_percentage + (detection_count * 0.05))
+
+    return FileRiskDetailsResponse(
+        file_id=file_id,
+        file_name=file_name,
+        employees_with_access_count=employees_with_access_count,
+        valid_access_count=valid_access_count,
+        invalid_access_count=invalid_access_count,
+        valid_access_percentage=round(valid_access_percentage, 2),
+        invalid_access_percentage=round(invalid_access_percentage, 2),
+        detection_count=detection_count,
+        risk_score=round(risk_score, 2),
+    )
 
 
 # Method for building employees dictionary from fetched employee records

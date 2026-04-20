@@ -1,8 +1,8 @@
-"""pulled from dev
+"""Latest version of db
 
-Revision ID: 85705444f91e
+Revision ID: 985d60b89e17
 Revises: 
-Create Date: 2026-04-15 18:25:42.705587
+Create Date: 2026-04-16 16:57:05.981703
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision: str = '85705444f91e'
+revision: str = '985d60b89e17'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None

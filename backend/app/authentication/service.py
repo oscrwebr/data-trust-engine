@@ -6,6 +6,9 @@ import requests
 
 from ..core.config import SCOPES
 from ..core.security import create_refresh_token, create_access_token, hash_user_refresh_token, encrypt_refresh, decrypt_refresh
+from app.core.celery_worker import celery
+from app.core.database import SessionLocal
+from app.ingestion.service import get_set_all_graph_files
 from app.workspaces.repository import add_notification, get_workspace_by_workspace_id, add_user_workspace
 from app.invites.repository import get_invite_by_workspace_id, update_invite_used_value
 from app.roles.repository import migrate_pending_roles
@@ -54,8 +57,18 @@ def create_user(db, details: dict, refresh: str, ms_access_token: str, role: str
                     user_id = user.user_id
 
             add_notification(db, "Employee Accepted Invite", f"{firstname} {surname} accepted their invite request to join your workspace.", datetime.now(), user_id)
+    # Handle ingestion with celery - in the background and sets up a queue, incase of multiple signup and inturn ingestion requests at once
+    _ = setup_ingestion_celery.delay(ms_access_token, user.user_id)
 
     return user
+
+@celery.task
+def setup_ingestion_celery(ms_access_token, user_id):
+    db = SessionLocal()
+    try:
+        return get_set_all_graph_files(ms_access_token, user_id, db)
+    finally:
+        db.close()
 
 def check_get_by_id(id: int, db):
     user = repository.get_by_id(id, db)

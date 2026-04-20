@@ -25,12 +25,33 @@ class FileEmployeeAccessResponse(BaseModel):
     email: str
     roles: list[str]
     access_allowed: bool | None
-    last_sent: datetime | None
     failed_detections: list[FailedDetectionResponse]
+
+
+class FileRiskDetailsResponse(BaseModel):
+    file_id: int
+    file_name: str
+    employees_with_access_count: int
+    valid_access_count: int
+    invalid_access_count: int
+    valid_access_percentage: float
+    invalid_access_percentage: float
+    detection_count: int
+    risk_score: float
+
+
+class PaginatedFileRiskDetailsResponse(BaseModel):
+    items: list[FileRiskDetailsResponse]
+    total: int
+    limit: int
+    offset: int
+    last_sent: datetime | None = None
+
 
 class SendViolationsEmailRequest(BaseModel):
     file_name: str
     employee: FileEmployeeAccessResponse
+
 
 conf = ConnectionConfig(
    MAIL_FROM="datatrustengine@gmail.com",

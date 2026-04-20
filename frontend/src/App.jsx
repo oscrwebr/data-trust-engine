@@ -8,6 +8,7 @@ import Roles from "./roles/roles";
 import CreateWorkspace from "./workspace/CreateWorkspace";
 import Home from "./home/home.jsx"
 import FileOverviewPage from "./FileOverview/FileOverviewPage.jsx";
+import HighRiskFilesDashboard from "./HighRiskFilesDashboard/HighRiskFilesDashboard.jsx";
 import { Toast } from 'primereact/toast';
 import Scans from "./scans/Scans.jsx";
 import FilesDashboard from "./FilesDashboard/filesDashboard.jsx";
@@ -51,6 +52,7 @@ function App() {
           <Route path="/scans" element={<Scans />} />
           <Route path="/scans/:scanId" element={<ScanPage/>} />
           <Route path="/org-scan-dev" element={<OrganisationalDevTest />} />
+          <Route path="/high-risk-files" element={<HighRiskFilesDashboard />} />
         </Route>
 
         {/* Elements in here will not inherit the sidebar */}
