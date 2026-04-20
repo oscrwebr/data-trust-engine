@@ -78,3 +78,22 @@ def create_ingestion_file(db: Session, graph_id: str, name: str, extension: str,
 
 def get_all_files(db: Session):
     return db.query(IngestionFile).all()
+
+def get_user_files(db: Session, user_id: int):
+    results = (
+        db.query(UserFiles, IngestionFile)
+        .outerjoin(
+            IngestionFile,
+            IngestionFile.ingestion_file_id == UserFiles.file_id
+        )
+        .filter(UserFiles.user_id == user_id)
+        .all()
+    )
+
+    files = []
+    for user_file, file in results:
+        files.append({
+            "file": file
+        })
+
+    return files
