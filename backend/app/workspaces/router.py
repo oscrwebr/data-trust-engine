@@ -7,7 +7,8 @@ from ..core.security_schemas import User
 from ..core.security import get_user_from_access_token
 from app.authentication import service
 from app.workspaces.schema import NotificationSchema, RemoveSchema, MessageSchema
-from app.invites.service import get_invite_by_pending_user_id, set_pending_user_type_invite
+from app.invites.service import set_pending_user_type_invite
+from app.access_mapping.service import determine_employee_risk_from_violated_files
 from datetime import datetime
 from app.roles.models import UserRole, Role
 
@@ -104,33 +105,11 @@ async def get_workspace_image(workspace_id: int, db: Annotated[Session, Depends(
 
 @router.get("/get-employees")
 async def get_all_employees(db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)]):
-    employees = get_employees(db, current_user.user_id)
-    pending = get_pending_employees(db, current_user.user_id)
+    active_employees = get_employees(db, current_user.user_id)
+    pending_employees = get_pending_employees(db, current_user.user_id)
 
-    active_employees = []
-    pending_employees = []
-
-    for e in employees:
-
-        # fetch assigned sensitivity role
-        user_role = db.query(UserRole).filter(UserRole.user_id == e.user_id).first()
-        role_id = user_role.role_id if user_role else None
-
-        # optionally fetch role name
-        role_name = None
-        if role_id:
-            role = db.query(Role).filter(Role.role_id == role_id).first()
-            role_name = role.name if role else None
-
-        active_employees.append({"user": e, "role_name": role_name})
-
-    for p in pending:
-
-        # Fetch the invite associated with the pending user where possible
-        invite = get_invite_by_pending_user_id(db, p.user_id)
-  
-        datetime = invite.created_at if invite else None
-        pending_employees.append({"pending": p, "datetime": datetime})
+    # This returns an employees current file access history
+    active_employees = determine_employee_risk_from_violated_files(db, active_employees)
 
     return {
         "pending": pending_employees,
@@ -157,9 +136,9 @@ async def get_all_pending_employees(db: Annotated[Session, Depends(get_database)
     if user.role == "admin":
         result = get_pending_employees(db, current_user.user_id)
         
-        for p in result:
-            if p.type == "request":
-                pending_employees.append(p)
+        for pending_employee in result:
+            if pending_employee["user"].type == "request":
+                pending_employees.append(pending_employee)
 
     return pending_employees
 

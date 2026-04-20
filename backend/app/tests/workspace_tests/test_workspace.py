@@ -443,7 +443,7 @@ def test_get_all_employees_route(db, client):
     active_list = response_json["active"]
 
     # Check pending emails and type only
-    pending_emails = [{"email": p["pending"]["email"], "type": p["pending"]["type"]} for p in pending_list]
+    pending_emails = [{"email": p["user"]["email"], "type": p["user"]["type"]} for p in pending_list]
     assert pending_emails == [{"email": "maria@email.com", "type": "invite"}]
 
     # Check active users
@@ -595,7 +595,7 @@ def test_get_pending_employees_route(db, client):
     response = client.send(request = req)
 
     assert response.status_code == 200
-    assert response.json() == [{'email': 'mary@email.com', 'type': 'request', 'user_id': res_2.inserted_primary_key[0]}]
+    assert response.json() == [{'datetime':None, 'user':{'email': 'mary@email.com', 'type': 'request', 'user_id': res_2.inserted_primary_key[0]}}]
     
 
 # Test the /get-all-workspaces route
