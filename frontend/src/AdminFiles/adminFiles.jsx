@@ -1,9 +1,11 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import api from "../api/axiosConfig";
 import styles from "./adminFiles.module.css";
 import { useNavigate } from "react-router-dom";
 
 function AdminFiles() {
+  const navigate = useNavigate();
+
   const [files, setFiles] = useState([]);
   const [selected, setSelected] = useState([]);
 
@@ -12,47 +14,66 @@ function AdminFiles() {
 
   const [loading, setLoading] = useState(false);
   const [scanning, setScanning] = useState(false);
-
-  // 🔎 SEARCH + SORT STATE
-  const [search, setSearch] = useState("");
-  const [sensitivityFilter, setSensitivityFilter] = useState("all");
-  const [sortBy, setSortBy] = useState("risk");
-
+  
   const pageSize = 10;
 
   const backend_uri =
     import.meta.env.VITE_BACKEND_HOST || "http://localhost:8000";
 
-  const navigate = useNavigate();
-
-  // ----------------------------
-  // RISK LOGIC (UNCHANGED)
-  // ----------------------------
+  // ✅ SAME RISK LOGIC
   const getRiskLevel = (file) => {
     if (file.invalid_access_percentage >= 50) return "high";
     if (file.invalid_access_percentage >= 25) return "medium";
     return "low";
   };
 
-  // ----------------------------
-  // FETCH DATA
-  // ----------------------------
+  // ✅ FETCH FILES + LAST SCANNED
   const fetchFiles = async () => {
     setLoading(true);
 
     try {
       const offset = (page - 1) * pageSize;
 
-      const res = await fetch(
-        `${backend_uri}/admin/files/get_highest_risk_files?limit=${pageSize}&offset=${offset}`
+      // 1️⃣ GET BASE FILES
+      const filesRes = await fetch(
+        `${backend_uri}/access_mapping/get_highest_risk_files?limit=${pageSize}&offset=${offset}`
       );
 
-      const data = await res.json();
+      const filesData = await filesRes.json();
 
-      setFiles(data.items || []);
-      setTotal(data.total);
+      const baseFiles = filesData.items || [];
+      setTotal(filesData.total);
+
+      const ids = baseFiles.map((f) => f.file_id);
+
+      let scanMap = {};
+      let graphMap = {};
+
+      // 2️⃣ GET LAST SCANNED + GRAPH IDs
+      if (ids.length > 0) {
+        const scanRes = await api.get("/admin/files/last-scanned", {
+          params: { file_ids: ids },
+          paramsSerializer: (params) =>
+            params.file_ids.map((id) => `file_ids=${id}`).join("&")
+        });
+
+        // ✅ FIX: use scanRes.data (NOT .data.data)
+        scanRes.data.forEach((f) => {
+          scanMap[f.file_id] = f.last_scanned;
+          graphMap[f.file_id] = f.graph_file_id;
+        });
+      }
+
+      // 3️⃣ MERGE EVERYTHING
+      const merged = baseFiles.map((f) => ({
+        ...f,
+        last_scanned: scanMap[f.file_id] || null,
+        graph_file_id: graphMap[f.file_id] || null
+      }));
+
+      setFiles(merged);
     } catch (err) {
-      console.error(err);
+      console.error("Failed to fetch files:", err);
     } finally {
       setLoading(false);
     }
@@ -62,20 +83,18 @@ function AdminFiles() {
     fetchFiles();
   }, [page]);
 
-  // ----------------------------
-  // SELECT FILES
-  // ----------------------------
-  const toggleFile = (fileId) => {
+  // ✅ SELECT FILES (STORE GRAPH IDS!)
+  const toggleFile = (file) => {
+    if (!file.graph_file_id) return;
+
     setSelected((prev) =>
-      prev.includes(fileId)
-        ? prev.filter((id) => id !== fileId)
-        : [...prev, fileId]
+      prev.includes(file.graph_file_id)
+        ? prev.filter((id) => id !== file.graph_file_id)
+        : [...prev, file.graph_file_id]
     );
   };
 
-  // ----------------------------
-  // SCAN
-  // ----------------------------
+  // ✅ SCAN
   const scanSelected = async () => {
     if (selected.length === 0) return;
 
@@ -83,73 +102,31 @@ function AdminFiles() {
 
     try {
       await api.post("/scanning/scan_files", {
-        graph_file_ids: selected
+        graph_file_ids: selected // ✅ CORRECT NOW
       });
 
       setSelected([]);
       fetchFiles();
     } catch (err) {
-      console.error(err);
+      console.error("Scan failed:", err);
     } finally {
       setScanning(false);
     }
   };
 
-  // ----------------------------
-  // SENSITIVITY LABEL
-  // ----------------------------
-  const getSensitivity = (file) => {
-    const risk = getRiskLevel(file);
-
-    if (risk === "high") return "high";
-    if (risk === "medium") return "medium";
-    return "low";
+  // ✅ STYLING
+  const getSensitivityStyle = (level) => {
+    switch (level) {
+      case "low":
+        return { label: "Low", className: styles.low };
+      case "medium":
+        return { label: "Medium", className: styles.medium };
+      case "high":
+        return { label: "High", className: styles.high };
+      default:
+        return { label: "N/A", className: styles.na };
+    }
   };
-
-  // ----------------------------
-  // FILTER + SORT (CLIENT SIDE)
-  // ----------------------------
-  const filteredAndSortedFiles = useMemo(() => {
-    let result = [...files];
-
-    // 🔎 SEARCH BY NAME
-    if (search.trim()) {
-      result = result.filter((f) =>
-        f.file_name.toLowerCase().includes(search.toLowerCase())
-      );
-    }
-
-    // 🎯 FILTER BY SENSITIVITY
-    if (sensitivityFilter !== "all") {
-      result = result.filter(
-        (f) => getSensitivity(f) === sensitivityFilter
-      );
-    }
-
-    // ↕️ SORTING
-    result.sort((a, b) => {
-      switch (sortBy) {
-        case "name":
-          return a.file_name.localeCompare(b.file_name);
-
-        case "sensitivity":
-          return (
-            getRiskLevel(b) - getRiskLevel(a)
-          );
-
-        case "detections":
-          return b.detection_count - a.detection_count;
-
-        case "last_scanned":
-          return new Date(b.last_scanned || 0) - new Date(a.last_scanned || 0);
-
-        default:
-          return 0;
-      }
-    });
-
-    return result;
-  }, [files, search, sensitivityFilter, sortBy]);
 
   const totalPages = Math.ceil(total / pageSize);
 
@@ -157,34 +134,7 @@ function AdminFiles() {
     <div className={styles.container}>
       <h2>Admin Files</h2>
 
-      {/* ---------------- FILTER BAR ---------------- */}
-      <div className={styles.filters}>
-        <input
-          placeholder="Search file name..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-
-        <select
-          value={sensitivityFilter}
-          onChange={(e) => setSensitivityFilter(e.target.value)}
-        >
-          <option value="all">All Sensitivity</option>
-          <option value="low">Low</option>
-          <option value="medium">Medium</option>
-          <option value="high">High</option>
-        </select>
-
-        <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-          <option value="risk">Default (Risk)</option>
-          <option value="name">Name</option>
-          <option value="sensitivity">Sensitivity</option>
-          <option value="last_scanned">Last Scanned</option>
-          <option value="detections">Detections</option>
-        </select>
-      </div>
-
-      {/* ---------------- SCAN BUTTON ---------------- */}
+      {/* SCAN BUTTON */}
       <button
         onClick={scanSelected}
         disabled={selected.length === 0 || scanning}
@@ -192,7 +142,7 @@ function AdminFiles() {
         {scanning ? "Scanning..." : "Scan Selected"}
       </button>
 
-      {/* ---------------- TABLE ---------------- */}
+      {/* TABLE */}
       {loading ? (
         <p>Loading...</p>
       ) : (
@@ -208,36 +158,49 @@ function AdminFiles() {
           </thead>
 
           <tbody>
-            {filteredAndSortedFiles.map((file) => {
-              const sensitivity = getSensitivity(file);
+            {files.map((file) => {
+              const risk = getRiskLevel(file);
+              const s = getSensitivityStyle(risk);
 
               return (
                 <tr key={file.file_id}>
+                  {/* CHECKBOX */}
                   <td>
                     <input
                       type="checkbox"
-                      checked={selected.includes(file.file_id)}
-                      onChange={() => toggleFile(file.file_id)}
+                      checked={selected.includes(file.graph_file_id)}
+                      onChange={() => toggleFile(file)}
+                      disabled={!file.graph_file_id}
                     />
                   </td>
 
-                  {/* clickable name */}
-                  <td
-                    className={styles.fileLink}
-                    onClick={() => navigate(`/files/${file.file_id}`)}
-                  >
-                    {file.file_name}
-                  </td>
-
-                  <td>{sensitivity}</td>
-
+                  {/* NAME */}
                   <td>
-                    {file.last_scanned
-                      ? new Date(file.last_scanned).toLocaleString()
-                      : "Never"}
+                    <span
+                      className={styles.fileLink}
+                      onClick={() => navigate(`/files/${file.file_id}`)}
+                    >
+                      {file.file_name}
+                    </span>
+                  </td>
+                  {/* SENSITIVITY */}
+                  <td>
+                    <span className={`${styles.badge} ${s.className}`}>
+                      {s.label}
+                    </span>
                   </td>
 
-                  <td>{file.detection_count}</td>
+                  {/* LAST SCANNED */}
+                  <td>
+                    {file.last_scanned ? (
+                      new Date(file.last_scanned).toLocaleString()
+                    ) : (
+                      <span className={styles.neverScanned}>Never</span>
+                    )}
+                  </td>
+
+                  {/* DETECTIONS */}
+                  <td>{file.detection_count ?? 0}</td>
                 </tr>
               );
             })}
@@ -245,9 +208,12 @@ function AdminFiles() {
         </table>
       )}
 
-      {/* ---------------- PAGINATION ---------------- */}
+      {/* PAGINATION */}
       <div className={styles.pagination}>
-        <button disabled={page === 1} onClick={() => setPage(p => p - 1)}>
+        <button
+          disabled={page === 1}
+          onClick={() => setPage((p) => p - 1)}
+        >
           Prev
         </button>
 
@@ -257,7 +223,7 @@ function AdminFiles() {
 
         <button
           disabled={page >= totalPages}
-          onClick={() => setPage(p => p + 1)}
+          onClick={() => setPage((p) => p + 1)}
         >
           Next
         </button>

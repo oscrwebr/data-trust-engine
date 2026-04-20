@@ -1,4 +1,6 @@
-/* Container */
+/* ========================= */
+/* Container                */
+/* ========================= */
 .container {
   padding: 24px 32px;
   background-color: #f5f7fb;
@@ -14,7 +16,9 @@
   color: #1f2937;
 }
 
-/* Filters */
+/* ========================= */
+/* Filters                  */
+/* ========================= */
 .filters {
   display: flex;
   gap: 12px;
@@ -40,7 +44,9 @@
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
 }
 
-/* Scan Button */
+/* ========================= */
+/* Scan Button              */
+/* ========================= */
 button {
   padding: 10px 16px;
   border-radius: 8px;
@@ -64,7 +70,9 @@ button:disabled {
   transform: none;
 }
 
-/* Table */
+/* ========================= */
+/* Table                    */
+/* ========================= */
 .table {
   width: 100%;
   border-collapse: collapse;
@@ -74,7 +82,7 @@ button:disabled {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
-/* Table Header */
+/* Header */
 .table thead {
   background: #f1f5f9;
 }
@@ -82,97 +90,106 @@ button:disabled {
 .table th {
   text-align: left;
   padding: 14px;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
-  color: #374151;
+  color: #475569;
+  letter-spacing: 0.02em;
 }
 
-/* Table Rows */
+/* Rows */
 .table td {
   padding: 14px;
   font-size: 14px;
-  color: #374151;
-  border-top: 1px solid #f1f5f9;
+  color: #334155;
+  border-top: 1px solid #eef2f7;
 }
 
 .table tr:hover {
-  background: #f9fafb;
+  background: #f8fafc;
 }
 
-/* Checkbox */
+/* ========================= */
+/* File Link                */
+/* ========================= */
+.fileLink {
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.fileLink:hover {
+  text-decoration: underline;
+}
+
+/* ========================= */
+/* Checkbox                 */
+/* ========================= */
 .table input[type="checkbox"] {
-  transform: scale(1.2);
+  transform: scale(1.15);
   cursor: pointer;
 }
 
 /* ========================= */
-/* Sensitivity Badges        */
+/* 🔥 Sensitivity System    */
 /* ========================= */
-
 .badge {
   padding: 4px 10px;
   border-radius: 999px;
   font-size: 12px;
   font-weight: 600;
   display: inline-block;
+  letter-spacing: 0.02em;
 }
 
-/* ❌ N/A */
-.na {
-  background-color: #e5e7eb;
-  color: #374151;
-}
-
-/* 🟢 Safe */
-.safe {
-  background-color: #dcfce7;
-  color: #166534;
-}
-
-/* 🟡 Low */
+/* LOW (safe-ish) */
 .low {
-  background-color: #fef9c3;
-  color: #854d0e;
+  background-color: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
 }
 
-/* 🟠 Medium */
+/* MEDIUM (warning) */
 .medium {
-  background-color: #ffedd5;
-  color: #9a3412;
+  background-color: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
 }
 
-/* 🔴 High */
+/* HIGH (danger) */
 .high {
-  background-color: #fee2e2;
-  color: #991b1b;
+  background-color: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
 }
 
-/* 🚨 Critical (NEW) */
-.critical {
-  background-color: #7f1d1d;
-  color: #ffffff;
-  font-weight: 700;
-  box-shadow: 0 0 0 2px rgba(127, 29, 29, 0.2);
+/* OPTIONAL fallback */
+.na {
+  background-color: #f1f5f9;
+  color: #475569;
 }
 
 /* ========================= */
-/* Detections styling        */
+/* Row emphasis (important) */
 /* ========================= */
+.highRow {
+  background: rgba(239, 68, 68, 0.04);
+}
 
+.mediumRow {
+  background: rgba(245, 158, 11, 0.03);
+}
+
+/* ========================= */
+/* Detections               */
+/* ========================= */
 td strong {
   font-size: 14px;
-  color: #111827;
-}
-
-/* highlight dangerous rows subtly */
-tr:hover td strong {
-  color: #000;
+  color: #0f172a;
 }
 
 /* ========================= */
-/* Pagination                */
+/* Pagination               */
 /* ========================= */
-
 .pagination {
   display: flex;
   align-items: center;
@@ -185,16 +202,17 @@ tr:hover td strong {
   font-size: 13px;
 }
 
-/* Loading text */
+/* ========================= */
+/* Loading text             */
+/* ========================= */
 .container p {
-  color: #6b7280;
+  color: #64748b;
   font-size: 14px;
 }
 
 /* ========================= */
-/* Spinner                   */
+/* Spinner                  */
 /* ========================= */
-
 .spinner {
   display: inline-block;
   width: 16px;
@@ -212,15 +230,10 @@ tr:hover td strong {
   }
 }
 
-/* Scan button loading state */
-.loadingButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Never scanned */
+/* ========================= */
+/* Never scanned            */
+/* ========================= */
 .neverScanned {
-  color: #9ca3af;
+  color: #94a3b8;
   font-style: italic;
 }
