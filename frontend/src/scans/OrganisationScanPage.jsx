@@ -45,9 +45,16 @@ function OrganisationScanPage({ scan }) {
         duplicateCount += duplicateGroups[duplicateGroupId].length - 1;
     }
 
+    // Files can be both duplicates and have naming issues
+    // Need to avoid counting the same file twice when calculating the percentage for clean files
+    // Sets remove duplicates automatically
+    const filesWithIssues = new Set(
+        scan.files.filter(
+            file => file.naming_convention_scan_results.every(result => !result.passed) || file.duplicate_group_id !== null
+        ).map(file => file.scan_file_id)
+    );
     // Get the amount of issues and percentage of clean files for display
-    const totalIssues = namingIssues + duplicateCount;
-    const cleanFiles = scan.file_count - totalIssues;
+    const cleanFiles = scan.file_count - filesWithIssues.size;
     const cleanFilesPercentage = getPercentage(cleanFiles, scan.file_count);
 
     
