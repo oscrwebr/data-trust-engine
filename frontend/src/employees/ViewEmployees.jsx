@@ -62,6 +62,11 @@ function ViewEmployees({toast}){
             (selectedRole.name === "No Role Assigned" && employee.role_name === null) ||
             employee.role_name === selectedRole.name;
 
+        const matchesRisk =
+            !selectedRisk ||
+            selectedRisk === "View All Scanning Risks" ||
+            employee.files.status === selectedRisk;
+
         const search = searchValue?.toLowerCase() || "";
 
         const matchesSearch =
@@ -69,8 +74,10 @@ function ViewEmployees({toast}){
             employee.user.surname?.toLowerCase().includes(search) ||
             employee.user.email?.toLowerCase().includes(search);
 
-        return matchesRole && matchesSearch;
+        return matchesRole && matchesSearch && matchesRisk;
     });
+
+    const riskOptions = ["View All Scanning Risks", "No Risk Detected", "Risk Detected", "No Files Found", "No Files Scanned"]
 
     return(
         <div className={styles.page}>
@@ -91,7 +98,7 @@ function ViewEmployees({toast}){
                             placeholder="Filter by Roles" className="p-inputtext-sm"/>
                     </div>
                     <div className="card flex justify-content-center" style={{ marginRight:"15px" }}>
-                        <Dropdown value={selectedRisk} onChange={(e) => setSelectedRisk(e.value)} optionLabel="name" 
+                        <Dropdown value={selectedRisk} options={riskOptions} onChange={(e) => setSelectedRisk(e.value)}
                             placeholder="Filter by Risk Level" className="p-inputtext-sm"/>
                     </div>
                     <IconField iconPosition="left">
