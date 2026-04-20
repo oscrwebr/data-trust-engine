@@ -71,7 +71,7 @@ async def create_notification(db: Annotated[Session, Depends(get_database)], cur
     return True
 
 @router.post("/send-message")
-async def create_notification(db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)], employees: MessageSchema):
+async def create_notification(db: Annotated[Session, Depends(get_database)], employees: MessageSchema):
     
     if employees.body is None or employees.body == "":
         return

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from app.core.database import Base
 
 class Role(Base):
@@ -7,6 +7,7 @@ class Role(Base):
     role_id = Column(Integer, primary_key=True, index=True)
     workspace_id = Column(Integer, ForeignKey("workspaces.id"))
     name = Column(String(128), nullable=False)
+    last_updated = Column(DateTime, nullable=False)
 
 class SensitivityCategory(Base):
     __tablename__ = "sensitivity_category"
