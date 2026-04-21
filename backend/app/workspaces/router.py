@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, UploadFile, File, Form, Response
 from app.core.database import get_database
 from sqlalchemy.orm import Session
-from app.workspaces.service import workspace, add_notification, get_user_notifications, del_notification, get_employees, get_pending_employees, get_workspaces, get_workspace_by_id, get_admin_from_workspace, add_pending_user_to_workspace
+from app.workspaces.service import workspace, add_notification, get_user_notifications, del_notification, get_employees, get_pending_employees, get_workspaces, get_workspace_by_id, get_admin_from_workspace, add_pending_user_to_workspace, get_pending_employees_type_request
 from typing import Annotated
 from ..core.security_schemas import User
 from ..core.security import get_user_from_access_token
@@ -127,20 +127,9 @@ async def get_workspace_roles(db: Annotated[Session, Depends(get_database)], cur
     return roles
 
 @router.get("/get-pending-employees")
-async def get_all_pending_employees(db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)]):
-    user = service.test_route(current_user.user_id, db=db)
-    pending_employees = []
-    if user.role == "employee":
-        return pending_employees
-    
-    if user.role == "admin":
-        result = get_pending_employees(db, current_user.user_id)
-        
-        for pending_employee in result:
-            if pending_employee["user"].type == "request":
-                pending_employees.append(pending_employee)
-
-    return pending_employees
+async def get_all_pending_employees_type_request(db: Annotated[Session, Depends(get_database)], current_user: Annotated[User, Depends(get_user_from_access_token)]):    
+    result = get_pending_employees_type_request(db, current_user.user_id)
+    return result or None
 
 @router.delete("/delete-user/{user_id}")
 async def delete_active_user(user_id: int, db: Annotated[Session, Depends(get_database)]):

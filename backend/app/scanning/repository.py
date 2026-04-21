@@ -511,6 +511,17 @@ def get_scan_file_detection_counts(db: Session, scan_id: int):
         .all()
     )
 
+
+def update_file_last_scanned(db: Session, file_id: int):
+    file = db.query(IngestionFile).filter(IngestionFile.ingestion_file_id == file_id).first()
+
+    if file is None:
+        raise ValueError(f"File with id '{file_id}' not found")
+
+    file.last_scanned = datetime.now(timezone.utc)
+    db.commit()
+    db.refresh(file)
+
 def get_high_risk_file_count(db: Session, scan_id: int, sensitive_categories: list[str]):
     return (
         db.query(ScanFile.scan_file_id)
