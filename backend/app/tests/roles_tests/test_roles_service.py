@@ -102,7 +102,7 @@ def test_get_roles_service(db):
     repository.update_role(db, role.role_id, name="Law Role", date='2024-01-15 09:30:00',
                            thresholds=[{"sensitivity_subcategory_id": sub.sensitivity_subcategory_id, "threshold": 10}])
 
-    result = service.get_roles(db)
+    result = service.get_roles(db, workspace.id)
     assert len(result) >= 1
     found = next(r for r in result if r["role_id"] == role.role_id)
     assert found["name"] == "Law Role"
