@@ -3,14 +3,14 @@ from fastapi import APIRouter, Request
 from sqlalchemy import insert, select
 from PIL import Image
 from io import BytesIO
-from datetime import datetime
+from datetime import datetime, date
 import secrets
 import requests
 import pytest
 
-from app.authentication.service import create_user, DRIVE_DATA_GRAPH_URL
+from app.authentication.service import create_user, DRIVE_DATA_GRAPH_URL, add_pending_user
 from app.workspaces.models import Notification
-from app.workspaces.repository import add_workspace
+from app.workspaces.repository import add_workspace, add_user_workspace
 from app.invites.repository import add_invite
 from app.authentication.models import User
 from app.authentication.router import get_session
@@ -56,11 +56,14 @@ def test_create_user_service_adds_employee_correctly(db, mock_delay):
     }
 
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    admin = insert(User).values(firstname="John", surname="Smith", username="johnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", refresh="ms-refresh-token".encode(), oid=oid, role="employee")
+    admin = insert(User).values(firstname="John", surname="Smith", username="johnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", refresh="ms-refresh-token".encode(), oid=oid, role="admin")
     admin_instance=db.execute(admin)
 
     workspace = add_workspace(db=db, name="Test Workspace", image=image)
-    user = create_user(db=db, details=dummy_user, refresh="ms-refresh-token", ms_access_token="ms-access-token", role="employee", workspace_id=workspace.id)
+    add_user_workspace(db, workspace.id, admin_instance.inserted_primary_key[0])
+    pending_user = add_pending_user(db, "johnSmith1@hotmail.com", "invite")
+    add_invite(db, '2026-04-20 12:00:00', '2026-04-20 12:00:00', "dummy-token", True, pending_user.user_id, workspace)
+    user = create_user(db=db, details=dummy_user, refresh="ms-refresh-token", ms_access_token="ms-access-token", role="employee", workspace_id=workspace.id, token="dummy-token")
 
     # assertions
     assert user # Check that there is a user object returned
@@ -81,7 +84,11 @@ def test_create_user_service_adds_admin_correctly(db, mock_delay):
         "oid": "00000000-0000-0000-476j-987sdf88se", # This is random
     }
 
-    user = create_user(db=db, details=dummy_user, refresh="ms-refresh-token", ms_access_token="ms-access-token", role="admin", workspace_id=None)
+    workspace = add_workspace(db=db, name="Test Workspace", image=image)
+    pending_user = add_pending_user(db, "johnSmith1@hotmail.com", "invite")
+    add_invite(db, '2026-04-20 12:00:00', '2026-04-20 12:00:00', "dummy-token", True, pending_user.user_id, workspace)
+    user = create_user(db=db, details=dummy_user, refresh="ms-refresh-token", ms_access_token="ms-access-token", role="admin", workspace_id=None, token="dummy-token")
+    
 
     # assertions
     assert user # Check that there is a user object returned
@@ -121,11 +128,18 @@ def test_drive_id_and_refresh_added_for_user(client, db, requests_mock, mock_del
     fake_requests.session["signup"] = True
     fake_requests.session["role"] = 1
     fake_requests.session["workspace_id"] = 1
+    fake_requests.session["token"] = "dummy-token"
 
     # overriding dependencies used by the router for '/success/'
     app.dependency_overrides[application] = lambda: FakeMsal()
     app.dependency_overrides[get_database] = lambda: db
     app.dependency_overrides[get_session] = lambda: fake_requests
+
+    image = create_test_image()
+    workspace = add_workspace(db=db, name="Test Workspace", image=image)
+
+    pending_user = add_pending_user(db, "johnSmith1@hotmail.com", "invite")
+    add_invite(db, '2026-04-20 12:00:00', '2026-04-20 12:00:00', "dummy-token", True, pending_user.user_id, workspace)
 
     # Setting the URL interception for getting the driveId
     mock_get = requests_mock.get(
@@ -169,11 +183,14 @@ def test_delay_called_correctly(db, mock_delay):
     }
 
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    admin = insert(User).values(firstname="John", surname="Smith", username="johnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", refresh="ms-refresh-token".encode(), oid=oid, role="employee")
+    admin = insert(User).values(firstname="John", surname="Smith", username="johnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", refresh="ms-refresh-token".encode(), oid=oid, role="admin")
     admin_instance=db.execute(admin)
-
+    
     workspace = add_workspace(db=db, name="Test Workspace", image=image)
-    user = create_user(db=db, details=dummy_user, refresh="ms-refresh-token", ms_access_token="ms-access-token", role="employee", workspace_id=workspace.id)
-
+    add_user_workspace(db, workspace.id, admin_instance.inserted_primary_key[0])
+    pending_user = add_pending_user(db, "johnSmith1@hotmail.com", "invite")
+    add_invite(db, '2026-04-20 12:00:00', '2026-04-20 12:00:00', "dummy-token", True, pending_user.user_id, workspace)
+    user = create_user(db=db, details=dummy_user, refresh="ms-refresh-token", ms_access_token="ms-access-token", role="employee", workspace_id=workspace.id, token="dummy-token")
+    
     # assertions
     mock_delay.assert_called_once_with("ms-access-token", user.user_id)

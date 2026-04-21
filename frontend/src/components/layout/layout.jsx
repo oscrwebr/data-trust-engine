@@ -14,7 +14,7 @@ const Layout = () => {
   const [user, setUser] = useState({});
   const [workspace, setWorkspace] = useState(null)
   const [notifications, setNotifications] = useState([])
-  const [workspace_id, setWorkspaceId] = useState(null)
+  const [pendingEmployees, setPendingEmployees] = useState([])
 
 // Getting user information and all their notifications on loading
   useEffect(() => {
@@ -34,6 +34,13 @@ const Layout = () => {
         .catch(error => console.log(error))
   }, []);
 
+  useEffect(() => {
+      api.get("/workspace/get-pending-employees")
+      .then(res => {
+          setPendingEmployees(res.data)
+      })
+  }, [pendingEmployees])
+
   // Function to handle removing notifications
   const handleRemove = async (id) => {
     try {
@@ -49,7 +56,7 @@ const Layout = () => {
   return (
     <div className={styles.container}>
         {sidebarVisible &&(<div className={styles.navbar_container}>
-            <Sidebar setSidebarVisible={setSidebarVisible} firstname={user.firstname} surname={user.surname} email={user.email} setVisible={setVisible} role={user.role}/>
+            <Sidebar setSidebarVisible={setSidebarVisible} firstname={user.firstname} surname={user.surname} email={user.email} setVisible={setVisible} role={user.role} pendingEmployees={pendingEmployees}/>
         </div>)}
         <div className={styles.main}>
             <Header firstname={user.firstname} lastname={user.surname} workspace={workspace} sidebarVisible={sidebarVisible} setSidebarVisible={setSidebarVisible} toastRef={toastNotifications} notifications={notifications} setNotifications={setNotifications}/>
@@ -58,7 +65,9 @@ const Layout = () => {
                     visible,
                     setVisible,
                     user,
-                    workspace
+                    workspace,
+                    pendingEmployees,
+                    setPendingEmployees
                 }} />
             </div>
             <Toast className={styles.d_toast} ref={toastNotifications} onRemove={(message) => handleRemove(message.id)} position="top-right" />
