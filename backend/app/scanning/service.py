@@ -131,7 +131,9 @@ def get_file(db: Session, file_id: int):
     return FileResponse(
         file_id = file.ingestion_file_id,
         file_name = file.name,
-        hash = file.hash
+        hash = file.hash,
+        last_scanned = file.last_scanned,
+        last_modified = file.last_modified
     )
 
 

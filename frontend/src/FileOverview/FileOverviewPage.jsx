@@ -94,6 +94,17 @@ function FileOverviewPage({toast}) {
         toast.current.show({ severity: 'error', summary: 'Error', detail: 'You are sending this employee too many emails, please try again later.', life: 4000});
     };
 
+    const formatted_date = (value) => {
+        return new Date(value).toLocaleString("en-GB", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+        });
+    };
+
     return (
         <div className={styles.file_overview_page}>
             <div className={styles.file_header_card}>
@@ -113,7 +124,7 @@ function FileOverviewPage({toast}) {
                         <div>
                             <div className={styles.metadata_label}>Last Scanned</div>
                             <div className={styles.metadata_value}>
-                                {file.last_scanned ? formatDateTime(file.last_scanned) : "Not scanned yet"}
+                                {file.last_scanned ? formatted_date(file.last_scanned) : "Not scanned yet"}
                             </div>
                         </div>
                     </div>
@@ -123,7 +134,7 @@ function FileOverviewPage({toast}) {
                         <div>
                             <div className={styles.metadata_label}>Last Modified</div>
                             <div className={styles.metadata_value}>
-                                {file.last_modified ? formatDateTime(file.last_modified) : "Unknown"}
+                                {file.last_modified ? formatted_date(file.last_modified) : "Unknown"}
                             </div>
                         </div>
                     </div>
