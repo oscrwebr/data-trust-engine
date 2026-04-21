@@ -592,6 +592,14 @@ def get_scan_file_details(db: Session, scan_file_id: int):
         "detections": detections
     }
 
+def get_sensitivity_subcategories(db: Session):
+    categories = repository.get_sensitivity_categories(db=db)
+    return [{
+        "sensitivity_subcategory_id": subcategory.sensitivity_subcategory_id,
+        "subcategory": subcategory.name,
+        "category": category
+    } for subcategory, category in categories
+    ]
 
 
     

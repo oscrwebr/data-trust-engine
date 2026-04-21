@@ -87,3 +87,7 @@ def get_scan_by_id(scan_id: int, db: Session = Depends(get_database)):
 @router.get("/get_scan_file_by_id/{scan_file_id}")
 def get_scan_file_by_id(scan_file_id: int, db: Session = Depends(get_database)):
     return service.get_scan_file_details(db=db, scan_file_id=scan_file_id)
+
+@router.get("/get_sensitivity_categories")
+def get_sensitivity_categories(db: Session = Depends(get_database)):
+    return service.get_sensitivity_subcategories(db=db)

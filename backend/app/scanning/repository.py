@@ -520,3 +520,10 @@ def get_high_risk_file_count(db: Session, scan_id: int, sensitive_categories: li
         .distinct()
         .count()
     )
+
+def get_sensitivity_categories(db: Session):
+    return (
+        db.query(SensitivitySubcategory, SensitivityCategory.name.label("category_name"))
+        .join(SensitivityCategory, SensitivitySubcategory.sensitivity_category_id == SensitivityCategory.sensitivity_category_id)
+        .all()
+    )
