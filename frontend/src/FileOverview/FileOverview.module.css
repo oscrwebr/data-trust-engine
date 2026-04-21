@@ -317,14 +317,14 @@
 }
 
 .metadata_label {
-    font-size: 0.72rem;
+    font-size: 0.68rem;
     color: #6b7280;
-    margin-bottom: 0.15rem;
+    margin-bottom: 0.2rem;
     line-height: 1.1;
 }
 
 .metadata_value {
-    font-size: 0.95rem;
+    font-size: 0.82rem;
     font-weight: 500;
     color: #111827;
     line-height: 1.2;
