@@ -36,6 +36,23 @@ apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin do
 # Login to docker for access to personal registry
 echo "dckr_pat_kMcmoi1oTECeoSm2qG7V0ESi_Eo" | sudo docker login -u dk04 --password-stdin
 
+echo "Ensuring that docker network doesn't interfere with SSH"
+cd /etc/docker
+cat <<EOF | sudo tee /etc/docker/daemon.json
+{
+  "default-address-pools": [
+    {
+      "base": "172.20.0.0/16",
+      "size": 24
+    }
+  ],
+  "bip": "172.19.0.1/24",
+  "mtu": 1400,
+  "labels": ["vm_ip=$VM_IP"]
+}
+EOF
+sudo systemctl restart docker
+
 # Above was found from HashiCorp at: https://developer.hashicorp.com/vagrant/tutorials/get-started/provision
 cd /
 echo "Creating the app directory and adding the compose.yaml file"
@@ -141,23 +158,6 @@ volumes:
 `EOF`
 
 sudo docker compose pull
-
-echo "Ensuring that docker network doesn't interfere with SSH"
-cd /etc/docker
-cat <<EOF | sudo tee /etc/docker/daemon.json
-{
-  "default-address-pools": [
-    {
-      "base": "172.20.0.0/16",
-      "size": 24
-    }
-  ],
-  "bip": "172.19.0.1/24",
-  "mtu": 1400,
-  "labels": ["vm_ip=$VM_IP"]
-}
-EOF
-sudo systemctl restart docker
 cd /app
 
 
