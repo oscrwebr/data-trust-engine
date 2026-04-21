@@ -1,6 +1,7 @@
     import styles from "./employees.module.css"
     import api from "../api/axiosConfig"
     import { useEffect, useRef, useCallback } from "react";
+    import { useOutletContext } from "react-router-dom";
 
 
     import { IconField } from "primereact/iconfield";
@@ -20,6 +21,7 @@
     import Invite from "../invites/invites";
 
     function ManageEmployees({toast}){
+        const { fetchPendingEmployees } = useOutletContext();
         const [employeeRoles, setEmployeeRoles] = useState({});
         const [selectedRole, setSelectedRole] = useState(null)
         const [selectedStatus, setSelectedStatus] = useState(null);
@@ -166,6 +168,7 @@
                 .then(res => {
                     showSuccessMessageReject();
                     fetchEmployees();
+                    fetchPendingEmployees();
                 })
                 .catch(err => console.error(err));
         }
@@ -185,6 +188,7 @@
                 } else {
                     showSuccessMessageAccept();
                     fetchEmployees();
+                    fetchPendingEmployees();
                 }
                 
             })
