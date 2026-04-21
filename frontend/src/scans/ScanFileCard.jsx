@@ -185,7 +185,7 @@ function ScanFileCard({scan_file, scan_type, scan_files}) {
                     <button className="sensitivity-scan-file-button"
                     // Link inside a link code adapted from: 
                     // https://stackoverflow.com/a/30362416
-                            onClick={(event) => {event.preventDefault(); event.stopPropagation(); navigate(`/scan_file/${scan_file.scan_file_id}`)}}
+                            onClick={(event) => {event.preventDefault(); event.stopPropagation(); navigate(`/scan-file/${scan_file.scan_file_id}`)}}
                     >
                         <PiMagnifyingGlassBold /> View Advanced Details
                     </button>

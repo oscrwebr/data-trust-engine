@@ -398,6 +398,15 @@ def get_basic_sensitivity_scan_results_by_scan_id(db: Session, scan_id: int):
         .all()
     )
 
+def get_scan_file_with_file(db: Session, scan_file_id: int):
+    return (
+        db.query(ScanFile, IngestionFile, Scan)
+        .join(IngestionFile, ScanFile.file_id == IngestionFile.ingestion_file_id)
+        .join(Scan, Scan.scan_id == ScanFile.scan_id)
+        .filter(ScanFile.scan_file_id == scan_file_id)
+        .first()
+    )
+
 def get_scan_file_details(db: Session, scan_file_id: int):
     return (
         db.query(ScanFileDetection, SensitivityCategory.name.label("category_name"))
@@ -411,6 +420,7 @@ def get_scan_file_details(db: Session, scan_file_id: int):
             SensitivitySubcategory.sensitivity_category_id == SensitivityCategory.sensitivity_category_id
         )
         .filter(ScanFileDetection.scan_file_id == scan_file_id)
+        .order_by(ScanFileDetection.page_number.asc())
         .all()
     )
 
