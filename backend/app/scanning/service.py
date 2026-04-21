@@ -103,6 +103,10 @@ def scan_file(db: Session, graph_file_id: str, scan_id: int):
             page_number=detection["page_number"]
         )
 
+    # Update the last_scanned value of the file
+    repository.update_file_last_scanned(db=db, file_id=file.ingestion_file_id)
+
+
 
 # Method returns hard coded test files' paths to be used for testing, DO NOT DELETE
 def fetch_graph_file(graph_file_id: str):
@@ -131,7 +135,9 @@ def get_file(db: Session, file_id: int):
     return FileResponse(
         file_id = file.ingestion_file_id,
         file_name = file.name,
-        hash = file.hash
+        hash = file.hash,
+        last_scanned = file.last_scanned,
+        last_modified = file.last_modified
     )
 
 

@@ -15,6 +15,8 @@ class FileResponse(BaseModel):
     file_id: int
     file_name: str
     hash: str
+    last_scanned: datetime | None
+    last_modified: datetime 
 
     class Config:
         from_attributes = True
