@@ -158,6 +158,6 @@ volumes:
 `EOF`
 
 sudo docker compose pull
-cd /app
+
 
 

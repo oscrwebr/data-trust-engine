@@ -52,3 +52,20 @@ sudo sudo gitlab-runner register \
 
 echo "Adding the gitlab-runner to the docker group, so that that it doesn't need sudo to run commands"
 sudo usermod -aG docker gitlab-runner
+
+echo "Ensuring that docker network doesn't interfere with SSH"
+cd /etc/docker
+cat <<EOF | sudo tee /etc/docker/daemon.json
+{
+  "default-address-pools": [
+    {
+      "base": "172.20.0.0/16",
+      "size": 24
+    }
+  ],
+  "bip": "172.19.0.1/24",
+  "mtu": 1400,
+  "labels": ["vm_ip=$VM_IP"]
+}
+EOF
+sudo systemctl restart docker
