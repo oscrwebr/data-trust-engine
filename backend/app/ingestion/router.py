@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from typing import Annotated
 from msal import ConfidentialClientApplication
 import os
@@ -25,6 +25,19 @@ async def test_ingest(application: Annotated[ConfidentialClientApplication, Depe
         return output
     
     return {"message": None}
+
+@router.patch("/update-file")
+async def update_file(application: Annotated[ConfidentialClientApplication, Depends(application)], user: Annotated[User, Depends(get_user_from_access_token)], db: Annotated[Session, Depends(get_database)], graph_id: str, new_name: Annotated[str, Query(max_length=255)]):
+    # Ensure that only admins can access this route!
+    if user.role != 'admin':
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+    print(f"This is the graph_id: {graph_id}")
+    print(f"This is the new name: {new_name}")
+
+    return {
+        "message": "Updating!"
+    }
+    
 
 @router.get("/test-download")
 async def test_download(application: Annotated[ConfidentialClientApplication, Depends(application)], user: Annotated[User, Depends(get_user_from_access_token)], db: Annotated[Session, Depends(get_database)], graph_id: str):
