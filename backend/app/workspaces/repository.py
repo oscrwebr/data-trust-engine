@@ -127,3 +127,25 @@ def get_all_pending_employees(db: Session, user_id: int):
     })
 
     return pending_users
+
+def get_all_pending_employees_type_request(db: Session, user_id: int):
+    workspace = db.query(Workspace).join(user_workspace).filter(
+        user_workspace.c.user_id == user_id
+    ).first()
+    
+    results = (
+        db.query(PendingUser)
+        .join(pending_user_workspace, pending_user_workspace.c.user_id == PendingUser.user_id)
+        .filter(pending_user_workspace.c.workspace_id == workspace.id)
+        .filter(PendingUser.type == "request")
+        .all()
+    )
+
+    # shape into clean response
+    pending_users = []
+    for pending_user in results:
+        pending_users.append({
+        "user": pending_user,
+    })
+
+    return pending_users

@@ -34,12 +34,16 @@ const Layout = () => {
         .catch(error => console.log(error))
   }, []);
 
+  const fetchPendingEmployees = () => {
+    api.get("/workspace/get-pending-employees")
+      .then(res => setPendingEmployees(res.data))
+      .catch(err => console.log(err));
+  };
+
   useEffect(() => {
-      api.get("/workspace/get-pending-employees")
-      .then(res => {
-          setPendingEmployees(res.data)
-      })
-  }, [pendingEmployees])
+    fetchPendingEmployees();
+  }, [])
+
 
   // Function to handle removing notifications
   const handleRemove = async (id) => {
@@ -67,7 +71,8 @@ const Layout = () => {
                     user,
                     workspace,
                     pendingEmployees,
-                    setPendingEmployees
+                    setPendingEmployees,
+                    fetchPendingEmployees
                 }} />
             </div>
             <Toast className={styles.d_toast} ref={toastNotifications} onRemove={(message) => handleRemove(message.id)} position="top-right" />
