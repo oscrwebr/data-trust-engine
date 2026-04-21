@@ -300,7 +300,7 @@
 
 .metadata_chip {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 0.55rem;
     background-color: #f9fafb;
     border: 1px solid #e5e7eb;
