@@ -31,13 +31,14 @@ async def update_file(application: Annotated[ConfidentialClientApplication, Depe
     # Ensure that only admins can access this route!
     if user.role != 'admin':
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
-    print(f"This is the graph_id: {graph_id}")
-    print(f"This is the new name: {new_name}")
-
-    return {
-        "message": "Updating!"
-    }
-    
+    # Update file name flow
+    update_res = service.update_file_name(application=application, graph_id=graph_id, name=new_name, db=db)
+    if update_res == 200:
+        return {
+            "message": "file updated successfully!"
+        }
+    else:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
 
 @router.get("/test-download")
 async def test_download(application: Annotated[ConfidentialClientApplication, Depends(application)], user: Annotated[User, Depends(get_user_from_access_token)], db: Annotated[Session, Depends(get_database)], graph_id: str):
