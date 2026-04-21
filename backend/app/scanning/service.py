@@ -593,13 +593,25 @@ def get_scan_file_details(db: Session, scan_file_id: int):
     }
 
 def get_sensitivity_subcategories(db: Session):
-    categories = repository.get_sensitivity_categories(db=db)
-    return [{
-        "sensitivity_subcategory_id": subcategory.sensitivity_subcategory_id,
-        "subcategory": subcategory.name,
-        "category": category
-    } for subcategory, category in categories
-    ]
+    query = repository.get_sensitivity_categories(db=db)
+    result = {}
+
+    # Group subcategories under their category
+    for subcategory, category in query:
+        if category not in result:
+            result[category] = {
+                "category": category,
+                "subcategories": []
+            }
+        result[category]["subcategories"].append(
+            {
+                "subcategory_id": subcategory.sensitivity_subcategory_id,
+                "subcategory_name": subcategory.name
+            }
+        )
+    return list(result.values())
+        
+        
 
 
     
