@@ -26,7 +26,7 @@ async def test_ingest(application: Annotated[ConfidentialClientApplication, Depe
     
     return {"message": None}
 
-@router.patch("/update-file")
+@router.patch("/rename-file")
 async def update_file(application: Annotated[ConfidentialClientApplication, Depends(application)], user: Annotated[User, Depends(get_user_from_access_token)], db: Annotated[Session, Depends(get_database)], graph_id: str, new_name: Annotated[str, Query(max_length=255)]):
     # Ensure that only admins can access this route!
     if user.role != 'admin':
