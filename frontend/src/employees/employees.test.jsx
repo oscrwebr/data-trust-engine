@@ -12,8 +12,8 @@ const employees = [
 ];
 
 const pending_users = [
-    { pending: {user_id: 4, email: 'valid@example.com', type: 'request'}, datetime: '2026-12-25T18:05:00'},
-    { pending: {user_id: 5, email: 'test@email.com', type: 'invite'}, datetime: '2026-12-25T18:05:00'},
+    { user: {user_id: 4, email: 'valid@example.com', type: 'request'}, datetime: '2026-12-25T18:05:00'},
+    { user: {user_id: 5, email: 'test@email.com', type: 'invite'}, datetime: '2026-12-25T18:05:00'},
 ];
 
 const roles = [

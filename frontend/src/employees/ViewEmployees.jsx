@@ -84,12 +84,16 @@ function ViewEmployees({toast}){
             <SendMessage visible={sendMessageDialog} setVisible={setSendMessageDialog} selectedEmployees={selectedEmployees} setSelectedEmployees={setSelectedEmployees} onRemove={onRemove} toast={toast}/>
             <Invite className={styles.d_invite_dialog} visible={sendInviteModal} setVisible={setSendInviteModal} toast={toast}/>
             <div className={styles.container}>
-                <h1 className={styles.title}>View Employees</h1>
+                <div className={styles.icon_and_title}>
+                    <i id={styles.title_icon} className="pi pi-users"/>
+                    <h1 className={styles.title}>View Employees</h1>
+                </div>
                 <div>
                     <Button data-testid="send-invite" style={{ marginRight: '10px'}} onClick={() => setSendInviteModal(true)} >Send an Invite</Button>
                     <Button data-testid="send-message-button" disabled={selectedEmployees.length == 0 ? (true) : (false)} onClick={() => setSendMessageDialog(true)}>Send a Message</Button>
                 </div>
             </div>
+            <span className={styles.subheader}>View your current employees, including their role and any potential risks</span>
             <div className={styles.header}>
                 <strong className={styles.employee_count}>{employees.length} People</strong>
                 <div className={styles.search_dropdown_icon_container}>

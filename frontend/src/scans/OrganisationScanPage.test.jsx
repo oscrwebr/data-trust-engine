@@ -90,7 +90,7 @@ describe("OrganisationScanPageTests", () => {
 
     test("organisationScanPageShowsCorrectTotalFilesScanned", async () => {
         renderOrganisationScanPage();
-        expect(screen.getByText("Total Files Scanned")).toBeInTheDocument();
+        expect(screen.getByText("Total Files")).toBeInTheDocument();
         expect(screen.getByText("3")).toBeInTheDocument();
     });
 

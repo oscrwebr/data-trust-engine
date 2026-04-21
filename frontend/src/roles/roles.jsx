@@ -174,16 +174,18 @@ function Roles() {
               <h1 className={styles.page_title}>Manage Roles</h1>
           </div>
           <p className={styles.page_subtitle}>Manage roles and sensitivity thresholds for organisational data</p>
-          <div className={styles.button_container}>
-            <IconField iconPosition="left">
-                <InputIcon className="pi pi-search"></InputIcon>
-                <InputText onChange={(e) => setSearchValue(e.target.value)} style={{ width: '23vw'}} placeholder="Search by role name" className="p-inputtext-sm"/>
-            </IconField>
-            <Dropdown optionLabel="name" optionValue="value" options={sortOptions} value={sortOption}
-              onChange={(e) => setSortOption(e.value)} placeholder="Sort by" className="p-inputtext-sm"/>
-            <Button className={styles.create_role_button} onClick={() => {setEditSidebar(true); setEditingRole(null);}}>Create Role</Button>
+          <div className={styles.header_container}>
+            <span className={styles.num_roles}>{roles.length} Roles</span>
+            <div className={styles.button_container}>
+              <IconField iconPosition="left">
+                  <InputIcon className="pi pi-search"></InputIcon>
+                  <InputText onChange={(e) => setSearchValue(e.target.value)} style={{ width: '23vw'}} placeholder="Search by role name" className="p-inputtext-sm"/>
+              </IconField>
+              <Dropdown optionLabel="name" optionValue="value" options={sortOptions} value={sortOption}
+                onChange={(e) => setSortOption(e.value)} placeholder="Sort by" className="p-inputtext-sm"/>
+              <Button className={styles.create_role_button} onClick={() => {setEditSidebar(true); setEditingRole(null);}}>Create Role</Button>
+            </div>
           </div>
-          
       </div>
 
       {/* ---------------- Role Cards ---------------- */}

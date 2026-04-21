@@ -4,7 +4,7 @@ from app.authentication.models import User, PendingUser
 from app.invites.models import Invite
 from app.roles.models import Role, UserRole
 from datetime import datetime
-from sqlalchemy import desc, insert
+from sqlalchemy import desc, insert, func
 
 def add_workspace(db: Session, name:str, image:bytes):
     workspace = Workspace(name=name, image=image)
@@ -100,11 +100,20 @@ def get_all_pending_employees(db: Session, user_id: int):
     workspace = db.query(Workspace).join(user_workspace).filter(
         user_workspace.c.user_id == user_id
     ).first()
+
+    latest_invite = (
+        db.query(
+            Invite.user_id,
+            func.max(Invite.created_at).label("datetime")
+        )
+        .group_by(Invite.user_id)
+        .subquery()
+    )
     
     results = (
-        db.query(PendingUser, Invite.created_at.label("datetime"))
+        db.query(PendingUser, latest_invite.c.datetime)
         .join(pending_user_workspace, pending_user_workspace.c.user_id == PendingUser.user_id)
-        .outerjoin(Invite, Invite.user_id == PendingUser.user_id)
+        .outerjoin(latest_invite, latest_invite.c.user_id == PendingUser.user_id)
         .filter(pending_user_workspace.c.workspace_id == workspace.id)
         .all()
     )

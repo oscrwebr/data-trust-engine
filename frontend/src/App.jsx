@@ -23,6 +23,7 @@ import ViewEmployees from "./employees/ViewEmployees.jsx";
 import ManageEmployees from "./employees/ManageEmployees.jsx";
 import ScanPage from "./scans/ScanPage.jsx";
 import OrganisationalDevTest from "./scan_dev_test/OrganisationalDevTest.jsx";
+import ScanFile from "./scan_file/ScanFile.jsx";
 
 
 
@@ -53,6 +54,7 @@ function App() {
           <Route path="/scans/:scanId" element={<ScanPage/>} />
           <Route path="/org-scan-dev" element={<OrganisationalDevTest />} />
           <Route path="/high-risk-files" element={<HighRiskFilesDashboard />} />
+          <Route path="scan-file/:scanFileId" element={<ScanFile/>} />
         </Route>
 
         {/* Elements in here will not inherit the sidebar */}
