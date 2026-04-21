@@ -510,3 +510,13 @@ def get_scan_file_detection_counts(db: Session, scan_id: int):
         .group_by(ScanFile.scan_file_id)
         .all()
     )
+
+def get_high_risk_file_count(db: Session, scan_id: int, sensitive_categories: list[str]):
+    return (
+        db.query(ScanFile.scan_file_id)
+        .join(ScanFileDetection, ScanFile.scan_file_id == ScanFileDetection.scan_file_id)
+        .filter(ScanFile.scan_id == scan_id)
+        .filter(ScanFileDetection.sensitivity_subcategory.in_(sensitive_categories))
+        .distinct()
+        .count()
+    )

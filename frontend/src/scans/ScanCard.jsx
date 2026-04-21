@@ -93,7 +93,7 @@ function ScanCard({ scan }) {
                         </span>
                     </div>
                     <div className="scan-card-date-block">
-                        <span className="scan-card-id-heading">Files with Issues</span>
+                        <span className="scan-card-id-heading">High-Risk Files</span>
                         <span className="scan-card-value scan-card-issue-files">
                             {/* Hardcoded for now (also need to add style for no issues)*/}
                             <span>2</span>
