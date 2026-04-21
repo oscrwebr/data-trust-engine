@@ -6,7 +6,7 @@ import LatestScanResultCard from "./LatestScanResultCard";
 import EmployeeAccessItem from "./EmployeeAccessItem";
 import styles from "./FileOverview.module.css";
 
-import { FaRegFileAlt } from "react-icons/fa";
+import { FaRegFileAlt, FaEdit, FaHashtag } from "react-icons/fa";
 import { FaShieldAlt } from "react-icons/fa";
 import { FaHistory } from "react-icons/fa";
 import { FaUserFriends } from "react-icons/fa";
@@ -98,16 +98,37 @@ function FileOverviewPage({toast}) {
         <div className={styles.file_overview_page}>
             <div className={styles.file_header_card}>
                 <div className={styles.file_header_top}>
-                    <div className={styles.file_icon}><FaRegFileAlt/></div>
-                    <div>
-                        <h1 className={styles.file_name}>{file.file_name}</h1>
+                    <div className={styles.file_icon}>
+                        <FaRegFileAlt />
+                    </div>
+
+                    <h1 className={styles.file_name}>
+                        {file.file_name}
+                    </h1>
+                </div>
+
+                <div className={styles.file_metadata}>
+                    <div className={styles.metadata_chip}>
+                        <FaHistory className={styles.metadata_icon} />
+                        <div>
+                            <div className={styles.metadata_label}>Last Scanned</div>
+                            <div className={styles.metadata_value}>
+                                {file.last_scanned ? formatDateTime(file.last_scanned) : "Not scanned yet"}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className={styles.metadata_chip}>
+                        <FaEdit className={styles.metadata_icon} />
+                        <div>
+                            <div className={styles.metadata_label}>Last Modified</div>
+                            <div className={styles.metadata_value}>
+                                {file.last_modified ? formatDateTime(file.last_modified) : "Unknown"}
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div className={styles.file_hash_section}>
-                    <div className={styles.hash_label}>Hash</div>
-                    <div className={styles.file_hash}>{file.hash}</div>
-                </div>
             </div>
 
             <div className={styles.file_overview_content}>
