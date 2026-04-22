@@ -6,6 +6,16 @@ import { Button } from "primereact/button";
 import RequestJoinWorkspaceModal from "../components/modals/RequestJoinWorkspaceModal.jsx";
 import { Divider } from "primereact/divider";
 import "../scans/scans.css"
+import { PiEnvelopeSimple } from "react-icons/pi";
+import { PiUserGear } from "react-icons/pi";
+import { PiClockClockwise } from "react-icons/pi";
+import { PiCheckCircle } from "react-icons/pi";
+import { useNavigate } from "react-router-dom";
+import ReactTimeAgo from "react-time-ago"
+import "react-time-ago/locale/en"
+
+
+
 
 function Dashboard({toast}) {
 
@@ -15,6 +25,7 @@ function Dashboard({toast}) {
   const [recentActivity, setRecentActivity] = useState([])
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     api.get("/auth/test")
@@ -49,6 +60,26 @@ function Dashboard({toast}) {
     }
   }
 
+  const activityIcons = {
+    "scan_started": <PiClockClockwise size={22} />,
+    "scan_completed": <PiCheckCircle size={22} />,
+    "invite": <PiEnvelopeSimple size={22} />,
+    "role_change": <PiUserGear size={22} />
+  }
+
+  function handleActivityClick(activity) {
+    switch(activity.type) {
+      case "scan_started":
+      case "scan_completed":
+        navigate(`/scans/${activity.scan_id}`);
+        break;
+      case "invite":
+        navigate("/manage-employees")
+      case "role_change":
+        navigate("/roles")
+    }
+  }
+
   return (
     <div className={styles.container}>
         <RequestJoinWorkspaceModal toast={toast} visible={requestJoinWorkspaceVisible} setVisible={() => setRequestJoinWorkspaceVisible(false)}/>
@@ -71,6 +102,10 @@ function Dashboard({toast}) {
               <Divider/>
               </div>
 
+              <div >
+                <h2 className={styles.welcomeHeading}>Welcome back, {user.firstname}!</h2>
+              </div>
+
               <div className={styles.recentActivityCard}>
                 <h2 className={styles.recentActivityHeader}>Recent Activity</h2>
                  {loading ? (
@@ -82,8 +117,14 @@ function Dashboard({toast}) {
                   ) : (
                     <div className={styles.activityList}>
                       {recentActivity.map((activity, index) => (
-                        <div key={index} className={styles.activityItem}>
-                          <p>{formatText(activity)}</p>
+                        <div key={index} className={styles.activityItem} onClick={() => handleActivityClick(activity)}>
+                          <div className={styles.activityIconBox}>
+                            {activityIcons[activity.type]}
+                          </div>
+                          <div className={styles.activityContent}>
+                            <span className={styles.activityText}>{formatText(activity)}</span>
+                            <span className={styles.activityTime}><ReactTimeAgo date={new Date(activity.timestamp)} locale="en-US" /></span>
+                          </div>
                         </div>
                       ))}
                     </div>

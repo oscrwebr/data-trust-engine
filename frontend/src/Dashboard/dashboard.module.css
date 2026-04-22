@@ -25,11 +25,74 @@
 }
 
 .recentActivityCard {
-  width: 100%;
+  display: flex;
+  flex-direction: column;
+  width: 500px;
+  height: 420px;
   background: #ffffff;
   border-radius: 16px;
-  padding: 24px 28px;
+  padding: 5px 20px;
   margin-top: 24px;
   border: 1px solid #d9e3f0;
+}
+
+.recentActivityHeader {
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+.welcomeHeading {
+  font-weight: 500;
+  font-size: 32px;
+}
+
+.activityList {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-bottom: 20px;
+  margin-top: 2px;
+}
+
+.activityItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 4px;
+  width: 100%;
+}
+
+.activityItem:hover {
+  background: #f1f5f9;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.activityIconBox {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.activityContent {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.activityText {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.activityTime {
+  margin: 0;
+  font-size: 14px;
+  color: #64748b;
 }
 
