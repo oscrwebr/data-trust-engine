@@ -87,10 +87,9 @@ function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role
                         <DropdownItem url="/detection-sensitivity" text="Detection Sensitivity"/>
                     </SidebarDropdown>
 
-                    <div className={styles.line}/>
+                    <div className={styles.line2}/>
 
                     {/* Add regular navbar items here, specifying the url and the text you want displayed on the navbar */}
-                    <DropdownItem url="/settings" text="Settings" icon="pi pi-cog"/>
                     <DropdownItemNoLink onClick={() => signOut()} text="Sign-out" icon="pi pi-sign-out"/>
                     <div className={styles.line}/>
                 </div> 

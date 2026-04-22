@@ -25,6 +25,7 @@ function Dashboard({toast}) {
         {/* Employee View of the Dashboard */}
         {user?.role === "employee" && (
           <div className={styles.headerRow}>
+            <i className="pi pi-compass"/>
             <h1 className={styles.title} data-testid="dashboard-h1">Dashboard</h1>
             {workspace == null && (<Button data-testid="request-join-workspace-button" onClick={() => setRequestJoinWorkspaceVisible(true)} disabled={pendingUser == null || pendingUser != true ? false : true} label={pendingUser == null || pendingUser != true ? "Request to Join Workspace" : "A request has been sent"} />)}
           </div>
@@ -32,8 +33,9 @@ function Dashboard({toast}) {
 
         {/* Admin View of the Dashboard */}
         {user?.role === "admin" && (
-          <div>
-            <h1 data-testid="dashboard-h1">Dashboard</h1>
+          <div className={styles.headerRow}>
+            <i id={styles.icon} className="pi pi-compass"/>
+            <h1 className={styles.title} data-testid="dashboard-h1">Dashboard</h1>
           </div>
         )}
         

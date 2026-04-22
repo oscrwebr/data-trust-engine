@@ -44,6 +44,13 @@
   margin-bottom: 10px;
 }
 
+.line2 {
+  width: 100%;
+  height: 1px;
+  background-color: #ccc;
+  margin-bottom: 5px;
+}
+
 .navbar_title {
     color: white;
     font-weight: 700;
