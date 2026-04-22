@@ -37,11 +37,35 @@ def create_user(db, details: dict, refresh: str, ms_access_token: str, role: str
         driveId=drive_id,
         role=role
     )
-
     # Handle ingestion with celery - in the background and sets up a queue, incase of multiple signup and inturn ingestion requests at once
     _ = setup_ingestion_celery.delay(ms_access_token, user.user_id)
 
     return user
+
+def check_user_unknown(workspace_id: int, user: User, db: Session):
+    # Get all the unknown user files and folders for this work space
+    workspace_unknown_folders = get_workspace_unknown_folders(id=workspace_id, email=user.email, db=db)
+    workspace_unknown_files = get_workspace_unknown_files(id=workspace_id, email=user.email, db=db)
+
+    # Need to now iterate through and check if the user's email is the unknown
+    user_folders_add = []
+    user_files_add = []
+    for i in workspace_unknown_folders:
+        # Add the user to the user_folders table and remove the entry from the unknown folders table
+        user_folders_add.append({"folder_id": i[0], "user_id": user.user_id})
+    # print(user_folders_add)
+
+    for i in workspace_unknown_files:
+        user_files_add.append({"file_id": i[0], "user_id": user.user_id})
+    # print(user_files_add)
+
+    # If the users email is the unknown, we add them to the userFiles and remove them from here. Otherwise, continue
+    ufolder_add_res = add_user_folders_after_workspace_join(user_folders=user_folders_add, db=db)
+    ufile_add_res = add_user_files_after_workspace_join(user_files=user_files_add, db=db)
+    if ufolder_add_res != 200 or ufile_add_res != 200:
+        print("something went wrong updating user files/folders, not removing unknown!")
+    else:
+        remove_unknown_by_email(user.email, db=db)
 
 # Method to handle user creation for anyone who has accepted an invite
 def handle_user_creation_after_invite(db: Session, user: User, workspace_id: int, token: str):
@@ -59,8 +83,9 @@ def handle_user_creation_after_invite(db: Session, user: User, workspace_id: int
     for user in users:
         if(user.role == "admin"):
             user_id = user.user_id
-
     add_notification(db, "Employee Accepted Invite", f"{user.firstname} {user.surname} accepted their invite request to join your workspace.", datetime.now(), user_id)
+    # Checking whether the user is one of the unknown users for the workspace
+    check_user_unknown(workspace_id=workspace_id, user=user, db=db)
     return
 
 
