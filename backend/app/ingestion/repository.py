@@ -135,7 +135,7 @@ def delete_ingestion_file(db: Session, graph_id: str) -> None:
     db.execute(delete_statement)
     db.commit()
 
-def get_workspace_unknown_folders(id: int, db: Session):
+def get_workspace_unknown_folders(id: int, email: str, db: Session):
     select_statement = select(
         UnknownUserFolders.folder_id,
         UnknownUserFolders.email,
@@ -146,10 +146,10 @@ def get_workspace_unknown_folders(id: int, db: Session):
             Folder, Folder.drive_id == User.driveId
         ).join(
             UnknownUserFolders, UnknownUserFolders.folder_id == Folder.folder_id
-        ).where(user_workspace.c.workspace_id == id)
+        ).where(user_workspace.c.workspace_id == id, UnknownUserFolders.email.ilike(email))
     return db.execute(select_statement).fetchall()
 
-def get_workspace_unknown_files(id: int, db: Session):
+def get_workspace_unknown_files(id: int, email: str, db: Session):
     select_statement = select(
         UnknownUserFiles.file_id,
         UnknownUserFiles.email,
@@ -160,5 +160,27 @@ def get_workspace_unknown_files(id: int, db: Session):
             IngestionFile, IngestionFile.drive_id == User.driveId
         ).join(
             UnknownUserFiles, UnknownUserFiles.file_id == IngestionFile.ingestion_file_id
-        ).where(user_workspace.c.workspace_id == id)
+        ).where(user_workspace.c.workspace_id == id, UnknownUserFiles.email.ilike(email))
     return db.execute(select_statement).fetchall()
+
+def add_user_files_after_workspace_join(user_files: list, db: Session):
+    try:
+        db.execute(insert(UserFiles), user_files)
+        db.commit()
+        return 200
+    except:
+        return None
+
+def add_user_folders_after_workspace_join(user_folders: list, db: Session):
+    try:
+        db.execute(insert(UserFolders), user_folders)
+        db.commit()
+        return 200
+    except:
+        return None
+
+def remove_unknown_by_email(email: str, db: Session):
+    db.query(UnknownUserFiles).filter(UnknownUserFiles.email == email).delete()
+    db.commit()
+    db.query(UnknownUserFolders).filter(UnknownUserFolders.email == email).delete()
+    db.commit()
