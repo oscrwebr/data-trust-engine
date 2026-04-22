@@ -8,15 +8,16 @@ from ..core.config import SCOPES
 from ..core.security import create_refresh_token, create_access_token, hash_user_refresh_token, encrypt_refresh, decrypt_refresh
 from app.core.celery_worker import celery
 from app.core.database import SessionLocal
-from app.ingestion.service import get_set_all_graph_files
+from app.ingestion.service import get_set_all_graph_files, get_workspace_unknown_folders, get_workspace_unknown_files, add_user_files_after_workspace_join, add_user_folders_after_workspace_join, remove_unknown_by_email
 from app.workspaces.repository import add_notification, get_workspace_by_workspace_id, add_user_workspace
 from app.invites.repository import get_invite_by_token
 from app.roles.repository import migrate_pending_roles
 from app.authentication.repository import get_pending_user_by_email, delete_pending_user
+from app.authentication.models import User
 
 DRIVE_DATA_GRAPH_URL = "https://graph.microsoft.com/v1.0/me/drive?$select=id"
 
-def create_user(db, details: dict, refresh: str, ms_access_token: str, role: str, workspace_id: int, token: str):
+def create_user(db, details: dict, refresh: str, ms_access_token: str, role: str):
     split_name = details["name"].split()
     firstname, surname = split_name[0], split_name[-1]
     enc_refresh = encrypt_refresh(refresh)
@@ -24,9 +25,6 @@ def create_user(db, details: dict, refresh: str, ms_access_token: str, role: str
     drive_id = get_drive_id(access_token=ms_access_token)
 
     email = details["email"]
-
-    invite = get_invite_by_token(db, token)
-    pending_user = repository.get_pending_user_by_id(db, invite.user_id) if invite else None
 
     user = repository.create_user(
         db=db,
@@ -39,28 +37,62 @@ def create_user(db, details: dict, refresh: str, ms_access_token: str, role: str
         driveId=drive_id,
         role=role
     )
-    
-    if pending_user:
-        migrate_pending_roles(db, pending_user.user_id, user.user_id)
-
-        # delete pending user AFTER migration
-        delete_pending_user(db, pending_user.user_id)
-    
-    if(workspace_id != None and role == "employee"):
-        add_user_workspace(db, workspace_id, user.user_id)
-        if invite:
-            delete_pending_user(db, pending_user.user_id)
-            workspace = get_workspace_by_workspace_id(db, workspace_id)
-            users = workspace.user
-            for user in users:
-                if(user.role == "admin"):
-                    user_id = user.user_id
-
-            add_notification(db, "Employee Accepted Invite", f"{firstname} {surname} accepted their invite request to join your workspace.", datetime.now(), user_id)
     # Handle ingestion with celery - in the background and sets up a queue, incase of multiple signup and inturn ingestion requests at once
     _ = setup_ingestion_celery.delay(ms_access_token, user.user_id)
 
     return user
+
+def check_user_unknown(workspace_id: int, user: User, db: Session):
+    # Get all the unknown user files and folders for this work space
+    workspace_unknown_folders = get_workspace_unknown_folders(id=workspace_id, email=user.email, db=db)
+    workspace_unknown_files = get_workspace_unknown_files(id=workspace_id, email=user.email, db=db)
+
+    # If both lists are empty, return return None
+    if not workspace_unknown_folders and not workspace_unknown_files:
+        print("they're empty")
+        return
+
+    # Need to now iterate through and check if the user's email is the unknown
+    user_folders_add = []
+    user_files_add = []
+    for i in workspace_unknown_folders:
+        # Add the user to the user_folders table and remove the entry from the unknown folders table
+        user_folders_add.append({"folder_id": i[0], "user_id": user.user_id})
+    # print(user_folders_add)
+
+    for i in workspace_unknown_files:
+        user_files_add.append({"file_id": i[0], "user_id": user.user_id})
+    # print(user_files_add)
+
+    # If the users email is the unknown, we add them to the userFiles and remove them from here. Otherwise, continue
+    ufolder_add_res = add_user_folders_after_workspace_join(user_folders=user_folders_add, db=db)
+    ufile_add_res = add_user_files_after_workspace_join(user_files=user_files_add, db=db)
+    if ufolder_add_res != 200 or ufile_add_res != 200:
+        print("something went wrong updating user files/folders, not removing unknown!")
+    else:
+        remove_unknown_by_email(user.email, db=db)
+
+# Method to handle user creation for anyone who has accepted an invite
+def handle_user_creation_after_invite(db: Session, user: User, workspace_id: int, token: str):
+    invite = get_invite_by_token(db, token)
+    pending_user = repository.get_pending_user_by_id(db, invite.user_id) if invite else None
+    
+    if pending_user == None:
+        return
+    
+    migrate_pending_roles(db, pending_user.user_id, user.user_id)
+    delete_pending_user(db, pending_user.user_id)
+    add_user_workspace(db, workspace_id, user.user_id)
+    workspace = get_workspace_by_workspace_id(db, workspace_id)
+    users = workspace.user
+    for user in users:
+        if(user.role == "admin"):
+            user_id = user.user_id
+    add_notification(db, "Employee Accepted Invite", f"{user.firstname} {user.surname} accepted their invite request to join your workspace.", datetime.now(), user_id)
+    # Checking whether the user is one of the unknown users for the workspace
+    check_user_unknown(workspace_id=workspace_id, user=user, db=db)
+    return
+
 
 @celery.task
 def setup_ingestion_celery(ms_access_token, user_id):

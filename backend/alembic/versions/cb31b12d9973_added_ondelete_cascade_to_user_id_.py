@@ -1,8 +1,8 @@
-"""1 Creating database
+"""Added ondelete CASCADE to user_id column in Notifications table
 
-Revision ID: 31ce6f936626
+Revision ID: cb31b12d9973
 Revises: 
-Create Date: 2026-04-21 20:19:06.221290
+Create Date: 2026-04-22 19:17:56.271189
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision: str = '31ce6f936626'
+revision: str = 'cb31b12d9973'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -144,7 +144,7 @@ def upgrade() -> None:
     sa.Column('body', sa.String(length=200), nullable=False),
     sa.Column('datetime', sa.DATETIME(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['user_id'], ['user.user_id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['user.user_id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_notifications_id'), 'notifications', ['id'], unique=False)
@@ -268,6 +268,16 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('user_role_id')
     )
     op.create_index(op.f('ix_user_role_user_role_id'), 'user_role', ['user_role_id'], unique=False)
+    op.create_table('workspace_detection_sensitivity',
+    sa.Column('workspace_detection_sensitivity_id', sa.Integer(), nullable=False),
+    sa.Column('workspace_id', sa.Integer(), nullable=True),
+    sa.Column('sensitivity_subcategory_id', sa.Integer(), nullable=False),
+    sa.Column('is_high', sa.Boolean(), nullable=False),
+    sa.ForeignKeyConstraint(['sensitivity_subcategory_id'], ['sensitivity_subcategory.sensitivity_subcategory_id'], ),
+    sa.ForeignKeyConstraint(['workspace_id'], ['workspaces.id'], ),
+    sa.PrimaryKeyConstraint('workspace_detection_sensitivity_id')
+    )
+    op.create_index(op.f('ix_workspace_detection_sensitivity_workspace_detection_sensitivity_id'), 'workspace_detection_sensitivity', ['workspace_detection_sensitivity_id'], unique=False)
     op.create_table('duplicate_scan_result',
     sa.Column('duplicate_scan_result_id', sa.Integer(), nullable=False),
     sa.Column('duplicate_group_id', sa.Integer(), nullable=True),
@@ -309,6 +319,8 @@ def downgrade() -> None:
     op.drop_table('naming_convention_scan_result')
     op.drop_index(op.f('ix_duplicate_scan_result_duplicate_scan_result_id'), table_name='duplicate_scan_result')
     op.drop_table('duplicate_scan_result')
+    op.drop_index(op.f('ix_workspace_detection_sensitivity_workspace_detection_sensitivity_id'), table_name='workspace_detection_sensitivity')
+    op.drop_table('workspace_detection_sensitivity')
     op.drop_index(op.f('ix_user_role_user_role_id'), table_name='user_role')
     op.drop_table('user_role')
     op.drop_index('rev_idx_user_files', table_name='user_files')

@@ -145,12 +145,15 @@ def get_permissions(shared_folders_files: dict, access_token: str) -> dict:
 def clean_folders_files_with_permissions(folder_file_data: dict, permissions: dict, id: int, db: Session):
     '''
     Function that will take in file and folder data in a dictionary, along with the permissions dictionary.
-    It will then return two lists of dictionaries that can be directly fed into the repository functions that handle insertion into the user_files and user_folders table
+    It will then return FOUR lists of dictionaries that can be directly fed into the repository functions that handle insertion into the user_files, user_folders, unknown_user_files and unknown_user_folders tables
     It requires the 'db', for calls to the db to retrieve the user_id's linked to the granted users (if they exist) and will add to a dict for rapid lookup and reduce redundant DB calls
     '''
     user_id_dict = {}
+    unknown_user_email_set = set()
     folder_list = []
     file_list = []
+    unknown_folder_list = []
+    unknown_file_list = []
     # Setting the user first
     current_user = auth_service.check_get_by_id(id, db)
     user_id_dict[current_user.email] = id
@@ -178,11 +181,19 @@ def clean_folders_files_with_permissions(folder_file_data: dict, permissions: di
                             "folder_id": folder[0],
                             "user_id": user_id_dict[user_email]
                         })
+                    elif user_email in unknown_user_email_set:
+                        unknown_folder_list.append({
+                            "folder_id": folder[0],
+                            "email": user_email.lower()
+                        })
                     else: # If not, we add the user to the dict as well as adding them to the dict
                         user = auth_service.check_get_by_email(user_email, db)
                         if not user: # This is a case where the user doesn't exist!
-                            # Need to decide how to handle this
-                            continue
+                            unknown_user_email_set.add(user_email)
+                            unknown_folder_list.append({
+                                "folder_id": folder[0],
+                                "email": user_email.lower()
+                            })
                         else:
                             user_id_dict[user.email] = user.user_id
                             # Add the user to the folder_list
@@ -211,11 +222,20 @@ def clean_folders_files_with_permissions(folder_file_data: dict, permissions: di
                             "file_id": file[0],
                             "user_id": user_id_dict[user_email]
                         })
+                    # check if the user exists in the unknown users set
+                    elif user_email in unknown_user_email_set:
+                        unknown_file_list.append({
+                            "file_id": file[0],
+                            "email": user_email.lower()
+                        })
                     else: # If not, we add the user to the dict as well as adding them to the dict
                         user = auth_service.check_get_by_email(user_email, db)
                         if not user: # This is a case where the user doesn't exist!
-                            # Need to decide how to handle this
-                            continue
+                            unknown_user_email_set.add(user_email)
+                            unknown_file_list.append({
+                                "file_id": file[0],
+                                "email": user_email.lower()
+                            })
                         else:
                             user_id_dict[user.email] = user.user_id
                             # Add the user to the file_list
@@ -224,7 +244,7 @@ def clean_folders_files_with_permissions(folder_file_data: dict, permissions: di
                                 "user_id": user.user_id
                             })
                             
-        return folder_list, file_list
+        return folder_list, file_list, unknown_folder_list, unknown_file_list
     except Exception as e: 
         print("Something went terribly wrong trying to prep for the user_folder or user_file table :/")
         print(f"{type(e).__name__} - {e}")
@@ -291,16 +311,24 @@ def get_set_all_graph_files(access_token: str, id: int, db:Session) -> str:
 
     # Go through folder and files and add them to the correct tables
     ## Get two list[dict] for files and folders with the linked user that has to be added 
-    user_folders, user_files = clean_folders_files_with_permissions(folder_file_data=folder_file_response["data"], permissions=permissions_dict, id=id, db=db)
+    user_folders, user_files, unknown_user_folders, unknown_user_files = clean_folders_files_with_permissions(folder_file_data=folder_file_response["data"], permissions=permissions_dict, id=id, db=db)
     
+
+
     iu_folders = repository.insert_user_folders(user_folders=user_folders, db=db)
     iu_files = repository.insert_user_files(user_files=user_files, db=db)
-    
+    iuu_folders = repository.insert_unknown_user_folders(user_folders=unknown_user_folders, db=db) if unknown_user_folders else 204
+    iuu_files = repository.insert_unknown_user_files(user_files=unknown_user_files, db=db) if unknown_user_files else 204
+    # print(f"\n\nThese are the unknown user_folders: {unknown_user_folders}\n\n")
+    # print(f"\n\nThese are the unknown user files: {unknown_user_files}\n\n")
+
     # print(permissions_dict)
     return {
         "repo_response_u_folders": iu_folders,
-        "repo_response_u_files": iu_files
-            }
+        "repo_response_u_files": iu_files,
+        "repo_response_uu_folders": iuu_folders,
+        "repo_response_uu_files": iuu_files
+        }
 
 def get_access_token_by_graph_id(application: ConfidentialClientApplication, graph_id: str, db) -> str|None:
     '''
@@ -410,3 +438,18 @@ def delete_ingestion_file(application: ConfidentialClientApplication, user_id: i
     except:
         return None
     
+def get_workspace_unknown_folders(id: int, email: str, db: Session):
+    return repository.get_workspace_unknown_folders(id=id, email=email, db=db)
+
+def get_workspace_unknown_files(id: int, email: str, db: Session):
+    return repository.get_workspace_unknown_files(id=id, email=email, db=db)
+
+def add_user_files_after_workspace_join(user_files: list, db: Session):
+    return repository.add_user_files_after_workspace_join(user_files=user_files, db=db)
+
+def add_user_folders_after_workspace_join(user_folders: list, db: Session):
+    return repository.add_user_folders_after_workspace_join(user_folders=user_folders, db=db)
+
+def remove_unknown_by_email(email: str, db: Session):
+    repository.remove_unknown_by_email(email=email, db=db)
+
