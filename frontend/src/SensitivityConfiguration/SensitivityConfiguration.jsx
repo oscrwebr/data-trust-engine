@@ -71,7 +71,7 @@ function SensitivityConfiguration() {
                 </h1>
             <Divider/>
             </div>
-            <p className="scan-loading">Error loading sensitivity categories: {error.message}</p>
+            <p className="scan-loading">Error loading sensitivity categories.</p>
             </>
         )
     }
