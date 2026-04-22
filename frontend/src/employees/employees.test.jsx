@@ -2,7 +2,7 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, within, waitFor, getByTestId, findByTestId } from "@testing-library/react";
 import ViewEmployees from "./ViewEmployees";
 import ManageEmployees from "./ManageEmployees";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Routes, Route, Outlet } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 
 const employees = [
@@ -19,6 +19,16 @@ const pending_users = [
 const roles = [
     {id: 1, name: "PII Role"}, {id: 2, name: "Financial Role"}
 ];
+
+function ManageEmployeesWithContext({ contextValue, toast }) {
+  return (
+    <Routes>
+      <Route path="/" element={<Outlet context={contextValue} />}>
+        <Route index element={<ManageEmployees toast={toast} />} />
+      </Route>
+    </Routes>
+  );
+}
 
 vi.mock("../api/axiosConfig.js", () => ({
   default: {
@@ -289,7 +299,7 @@ describe("View Employees Component", () => {
 
         render(
             <MemoryRouter>
-                <ManageEmployees />
+                <ManageEmployeesWithContext contextValue={{fetchPendingEmployees: vi.fn()}} toast={null}/>
             </MemoryRouter>
         );
 
@@ -318,7 +328,7 @@ describe("View Employees Component", () => {
 
         render(
             <MemoryRouter>
-                <ManageEmployees />
+                <ManageEmployeesWithContext contextValue={{fetchPendingEmployees: vi.fn()}} toast={null}/>
             </MemoryRouter>
         );
 
@@ -346,7 +356,7 @@ describe("View Employees Component", () => {
 
         render(
             <MemoryRouter>
-                <ManageEmployees />
+                <ManageEmployeesWithContext contextValue={{fetchPendingEmployees: vi.fn()}} toast={null}/>
             </MemoryRouter>
         );
 
@@ -369,7 +379,7 @@ describe("View Employees Component", () => {
 
         render(
             <MemoryRouter>
-                <ManageEmployees />
+                <ManageEmployeesWithContext contextValue={{fetchPendingEmployees: vi.fn()}} toast={null}/>
             </MemoryRouter>
         );
 
@@ -393,7 +403,7 @@ describe("View Employees Component", () => {
 
         render(
             <MemoryRouter>
-                <ManageEmployees />
+                <ManageEmployeesWithContext contextValue={{fetchPendingEmployees: vi.fn()}} toast={null}/>
             </MemoryRouter>
         );
 
@@ -421,7 +431,7 @@ describe("View Employees Component", () => {
 
         render(
             <MemoryRouter>
-                <ManageEmployees />
+                <ManageEmployeesWithContext contextValue={{fetchPendingEmployees: vi.fn()}} toast={null}/>
             </MemoryRouter>
         );
 
@@ -466,7 +476,7 @@ describe("View Employees Component", () => {
 
         render(
             <MemoryRouter>
-                <ManageEmployees />
+                <ManageEmployeesWithContext contextValue={{fetchPendingEmployees: vi.fn()}} toast={null}/>
             </MemoryRouter>
         );
 
@@ -513,7 +523,7 @@ describe("View Employees Component", () => {
 
         render(
             <MemoryRouter>
-                <ManageEmployees />
+                <ManageEmployeesWithContext contextValue={{fetchPendingEmployees: vi.fn()}} toast={null}/>
             </MemoryRouter>
         );
 
@@ -550,7 +560,7 @@ describe("View Employees Component", () => {
 
         render(
             <MemoryRouter>
-                <ManageEmployees toast={ mockToast } />
+                <ManageEmployeesWithContext contextValue={{fetchPendingEmployees: vi.fn()}} toast={mockToast}/>
             </MemoryRouter>
         );
 
@@ -591,7 +601,7 @@ describe("View Employees Component", () => {
 
         render(
         <MemoryRouter>
-            <ManageEmployees toast={mockToast} />
+            <ManageEmployeesWithContext contextValue={{fetchPendingEmployees: vi.fn()}} toast={mockToast}/>
         </MemoryRouter>
         );
 
@@ -626,7 +636,7 @@ describe("View Employees Component", () => {
 
         render(
             <MemoryRouter>
-                <ManageEmployees />
+                <ManageEmployeesWithContext contextValue={{fetchPendingEmployees: vi.fn()}} toast={null}/>
             </MemoryRouter>
         );
 
@@ -663,7 +673,7 @@ describe("View Employees Component", () => {
 
         render(
             <MemoryRouter>
-                <ManageEmployees toast={mockToast}/>
+                <ManageEmployeesWithContext contextValue={{fetchPendingEmployees: vi.fn()}} toast={mockToast}/>
             </MemoryRouter>
         );
 
@@ -705,7 +715,7 @@ describe("View Employees Component", () => {
 
         render(
             <MemoryRouter>
-                <ManageEmployees toast={mockToast}/>
+                <ManageEmployeesWithContext contextValue={{fetchPendingEmployees: vi.fn()}} toast={mockToast}/>
             </MemoryRouter>
         );
 
@@ -747,7 +757,7 @@ describe("View Employees Component", () => {
 
         render(
             <MemoryRouter>
-                <ManageEmployees toast={mockToast}/>
+                <ManageEmployeesWithContext contextValue={{fetchPendingEmployees: vi.fn()}} toast={mockToast}/>
             </MemoryRouter>
         );
 
@@ -789,7 +799,7 @@ describe("View Employees Component", () => {
 
         render(
             <MemoryRouter>
-                <ManageEmployees toast={mockToast}/>
+                <ManageEmployeesWithContext contextValue={{fetchPendingEmployees: vi.fn()}} toast={mockToast}/>
             </MemoryRouter>
         );
 
@@ -824,7 +834,7 @@ describe("View Employees Component", () => {
 
         render(
             <MemoryRouter>
-                <ManageEmployees />
+                <ManageEmployeesWithContext contextValue={{fetchPendingEmployees: vi.fn()}} toast={null}/>
             </MemoryRouter>
         );
 
@@ -859,7 +869,7 @@ describe("View Employees Component", () => {
 
         render(
             <MemoryRouter>
-                <ManageEmployees toast={mockToast}/>
+                <ManageEmployeesWithContext contextValue={{fetchPendingEmployees: vi.fn()}} toast={mockToast}/>
             </MemoryRouter>
         );
 
@@ -894,7 +904,7 @@ describe("View Employees Component", () => {
 
         render(
             <MemoryRouter>
-                <ManageEmployees />
+                <ManageEmployeesWithContext contextValue={{fetchPendingEmployees: vi.fn()}} toast={null}/>
             </MemoryRouter>
         );
 
@@ -936,7 +946,7 @@ describe("View Employees Component", () => {
 
         render(
             <MemoryRouter>
-                <ManageEmployees />
+                <ManageEmployeesWithContext contextValue={{fetchPendingEmployees: vi.fn()}} toast={null}/>
             </MemoryRouter>
         );
 

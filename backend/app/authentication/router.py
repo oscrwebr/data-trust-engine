@@ -37,7 +37,11 @@ async def sign_in(application: Annotated[ConfidentialClientApplication, Depends(
     if not next.startswith("/"):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
     
-    flow = application.initiate_auth_code_flow(scopes=config.SCOPES, redirect_uri=f"{config.REDIRECT_URI}/auth/success/")
+    # This is to ask for permissions each time that someone signs up no matter what
+    if signup:
+        flow = application.initiate_auth_code_flow(scopes=config.SCOPES, redirect_uri=f"{config.REDIRECT_URI}/auth/success/", prompt="consent")
+    else:
+        flow = application.initiate_auth_code_flow(scopes=config.SCOPES, redirect_uri=f"{config.REDIRECT_URI}/auth/success/")
     # print(flow)
     request.session["flow"] = flow
     request.session["next"] = next
