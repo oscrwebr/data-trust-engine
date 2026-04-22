@@ -411,8 +411,9 @@ def perform_organisation_scan(db: Session, user_id: int, naming_convention_ids: 
 
 
 # Turn repository data into JSON response
-def get_scans_with_file_count(db: Session):
-    scans = repository.get_scans_with_file_count(db=db)
+def get_scans_with_file_count(db: Session, user_id: int):
+    workspace_id = repository.get_user_workspace_id(db=db, user_id=user_id)
+    scans = repository.get_scans_with_file_count(db=db, workspace_id=workspace_id)
     return [{
         "scan_id": scan.scan_id, 
         "scan_type": scan.scan_type, 

@@ -308,8 +308,15 @@ def get_all_scans(db: Session):
 def get_scan_file_count(db: Session, scan_id: int):
     return db.query(ScanFile).filter(ScanFile.scan_id == scan_id).count()
 
-def get_scans_with_file_count(db: Session):
-    return db.query(Scan, func.count(ScanFile.scan_file_id)).outerjoin(ScanFile, Scan.scan_id == ScanFile.scan_id).group_by(Scan.scan_id).all()
+def get_scans_with_file_count(db: Session, workspace_id: int):
+    return (db.query(Scan, func.count(ScanFile.scan_file_id))
+            .join(ScanFile, Scan.scan_id == ScanFile.scan_id)
+            .join(IngestionFile, ScanFile.file_id == IngestionFile.ingestion_file_id)
+            .join(UserFiles, IngestionFile.ingestion_file_id == UserFiles.file_id)
+            .join(UserWorkspace, UserWorkspace.c.user_id == UserFiles.user_id)
+            .filter(UserWorkspace.c.workspace_id == workspace_id)
+            .group_by(Scan.scan_id)
+            .all())
 
 def get_naming_convention_scan_results_by_scan_id(db: Session, scan_id: int):
     return(
