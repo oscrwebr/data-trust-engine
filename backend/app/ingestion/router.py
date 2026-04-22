@@ -46,7 +46,7 @@ async def delete_file(application: Annotated[ConfidentialClientApplication, Depe
     if user.role != "admin":
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     # Delete ingestion_file flow
-    deleted_res = service.delete_ingestion_file(application=application, graph_id=graph_id, db=db)
+    deleted_res = service.delete_ingestion_file(application=application, user_id=user.user_id, graph_id=graph_id, db=db)
     if deleted_res == 204:
         return {
             "message": "file deleted successfully!"
