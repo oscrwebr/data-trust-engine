@@ -40,3 +40,7 @@ class FileScansResponse(BaseModel):
 
 class OrganisationScanRequest(BaseModel):
     naming_convention_ids: list[int]
+
+class UpdateWorkspaceDetectionSensitivityRequest(BaseModel):
+    sensitivity_subcategory_id: int
+    is_high: bool

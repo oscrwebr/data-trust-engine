@@ -24,6 +24,7 @@ import ManageEmployees from "./employees/ManageEmployees.jsx";
 import ScanPage from "./scans/ScanPage.jsx";
 import OrganisationalDevTest from "./scan_dev_test/OrganisationalDevTest.jsx";
 import ScanFile from "./scan_file/ScanFile.jsx";
+import SensitivityConfiguration from "./SensitivityConfiguration/SensitivityConfiguration.jsx";
 
 
 
@@ -54,6 +55,7 @@ function App() {
           <Route path="/org-scan-dev" element={<OrganisationalDevTest />} />
           <Route path="/high-risk-files" element={<HighRiskFilesDashboard />} />
           <Route path="scan-file/:scanFileId" element={<ScanFile/>} />
+          <Route path="detection-sensitivity" element={<SensitivityConfiguration />} />
         </Route>
 
         {/* Elements in here will not inherit the sidebar */}
