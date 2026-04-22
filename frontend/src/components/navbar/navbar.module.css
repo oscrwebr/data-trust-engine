@@ -14,15 +14,15 @@
   scrollbar-width: none;  
 }
 
-.navbar_logo img {
-    width: 20vw;
-    height: auto;
-}
-
 .navbar_logo {
     display: flex;
-    align-items: center;     
-    height: 100%;             
+    align-items: center;
+    height: 100%;
+}
+
+.navbar_logo img {
+    width: 15rem;
+    height: auto;
 }
 
 .sidebar_toggle_icon {
