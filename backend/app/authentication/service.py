@@ -48,6 +48,9 @@ def handle_user_creation_after_invite(db: Session, user: User, workspace_id: int
     invite = get_invite_by_token(db, token)
     pending_user = repository.get_pending_user_by_id(db, invite.user_id) if invite else None
     
+    if pending_user == None:
+        return
+    
     migrate_pending_roles(db, pending_user.user_id, user.user_id)
     delete_pending_user(db, pending_user.user_id)
     add_user_workspace(db, workspace_id, user.user_id)
@@ -58,6 +61,7 @@ def handle_user_creation_after_invite(db: Session, user: User, workspace_id: int
             user_id = user.user_id
 
     add_notification(db, "Employee Accepted Invite", f"{user.firstname} {user.surname} accepted their invite request to join your workspace.", datetime.now(), user_id)
+    return
 
 
 @celery.task

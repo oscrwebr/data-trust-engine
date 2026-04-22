@@ -102,6 +102,7 @@ async def login_redirect(application: Annotated[ConfidentialClientApplication, D
     response.delete_cookie("session") # This is to remove the cookie from the user's browser
 
     if user:
+        print(token)
         if token != None:
             service.handle_user_creation_after_invite(db, user, workspace_id, token)
 
