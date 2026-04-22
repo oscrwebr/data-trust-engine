@@ -1,4 +1,4 @@
-from app.authentication.service import create_user
+from app.authentication.service import create_user, handle_user_creation_after_invite
 from app.workspaces.models import Notification
 from app.workspaces.repository import add_workspace, add_user_workspace
 from app.invites.repository import add_invite
@@ -37,8 +37,11 @@ def test_create_user_service_to_add_employee_creates_notification(db, mock_delay
 
         workspace = add_workspace(db=db, name="Test Workspace", image=image)
         add_user_workspace(db, workspace.id, admin_instance.inserted_primary_key[0])
-        add_invite(db=db, createdAt=datetime.now(), expiryDate="2030-03-03", token=token, used=False, user_id=pending_user.user_id, workspace=workspace)
-        create_user(db=db, details=dummy_user, refresh="ms-refresh", ms_access_token="ms-access-token", role="employee", workspace_id=workspace.id, token=token)
 
+        add_invite(db=db, createdAt=datetime.now(), expiryDate="2030-03-03", token=token, used=False, user_id=pending_user.user_id, workspace=workspace)
+        user = create_user(db=db, details=dummy_user, refresh="ms-refresh", ms_access_token="ms-access-token", role="employee")
+        
+        mock_delay.assert_called_once_with("ms-access-token", user.user_id)
+        handle_user_creation_after_invite(db, user, workspace.id, token)
         # assertions
         assert db.query(Notification).count() == 1
