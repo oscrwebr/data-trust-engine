@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { PiCopySimpleBold } from "react-icons/pi";
 import { useState } from "react";
 import DuplicatePopUp from "./DuplicatePopUp";
+import api from "../api/axiosConfig";
 
 
 
@@ -81,6 +82,29 @@ function ScanFileCard({scan_file, scan_type, scan_files}) {
                             scan_type === "organisation"
                             ? issues.map(i => i.type).join(", ")
                             : `${detectionCount} Detections Found`
+
+    async function applySuggestedName(event, suggestedName) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        // const extension = scan_file.file_name.split('.').pop();
+        // const nameWithExtension =  `${suggestedName}.${extension}`;
+
+        try {
+            await api.patch("/ingestion/rename-file", null, {
+            params: {
+                graph_id: scan_file.graph_file_id,
+                new_name: suggestedName
+            }
+            
+        });
+        console.log("File renamed successfully");
+        } catch (error) {
+            console.error("Error applying suggested name:", error);
+            console.error("Status:", error?.response?.status);
+            console.error("Data:", error?.response?.data);
+        }
+    }
                             
 
     return (
@@ -126,6 +150,15 @@ function ScanFileCard({scan_file, scan_type, scan_files}) {
                                     <div className="scan-file-suggested-text">
                                         <span>{issue.suggested_name[0]}</span>
                                     </div>
+                                    <div className="button-container-suggested">
+                                        <button className="apply-suggested-name-button"
+                                                onClick={(event) => applySuggestedName(event, issue.suggested_name[0])}
+                                        >
+                                            <PiCheckCircle size={20}/> Apply Suggested Name
+
+
+                                        </button>
+                                    </div>
                                 </div>
                                 </>
                                     
@@ -152,7 +185,7 @@ function ScanFileCard({scan_file, scan_type, scan_files}) {
                                     // Opens pop up to view duplicate files related to the scanned file
                                             onClick={(event) => {event.preventDefault(); event.stopPropagation(); setShowPopup(true)}}
                                     >
-                                        <PiCopySimpleBold /> View Duplicates
+                                        <PiCopySimpleBold size={20}/> View Duplicates
                                     </button>
                                 </div>
                                 </>
