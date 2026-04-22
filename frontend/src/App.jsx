@@ -12,7 +12,7 @@ import HighRiskFilesDashboard from "./HighRiskFilesDashboard/HighRiskFilesDashbo
 import { Toast } from 'primereact/toast';
 import Scans from "./scans/Scans.jsx";
 import FilesDashboard from "./FilesDashboard/filesDashboard.jsx";
-import AdminFiles from "./AdminFiles/adminFiles.jsx"
+import AdminFiles from "./AdminFiles/AdminFiles.jsx"
 import Test from "./Test/Test.jsx";
 import Unprocessable422 from "./Errors/Unprocessable422.jsx";
 import WorkspaceJoinedError from "./invites/WorkspaceJoined.jsx";
