@@ -295,7 +295,7 @@ def test_no_permissions_call_when_no_shared(db, requests_mock):
 
     # Calling the function that handles graph ingestion
     output = get_set_all_graph_files(access_token=ms_access_token, id=user.user_id, db=db)
-    assert output == {'repo_response_u_folders': {'status': 200}, 'repo_response_u_files': {'status': 200}} # Make sure that the lack of calls isn't because there was an error somewhere!
+    assert output == {'repo_response_u_folders': {'status': 200}, 'repo_response_u_files': {'status': 200}, 'repo_response_uu_folders': 204, 'repo_response_uu_files': 204} # Make sure that the lack of calls isn't because there was an error somewhere!
 
     # MAIN ASSERTION - ensure that there is no call for permissions - history of calls is empty
     assert mock_permissions_response.request_history == []
@@ -335,7 +335,7 @@ def test_user_id_dict_used_instead_of_db_calls_for(db):
     }
 
     # Calling function
-    user_folders, user_files = clean_folders_files_with_permissions(folder_file_data=folder_file_data, permissions=permissions, id=user_id, db=db)
+    user_folders, user_files, _, _ = clean_folders_files_with_permissions(folder_file_data=folder_file_data, permissions=permissions, id=user_id, db=db)
     assert len(user_folders) == 8
     assert len(user_files) == 5
 
