@@ -2,10 +2,8 @@ from sqlalchemy.orm import Session
 from app.roles import repository
 from datetime import datetime
 
-# Existing functions
 def get_roles(db: Session, workspace_id=int):
     roles = repository.get_all_roles(db, workspace_id)
-    # Include role_permissions for frontend
     result = []
     for r in roles:
         permissions = db.query(repository.RolePermission).filter(repository.RolePermission.role_id == r.role_id).all()

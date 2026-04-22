@@ -6,10 +6,6 @@ from app.ingestion.models import IngestionFile
 
 
 def get_last_scanned_for_files(db: Session, file_ids: list[int]):
-    """
-    Returns latest scan date per file + graph_id
-    """
-
     results = (
         db.query(
             IngestionFile.ingestion_file_id.label("file_id"),

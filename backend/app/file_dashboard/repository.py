@@ -3,9 +3,6 @@ from sqlalchemy import func
 from app.ingestion.models import Folder, IngestionFile, UserFolders, UserFiles
 
 
-# -------------------------
-# ROOT FOLDERS (USER SCOPED)
-# -------------------------
 def get_root_folders(db: Session, user_id: int):
     if not user_id:
         return []
@@ -21,10 +18,6 @@ def get_root_folders(db: Session, user_id: int):
         .all()
     )
 
-
-# -------------------------
-# SUBFOLDERS (USER SCOPED)
-# -------------------------
 def get_subfolders(db: Session, user_id: int, parent_graph_id: str):
     if not user_id:
         return []
@@ -40,10 +33,6 @@ def get_subfolders(db: Session, user_id: int, parent_graph_id: str):
         .all()
     )
 
-
-# -------------------------
-# FILES (USER SCOPED)
-# -------------------------
 def get_files(db: Session, user_id: int, parent_graph_id: str):
     if not user_id:
         return []

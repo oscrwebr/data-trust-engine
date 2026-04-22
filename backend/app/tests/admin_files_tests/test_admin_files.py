@@ -6,8 +6,6 @@ from app.ingestion.models import IngestionFile
 from app.scanning.models import Scan, ScanFile
 
 
-# ---------------- Helpers ----------------
-
 def create_file(db, name="test.txt"):
     file = IngestionFile(
         graph_id=f"graph-{name}",
@@ -49,8 +47,6 @@ def create_scan_for_file(db, file):
 
     return scan
 
-
-# ---------------- Tests ----------------
 
 def test_get_last_scanned_for_single_file(db):
     file = create_file(db, "a.txt")
