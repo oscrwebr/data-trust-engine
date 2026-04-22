@@ -8,6 +8,8 @@ from ..core.security import decrypt_refresh, encrypt_refresh
 from ..core.config import SCOPES
 from . import repository
 from ..authentication import service as auth_service
+from app.authentication.repository import get_user_id_by_drive_id
+from app.workspaces.repository import get_workspace_by_user
 
 
 INIT_GRAPH_GET = "https://graph.microsoft.com/v1.0/me/drive/root/delta?$select=id,name,lastModifiedDateTime,parentReference,file,folder,webUrl,content.downloadUrl,shared"
@@ -365,3 +367,46 @@ def update_file_name(application: ConfidentialClientApplication, graph_id: str, 
 
     return 200
 
+def delete_ingestion_file(application: ConfidentialClientApplication, user_id: int, graph_id: str, db: Session):
+     # Get the ingestion file from the grph Id
+    file = repository.get_ingestion_file_by_graph_id(graph_id=graph_id, db=db)
+    if not file: # This means that the graph Id doesn't exist in our database
+        print("File doesn't exist")
+        return None
+    
+    # Get the workspace for the admin
+    admin_workspace = get_workspace_by_user(db=db, user_id=user_id)
+    # Get the workspace where driveId == driveId
+    file_owner = get_user_id_by_drive_id(drive_id=file.drive_id, db=db)
+    if not file_owner:
+        print("There is no file owner")
+        return None
+    file_owner_workspace = get_workspace_by_user(db=db, user_id=file_owner.user_id)
+    
+    if admin_workspace != file_owner_workspace:
+        print("workspaces don't match!")
+        return None
+    
+    # Get the access token from the graph Id
+    access_token = get_access_token_by_graph_id(application=application, graph_id=graph_id, db=db)
+    if not access_token: # If there is no access token, either the user, driveId or graphId don't exist - this will force a 400 error to be raised
+        print("no access token")
+        return None
+    
+    # Send request to Graph API to update the name
+    headers = {"Authorization": f"Bearer {access_token}"}
+    response = requests.delete(
+        url=GRAPH_PATCH_NAME.format(graph_id=file.graph_id),
+        headers=headers
+    )
+
+    # Handle the non 200 response from microsoft
+    if response.status_code != 204:
+        print("Microsoft bad request")
+        return None
+    try:
+        repository.delete_ingestion_file(db=db, graph_id=graph_id)
+        return 204
+    except:
+        return None
+    
