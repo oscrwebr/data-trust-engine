@@ -26,7 +26,7 @@ def create_user(db, details: dict, refresh: str, ms_access_token: str, role: str
     email = details["email"]
 
     invite = get_invite_by_token(db, token)
-    pending_user = repository.get_pending_user_by_id(db, invite.user_id)
+    pending_user = repository.get_pending_user_by_id(db, invite.user_id) if invite else None
 
     user = repository.create_user(
         db=db,
