@@ -52,3 +52,22 @@ def get_recent_activity(db: Session, user_id: int):
     # Understanding lambda: https://stackoverflow.com/a/42966511
     recent_activity.sort(key=lambda x: x["timestamp"], reverse=True)
     return recent_activity[:5]
+
+def get_dashboard_summary(db: Session, user_id: int):
+    workspace_id = get_user_workspace_id(db, user_id)
+    if workspace_id is None:
+        return {
+            "total_files": 0,
+            "pending_users": 0,
+            "total_employees": 0,
+        }
+    
+    total_files = repository.get_all_workspace_files(db, workspace_id)
+    pending_users = repository.get_all_pending_users(db, workspace_id)
+    total_employees = repository.get_all_workspace_employees(db, workspace_id)
+
+    return {
+        "total_files": total_files,
+        "pending_users": pending_users,
+        "total_employees": total_employees,
+    }
