@@ -25,6 +25,29 @@ function SensitivityConfiguration() {
             })
     }, [])
 
+    const handleClick = async (subcategory_id, is_high) => {
+        try {
+            // Add configuration to DB
+            await api.post("/scanning/update_workspace_detection_sensitivity", {
+                sensitivity_subcategory_id: subcategory_id,
+                is_high: is_high
+            });
+
+            // Update UI rather than refreshing to see changes
+            setCategories(prevCategories => prevCategories.map(category => ({
+                ...category,
+                subcategories: category.subcategories.map(subcategory => 
+                    subcategory.subcategory_id === subcategory_id
+                    ? { ...subcategory, is_high_risk: is_high }
+                    : subcategory
+                )
+            })));
+        }
+        catch (error) {
+            console.error("Error updating sensitivity categories:", error);
+        }
+    }
+
     if (loading) {
         return (
             <>
@@ -77,7 +100,7 @@ function SensitivityConfiguration() {
                 </div>
                 <div className="subcategory-card-container">
                     {subcategories.map((subcategory) => (
-                        <SubcategoryCard key={subcategory.subcategory_id} subcategory={subcategory} isHigh={subcategory.is_high_risk}/>
+                        <SubcategoryCard key={subcategory.subcategory_id} subcategory={subcategory} isHigh={subcategory.is_high_risk} onClick={handleClick}/>
                     ))}
                 </div>
             </div>
