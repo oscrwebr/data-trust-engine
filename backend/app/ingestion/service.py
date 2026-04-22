@@ -14,7 +14,7 @@ INIT_GRAPH_GET = "https://graph.microsoft.com/v1.0/me/drive/root/delta?$select=i
 DOWNLOAD_URL_GET = "https://graph.microsoft.com/v1.0/me/drive/items/{graph_id}?select=content.downloadUrl"
 GET_PERMISSIONS = "me/drive/items/{graph_id}/permissions"
 GRAPH_BATCH_URL = "https://graph.microsoft.com/v1.0/$batch"
-
+GRAPH_PATCH_NAME = "https://graph.microsoft.com/v1.0/me/drive/items/{graph_id}"
 
 
 def get_values_data(folders: dict, files: dict, shared_folder_files: dict, values: list[dict]):
@@ -328,3 +328,40 @@ def get_download_link_by_graph_id(application:ConfidentialClientApplication, gra
         return response.json()["@microsoft.graph.downloadUrl"]
     else:
         return None
+    
+def update_file_name(application: ConfidentialClientApplication, graph_id: str, name: str, db: Session):
+    # Get the ingestion file from the grph Id
+    file = repository.get_ingestion_file_by_graph_id(graph_id=graph_id, db=db)
+    if not file: # This means that the graph Id doesn't exist in our database
+        return None
+    
+    # Get the access token from the graph Id
+    access_token = get_access_token_by_graph_id(application=application, graph_id=graph_id, db=db)
+    if not access_token: # If there is no access token, either the user, driveId or graphId don't exist - this will force a 400 error to be raised
+        return None
+    # Send request to Graph API to update the name
+    headers = {"Authorization": f"Bearer {access_token}"}
+    response = requests.patch(
+        url=GRAPH_PATCH_NAME.format(graph_id=file.graph_id),
+        json={"name": f"{name}.{file.extension}"},
+        headers=headers
+    )
+
+    # Handle the non 200 response from microsoft
+    if response.status_code != 200:
+        return None
+    
+    json_response = response.json()
+    
+    # Update the name
+    updated_name = json_response["name"]
+    # Update the web url
+    updated_web_url = json_response["webUrl"]
+    # Update the last modified date time - 
+    new_last_updated = datetime.fromisoformat(json_response["lastModifiedDateTime"])
+
+    # Update the ingesiton table with the latest values returned by microsoft
+    repository.update_ingestion_file_after_name_change(db=db, graph_id=graph_id, name=updated_name, web_url=updated_web_url, updated_modified=new_last_updated)
+
+    return 200
+
