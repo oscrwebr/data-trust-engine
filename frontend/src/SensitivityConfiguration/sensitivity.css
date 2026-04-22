@@ -10,3 +10,47 @@
     font-size: 40px;
     margin-bottom: 0;
 }
+
+.subcategory-card {
+    border: 1px solid #d9e3f0;
+    border-radius: 14px;
+    padding: 15px;
+    display: flex;
+    width: 280px;
+    height: 120px;
+
+}
+
+.subcategory-icon-box {
+    width: 28px;
+    height: 28px;
+    background-color: #F1F5F9;
+    border-radius: 8px; 
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.subcategory-card-left {
+    display: flex;
+    align-items: flex-start;
+}
+
+.subcategory-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.subcategory-name {
+    font-weight: 500;
+}
+
+.subcategory-card-container {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 280px);
+    gap: 5px;
+    margin-bottom: 20px;
+}

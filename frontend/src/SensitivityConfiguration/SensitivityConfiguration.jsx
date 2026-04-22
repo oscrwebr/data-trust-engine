@@ -4,6 +4,7 @@ import "../scans/scans.css";
 import { Divider } from "primereact/divider";
 import { PiUserListBold, PiScalesBold, PiCurrencyGbpBold } from "react-icons/pi";
 import "./sensitivity.css"
+import SubcategoryCard from "./SubcategoryCard";
 
 function SensitivityConfiguration() {
 
@@ -74,10 +75,11 @@ function SensitivityConfiguration() {
                 <div className="category-header">
                     <span>{category} Detections</span>
                 </div>
-                
+                <div className="subcategory-card-container">
                     {subcategories.map((subcategory) => (
-                        <p key={subcategory.subcategory_id}>{subcategory.subcategory_name}</p>
+                        <SubcategoryCard key={subcategory.subcategory_id} subcategory={subcategory} />
                     ))}
+                </div>
             </div>
         ))}
         </>
