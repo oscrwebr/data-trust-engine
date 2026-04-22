@@ -195,7 +195,7 @@ def test_delay_called_correctly(db, mock_delay):
 
 
 # Test that handle_user_creation_after_invite adds user to workspace
-def test_handle_user_creation_after_invite_performs_correctly(db, client):
+def test_handle_user_creation_after_invite_performs_correctly(db, mock_delay):
     image = create_test_image()
     token = str(secrets.token_hex(16))
 
@@ -215,6 +215,8 @@ def test_handle_user_creation_after_invite_performs_correctly(db, client):
     pending_user = add_pending_user(db, "johnSmith1@hotmail.com", "invite")
     add_invite(db, '2026-04-20 12:00:00', '2026-04-20 12:00:00', token, True, pending_user.user_id, workspace)
     user = create_user(db=db, details=dummy_user, refresh="ms-refresh-token", ms_access_token="ms-access-token", role="employee")
+
+    mock_delay.assert_called_once_with("ms-access-token", user.user_id)
 
     # Call said function 
     handle_user_creation_after_invite(db, user, workspace.id, token)

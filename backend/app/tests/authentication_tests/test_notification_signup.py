@@ -19,7 +19,7 @@ def create_test_image():
     return buffer.getvalue()
 
 # Test to ensure that a notification gets created when an employee has accepted an invite
-def test_create_user_service_to_add_employee_creates_notification(db):
+def test_create_user_service_to_add_employee_creates_notification(db, mock_delay):
         image = create_test_image()
         token = str(secrets.token_hex(16))
         dummy_user = {
@@ -40,6 +40,8 @@ def test_create_user_service_to_add_employee_creates_notification(db):
 
         add_invite(db=db, createdAt=datetime.now(), expiryDate="2030-03-03", token=token, used=False, user_id=pending_user.user_id, workspace=workspace)
         user = create_user(db=db, details=dummy_user, refresh="ms-refresh", ms_access_token="ms-access-token", role="employee")
+        
+        mock_delay.assert_called_once_with("ms-access-token", user.user_id)
         handle_user_creation_after_invite(db, user, workspace.id, token)
         # assertions
         assert db.query(Notification).count() == 1
