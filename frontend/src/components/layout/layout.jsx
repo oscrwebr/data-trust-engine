@@ -15,14 +15,25 @@ const Layout = () => {
   const [workspace, setWorkspace] = useState(null)
   const [notifications, setNotifications] = useState([])
   const [pendingEmployees, setPendingEmployees] = useState([])
+  const [role, setRole] = useState(null);
 
 // Getting user information and all their notifications on loading
+  const fetchPendingEmployees = () => {
+    api.get("/workspace/get-pending-employees")
+      .then(res => setPendingEmployees(res.data))
+      .catch(err => console.log(err));
+  };
+
   useEffect(() => {
       api.get("/workspace/dashboard")
       .then(res => {
           if (res.data.user) {
             setUser(res.data.user);
             setWorkspace(res.data.workspace);
+
+            if (res.data.user.role == "admin"){
+              fetchPendingEmployees();
+            }
           }
       })
       .catch(error => console.log(error))
@@ -33,16 +44,6 @@ const Layout = () => {
         })
         .catch(error => console.log(error))
   }, []);
-
-  const fetchPendingEmployees = () => {
-    api.get("/workspace/get-pending-employees")
-      .then(res => setPendingEmployees(res.data))
-      .catch(err => console.log(err));
-  };
-
-  useEffect(() => {
-    fetchPendingEmployees();
-  }, [])
 
 
   // Function to handle removing notifications
