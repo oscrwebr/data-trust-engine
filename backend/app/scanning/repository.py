@@ -308,8 +308,9 @@ def get_all_scans(db: Session):
 def get_scan_file_count(db: Session, scan_id: int):
     return db.query(ScanFile).filter(ScanFile.scan_id == scan_id).count()
 
+# Have to do long joins because don't want to add new row to Scan table late in dev!
 def get_scans_with_file_count(db: Session, workspace_id: int):
-    return (db.query(Scan, func.count(ScanFile.scan_file_id))
+    return (db.query(Scan, func.count(func.distinct(ScanFile.scan_file_id)))
             .join(ScanFile, Scan.scan_id == ScanFile.scan_id)
             .join(IngestionFile, ScanFile.file_id == IngestionFile.ingestion_file_id)
             .join(UserFiles, IngestionFile.ingestion_file_id == UserFiles.file_id)
