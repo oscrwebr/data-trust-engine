@@ -51,6 +51,7 @@ function SensitivityConfiguration() {
     if (loading) {
         return (
             <>
+            {/* Heading area rendered as well*/}
             <div className="scan-header">
                 <h1 className="scan-heading">
                     Sensitivity Categories
@@ -65,6 +66,7 @@ function SensitivityConfiguration() {
     if (error) {
         return (
             <>
+            {/* Heading area rendered as well */}
             <div className="scan-header">
                 <h1 className="scan-heading">
                     Sensitivity Categories
@@ -95,10 +97,12 @@ function SensitivityConfiguration() {
         </div>
         {categories.map(({category, subcategories}) => (
             <div key={category}>
+                {/* Each category has a header */}
                 <div className="category-header">
                     <span>{category} Detections</span>
                 </div>
                 <div className="subcategory-card-container">
+                    {/* Map each subcategory into a card */}
                     {subcategories.map((subcategory) => (
                         <SubcategoryCard key={subcategory.subcategory_id} subcategory={subcategory} isHigh={subcategory.is_high_risk} onClick={handleClick}/>
                     ))}
