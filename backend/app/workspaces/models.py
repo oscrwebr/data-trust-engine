@@ -29,7 +29,7 @@ class Notification(Base):
     title = Column(String(100), nullable=False)
     body = Column(String(200), nullable=False)
     datetime = Column(DATETIME, nullable=False)
-    user_id = Column(Integer, ForeignKey("user.user_id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("user.user_id", ondelete="CASCADE"), nullable=False)
     user = relationship("User", backref="notifications")
 
 user_workspace = Table(
