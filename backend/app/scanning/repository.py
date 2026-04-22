@@ -553,3 +553,30 @@ def get_user_workspace_id(db: Session, user_id: int):
         .scalar()
     )
 
+def get_workspace_detection_sensitivity_by_subcategory_id(db: Session, workspace_id: int, sensitivity_subcategory_id: int):
+    return (
+        db.query(WorkspaceDetectionSensitivity)
+        .filter(
+            WorkspaceDetectionSensitivity.workspace_id == workspace_id,
+        )
+        .filter(
+            WorkspaceDetectionSensitivity.sensitivity_subcategory_id == sensitivity_subcategory_id
+        )
+        .first()
+    )
+
+# Upsert method to add or update a workspace detection sensitivity (checks if record exists)
+def add_workspace_detection_sensitivity(db: Session, workspace_id: int, sensitivity_subcategory_id: int, is_high: bool):
+    existing_record = get_workspace_detection_sensitivity_by_subcategory_id(db=db, workspace_id=workspace_id, sensitivity_subcategory_id=sensitivity_subcategory_id)
+
+    if existing_record:
+        existing_record.is_high = is_high
+        db.commit()
+        db.refresh(existing_record)
+        return existing_record
+    else:
+        new_record = WorkspaceDetectionSensitivity(workspace_id=workspace_id, sensitivity_subcategory_id=sensitivity_subcategory_id, is_high=is_high)
+        db.add(new_record)
+        db.commit()
+        db.refresh(new_record)
+        return new_record

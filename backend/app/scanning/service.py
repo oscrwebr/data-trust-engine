@@ -598,7 +598,8 @@ def get_scan_file_details(db: Session, scan_file_id: int):
         "detections": detections
     }
 
-def get_sensitivity_subcategories(db: Session, workspace_id: int):
+def get_sensitivity_subcategories(db: Session, user_id: int):
+    workspace_id = repository.get_user_workspace_id(db=db, user_id=user_id)
     query = repository.get_sensitivity_categories(db=db)
     workspace_sensitivies = repository.get_workspace_detection_sensitivities(db=db, workspace_id=workspace_id)
 
@@ -624,6 +625,14 @@ def get_sensitivity_subcategories(db: Session, workspace_id: int):
             }
         )
     return list(result.values())
+
+def update_workspace_detection_sensitivity(db: Session, user_id: int, sensitivity_subcategory_id: int, is_high: bool):
+    workspace_id = repository.get_user_workspace_id(db=db, user_id=user_id)
+    
+    if workspace_id is None:
+        raise ValueError("User does not belong to a workspace")
+    
+    return repository.add_workspace_detection_sensitivity(db=db, workspace_id=workspace_id, sensitivity_subcategory_id=sensitivity_subcategory_id, is_high=is_high)
         
         
 

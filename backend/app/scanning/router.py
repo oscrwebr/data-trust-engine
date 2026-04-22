@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_database
 from app.scanning import service, repository
 from pydantic import BaseModel
-from app.scanning.schemas import OrganisationScanRequest, FileResponse, FileScansResponse, FileLatestScanResultResponse
+from app.scanning.schemas import OrganisationScanRequest, FileResponse, FileScansResponse, FileLatestScanResultResponse, UpdateWorkspaceDetectionSensitivityRequest
 
 from app.core.security import get_user_id_from_access_token
 from app.authentication.models import User
@@ -90,5 +90,9 @@ def get_scan_file_by_id(scan_file_id: int, db: Session = Depends(get_database)):
 
 @router.get("/get_sensitivity_categories")
 def get_sensitivity_categories(db: Session = Depends(get_database), user_id: int = Depends(get_user_id_from_access_token)):
-    workspace_id = repository.get_user_workspace_id(db=db, user_id=user_id)
-    return service.get_sensitivity_subcategories(db=db, workspace_id=workspace_id)
+    return service.get_sensitivity_subcategories(db=db, user_id=user_id)
+
+@router.post("/update_workspace_detection_sensitivity")
+def update_workspace_detection_sensitivity(update_request: UpdateWorkspaceDetectionSensitivityRequest, db: Session = Depends(get_database), user_id: int = Depends(get_user_id_from_access_token)):
+    service.update_workspace_detection_sensitivity(db=db, user_id=user_id, sensitivity_subcategory_id=update_request.sensitivity_subcategory_id, is_high=update_request.is_high)
+    return {"message": "Updated successfully"}
