@@ -47,6 +47,11 @@ def check_user_unknown(workspace_id: int, user: User, db: Session):
     workspace_unknown_folders = get_workspace_unknown_folders(id=workspace_id, email=user.email, db=db)
     workspace_unknown_files = get_workspace_unknown_files(id=workspace_id, email=user.email, db=db)
 
+    # If both lists are empty, return return None
+    if not workspace_unknown_folders and not workspace_unknown_files:
+        print("they're empty")
+        return
+
     # Need to now iterate through and check if the user's email is the unknown
     user_folders_add = []
     user_files_add = []
