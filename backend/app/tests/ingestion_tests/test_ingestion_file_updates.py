@@ -98,7 +98,7 @@ def test_file_updated(db, client, requests_mock):
     assert latest_file.last_modified.isoformat() == date_val
     assert latest_file.web_url == "dummy-return-url"
 
-# Test that the values in the post request are as expected
+# Test that the values in the patch request are as expected
 def test_patch_request(db, client, requests_mock):
     ms_access_token = "fake-ms-access-token"
 
