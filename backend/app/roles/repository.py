@@ -17,8 +17,8 @@ def create_role(db: Session, name: str, workspace_id: int, date: datetime):
     db.refresh(role)
     return role
 
-def get_all_roles(db: Session):
-    return db.query(Role).all()
+def get_all_roles(db: Session, workspace_id):
+    return db.query(Role).filter(Role.workspace_id == workspace_id).all()
 
 def get_role_by_name(db: Session, name: str):
     role = db.query(Role).filter(Role.name == name).first()
