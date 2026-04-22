@@ -588,3 +588,16 @@ def add_workspace_detection_sensitivity(db: Session, workspace_id: int, sensitiv
         db.commit()
         db.refresh(new_record)
         return new_record
+    
+
+def get_high_risk_file_count_by_scan_id(db: Session, scan_id: int, workspace_id: int):
+    return (
+        db.query(func.count(func.distinct(ScanFile.scan_file_id)))
+        .join(ScanFileDetection, ScanFile.scan_file_id == ScanFileDetection.scan_file_id)
+        .join(SensitivitySubcategory, ScanFileDetection.sensitivity_subcategory == SensitivitySubcategory.name)
+        .join(WorkspaceDetectionSensitivity, SensitivitySubcategory.sensitivity_subcategory_id == WorkspaceDetectionSensitivity.sensitivity_subcategory_id)
+        .filter(ScanFile.scan_id == scan_id)
+        .filter(WorkspaceDetectionSensitivity.workspace_id == workspace_id)
+        .filter(WorkspaceDetectionSensitivity.is_high == True) 
+        .scalar()
+    )

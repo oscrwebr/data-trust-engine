@@ -36,6 +36,10 @@ function ScanCard({ scan }) {
                             ? <PiCheckCircle/>
                             : <PiClockClockwise/>
 
+    const issueFilesLabel = scan.scan_type === "sensitivity"
+                            ? "High-Risk Files"
+                            : "Files with Issues"
+
     return(
         <Link to={`/scans/${scan.scan_id}`} className="scan-card-link">
             <div className={`scan-card ${scanTypeClassName}`}>
@@ -93,10 +97,9 @@ function ScanCard({ scan }) {
                         </span>
                     </div>
                     <div className="scan-card-date-block">
-                        <span className="scan-card-id-heading">High-Risk Files</span>
+                        <span className="scan-card-id-heading">{issueFilesLabel}</span>
                         <span className="scan-card-value scan-card-issue-files">
-                            {/* Hardcoded for now (also need to add style for no issues)*/}
-                            <span>2</span>
+                            <span>{scan.issue_files_count}</span>
                             <PiWarningCircle/>
                         </span>
                     </div>

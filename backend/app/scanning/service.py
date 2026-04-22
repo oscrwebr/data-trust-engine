@@ -414,14 +414,27 @@ def perform_organisation_scan(db: Session, user_id: int, naming_convention_ids: 
 def get_scans_with_file_count(db: Session, user_id: int):
     workspace_id = repository.get_user_workspace_id(db=db, user_id=user_id)
     scans = repository.get_scans_with_file_count(db=db, workspace_id=workspace_id)
-    return [{
-        "scan_id": scan.scan_id, 
-        "scan_type": scan.scan_type, 
-        "started_at": scan.started_at, 
-        "finished_at": scan.finished_at,
-        # Gets the number of scan_file records associated with a scan
-        "file_count": file_count} 
-        for scan, file_count in scans]
+
+    return_result = []
+
+    for scan, file_count in scans:
+
+        issue_files_count = 0
+
+        if scan.scan_type == ScanType.SENSITIVITY:
+            issue_files_count = repository.get_high_risk_file_count_by_scan_id(db=db, scan_id=scan.scan_id, workspace_id=workspace_id)
+
+        return_result.append({
+            "scan_id": scan.scan_id, 
+            "scan_type": scan.scan_type, 
+            "started_at": scan.started_at, 
+            "finished_at": scan.finished_at,
+            # Gets the number of scan_file records associated with a scan
+            "file_count": file_count,
+            "issue_files_count": issue_files_count
+        })
+
+    return return_result
 
 def get_scan_by_id(db: Session, scan_id: int):
     return repository.get_scan_by_id(db=db, scan_id=scan_id)
