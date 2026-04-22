@@ -3,16 +3,17 @@ from fastapi import APIRouter, Request
 from sqlalchemy import insert, select
 from PIL import Image
 from io import BytesIO
-from datetime import datetime
+from datetime import datetime, date
 import secrets
 import requests
 import pytest
 
-from app.authentication.service import create_user, DRIVE_DATA_GRAPH_URL
+from app.authentication.service import create_user, DRIVE_DATA_GRAPH_URL, add_pending_user, handle_user_creation_after_invite
 from app.workspaces.models import Notification
-from app.workspaces.repository import add_workspace
+from app.workspaces.models import user_workspace
+from app.workspaces.repository import add_workspace, add_user_workspace
 from app.invites.repository import add_invite
-from app.authentication.models import User
+from app.authentication.models import User, PendingUser
 from app.authentication.router import get_session
 from app.core.security import application, decrypt_refresh
 from app.core.database import get_database
@@ -45,7 +46,7 @@ def create_test_image():
     return buffer.getvalue()
 
 # Tests to ensure that an employee is added correctly when the create_user service is run
-def test_create_user_service_adds_employee_correctly(db):
+def test_create_user_service_adds_employee_correctly(db, mock_delay):
     image = create_test_image()
 
     dummy_user = {
@@ -56,11 +57,14 @@ def test_create_user_service_adds_employee_correctly(db):
     }
 
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    admin = insert(User).values(firstname="John", surname="Smith", username="johnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", refresh="ms-refresh-token".encode(), oid=oid, role="employee")
+    admin = insert(User).values(firstname="John", surname="Smith", username="johnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", refresh="ms-refresh-token".encode(), oid=oid, role="admin")
     admin_instance=db.execute(admin)
 
     workspace = add_workspace(db=db, name="Test Workspace", image=image)
-    user = create_user(db=db, details=dummy_user, refresh="ms-refresh-token", ms_access_token="ms-access-token", role="employee", workspace_id=workspace.id)
+    add_user_workspace(db, workspace.id, admin_instance.inserted_primary_key[0])
+    pending_user = add_pending_user(db, "johnSmith1@hotmail.com", "invite")
+    add_invite(db, '2026-04-20 12:00:00', '2026-04-20 12:00:00', "dummy-token", True, pending_user.user_id, workspace)
+    user = create_user(db=db, details=dummy_user, refresh="ms-refresh-token", ms_access_token="ms-access-token", role="employee")
 
     # assertions
     assert user # Check that there is a user object returned
@@ -72,7 +76,7 @@ def test_create_user_service_adds_employee_correctly(db):
     
 
 # Tests to ensure that an admin is added correctly when the create_user service is run
-def test_create_user_service_adds_admin_correctly(db):
+def test_create_user_service_adds_admin_correctly(db, mock_delay):
     image = create_test_image()
     dummy_user = {
         "name": "John Katherine Smith",
@@ -81,8 +85,9 @@ def test_create_user_service_adds_admin_correctly(db):
         "oid": "00000000-0000-0000-476j-987sdf88se", # This is random
     }
 
-    user = create_user(db=db, details=dummy_user, refresh="ms-refresh-token", ms_access_token="ms-access-token", role="admin", workspace_id=None)
-
+    workspace = add_workspace(db=db, name="Test Workspace", image=image)
+    user = create_user(db=db, details=dummy_user, refresh="ms-refresh-token", ms_access_token="ms-access-token", role="admin")
+    
     # assertions
     assert user # Check that there is a user object returned
     assert user.firstname == "John"
@@ -113,7 +118,7 @@ def test_signup_fails_with_bad_role(client):
     assert response.status_code == 400
 
 # Integration test that ensures a user's refresh token and driveId are added when they sign up'
-def test_drive_id_and_refresh_added_for_user(client, db, requests_mock):
+def test_drive_id_and_refresh_added_for_user(client, db, requests_mock, mock_delay):
     # Setting up FakeRequests class for dependency injection override
     fake_requests = FakeRequests()
     fake_requests.session["flow"] = "flow"
@@ -121,11 +126,18 @@ def test_drive_id_and_refresh_added_for_user(client, db, requests_mock):
     fake_requests.session["signup"] = True
     fake_requests.session["role"] = 1
     fake_requests.session["workspace_id"] = 1
+    fake_requests.session["token"] = None
 
     # overriding dependencies used by the router for '/success/'
     app.dependency_overrides[application] = lambda: FakeMsal()
     app.dependency_overrides[get_database] = lambda: db
     app.dependency_overrides[get_session] = lambda: fake_requests
+
+    image = create_test_image()
+    workspace = add_workspace(db=db, name="Test Workspace", image=image)
+
+    pending_user = add_pending_user(db, "johnSmith1@hotmail.com", "invite")
+    add_invite(db, '2026-04-20 12:00:00', '2026-04-20 12:00:00', "dummy-token", True, pending_user.user_id, workspace)
 
     # Setting the URL interception for getting the driveId
     mock_get = requests_mock.get(
@@ -156,3 +168,61 @@ def test_drive_id_and_refresh_added_for_user(client, db, requests_mock):
 
     # ensure that the request for driveId was made with the access token
     assert mock_get.request_history[0]._request.headers.get("Authorization") == "Bearer access_from_dummy_MSAL_class"
+
+# Tests to ensure that 'delay' for the celery function is called with the correct variables
+def test_delay_called_correctly(db, mock_delay):
+    image = create_test_image()
+
+    dummy_user = {
+        "name": "John Katherine Smith",
+        "email": "jkatherinesmith@outlook.com",
+        "preferred_username": "jkatherinesmith@outlook.com",
+        "oid": "00000000-0000-0000-476j-987sdf88se", # This is random
+    }
+
+    oid = "000000-7sdf77-88asdf8-9sdiy99"
+    admin = insert(User).values(firstname="John", surname="Smith", username="johnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", refresh="ms-refresh-token".encode(), oid=oid, role="admin")
+    admin_instance=db.execute(admin)
+    
+    workspace = add_workspace(db=db, name="Test Workspace", image=image)
+    add_user_workspace(db, workspace.id, admin_instance.inserted_primary_key[0])
+    pending_user = add_pending_user(db, "johnSmith1@hotmail.com", "invite")
+    add_invite(db, '2026-04-20 12:00:00', '2026-04-20 12:00:00', "dummy-token", True, pending_user.user_id, workspace)
+    user = create_user(db=db, details=dummy_user, refresh="ms-refresh-token", ms_access_token="ms-access-token", role="employee")
+    
+    # assertions
+    mock_delay.assert_called_once_with("ms-access-token", user.user_id)
+
+
+# Test that handle_user_creation_after_invite adds user to workspace
+def test_handle_user_creation_after_invite_performs_correctly(db, mock_delay):
+    image = create_test_image()
+    token = str(secrets.token_hex(16))
+
+    dummy_user = {
+        "name": "John Katherine Smith",
+        "email": "jkatherinesmith@outlook.com",
+        "preferred_username": "jkatherinesmith@outlook.com",
+        "oid": "00000000-0000-0000-476j-987sdf88se", # This is random
+    }
+
+    oid = "000000-7sdf77-88asdf8-9sdiy99"
+    admin = insert(User).values(firstname="John", surname="Smith", username="johnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", refresh="ms-refresh-token".encode(), oid=oid, role="admin")
+    admin_instance=db.execute(admin)
+    workspace = add_workspace(db=db, name="Test Workspace", image=image)
+    add_user_workspace(db, workspace.id, admin_instance.inserted_primary_key[0])
+
+    pending_user = add_pending_user(db, "johnSmith1@hotmail.com", "invite")
+    add_invite(db, '2026-04-20 12:00:00', '2026-04-20 12:00:00', token, True, pending_user.user_id, workspace)
+    user = create_user(db=db, details=dummy_user, refresh="ms-refresh-token", ms_access_token="ms-access-token", role="employee")
+
+    mock_delay.assert_called_once_with("ms-access-token", user.user_id)
+
+    # Call said function 
+    handle_user_creation_after_invite(db, user, workspace.id, token)
+
+    # assertions
+    assert db.query(user_workspace).count() == 2
+    assert db.query(Notification).count() == 1
+    assert db.query(PendingUser).count() == 0
+    

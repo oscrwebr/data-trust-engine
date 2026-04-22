@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import insert
+from sqlalchemy import insert, update, delete
 from .models import Folder, IngestionFile, UserFolders, UserFiles
 from datetime import datetime
 
@@ -75,3 +75,39 @@ def create_ingestion_file(db: Session, graph_id: str, name: str, extension: str,
 
     return ingestion_file
 
+
+def get_all_files(db: Session):
+    return db.query(IngestionFile).all()
+
+def get_user_files(db: Session, user_id: int):
+    results = (
+        db.query(UserFiles, IngestionFile)
+        .outerjoin(
+            IngestionFile,
+            IngestionFile.ingestion_file_id == UserFiles.file_id
+        )
+        .filter(UserFiles.user_id == user_id)
+        .all()
+    )
+
+    files = []
+    for user_file, file in results:
+        files.append({
+            "file": file
+        })
+
+    return files
+
+def update_ingestion_file_after_name_change(db: Session, graph_id: str, name: str, web_url: str, updated_modified: datetime):
+    update_statement = update(IngestionFile).where(IngestionFile.graph_id == graph_id).values({
+        IngestionFile.name: name,
+        IngestionFile.web_url: web_url,
+        IngestionFile.last_modified: updated_modified 
+    })
+    db.execute(update_statement)
+    db.commit()
+
+def delete_ingestion_file(db: Session, graph_id: str) -> None:
+    delete_statement = delete(IngestionFile).where(IngestionFile.graph_id == graph_id)
+    db.execute(delete_statement)
+    db.commit()

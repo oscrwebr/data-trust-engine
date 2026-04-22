@@ -15,6 +15,8 @@ class FileResponse(BaseModel):
     file_id: int
     file_name: str
     hash: str
+    last_scanned: datetime | None
+    last_modified: datetime 
 
     class Config:
         from_attributes = True
@@ -38,3 +40,7 @@ class FileScansResponse(BaseModel):
 
 class OrganisationScanRequest(BaseModel):
     naming_convention_ids: list[int]
+
+class UpdateWorkspaceDetectionSensitivityRequest(BaseModel):
+    sensitivity_subcategory_id: int
+    is_high: bool

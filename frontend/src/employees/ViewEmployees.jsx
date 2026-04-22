@@ -44,6 +44,7 @@ function ViewEmployees({toast}){
         api.get("/workspace/get-employees")
         .then(res => {
             setEmployees(res.data.active)
+            console.log(res.data.active)
         });
 
         api.get("/workspace/get-workspace-roles")
@@ -61,6 +62,11 @@ function ViewEmployees({toast}){
             (selectedRole.name === "No Role Assigned" && employee.role_name === null) ||
             employee.role_name === selectedRole.name;
 
+        const matchesRisk =
+            !selectedRisk ||
+            selectedRisk === "View All Scanning Risks" ||
+            employee.files.status === selectedRisk;
+
         const search = searchValue?.toLowerCase() || "";
 
         const matchesSearch =
@@ -68,20 +74,26 @@ function ViewEmployees({toast}){
             employee.user.surname?.toLowerCase().includes(search) ||
             employee.user.email?.toLowerCase().includes(search);
 
-        return matchesRole && matchesSearch;
+        return matchesRole && matchesSearch && matchesRisk;
     });
+
+    const riskOptions = ["View All Scanning Risks", "No Risk Detected", "Risk Detected", "No Files Found", "No Files Scanned"]
 
     return(
         <div className={styles.page}>
             <SendMessage visible={sendMessageDialog} setVisible={setSendMessageDialog} selectedEmployees={selectedEmployees} setSelectedEmployees={setSelectedEmployees} onRemove={onRemove} toast={toast}/>
             <Invite className={styles.d_invite_dialog} visible={sendInviteModal} setVisible={setSendInviteModal} toast={toast}/>
             <div className={styles.container}>
-                <h1 className={styles.title}>View Employees</h1>
+                <div className={styles.icon_and_title}>
+                    <i id={styles.title_icon} className="pi pi-users"/>
+                    <h1 className={styles.title}>View Employees</h1>
+                </div>
                 <div>
                     <Button data-testid="send-invite" style={{ marginRight: '10px'}} onClick={() => setSendInviteModal(true)} >Send an Invite</Button>
                     <Button data-testid="send-message-button" disabled={selectedEmployees.length == 0 ? (true) : (false)} onClick={() => setSendMessageDialog(true)}>Send a Message</Button>
                 </div>
             </div>
+            <span className={styles.subheader}>View your current employees, including their role and any potential risks</span>
             <div className={styles.header}>
                 <strong className={styles.employee_count}>{employees.length} People</strong>
                 <div className={styles.search_dropdown_icon_container}>
@@ -90,7 +102,7 @@ function ViewEmployees({toast}){
                             placeholder="Filter by Roles" className="p-inputtext-sm"/>
                     </div>
                     <div className="card flex justify-content-center" style={{ marginRight:"15px" }}>
-                        <Dropdown value={selectedRisk} onChange={(e) => setSelectedRisk(e.value)} optionLabel="name" 
+                        <Dropdown value={selectedRisk} options={riskOptions} onChange={(e) => setSelectedRisk(e.value)}
                             placeholder="Filter by Risk Level" className="p-inputtext-sm"/>
                     </div>
                     <IconField iconPosition="left">
@@ -127,6 +139,7 @@ function ViewEmployees({toast}){
                                 surname={employee.user.surname}
                                 email={employee.user.email}
                                 role={employee.role_name || "No Role Assigned"}
+                                risk={employee.files}
                                 onChange={(id, checked) => onSelectedEmployeesChange(employee, checked)}
                                 checked={selectedEmployees.some(emp => emp.user.user_id === employee.user.user_id)}
                             />
@@ -147,6 +160,7 @@ function ViewEmployees({toast}){
                                 surname={employee.user.surname}
                                 email={employee.user.email}
                                 role={employee.role_name || "No Role Assigned"}
+                                risk={employee.files}
                                 onChange={(id, checked) => onSelectedEmployeesChange(employee, checked)}
                                 checked={selectedEmployees.some(emp => emp.user.user_id === employee.user.user_id)}
                             />

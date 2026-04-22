@@ -1,7 +1,10 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import desc
 from app.authentication.models import User
+from app.access_mapping.models import ViolationEmail
 from app.roles.models import UserRole, Role, RolePermission, SensitivitySubcategory
 from app.ingestion.models import UserFiles
+from datetime import datetime
 
 
 # Method to get all employees with access to a specific file
@@ -20,6 +23,35 @@ def get_file_employees_with_access(db: Session, file_id: int):
         .filter(UserFiles.file_id == file_id)
         .all()
     )
+
+
+# Method to get all employees with access to all files provided
+def get_employees_with_access_for_files(db: Session, file_ids: list[int]):
+    rows = (
+        db.query(
+            UserFiles.file_id.label("file_id"),
+            User.user_id,
+            User.firstname,
+            User.surname,
+            User.email,
+            Role.name.label("role_name")
+        )
+        .join(User, User.user_id == UserFiles.user_id)
+        .outerjoin(UserRole, UserRole.user_id == User.user_id)
+        .outerjoin(Role, Role.role_id == UserRole.role_id)
+        .filter(UserFiles.file_id.in_(file_ids))
+        .all()
+    )
+
+    records_by_file = {}
+
+    for row in rows:
+        if row.file_id not in records_by_file:
+            records_by_file[row.file_id] = []
+
+        records_by_file[row.file_id].append(row)
+
+    return records_by_file
 
 
 # Method to get a user's role ids
@@ -46,4 +78,26 @@ def get_role_permissions(db: Session, role_id: int):
         )
         .filter(RolePermission.role_id == role_id)
         .all()
+    )
+
+
+# Method for creating a violation email record
+def create_violation_email_record(db: Session, time_now: datetime, admin_id: int, employee_id: int):
+    violation_email = ViolationEmail(created_at=time_now, admin_id=admin_id, employee_id=employee_id)
+    db.add(violation_email)
+    db.commit()
+    db.refresh(violation_email)
+    return violation_email
+
+
+# Method for getting the latest violation email for an admin
+def get_latest_violation_email_for_cooldown(db: Session, admin_id: int, employee_id: int):
+    return (
+        db.query(ViolationEmail)
+        .filter(
+            ViolationEmail.admin_id == admin_id,
+            ViolationEmail.employee_id == employee_id
+        )
+        .order_by(desc(ViolationEmail.created_at))
+        .first() 
     )

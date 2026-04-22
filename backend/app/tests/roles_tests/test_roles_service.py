@@ -62,9 +62,9 @@ def create_user(db, workspace=None, email="user@test.com"):
 
     return user
 
-def create_role(db, workspace, name="Test Role"):
+def create_role(db, workspace, name="Test Role", date='2024-01-15 09:30:00'):
     """Create a role in a workspace."""
-    role = Role(name=name, workspace_id=workspace.id)
+    role = Role(name=name, workspace_id=workspace.id, last_updated=date)
     db.add(role)
     db.commit()
     db.refresh(role)
@@ -79,7 +79,7 @@ def test_create_role_service(db):
     sub = repository.create_sensitivity_subcategory(db, "Emails", category.sensitivity_category_id)
 
     thresholds = [{"sensitivity_subcategory_id": sub.sensitivity_subcategory_id, "threshold": 42}]
-    result = service.create_role(db, "Test Role", thresholds, workspace.id)
+    result = service.create_role(db, "Test Role", thresholds, workspace.id, '2024-01-15 09:30:00')
 
     assert result["name"] == "Test Role"
     assert len(result["role_permissions"]) == 1
@@ -98,11 +98,11 @@ def test_get_roles_service(db):
     category = repository.create_sensitivity_category(db, "Legal")
     sub = repository.create_sensitivity_subcategory(db, "Contracts", category.sensitivity_category_id)
 
-    role = create_role(db, workspace, "Law Role")
-    repository.update_role(db, role.role_id, name="Law Role",
+    role = create_role(db, workspace, "Law Role", '2024-01-15 09:30:00')
+    repository.update_role(db, role.role_id, name="Law Role", date='2024-01-15 09:30:00',
                            thresholds=[{"sensitivity_subcategory_id": sub.sensitivity_subcategory_id, "threshold": 10}])
 
-    result = service.get_roles(db)
+    result = service.get_roles(db, workspace.id)
     assert len(result) >= 1
     found = next(r for r in result if r["role_id"] == role.role_id)
     assert found["name"] == "Law Role"
@@ -115,14 +115,14 @@ def test_update_role_service(db):
     category = repository.create_sensitivity_category(db, "Financial")
     sub = repository.create_sensitivity_subcategory(db, "IBANs", category.sensitivity_category_id)
 
-    role = create_role(db, workspace, "Finance Role")
+    role = create_role(db, workspace, "Finance Role", '2024-01-15 09:30:00')
 
-    service.update_role(db, role.role_id, name="Finance Role",
+    service.update_role(db, role.role_id, name="Finance Role", date='2024-01-15 09:30:00',
                         thresholds=[{"sensitivity_subcategory_id": sub.sensitivity_subcategory_id, "threshold": 5}])
     perm = db.query(RolePermission).filter(RolePermission.role_id == role.role_id).first()
     assert perm.threshold == 5
 
-    service.update_role(db, role.role_id, name="Finance Role",
+    service.update_role(db, role.role_id, name="Finance Role", date='2024-01-15 09:30:00',
                         thresholds=[{"sensitivity_subcategory_id": sub.sensitivity_subcategory_id, "threshold": 99}])
     perm_updated = db.query(RolePermission).filter(RolePermission.role_id == role.role_id).first()
     assert perm_updated.threshold == 99
@@ -131,7 +131,7 @@ def test_delete_role_service(db):
     admin = create_user(db, email="admin4@test.com")
     workspace = create_workspace(db)
     add_user_workspace(db, workspace.id, admin.user_id)
-    role = create_role(db, workspace, "Delete Me")
+    role = create_role(db, workspace, "Delete Me", '2024-01-15 09:30:00')
     role_id = role.role_id
 
     service.delete_role(db, role_id)

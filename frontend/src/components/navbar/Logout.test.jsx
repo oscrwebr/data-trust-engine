@@ -1,7 +1,7 @@
 import Sidebar from './Sidebar.jsx';
 import Home from '../../home/home.jsx';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom/vitest';
@@ -127,13 +127,20 @@ describe("Tests for logout feature", () => {
         // Ensure that the button is there to sign out
         const buttons = await screen.findAllByText("Sign-out");
         await userEvent.click(buttons[0]);
-        expect((await screen.findAllByText("Home"))[0].textContent);
+        expect((await screen.findAllByText("The Data Trust Engine"))[0].textContent);
     }),
     test("Test that when signout is successful, the user is sent to the homepage with a success message", async () => {
         // Set the access token
         setAccessToken("logout-test-token");
         // Ensure that the access token was correctly set
         expect(getAccessToken()).toBe("logout-test-token");
+
+        let toastCalled = null;
+            const mockToast = {
+            current: {
+                show: (args) => { toastCalled = args; console.log("Toast triggered:", args); }
+            }
+        };
 
         const mock = new MockAdapter(api);
         // Handle the axios calls that are made by the component on load via useEffect
@@ -156,20 +163,31 @@ describe("Tests for logout feature", () => {
         <MemoryRouter initialEntries={["/dashboard"]}>
             <Routes>
                 <Route path="/dashboard" element={<Sidebar/>}/>
-                <Route path="/" element={<Home/>}/>
+                <Route path="/" element={<Home toast={mockToast}/>}/>
             </Routes>
         </MemoryRouter>);
         // Ensure that the button is there to sign out
         const buttons = await screen.findAllByText("Sign-out");
         await userEvent.click(buttons[0]);
         // Expect there to be a success message
-        expect(await screen.findAllByText("You have logged out successfully!"))
+        // expect(await screen.findAllByText("You have logged out successfully!"))
+        await waitFor(() => {
+            expect(toastCalled).not.toBeNull();
+            expect(toastCalled.detail).toContain("You have logged out successfully!");
+        });
     }),
     test("Test that when signout is unsuccessful, the user is sent to the homepage with an error message", async () => {
         // Set the access token
         setAccessToken("logout-test-token");
         // Ensure that the access token was correctly set
         expect(getAccessToken()).toBe("logout-test-token");
+
+        let toastCalled = null;
+            const mockToast = {
+            current: {
+                show: (args) => { toastCalled = args; console.log("Toast triggered:", args); }
+            }
+        };
 
         const mock = new MockAdapter(api);
         // Handle the axios calls that are made by the component on load via useEffect
@@ -192,13 +210,17 @@ describe("Tests for logout feature", () => {
         <MemoryRouter initialEntries={["/dashboard"]}>
             <Routes>
                 <Route path="/dashboard" element={<Sidebar/>}/>
-                <Route path="/" element={<Home/>}/>
+                <Route path="/" element={<Home toast={mockToast}/>}/>
             </Routes>
         </MemoryRouter>);
         // Ensure that the button is there to sign out
         const buttons = await screen.findAllByText("Sign-out");
         await userEvent.click(buttons[0]);
         // Expect there to be a success message
-        expect(await screen.findAllByText("An error occurred while logging out."))
+        // expect(await screen.findAllByText("An error occurred while logging out."))
+        await waitFor(() => {
+            expect(toastCalled).not.toBeNull();
+            expect(toastCalled.detail).toContain("An error occurred while logging out.");
+        });
     })
 })

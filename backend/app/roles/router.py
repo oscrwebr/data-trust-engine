@@ -5,26 +5,31 @@ from app.roles import service
 from app.roles.models import UserRole, Role
 from app.roles.schema import UpdateUserRolesRequest
 from app.authentication.models import User
+from datetime import datetime
+from app.workspaces.repository import get_workspace_by_user
+from ..core.security import get_user_from_access_token
+from ..core.security_schemas import User as UserCore
 
 router = APIRouter(prefix="/roles", tags=["roles"])
 
 
 @router.get("/get")
-def get_roles(db: Session = Depends(get_database)):
-    return service.get_roles(db)
+def get_roles(db: Session = Depends(get_database), current_user: UserCore = Depends(get_user_from_access_token)):
+    workspace_id = get_workspace_by_user(db, current_user.user_id)
+    return service.get_roles(db, workspace_id)
 
 @router.post("/create")
-def create_role(payload: dict, db: Session = Depends(get_database)):
+def create_role(payload: dict, db: Session = Depends(get_database), current_user: UserCore = Depends(get_user_from_access_token)):
     name = payload.get("name")
     thresholds = payload.get("thresholds", [])
-    workspace_id = 1
-    return service.create_role(db, name, thresholds, workspace_id)
+    workspace_id = get_workspace_by_user(db, current_user.user_id)
+    return service.create_role(db, name, thresholds, workspace_id, datetime.now())
 
 @router.put("/update/{role_id}")
 def update_role(role_id: int, payload: dict, db: Session = Depends(get_database)):
     name = payload.get("name")
     thresholds = payload.get("thresholds", [])
-    return service.update_role(db, role_id, name, thresholds)
+    return service.update_role(db, role_id, name, thresholds, datetime.now())
 
 @router.delete("/delete/{role_id}")
 def delete_role(role_id: int, db: Session = Depends(get_database)):

@@ -11,7 +11,7 @@ INSERT INTO `user` (`user_id`, `firstname`, `surname`, `username`, `email`, `oid
 (6, 'Margaret', 'Plums', 'margaret@example.com', 'margaret@example.com', 'oid5', 'kasdjfh', 'employee'),
 (7, 'Daiyan', 'Khan', 'daiyan@example.com', 'daiyan@example.com', 'oid6', 'kasdjfh', 'employee'),
 (8, 'Oscar', 'Webster', 'oscar@example.com', 'oscar@example.com', 'oid7', 'kasdjfh', 'employee'),
-(9, 'Sam', 'Carter', 'samtc.1107@gmail.com', 'samtc.1107@gmail.com', '00000000-0000-0000-e24b-a6db04ddcd03', 'kasdjfh', 'admin'),
+(9, 'Sam', 'Carter', 'samtc.1107.11@gmail.com', 'samtc.1107.11@gmail.com', 'oid8', 'kasdjfh', 'employee'),
 (10, 'Elizabeth', 'Palmer', 'elizabeth@example.com', 'elizabeth@example.com', 'oid9', 'kasdjfh', 'employee'),
 (11, 'Susan', 'Younger', 'susan@example.com', 'susan@example.com', 'oid10', 'kasdjfh', 'employee');
 
@@ -112,12 +112,12 @@ INSERT INTO `sensitivity_subcategory` (`sensitivity_subcategory_id`, `name`, `se
 -- 9. Roles
 -- ==========================
 DELETE FROM `role`;
-INSERT INTO `role` (`role_id`, `workspace_id`, `name`) VALUES
-(1, 1, 'PII Role'),
-(2, 1, 'Financial Role'),
-(3, 1, 'Legal Role'),
-(4, 1, 'HR Role'),
-(5, 1, 'Executive Role');
+INSERT INTO `role` (`role_id`, `workspace_id`, `name`, `last_updated`) VALUES
+(1, 1, 'PII Role', '2024-01-15 09:30:00'),
+(2, 1, 'Financial Role', '2024-03-22 14:45:10'),
+(3, 1, 'Legal Role', '2024-06-01 00:00:00'),
+(4, 1, 'HR Role', '2025-08-17 18:20:35'),
+(5, 1, 'Executive Role', '2026-04-10 12:05:59');
 
 -- ==========================
 -- 10. Role Permissions (threshold=50)

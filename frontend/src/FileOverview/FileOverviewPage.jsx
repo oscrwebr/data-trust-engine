@@ -6,13 +6,15 @@ import LatestScanResultCard from "./LatestScanResultCard";
 import EmployeeAccessItem from "./EmployeeAccessItem";
 import styles from "./FileOverview.module.css";
 
-import { FaRegFileAlt } from "react-icons/fa";
+import { FaRegFileAlt, FaEdit, FaHashtag } from "react-icons/fa";
 import { FaShieldAlt } from "react-icons/fa";
 import { FaHistory } from "react-icons/fa";
 import { FaUserFriends } from "react-icons/fa";
 
+import api from "../api/axiosConfig"
 
-function FileOverviewPage() {
+
+function FileOverviewPage({toast}) {
     const { file_id } = useParams();
     const backend_uri = import.meta.env.VITE_BACKEND_HOST || "http://localhost:8000"
 
@@ -58,7 +60,23 @@ function FileOverviewPage() {
 
     if (!file) return <p>File not found.</p>
 
-    
+    const handleSendEmail = (id) => {
+        const user = employees_with_access.find(
+            employee => employee.user_id === id
+        );
+
+        api.post("/access_mapping/send-violations-email", {
+            file_name: file.file_name,
+            employee: user
+        }).then(res => {
+            if(res.data == "cooldown"){
+                showErrorMessage();
+            } else {
+                showSuccessMessage();
+            }
+        })
+    }
+
     const grouped_latest_scan_results = (latest_scan_results || []).reduce((acc, item) => {
         if (!acc[item.category]) {
             acc[item.category] = [];
@@ -68,20 +86,60 @@ function FileOverviewPage() {
         return acc;
     }, {});
 
+    const showSuccessMessage = () => {
+        toast.current.show({ severity: 'info', summary: 'Info', detail: 'An email containing the violations was sent to the employee.', life: 4000});
+    };
+
+    const showErrorMessage = () => {
+        toast.current.show({ severity: 'error', summary: 'Error', detail: 'You are sending this employee too many emails, please try again later.', life: 4000});
+    };
+
+    const formatted_date = (value) => {
+        return new Date(value).toLocaleString("en-GB", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+        });
+    };
+
     return (
         <div className={styles.file_overview_page}>
             <div className={styles.file_header_card}>
                 <div className={styles.file_header_top}>
-                    <div className={styles.file_icon}><FaRegFileAlt/></div>
-                    <div>
-                        <h1 className={styles.file_name}>{file.file_name}</h1>
+                    <div className={styles.file_icon}>
+                        <FaRegFileAlt />
+                    </div>
+
+                    <h1 className={styles.file_name}>
+                        {file.file_name}
+                    </h1>
+                </div>
+
+                <div className={styles.file_metadata}>
+                    <div className={styles.metadata_chip}>
+                        <FaHistory className={styles.metadata_icon} />
+                        <div>
+                            <div className={styles.metadata_label}>Last Scanned</div>
+                            <div className={styles.metadata_value}>
+                                {file.last_scanned ? formatted_date(file.last_scanned) : "Not scanned yet"}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className={styles.metadata_chip}>
+                        <FaEdit className={styles.metadata_icon} />
+                        <div>
+                            <div className={styles.metadata_label}>Last Modified</div>
+                            <div className={styles.metadata_value}>
+                                {file.last_modified ? formatted_date(file.last_modified) : "Unknown"}
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div className={styles.file_hash_section}>
-                    <div className={styles.hash_label}>Hash</div>
-                    <div className={styles.file_hash}>{file.hash}</div>
-                </div>
             </div>
 
             <div className={styles.file_overview_content}>
@@ -133,6 +191,7 @@ function FileOverviewPage() {
                                 <EmployeeAccessItem
                                     key={employee.user_id}
                                     employee={employee}
+                                    sendEmail={(value) => handleSendEmail(value)}
                                 />
                             ))
                         )}

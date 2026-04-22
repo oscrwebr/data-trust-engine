@@ -58,13 +58,19 @@ function ScanFileCard({scan_file, scan_type, scan_files}) {
             issues.push({
                 category: result.category,
                 subcategory: result.subcategory_name,
+                highRisk: result.is_high_risk
             })
         })
         
     }
 
+    const detectionCount = scan_file.detection_count
+
+    const isHighRisk = issues.some(issue => issue.highRisk);
+
     const cardClass = issues.length === 0 ?
         "card-clean" :
+        isHighRisk ? "card-critical" :
         "card-issue";
 
     const issueCheck = issues.length === 0;
@@ -74,7 +80,7 @@ function ScanFileCard({scan_file, scan_type, scan_files}) {
                             ? 'Clean' : 
                             scan_type === "organisation"
                             ? issues.map(i => i.type).join(", ")
-                            : 'Detections Found'
+                            : `${detectionCount} Detections Found`
                             
 
     return (
@@ -85,10 +91,9 @@ function ScanFileCard({scan_file, scan_type, scan_files}) {
                     {issueCheck ? (
                         <PiCheckCircle size={26} className="scan-file-icon icon-clean" />
                     ) : (
-                        <PiWarningCircle size={26} className="scan-file-icon icon-issue" />
-
+                        <PiWarningCircle size={26} className={`scan-file-icon ${isHighRisk ? 'critical-issue' : 'icon-issue'}`} />
                     )}
-                    <span className={`scan-file-pill ${issueCheck ? 'pill-clean' : 'pill-issue'}`}>
+                    <span className={`scan-file-pill ${issueCheck ? 'pill-clean' : isHighRisk ? 'pill-critical' : 'pill-issue'}`}>
                         {scanFilePillText}
                     </span>
 
@@ -168,7 +173,7 @@ function ScanFileCard({scan_file, scan_type, scan_files}) {
                         <span>Detections:</span>
                     </div>
                     {issues.map((issue, index) => (
-                        <div key={index} className="sensitivity-detection">
+                        <div key={index} className={`sensitivity-detection ${issue.highRisk ? 'high-risk' : 'standard-risk'}`}>
                             <div className="sensitivity-detection-category">
                                 <span>{issue.category}</span>
                             </div>
@@ -183,7 +188,7 @@ function ScanFileCard({scan_file, scan_type, scan_files}) {
                     <button className="sensitivity-scan-file-button"
                     // Link inside a link code adapted from: 
                     // https://stackoverflow.com/a/30362416
-                            onClick={(event) => {event.preventDefault(); event.stopPropagation(); navigate(`/scan_file/${scan_file.scan_file_id}`)}}
+                            onClick={(event) => {event.preventDefault(); event.stopPropagation(); navigate(`/scan-file/${scan_file.scan_file_id}`)}}
                     >
                         <PiMagnifyingGlassBold /> View Advanced Details
                     </button>

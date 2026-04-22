@@ -1,14 +1,14 @@
 import { useRef, useEffect } from "react";
 import { Button } from "primereact/button";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Toast } from "primereact/toast";
+import styles from "./home.module.css";
+import FeatureCard from "./FeatureCard";
 
 function Home({toast}) {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const toastParam = params.get("toast");
   const shownRef = useRef(false);
-  const successToast = useRef(null);
   const backend_uri = import.meta.env.VITE_BACKEND_HOST || "http://localhost:8000"
   const nav = useNavigate();
 
@@ -26,14 +26,14 @@ function Home({toast}) {
 
   useEffect(() => {
     if (!location.state) {return}
-    if (location.state.status_code === 200) {
-      successToast.current.show({
+    if (location.state?.status_code === 200) {
+      toast?.current.show({
       severity: 'success',
       summary: 'Success',
       detail: 'You have logged out successfully!',
       life: 1000
     })} else {
-      successToast.current.show({
+      toast?.current.show({
       severity: 'error',
       summary: 'Error',
       detail: 'An error occurred while logging out.',
@@ -57,12 +57,66 @@ function Home({toast}) {
   }
 
   return (
-    <div>
-      <h1>Home</h1>
-      <Toast ref={successToast}/>
-      <Button onClick={handleSignIn}>Sign in</Button>
-      <Button onClick={handleCreateWorkspace}>Create a workspace</Button>
-      <Button onClick={handleEmployeeSignup}>Join a Workspace</Button>
+    <div className={styles.body}>
+      <div className={styles.container}>
+        <div className={styles.hero}>
+          <span className={styles.primary_title}>The Data Trust Engine</span>
+          <span className={styles.secondary_title}>Building Trust in Every Data Interaction</span>
+          <span className={styles.tertiary_title}>Enable secure collaboration and controlled access between organizations. Create <br/>
+            trusted data environments where teams can work together with confidence.</span>
+          <div className={styles.chip_container}>
+            <div className={styles.chip}>
+              <i className="pi pi-check-circle"/>
+              <span>Secure</span>      
+            </div>
+            <i className="pi pi-circle-fill"/>
+            <div className={styles.chip}>
+              <i className="pi pi-check-circle"/>
+              <span>Scalable</span>         
+            </div>
+            <i className="pi pi-circle-fill"/>
+            <div className={styles.chip}>
+              <i className="pi pi-check-circle"/>
+              <span>Compliant</span>
+            </div>
+          </div>
+          <div>
+            <Button className={styles.create_a_workspace} onClick={handleCreateWorkspace}><i className="pi pi-shield"/> Create a Workspace</Button>
+            <Button className={styles.get_started} onClick={handleEmployeeSignup}><i className="pi pi-user-plus"/> Get Started</Button>
+          </div>
+          <Button className={styles.sign_in} onClick={handleSignIn}><i className="pi pi-sign-in"/> Sign in</Button>
+        </div>
+        <div className={styles.line}/>
+        <span className={styles.how_it_works}>How it Works</span>
+          <div className={styles.feature_card_container}>
+            <FeatureCard
+              icon="pi pi-folder"
+              title="Automated Classification System"
+              description="Your digital librarian for unstructured company data. It scans files across drives, email, and cloud storage to detect sensitive information and provide instant visibility and control."
+              bullet_1="Automatically detects and tags sensitive files"
+              bullet_2="Builds an access map of user permissions"
+              bullet_3="Continuous monitoring for data exposure risks"
+            />
+
+            <FeatureCard
+              icon="pi pi-filter"
+              title="Security Noise Filter"
+              description="An intelligent alert system that cuts through thousands of daily security signals and surfaces only what truly matters. It turns overwhelming tool output into a clean, actionable security view."
+              bullet_1="Aggregates alerts into one unified stream"
+              bullet_2="Filters out irrelevant noise"
+              bullet_3="Highlights the top 3 most critical threats"
+            />
+
+            <FeatureCard
+              icon="pi pi-chart-line"
+              title="Universal Trust Score"
+              description="A single, executive-friendly score that translates complex security and compliance data into a clear measure of trust. Built for leadership, clients, and auditors who require clarity."
+              bullet_1="Unifies classification and threat detection data"
+              bullet_2="Accurate Trust Score or risk level indicator"
+              bullet_3="Converts security posture into simple reports"
+            />
+          </div>
+      </div>
     </div>
   );
 }

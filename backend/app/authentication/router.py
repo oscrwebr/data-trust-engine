@@ -32,12 +32,16 @@ roles_dict = {
 }
 
 @router.get("/sign-in")
-async def sign_in(application: Annotated[ConfidentialClientApplication, Depends(application)], request: Annotated[dict, Depends(get_session)], next: str, signup: bool | None=None, role: int | None=None, workspace_id: int | None=None):
+async def sign_in(application: Annotated[ConfidentialClientApplication, Depends(application)], request: Annotated[dict, Depends(get_session)], next: str, signup: bool | None=None, role: int | None=None, workspace_id: int | None=None, token: str | None=None):
     # Protect against url manipulation!
     if not next.startswith("/"):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
     
-    flow = application.initiate_auth_code_flow(scopes=config.SCOPES, redirect_uri=f"{config.REDIRECT_URI}/auth/success/")
+    # This is to ask for permissions each time that someone signs up no matter what
+    if signup:
+        flow = application.initiate_auth_code_flow(scopes=config.SCOPES, redirect_uri=f"{config.REDIRECT_URI}/auth/success/", prompt="consent")
+    else:
+        flow = application.initiate_auth_code_flow(scopes=config.SCOPES, redirect_uri=f"{config.REDIRECT_URI}/auth/success/")
     # print(flow)
     request.session["flow"] = flow
     request.session["next"] = next
@@ -50,6 +54,7 @@ async def sign_in(application: Annotated[ConfidentialClientApplication, Depends(
         request.session["role"] = roles_dict[role]
         request.session["signup"] = signup
         request.session["workspace_id"] = workspace_id
+        request.session["token"] = token
         print("It has been added!")
     elif signup and not role:
         print("Need both!")
@@ -80,15 +85,27 @@ async def login_redirect(application: Annotated[ConfidentialClientApplication, D
     # getting the role from the session
     workspace_id = request.session["workspace_id"] if "workspace_id" in request.session else None
 
+     # getting the invite token from the session
+    token = request.session["token"] if "token" in request.session else None
+
     # Either create user or check if the user exists
     # Check if the user exists in the db before creating a new user, incase of repeated request
     user = service.check_get_by_oid(result['id_token_claims']['oid'], db)
     if "signup" in request.session and not user:
-        user = service.create_user(db=db, details=result["id_token_claims"], refresh=result["refresh_token"], ms_access_token=result["access_token"], role=role, workspace_id=workspace_id)
+        user = service.create_user(db=db, details=result["id_token_claims"], refresh=result["refresh_token"], ms_access_token=result["access_token"], role=role)
+
+        # If the user has been sent an invite (via direct email because user WAS none)
+        if token != None:
+            service.handle_user_creation_after_invite(db, user, workspace_id, token)
+
     request.session.clear()
     response.delete_cookie("session") # This is to remove the cookie from the user's browser
 
     if user:
+        print(token)
+        if token != None:
+            service.handle_user_creation_after_invite(db, user, workspace_id, token)
+
         # generates the refresh and access token for the user (refresh will be returned later at the end of this if block, access token is gained in another flow by the user)
         _, refresh_token, _ = service.create_access_refresh(db=db, data={"userId": user.user_id, "role": user.role})
         redirect_response = RedirectResponse(f"{config.FRONTEND_BASE_URL}{url}") # This will redirect the user back to the page that they were on originally
