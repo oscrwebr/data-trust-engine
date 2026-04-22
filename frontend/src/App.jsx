@@ -12,7 +12,7 @@ import HighRiskFilesDashboard from "./HighRiskFilesDashboard/HighRiskFilesDashbo
 import { Toast } from 'primereact/toast';
 import Scans from "./scans/Scans.jsx";
 import FilesDashboard from "./FilesDashboard/filesDashboard.jsx";
-
+import AdminFiles from "./AdminFiles/AdminFiles.jsx"
 import Test from "./Test/Test.jsx";
 import Unprocessable422 from "./Errors/Unprocessable422.jsx";
 import WorkspaceJoinedError from "./invites/WorkspaceJoined.jsx";
@@ -48,7 +48,8 @@ function App() {
           <Route path="/upload-org-chart" element={<OrgChart toast={toast} />} />
           <Route path="/settings" element={null} />
           <Route path="/dashboard" element={<Dashboard toast={toast}/>} />
-          <Route path="/dashboard-files" element={<FilesDashboard toast={toast}/>} />
+          <Route path="/my-files" element={<FilesDashboard toast={toast}/>} />
+          <Route path="/workspace-files" element={<AdminFiles toast={toast}/>} />
           <Route path="/files/:file_id" element={<FileOverviewPage toast={toast}/>} />
           <Route path="/scans" element={<Scans />} />
           <Route path="/scans/:scanId" element={<ScanPage/>} />
