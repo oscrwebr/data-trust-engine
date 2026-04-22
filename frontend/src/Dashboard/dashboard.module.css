@@ -24,3 +24,12 @@
   white-space: nowrap;
 }
 
+.recentActivityCard {
+  width: 100%;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px 28px;
+  margin-top: 24px;
+  border: 1px solid #d9e3f0;
+}
+

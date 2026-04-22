@@ -34,6 +34,21 @@ function Dashboard({toast}) {
     })
   }, [])
 
+  function formatText(activity){
+    switch(activity.type) {
+      case "scan_started":
+        return `${activity.scan_type.charAt(0).toUpperCase() + activity.scan_type.slice(1)} Scan Started`;
+      case "scan_completed":
+        return `${activity.scan_type.charAt(0).toUpperCase() + activity.scan_type.slice(1)} Scan Completed`;
+      case "invite":
+        return "Employee Invitation Sent";
+      case "role_change":
+        return "Workspace Role Updated";
+      default:
+        return "Unknown Activity";
+    }
+  }
+
   return (
     <div className={styles.container}>
         <RequestJoinWorkspaceModal toast={toast} visible={requestJoinWorkspaceVisible} setVisible={() => setRequestJoinWorkspaceVisible(false)}/>
@@ -48,13 +63,32 @@ function Dashboard({toast}) {
 
         {/* Admin View of the Dashboard */}
         {user?.role === "admin" && (
-          <div>
-            <div className="scan-header">
-                <h1 className="detection-heading">
-                    Dashboard
-                </h1>
-            <Divider/>
-            </div>
+            <div>
+              <div className="scan-header">
+                  <h1 className="detection-heading">
+                      Dashboard
+                  </h1>
+              <Divider/>
+              </div>
+
+              <div className={styles.recentActivityCard}>
+                <h2 className={styles.recentActivityHeader}>Recent Activity</h2>
+                 {loading ? (
+                    <p>Loading recent activity...</p>
+                  ) : error ? (
+                    <p>Error loading recent activity.</p>
+                  ) : recentActivity.length === 0 ? (
+                    <p>No recent activity found.</p>
+                  ) : (
+                    <div className={styles.activityList}>
+                      {recentActivity.map((activity, index) => (
+                        <div key={index} className={styles.activityItem}>
+                          <p>{formatText(activity)}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+              </div>
 
           </div>
         )}

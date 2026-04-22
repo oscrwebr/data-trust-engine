@@ -24,11 +24,11 @@ def get_recent_activity(db: Session, user_id: int):
             "scan_type": scan.scan_type,
         })
 
-        if scan.completed_at is not None:
+        if scan.finished_at is not None:
             recent_activity.append({
                 "type": "scan_completed",
                 "scan_id": scan.scan_id,
-                "timestamp": scan.completed_at,
+                "timestamp": scan.finished_at,
                 "scan_type": scan.scan_type,
             })
 
