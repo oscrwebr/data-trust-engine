@@ -84,6 +84,7 @@ function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role
                     <SidebarDropdown className={styles.dropdown} icon="pi pi-pen-to-square" label="Configure" openDropdown={openDropdown} setOpenDropdown={setOpenDropdown} basePaths={["/roles", "/upload-org-chart"]}>
                         <DropdownItem url="/roles" text="Manage Roles"/>
                         <DropdownItem url="/upload-org-chart" text="Upload Org Chart"/>
+                        <DropdownItem url="/detection-sensitivity" text="Detection Sensitivity"/>
                     </SidebarDropdown>
 
                     <div className={styles.line}/>

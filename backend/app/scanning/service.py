@@ -411,16 +411,33 @@ def perform_organisation_scan(db: Session, user_id: int, naming_convention_ids: 
 
 
 # Turn repository data into JSON response
-def get_scans_with_file_count(db: Session):
-    scans = repository.get_scans_with_file_count(db=db)
-    return [{
-        "scan_id": scan.scan_id, 
-        "scan_type": scan.scan_type, 
-        "started_at": scan.started_at, 
-        "finished_at": scan.finished_at,
-        # Gets the number of scan_file records associated with a scan
-        "file_count": file_count} 
-        for scan, file_count in scans]
+def get_scans_with_file_count(db: Session, user_id: int):
+    workspace_id = repository.get_user_workspace_id(db=db, user_id=user_id)
+    scans = repository.get_scans_with_file_count(db=db, workspace_id=workspace_id)
+
+    return_result = []
+
+    for scan, file_count in scans:
+
+        issue_files_count = 0
+
+        if scan.scan_type == ScanType.SENSITIVITY:
+            issue_files_count = repository.get_high_risk_file_count_by_scan_id(db=db, scan_id=scan.scan_id, workspace_id=workspace_id)
+
+        elif scan.scan_type == ScanType.ORGANISATION:
+            issue_files_count = repository.get_issue_file_count_by_scan_id(db=db, scan_id=scan.scan_id)
+
+        return_result.append({
+            "scan_id": scan.scan_id, 
+            "scan_type": scan.scan_type, 
+            "started_at": scan.started_at, 
+            "finished_at": scan.finished_at,
+            # Gets the number of scan_file records associated with a scan
+            "file_count": file_count,
+            "issue_files_count": issue_files_count
+        })
+
+    return return_result
 
 def get_scan_by_id(db: Session, scan_id: int):
     return repository.get_scan_by_id(db=db, scan_id=scan_id)
@@ -470,7 +487,7 @@ def get_organisational_scan_details(db: Session, scan):
         ]
     }
 
-def get_sensitivity_scan_details(db: Session, scan):
+def get_sensitivity_scan_details(db: Session, scan, user_id: int):
     files = repository.get_scan_files_with_file(db=db, scan_id=scan.scan_id)
 
     # Getting total detection counts for each sensitivity category
@@ -490,18 +507,27 @@ def get_sensitivity_scan_details(db: Session, scan):
         key = i.category_name.lower().replace(" ", "_")
         detection_counts[key] = i.detection_count
 
+    workspace_id = repository.get_user_workspace_id(db=db, user_id=user_id)
+    high_risk_subcategory_ids_query = repository.get_high_risk_workspace_detection_ids(db=db, workspace_id=workspace_id)
+
+    # Repository query returns tuples 
+    # Convert into clean list
+    high_risk_subcategory_ids = {subcategory_id for (subcategory_id,) in high_risk_subcategory_ids_query}
+
     # Same logic as organisational scan results (see above function)
     results_query = repository.get_basic_sensitivity_scan_results_by_scan_id(db=db, scan_id=scan.scan_id)
 
     results = {}
 
-    for scan_file_id, subcategory_name, category_name in results_query:
+    for scan_file_id, subcategory_id, subcategory_name, category_name in results_query:
         if scan_file_id not in results:
             results[scan_file_id] = []
         
         results[scan_file_id].append({
+            "subcategory_id": subcategory_id,
             "subcategory_name": subcategory_name,
-            "category": category_name
+            "category": category_name,
+            "is_high_risk": subcategory_id in high_risk_subcategory_ids
         })
 
     scan_file_detection_counts_query = repository.get_scan_file_detection_counts(db=db, scan_id=scan.scan_id)
@@ -533,7 +559,7 @@ def get_sensitivity_scan_details(db: Session, scan):
 
     
 
-def get_scan_details(db: Session, scan_id: int):
+def get_scan_details(db: Session, scan_id: int, user_id: int):
     scan = repository.get_scan_by_id(db=db, scan_id=scan_id)
     
     if not scan:
@@ -543,7 +569,7 @@ def get_scan_details(db: Session, scan_id: int):
         return get_organisational_scan_details(db=db, scan=scan)
     
     if scan.scan_type == ScanType.SENSITIVITY:
-        return get_sensitivity_scan_details(db=db, scan=scan)
+        return get_sensitivity_scan_details(db=db, scan=scan, user_id=user_id)
     
 def get_scan_file_details(db: Session, scan_file_id: int):
     query = repository.get_scan_file_details(db=db, scan_file_id=scan_file_id)
@@ -598,6 +624,43 @@ def get_scan_file_details(db: Session, scan_file_id: int):
         "detections": detections
     }
 
+def get_sensitivity_subcategories(db: Session, user_id: int):
+    workspace_id = repository.get_user_workspace_id(db=db, user_id=user_id)
+    query = repository.get_sensitivity_categories(db=db)
+    workspace_sensitivies = repository.get_workspace_detection_sensitivities(db=db, workspace_id=workspace_id)
+
+    high_risk_check = {
+        subcategory.sensitivity_subcategory_id: subcategory.is_high
+        for subcategory in workspace_sensitivies
+    }
+
+    result = {}
+
+    # Group subcategories under their category
+    for subcategory, category in query:
+        if category not in result:
+            result[category] = {
+                "category": category,
+                "subcategories": []
+            }
+        result[category]["subcategories"].append(
+            {
+                "subcategory_id": subcategory.sensitivity_subcategory_id,
+                "subcategory_name": subcategory.name,
+                "is_high_risk": high_risk_check.get(subcategory.sensitivity_subcategory_id, False)
+            }
+        )
+    return list(result.values())
+
+def update_workspace_detection_sensitivity(db: Session, user_id: int, sensitivity_subcategory_id: int, is_high: bool):
+    workspace_id = repository.get_user_workspace_id(db=db, user_id=user_id)
+    
+    if workspace_id is None:
+        raise ValueError("User does not belong to a workspace")
+    
+    return repository.add_workspace_detection_sensitivity(db=db, workspace_id=workspace_id, sensitivity_subcategory_id=sensitivity_subcategory_id, is_high=is_high)
+        
+        
 
 
     

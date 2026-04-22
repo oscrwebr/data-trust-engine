@@ -323,6 +323,10 @@
     border: 1px solid #FFD6A7;
 }
 
+.card-critical {
+    border: 1px solid #FECACA;
+}
+
 .scan-page-files-heading {
     margin-top: 34px;
     font-weight: 600;
@@ -354,6 +358,10 @@
     color: #bd461f;
 }
 
+.critical-issue {
+    color: #DC2626;
+}
+
 .scan-file-pill {
     border-radius: 5px;
     font-weight: 500;
@@ -369,6 +377,11 @@
 .pill-issue {
     background: #FEF3C6;
     color: #BB4D00;
+}
+
+.pill-critical {
+    background: #FEE2E2;
+    color: #DC2626;
 }
 
 .scan-file-name {
@@ -459,12 +472,23 @@
 }
 
 .sensitivity-detection-category {
-    background: #FEF3C6;
-    color: #BB4D00;
+    background: grey;
+    color: black;
     border-radius: 5px;
     font-weight: 500;
     padding: 4px 10px;
     font-size: 12px;
+}
+
+.standard-risk .sensitivity-detection-category {
+    background-color: #FEF3C6;
+    color: #B45309;
+}
+
+
+.high-risk .sensitivity-detection-category {
+    background-color: #FEE2E2;
+    color: #DC2626;
 }
 
 .scan-file-sensitivity-details {

@@ -1,8 +1,8 @@
 from datetime import datetime
 
-from sqlalchemy import select, func, and_
+from sqlalchemy import select, func, and_, case, or_
 from sqlalchemy.orm import Session
-from app.scanning.models import File, NamingConvention, Scan, ScanNamingConvention, NamingConventionScanResult, Scan, ScanFile, ScanFileDetection, DuplicateGroup, DuplicateScanResult 
+from app.scanning.models import File, NamingConvention, Scan, ScanNamingConvention, NamingConventionScanResult, Scan, ScanFile, ScanFileDetection, DuplicateGroup, DuplicateScanResult, WorkspaceDetectionSensitivity
 from app.ingestion.models import IngestionFile
 from app.roles.models import SensitivityCategory, SensitivitySubcategory
 from datetime import datetime, timezone
@@ -308,8 +308,16 @@ def get_all_scans(db: Session):
 def get_scan_file_count(db: Session, scan_id: int):
     return db.query(ScanFile).filter(ScanFile.scan_id == scan_id).count()
 
-def get_scans_with_file_count(db: Session):
-    return db.query(Scan, func.count(ScanFile.scan_file_id)).outerjoin(ScanFile, Scan.scan_id == ScanFile.scan_id).group_by(Scan.scan_id).all()
+# Have to do long joins because don't want to add new row to Scan table late in dev!
+def get_scans_with_file_count(db: Session, workspace_id: int):
+    return (db.query(Scan, func.count(func.distinct(ScanFile.scan_file_id)))
+            .join(ScanFile, Scan.scan_id == ScanFile.scan_id)
+            .join(IngestionFile, ScanFile.file_id == IngestionFile.ingestion_file_id)
+            .join(UserFiles, IngestionFile.ingestion_file_id == UserFiles.file_id)
+            .join(UserWorkspace, UserWorkspace.c.user_id == UserFiles.user_id)
+            .filter(UserWorkspace.c.workspace_id == workspace_id)
+            .group_by(Scan.scan_id)
+            .all())
 
 def get_naming_convention_scan_results_by_scan_id(db: Session, scan_id: int):
     return(
@@ -369,6 +377,7 @@ def get_basic_sensitivity_scan_results_by_scan_id(db: Session, scan_id: int):
     return (
         db.query(
             ScanFile.scan_file_id,
+            SensitivitySubcategory.sensitivity_subcategory_id,
             SensitivitySubcategory.name.label("subcategory_name"),
             SensitivityCategory.name.label("category_name"),
         )
@@ -521,3 +530,93 @@ def update_file_last_scanned(db: Session, file_id: int):
     file.last_scanned = datetime.now(timezone.utc)
     db.commit()
     db.refresh(file)
+
+def get_sensitivity_categories(db: Session):
+    return (
+        db.query(SensitivitySubcategory, SensitivityCategory.name.label("category_name"))
+        .join(SensitivityCategory, SensitivitySubcategory.sensitivity_category_id == SensitivityCategory.sensitivity_category_id)
+        .all()
+    )
+
+def get_workspace_detection_sensitivities(db: Session, workspace_id: int):
+    return (
+        db.query(WorkspaceDetectionSensitivity)
+        .filter(WorkspaceDetectionSensitivity.workspace_id == workspace_id)
+        .all()
+    )
+
+def get_user_workspace_id(db: Session, user_id: int):
+    return (
+        db.query(UserWorkspace.c.workspace_id)
+        .filter(UserWorkspace.c.user_id == user_id)
+        .scalar()
+    )
+
+def get_workspace_detection_sensitivity_by_subcategory_id(db: Session, workspace_id: int, sensitivity_subcategory_id: int):
+    return (
+        db.query(WorkspaceDetectionSensitivity)
+        .filter(
+            WorkspaceDetectionSensitivity.workspace_id == workspace_id,
+        )
+        .filter(
+            WorkspaceDetectionSensitivity.sensitivity_subcategory_id == sensitivity_subcategory_id
+        )
+        .first()
+    )
+
+# Upsert method to add or update a workspace detection sensitivity (checks if record exists)
+def add_workspace_detection_sensitivity(db: Session, workspace_id: int, sensitivity_subcategory_id: int, is_high: bool):
+    existing_record = get_workspace_detection_sensitivity_by_subcategory_id(db=db, workspace_id=workspace_id, sensitivity_subcategory_id=sensitivity_subcategory_id)
+
+    if existing_record:
+        existing_record.is_high = is_high
+        db.commit()
+        db.refresh(existing_record)
+        return existing_record
+    else:
+        new_record = WorkspaceDetectionSensitivity(workspace_id=workspace_id, sensitivity_subcategory_id=sensitivity_subcategory_id, is_high=is_high)
+        db.add(new_record)
+        db.commit()
+        db.refresh(new_record)
+        return new_record
+    
+
+def get_high_risk_file_count_by_scan_id(db: Session, scan_id: int, workspace_id: int):
+    return (
+        db.query(func.count(func.distinct(ScanFile.scan_file_id)))
+        .join(ScanFileDetection, ScanFile.scan_file_id == ScanFileDetection.scan_file_id)
+        .join(SensitivitySubcategory, ScanFileDetection.sensitivity_subcategory == SensitivitySubcategory.name)
+        .join(WorkspaceDetectionSensitivity, SensitivitySubcategory.sensitivity_subcategory_id == WorkspaceDetectionSensitivity.sensitivity_subcategory_id)
+        .filter(ScanFile.scan_id == scan_id)
+        .filter(WorkspaceDetectionSensitivity.workspace_id == workspace_id)
+        .filter(WorkspaceDetectionSensitivity.is_high == True) 
+        .scalar()
+    )
+
+def get_issue_file_count_by_scan_id(db: Session, scan_id: int):
+    return (
+        db.query(func.count(func.distinct(ScanFile.scan_file_id)))
+        # Outer joins as files may have no result for naming convention or duplicate scans
+        # We still want to count these files
+        .outerjoin(NamingConventionScanResult, NamingConventionScanResult.scan_file_id == ScanFile.scan_file_id)
+        .outerjoin(DuplicateScanResult, DuplicateScanResult.scan_file_id == ScanFile.scan_file_id)
+        .filter(ScanFile.scan_id == scan_id)
+        .group_by(ScanFile.scan_file_id)
+        .having(or_(
+            # Only count file as an issue if it fails all naming conventions
+            func.max(case((NamingConventionScanResult.passed == True, 1), else_=0)) == 0,
+            # Check if a file has a duplicate record
+            func.count(DuplicateScanResult.duplicate_scan_result_id) > 0
+            )
+        )
+        .count()
+
+    )
+
+def get_high_risk_workspace_detection_ids(db: Session, workspace_id: int):
+    return (
+        db.query(WorkspaceDetectionSensitivity.sensitivity_subcategory_id)
+        .filter(WorkspaceDetectionSensitivity.workspace_id == workspace_id)
+        .filter(WorkspaceDetectionSensitivity.is_high == True)
+        .all()
+    )

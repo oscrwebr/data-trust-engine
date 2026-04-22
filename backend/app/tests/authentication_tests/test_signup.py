@@ -85,11 +85,8 @@ def test_create_user_service_adds_admin_correctly(db, mock_delay):
     }
 
     workspace = add_workspace(db=db, name="Test Workspace", image=image)
-    pending_user = add_pending_user(db, "johnSmith1@hotmail.com", "invite")
-    add_invite(db, '2026-04-20 12:00:00', '2026-04-20 12:00:00', "dummy-token", True, pending_user.user_id, workspace)
     user = create_user(db=db, details=dummy_user, refresh="ms-refresh-token", ms_access_token="ms-access-token", role="admin", workspace_id=None, token="dummy-token")
     
-
     # assertions
     assert user # Check that there is a user object returned
     assert user.firstname == "John"
