@@ -81,8 +81,8 @@ def get_scans_with_file_count(db: Session = Depends(get_database), user_id: int 
     return service.get_scans_with_file_count(db=db, user_id=user_id)
 
 @router.get("/get_scan_by_id/{scan_id}")
-def get_scan_by_id(scan_id: int, db: Session = Depends(get_database)):
-    return service.get_scan_details(db=db, scan_id=scan_id)
+def get_scan_by_id(scan_id: int, db: Session = Depends(get_database), user_id: int = Depends(get_user_id_from_access_token)):
+    return service.get_scan_details(db=db, scan_id=scan_id, user_id=user_id)
 
 @router.get("/get_scan_file_by_id/{scan_file_id}")
 def get_scan_file_by_id(scan_file_id: int, db: Session = Depends(get_database)):

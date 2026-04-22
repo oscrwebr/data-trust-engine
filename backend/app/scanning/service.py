@@ -487,7 +487,7 @@ def get_organisational_scan_details(db: Session, scan):
         ]
     }
 
-def get_sensitivity_scan_details(db: Session, scan):
+def get_sensitivity_scan_details(db: Session, scan, user_id: int):
     files = repository.get_scan_files_with_file(db=db, scan_id=scan.scan_id)
 
     # Getting total detection counts for each sensitivity category
@@ -507,18 +507,27 @@ def get_sensitivity_scan_details(db: Session, scan):
         key = i.category_name.lower().replace(" ", "_")
         detection_counts[key] = i.detection_count
 
+    workspace_id = repository.get_user_workspace_id(db=db, user_id=user_id)
+    high_risk_subcategory_ids_query = repository.get_high_risk_workspace_detection_ids(db=db, workspace_id=workspace_id)
+
+    # Repository query returns tuples 
+    # Convert into clean list
+    high_risk_subcategory_ids = {subcategory_id for (subcategory_id,) in high_risk_subcategory_ids_query}
+
     # Same logic as organisational scan results (see above function)
     results_query = repository.get_basic_sensitivity_scan_results_by_scan_id(db=db, scan_id=scan.scan_id)
 
     results = {}
 
-    for scan_file_id, subcategory_name, category_name in results_query:
+    for scan_file_id, subcategory_id, subcategory_name, category_name in results_query:
         if scan_file_id not in results:
             results[scan_file_id] = []
         
         results[scan_file_id].append({
+            "subcategory_id": subcategory_id,
             "subcategory_name": subcategory_name,
-            "category": category_name
+            "category": category_name,
+            "is_high_risk": subcategory_id in high_risk_subcategory_ids
         })
 
     scan_file_detection_counts_query = repository.get_scan_file_detection_counts(db=db, scan_id=scan.scan_id)
@@ -550,7 +559,7 @@ def get_sensitivity_scan_details(db: Session, scan):
 
     
 
-def get_scan_details(db: Session, scan_id: int):
+def get_scan_details(db: Session, scan_id: int, user_id: int):
     scan = repository.get_scan_by_id(db=db, scan_id=scan_id)
     
     if not scan:
@@ -560,7 +569,7 @@ def get_scan_details(db: Session, scan_id: int):
         return get_organisational_scan_details(db=db, scan=scan)
     
     if scan.scan_type == ScanType.SENSITIVITY:
-        return get_sensitivity_scan_details(db=db, scan=scan)
+        return get_sensitivity_scan_details(db=db, scan=scan, user_id=user_id)
     
 def get_scan_file_details(db: Session, scan_file_id: int):
     query = repository.get_scan_file_details(db=db, scan_file_id=scan_file_id)

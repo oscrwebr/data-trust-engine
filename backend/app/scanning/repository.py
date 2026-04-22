@@ -377,6 +377,7 @@ def get_basic_sensitivity_scan_results_by_scan_id(db: Session, scan_id: int):
     return (
         db.query(
             ScanFile.scan_file_id,
+            SensitivitySubcategory.sensitivity_subcategory_id,
             SensitivitySubcategory.name.label("subcategory_name"),
             SensitivityCategory.name.label("category_name"),
         )
@@ -610,4 +611,12 @@ def get_issue_file_count_by_scan_id(db: Session, scan_id: int):
         )
         .count()
 
+    )
+
+def get_high_risk_workspace_detection_ids(db: Session, workspace_id: int):
+    return (
+        db.query(WorkspaceDetectionSensitivity.sensitivity_subcategory_id)
+        .filter(WorkspaceDetectionSensitivity.workspace_id == workspace_id)
+        .filter(WorkspaceDetectionSensitivity.is_high == True)
+        .all()
     )
