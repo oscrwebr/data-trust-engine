@@ -440,7 +440,54 @@ describe("Invite Component", () => {
         });
     })
 
+
     // Test 12
+    test("Test error message when an admin sends an invite to an employee already in the workspace", async () => {
+        api.post.mockImplementation((url, body) => {
+            if (url === "/invite/send-invite") {
+                return Promise.resolve({ data: { success: "exists" } }); 
+            }
+            return Promise.resolve({ data: [] });
+        });
+
+        let toastCalls = [];
+        const mockToast = {
+            current: {
+                show: (args) => {
+                    toastCalls.push(args);
+                    console.log("Toast triggered:", args);
+                },
+            },
+        };
+
+        render(
+            <MemoryRouter>
+                <EmployeeInvite visible={true} setVisible={() => {}} toast={mockToast}/>
+            </MemoryRouter>
+        );
+
+        const modal = screen.getByTestId("invite-dialog");
+
+        const emailInput = within(modal).getByPlaceholderText("Email address");
+        fireEvent.change(emailInput, { target: { value: "valid@example.com" } });
+
+        const calendarInput = within(modal).getByTestId("calendar-input");
+        fireEvent.change(calendarInput, { target: { value: "2030-04-01" } });
+
+        const submitButton = within(modal).getByRole("button", { name: /send invite/i });
+        fireEvent.click(submitButton);
+
+        await waitFor(() => {
+            const adminToast = toastCalls.find(
+                t => t.detail === "This employee has already been added to your workspace.",
+            );
+            expect(adminToast).toBeDefined();
+            expect(adminToast.severity).toBe("error");
+        });
+    })
+
+
+    // Test 13
     test("Test that clicking go to my workspace button correctly navigates user to dashboard", async () => {
         render(
             <MemoryRouter>
@@ -454,7 +501,7 @@ describe("Invite Component", () => {
         expect(mockNavigate).toHaveBeenCalledWith("/dashboard");
     })
 
-    // Test 13
+    // Test 14
     test("Test request to join workspace button functions correctly", async () => {
         api.post.mockResolvedValueOnce({
             data: { success: true }
