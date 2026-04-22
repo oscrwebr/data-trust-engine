@@ -152,17 +152,12 @@ services:
     depends_on:
       - redis
       - backend-prod
-      
-  watchtower:
-    image: containrrr/watchtower:latest
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    command: --cleanup true --api-version 1.54 --interval 300
 
 volumes:
   dte-prod-db-volume:
 `EOF`
 
+echo "Pulling all the images..."
 sudo docker compose pull
 
 
