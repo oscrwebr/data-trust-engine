@@ -2,6 +2,8 @@ import api from "../api/axiosConfig";
 import { useState, useEffect } from "react";
 import "../scans/scans.css";
 import { Divider } from "primereact/divider";
+import { PiUserListBold, PiScalesBold, PiCurrencyGbpBold } from "react-icons/pi";
+import "./sensitivity.css"
 
 function SensitivityConfiguration() {
 
@@ -50,17 +52,34 @@ function SensitivityConfiguration() {
         )
     }
 
+    const categoryIcons = {
+            "PERSONAL": <PiUserListBold size={30} />,
+            "LEGAL CASE": <PiScalesBold size={30} />,
+            "FINANCIAL": <PiCurrencyGbpBold size={30}/>
+        }
+
 
     return (
         <>
         <div>
             <div className="scan-header">
-                <h1 className="scan-heading">
-                    Sensitivity Categories
+                <h1 className="detection-heading">
+                    Detection Sensitivity
                 </h1>
             <Divider/>
             </div>
         </div>
+        {categories.map(({category, subcategories}) => (
+            <div key={category}>
+                <div className="category-header">
+                    <span>{category} Detections</span>
+                </div>
+                
+                    {subcategories.map((subcategory) => (
+                        <p key={subcategory.subcategory_id}>{subcategory.subcategory_name}</p>
+                    ))}
+            </div>
+        ))}
         </>
     )
 }

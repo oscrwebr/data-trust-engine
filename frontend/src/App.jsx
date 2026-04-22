@@ -55,7 +55,7 @@ function App() {
           <Route path="/org-scan-dev" element={<OrganisationalDevTest />} />
           <Route path="/high-risk-files" element={<HighRiskFilesDashboard />} />
           <Route path="scan-file/:scanFileId" element={<ScanFile/>} />
-          <Route path="sensitivity-levels" element={<SensitivityConfiguration />} />
+          <Route path="detection-sensitivity" element={<SensitivityConfiguration />} />
         </Route>
 
         {/* Elements in here will not inherit the sidebar */}
