@@ -365,3 +365,30 @@ def update_file_name(application: ConfidentialClientApplication, graph_id: str, 
 
     return 200
 
+def delete_ingestion_file(application: ConfidentialClientApplication, graph_id: str, db: Session):
+     # Get the ingestion file from the grph Id
+    file = repository.get_ingestion_file_by_graph_id(graph_id=graph_id, db=db)
+    if not file: # This means that the graph Id doesn't exist in our database
+        return None
+    
+    # Get the access token from the graph Id
+    access_token = get_access_token_by_graph_id(application=application, graph_id=graph_id, db=db)
+    if not access_token: # If there is no access token, either the user, driveId or graphId don't exist - this will force a 400 error to be raised
+        return None
+    
+    # Send request to Graph API to update the name
+    headers = {"Authorization": f"Bearer {access_token}"}
+    response = requests.delete(
+        url=GRAPH_PATCH_NAME.format(graph_id=file.graph_id),
+        headers=headers
+    )
+
+    # Handle the non 200 response from microsoft
+    if response.status_code != 204:
+        return None
+    try:
+        repository.delete_ingestion_file(db=db, graph_id=graph_id)
+        return 204
+    except:
+        return None
+    
