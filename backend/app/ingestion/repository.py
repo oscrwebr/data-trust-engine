@@ -1,6 +1,8 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import insert, update, delete
+from sqlalchemy import insert, update, delete, select
 from .models import Folder, IngestionFile, UserFolders, UserFiles, UnknownUserFolders, UnknownUserFiles
+from app.authentication.models import User
+from app.workspaces.models import user_workspace
 from datetime import datetime
 
 
@@ -132,3 +134,31 @@ def delete_ingestion_file(db: Session, graph_id: str) -> None:
     delete_statement = delete(IngestionFile).where(IngestionFile.graph_id == graph_id)
     db.execute(delete_statement)
     db.commit()
+
+def get_workspace_unknown_folders(id: int, db: Session):
+    select_statement = select(
+        UnknownUserFolders.folder_id,
+        UnknownUserFolders.email,
+        User.user_id
+        ).join(
+            user_workspace, User.user_id == user_workspace.c.user_id
+        ).join(
+            Folder, Folder.drive_id == User.driveId
+        ).join(
+            UnknownUserFolders, UnknownUserFolders.folder_id == Folder.folder_id
+        ).where(user_workspace.c.workspace_id == id)
+    return db.execute(select_statement).fetchall()
+
+def get_workspace_unknown_files(id: int, db: Session):
+    select_statement = select(
+        UnknownUserFiles.file_id,
+        UnknownUserFiles.email,
+        User.user_id
+        ).join(
+            user_workspace, User.user_id == user_workspace.c.user_id
+        ).join(
+            IngestionFile, IngestionFile.drive_id == User.driveId
+        ).join(
+            UnknownUserFiles, UnknownUserFiles.file_id == IngestionFile.ingestion_file_id
+        ).where(user_workspace.c.workspace_id == id)
+    return db.execute(select_statement).fetchall()
