@@ -26,6 +26,7 @@ function Dashboard({toast}) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const [dashboardSummary, setDashboardSummary] = useState(null); 
 
   useEffect(() => {
     api.get("/auth/test")
@@ -35,13 +36,18 @@ function Dashboard({toast}) {
 
     api.get("/dashboard/get_recent_activity")
     .then(response => {
-      console.log(response.data)
+      
       setRecentActivity(response.data);
       setLoading(false);
     })
     .catch(err => {
       setError(err);
       setLoading(false);
+    })
+
+    api.get("/dashboard/get_dashboard_summary")
+    .then(response => {
+      setDashboardSummary(response.data);
     })
   }, [])
 
@@ -104,6 +110,32 @@ function Dashboard({toast}) {
 
               <div >
                 <h2 className={styles.welcomeHeading}>Welcome back, {user.firstname}!</h2>
+              </div>
+
+              <div className={styles.summaryContainer}>
+                {/* Total employees card */}
+                <div className={styles.summaryCard}>
+                  <span className={styles.summaryCardLabel}>Total Employees</span>
+                  <span className={styles.summaryCardValue}>
+                    {dashboardSummary?.total_employees ?? 0}
+                  </span>
+                </div>
+
+                {/* Total pending users card */}
+                <div className={styles.summaryCard}>
+                  <span className={styles.summaryCardLabel}>Pending Users</span>
+                  <span className={styles.summaryCardValue}>
+                    {dashboardSummary?.pending_users ?? 0}
+                  </span>
+                </div>
+
+                {/* Total workspace files card */}
+                <div className={styles.summaryCard}>
+                  <span className={styles.summaryCardLabel}>Workspace Files</span>
+                  <span className={styles.summaryCardValue}>
+                    {dashboardSummary?.total_files ?? 0}
+                  </span>
+                </div>
               </div>
 
               <div className={styles.recentActivityCard}>
