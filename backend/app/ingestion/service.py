@@ -436,3 +436,8 @@ def delete_ingestion_file(application: ConfidentialClientApplication, user_id: i
     except:
         return None
     
+def get_workspace_unknown_folders(id: int, db: Session):
+    return repository.get_workspace_unknown_folders(id=id, db=db)
+
+def get_workspace_unknown_files(id: int, db: Session):
+    return repository.get_workspace_unknown_files(id=id, db=db)
