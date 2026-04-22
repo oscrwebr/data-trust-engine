@@ -40,6 +40,20 @@ async def update_file(application: Annotated[ConfidentialClientApplication, Depe
     else:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
 
+@router.delete("/delete-file")
+async def delete_file(application: Annotated[ConfidentialClientApplication, Depends(application)], user: Annotated[User, Depends(get_user_from_access_token)], db: Annotated[Session, Depends(get_database)], graph_id: str):
+    # Ensure that only admins can access this endpoint
+    if user.role != "admin":
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+    # Delete ingestion_file flow
+    deleted_res = service.delete_ingestion_file(application=application, graph_id=graph_id, db=db)
+    if deleted_res == 204:
+        return {
+            "message": "file deleted successfully!"
+        }
+    else:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
+
 @router.get("/test-download")
 async def test_download(application: Annotated[ConfidentialClientApplication, Depends(application)], user: Annotated[User, Depends(get_user_from_access_token)], db: Annotated[Session, Depends(get_database)], graph_id: str):
     download_url = service.get_download_link_by_graph_id(application=application, graph_id=graph_id, db=db)
