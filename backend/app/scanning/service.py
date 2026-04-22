@@ -424,6 +424,9 @@ def get_scans_with_file_count(db: Session, user_id: int):
         if scan.scan_type == ScanType.SENSITIVITY:
             issue_files_count = repository.get_high_risk_file_count_by_scan_id(db=db, scan_id=scan.scan_id, workspace_id=workspace_id)
 
+        elif scan.scan_type == ScanType.ORGANISATION:
+            issue_files_count = repository.get_issue_file_count_by_scan_id(db=db, scan_id=scan.scan_id)
+
         return_result.append({
             "scan_id": scan.scan_id, 
             "scan_type": scan.scan_type, 

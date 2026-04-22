@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import select, func, and_
+from sqlalchemy import select, func, and_, case, or_
 from sqlalchemy.orm import Session
 from app.scanning.models import File, NamingConvention, Scan, ScanNamingConvention, NamingConventionScanResult, Scan, ScanFile, ScanFileDetection, DuplicateGroup, DuplicateScanResult, WorkspaceDetectionSensitivity
 from app.ingestion.models import IngestionFile
@@ -530,16 +530,6 @@ def update_file_last_scanned(db: Session, file_id: int):
     db.commit()
     db.refresh(file)
 
-def get_high_risk_file_count(db: Session, scan_id: int, sensitive_categories: list[str]):
-    return (
-        db.query(ScanFile.scan_file_id)
-        .join(ScanFileDetection, ScanFile.scan_file_id == ScanFileDetection.scan_file_id)
-        .filter(ScanFile.scan_id == scan_id)
-        .filter(ScanFileDetection.sensitivity_subcategory.in_(sensitive_categories))
-        .distinct()
-        .count()
-    )
-
 def get_sensitivity_categories(db: Session):
     return (
         db.query(SensitivitySubcategory, SensitivityCategory.name.label("category_name"))
@@ -600,4 +590,24 @@ def get_high_risk_file_count_by_scan_id(db: Session, scan_id: int, workspace_id:
         .filter(WorkspaceDetectionSensitivity.workspace_id == workspace_id)
         .filter(WorkspaceDetectionSensitivity.is_high == True) 
         .scalar()
+    )
+
+def get_issue_file_count_by_scan_id(db: Session, scan_id: int):
+    return (
+        db.query(func.count(func.distinct(ScanFile.scan_file_id)))
+        # Outer joins as files may have no result for naming convention or duplicate scans
+        # We still want to count these files
+        .outerjoin(NamingConventionScanResult, NamingConventionScanResult.scan_file_id == ScanFile.scan_file_id)
+        .outerjoin(DuplicateScanResult, DuplicateScanResult.scan_file_id == ScanFile.scan_file_id)
+        .filter(ScanFile.scan_id == scan_id)
+        .group_by(ScanFile.scan_file_id)
+        .having(or_(
+            # Only count file as an issue if it fails all naming conventions
+            func.max(case((NamingConventionScanResult.passed == True, 1), else_=0)) == 0,
+            # Check if a file has a duplicate record
+            func.count(DuplicateScanResult.duplicate_scan_result_id) > 0
+            )
+        )
+        .count()
+
     )
