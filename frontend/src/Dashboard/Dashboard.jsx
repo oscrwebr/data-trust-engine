@@ -4,6 +4,8 @@ import { useOutletContext } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Button } from "primereact/button";
 import RequestJoinWorkspaceModal from "../components/modals/RequestJoinWorkspaceModal.jsx";
+import { Divider } from "primereact/divider";
+import "../scans/scans.css"
 
 function Dashboard({toast}) {
 
@@ -33,7 +35,12 @@ function Dashboard({toast}) {
         {/* Admin View of the Dashboard */}
         {user?.role === "admin" && (
           <div>
-            <h1 data-testid="dashboard-h1">Dashboard</h1>
+            <div className="scan-header">
+                <h1 className="detection-heading">
+                    Dashboard
+                </h1>
+            <Divider/>
+            </div>
           </div>
         )}
         
