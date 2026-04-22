@@ -222,7 +222,13 @@ services:
     depends_on:
       - redis
       - backend-prod
-
+  
+  # # Setting up WatchTower for monitoring changes in docker repository in docker hub
+  # watchtower:
+  #   image: containrrr/watchtower:latest
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   command: --cleanup true --api-version 1.54 --interval 300
 
   # Setting up the frontend test environment
   frontend-test:
