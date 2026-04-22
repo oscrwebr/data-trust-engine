@@ -42,3 +42,17 @@ class UserFiles(Base):
     file_id = Column(ForeignKey(IngestionFile.ingestion_file_id, ondelete="CASCADE"), primary_key=True)
     user_id = Column(ForeignKey(User.user_id, ondelete="CASCADE"), primary_key=True)
     Index("rev_idx_user_files", user_id, file_id)
+
+class UnknownUserFolders(Base):
+    __tablename__ = 'unknown_user_folders'
+
+    folder_id = Column(ForeignKey(Folder.folder_id, ondelete="CASCADE"), primary_key=True)
+    email = Column(String(254), primary_key=True)
+    Index("rev_idx_unknown_user_folders", email, folder_id)
+
+class UnknownUserFiles(Base):
+    __tablename__ = 'unknown_user_files'
+
+    file_id = Column(ForeignKey(IngestionFile.ingestion_file_id, ondelete="CASCADE"), primary_key=True)
+    email = Column(String(254), primary_key=True)
+    Index("rev_idx_unknown_user_files", email, file_id)

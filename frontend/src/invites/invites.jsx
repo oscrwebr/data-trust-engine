@@ -37,6 +37,10 @@ function Invite({ visible, setVisible, toast, fetchEmployees}) {
       toast.current.show({ severity: 'error', summary: 'Error', detail: 'You cannot send an invite to yourself.', life: 4000});
   };
 
+  const showExistsMessage = () => {
+      toast.current.show({ severity: 'error', summary: 'Error', detail: 'This employee has already been added to your workspace.', life: 4000});
+  };
+
   const today = new Date();
   const maxDay = new Date();
   maxDay.setMonth(maxDay.getMonth() + 1);
@@ -66,6 +70,9 @@ function Invite({ visible, setVisible, toast, fetchEmployees}) {
 
       } else if (res.data.success == "cooldown") {
         showCooldownMessage();
+
+      } else if (res.data.success == "exists") {
+        showExistsMessage();
 
       } else if (res.data.success == "admin") {
         showAdminMessage();
