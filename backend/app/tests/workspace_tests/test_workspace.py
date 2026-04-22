@@ -522,7 +522,8 @@ def test_delete_employee_route(db, client):
     response = client.send(request = req)
 
     assert response.status_code == 200
-    assert db.query(auth_model.User).count() is 1
+    assert db.query(auth_model.User).count() is 2
+    assert db.query(workspace_model.user_workspace).count() is 1
     
 
 # Test the reject user endpoint
