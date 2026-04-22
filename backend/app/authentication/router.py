@@ -92,7 +92,7 @@ async def login_redirect(application: Annotated[ConfidentialClientApplication, D
     # Check if the user exists in the db before creating a new user, incase of repeated request
     user = service.check_get_by_oid(result['id_token_claims']['oid'], db)
     if "signup" in request.session and not user:
-        user = service.create_user(db=db, details=result["id_token_claims"], refresh=result["refresh_token"], ms_access_token=result["access_token"], role=role, workspace_id=workspace_id, token=token)
+        user = service.create_user(db=db, details=result["id_token_claims"], refresh=result["refresh_token"], ms_access_token=result["access_token"], role=role)
     request.session.clear()
     response.delete_cookie("session") # This is to remove the cookie from the user's browser
 

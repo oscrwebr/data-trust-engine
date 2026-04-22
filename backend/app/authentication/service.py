@@ -13,10 +13,11 @@ from app.workspaces.repository import add_notification, get_workspace_by_workspa
 from app.invites.repository import get_invite_by_token
 from app.roles.repository import migrate_pending_roles
 from app.authentication.repository import get_pending_user_by_email, delete_pending_user
+from app.authentication.models import User
 
 DRIVE_DATA_GRAPH_URL = "https://graph.microsoft.com/v1.0/me/drive?$select=id"
 
-def create_user(db, details: dict, refresh: str, ms_access_token: str, role: str, workspace_id: int, token: str):
+def create_user(db, details: dict, refresh: str, ms_access_token: str, role: str):
     split_name = details["name"].split()
     firstname, surname = split_name[0], split_name[-1]
     enc_refresh = encrypt_refresh(refresh)
@@ -24,9 +25,6 @@ def create_user(db, details: dict, refresh: str, ms_access_token: str, role: str
     drive_id = get_drive_id(access_token=ms_access_token)
 
     email = details["email"]
-
-    invite = get_invite_by_token(db, token)
-    pending_user = repository.get_pending_user_by_id(db, invite.user_id) if invite else None
 
     user = repository.create_user(
         db=db,
@@ -39,28 +37,37 @@ def create_user(db, details: dict, refresh: str, ms_access_token: str, role: str
         driveId=drive_id,
         role=role
     )
-    
-    if pending_user:
-        migrate_pending_roles(db, pending_user.user_id, user.user_id)
 
-        # delete pending user AFTER migration
-        delete_pending_user(db, pending_user.user_id)
-    
-    if(workspace_id != None and role == "employee"):
-        add_user_workspace(db, workspace_id, user.user_id)
-        if invite:
-            delete_pending_user(db, pending_user.user_id)
-            workspace = get_workspace_by_workspace_id(db, workspace_id)
-            users = workspace.user
-            for user in users:
-                if(user.role == "admin"):
-                    user_id = user.user_id
-
-            add_notification(db, "Employee Accepted Invite", f"{firstname} {surname} accepted their invite request to join your workspace.", datetime.now(), user_id)
     # Handle ingestion with celery - in the background and sets up a queue, incase of multiple signup and inturn ingestion requests at once
     _ = setup_ingestion_celery.delay(ms_access_token, user.user_id)
 
     return user
+
+# Method to handle user creation for anyone who has accepted an invite
+# def handle_user_creation_after_invite(db: Session, user: User, workspace_id: int, token: str):
+#     invite = get_invite_by_token(db, token)
+#     pending_user = repository.get_pending_user_by_id(db, invite.user_id) if invite else None
+#     if pending_user:
+#         print("HERE 1")
+#         migrate_pending_roles(db, pending_user.user_id, user.user_id)
+
+#         # delete pending user AFTER migration
+#         delete_pending_user(db, pending_user.user_id)
+
+#     if(workspace_id != None and role == "employee"):
+#         print("HERE 2")
+        
+#         if invite:
+#             print("HERE 3")
+#             delete_pending_user(db, pending_user.user_id)
+#             workspace = get_workspace_by_workspace_id(db, workspace_id)
+#             users = workspace.user
+#             for user in users:
+#                 if(user.role == "admin"):
+#                     user_id = user.user_id
+
+#             add_notification(db, "Employee Accepted Invite", f"{firstname} {surname} accepted their invite request to join your workspace.", datetime.now(), user_id)
+
 
 @celery.task
 def setup_ingestion_celery(ms_access_token, user_id):
