@@ -317,9 +317,11 @@ def get_set_all_graph_files(access_token: str, id: int, db:Session) -> str:
 
     iu_folders = repository.insert_user_folders(user_folders=user_folders, db=db)
     iu_files = repository.insert_user_files(user_files=user_files, db=db)
-    iuu_folders = repository.insert_unknown_user_folders(user_folders=unknown_user_folders, db=db)
-    iuu_files = repository.insert_unknown_user_files(user_files=unknown_user_files, db=db)
-    
+    iuu_folders = repository.insert_unknown_user_folders(user_folders=unknown_user_folders, db=db) if unknown_user_folders else 204
+    iuu_files = repository.insert_unknown_user_files(user_files=unknown_user_files, db=db) if unknown_user_files else 204
+    # print(f"\n\nThese are the unknown user_folders: {unknown_user_folders}\n\n")
+    # print(f"\n\nThese are the unknown user files: {unknown_user_files}\n\n")
+
     # print(permissions_dict)
     return {
         "repo_response_u_folders": iu_folders,
@@ -436,8 +438,18 @@ def delete_ingestion_file(application: ConfidentialClientApplication, user_id: i
     except:
         return None
     
-def get_workspace_unknown_folders(id: int, db: Session):
-    return repository.get_workspace_unknown_folders(id=id, db=db)
+def get_workspace_unknown_folders(id: int, email: str, db: Session):
+    return repository.get_workspace_unknown_folders(id=id, email=email, db=db)
 
-def get_workspace_unknown_files(id: int, db: Session):
-    return repository.get_workspace_unknown_files(id=id, db=db)
+def get_workspace_unknown_files(id: int, email: str, db: Session):
+    return repository.get_workspace_unknown_files(id=id, email=email, db=db)
+
+def add_user_files_after_workspace_join(user_files: list, db: Session):
+    return repository.add_user_files_after_workspace_join(user_files=user_files, db=db)
+
+def add_user_folders_after_workspace_join(user_folders: list, db: Session):
+    return repository.add_user_folders_after_workspace_join(user_folders=user_folders, db=db)
+
+def remove_unknown_by_email(email: str, db: Session):
+    repository.remove_unknown_by_email(email=email, db=db)
+
