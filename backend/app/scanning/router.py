@@ -89,5 +89,6 @@ def get_scan_file_by_id(scan_file_id: int, db: Session = Depends(get_database)):
     return service.get_scan_file_details(db=db, scan_file_id=scan_file_id)
 
 @router.get("/get_sensitivity_categories")
-def get_sensitivity_categories(db: Session = Depends(get_database)):
-    return service.get_sensitivity_subcategories(db=db)
+def get_sensitivity_categories(db: Session = Depends(get_database), user_id: int = Depends(get_user_id_from_access_token)):
+    workspace_id = repository.get_user_workspace_id(db=db, user_id=user_id)
+    return service.get_sensitivity_subcategories(db=db, workspace_id=workspace_id)

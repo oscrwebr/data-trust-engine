@@ -2,7 +2,7 @@ from datetime import datetime
 
 from sqlalchemy import select, func, and_
 from sqlalchemy.orm import Session
-from app.scanning.models import File, NamingConvention, Scan, ScanNamingConvention, NamingConventionScanResult, Scan, ScanFile, ScanFileDetection, DuplicateGroup, DuplicateScanResult 
+from app.scanning.models import File, NamingConvention, Scan, ScanNamingConvention, NamingConventionScanResult, Scan, ScanFile, ScanFileDetection, DuplicateGroup, DuplicateScanResult, WorkspaceDetectionSensitivity
 from app.ingestion.models import IngestionFile
 from app.roles.models import SensitivityCategory, SensitivitySubcategory
 from datetime import datetime, timezone
@@ -538,3 +538,18 @@ def get_sensitivity_categories(db: Session):
         .join(SensitivityCategory, SensitivitySubcategory.sensitivity_category_id == SensitivityCategory.sensitivity_category_id)
         .all()
     )
+
+def get_workspace_detection_sensitivities(db: Session, workspace_id: int):
+    return (
+        db.query(WorkspaceDetectionSensitivity)
+        .filter(WorkspaceDetectionSensitivity.workspace_id == workspace_id)
+        .all()
+    )
+
+def get_user_workspace_id(db: Session, user_id: int):
+    return (
+        db.query(UserWorkspace.c.workspace_id)
+        .filter(UserWorkspace.c.user_id == user_id)
+        .scalar()
+    )
+

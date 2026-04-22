@@ -598,8 +598,15 @@ def get_scan_file_details(db: Session, scan_file_id: int):
         "detections": detections
     }
 
-def get_sensitivity_subcategories(db: Session):
+def get_sensitivity_subcategories(db: Session, workspace_id: int):
     query = repository.get_sensitivity_categories(db=db)
+    workspace_sensitivies = repository.get_workspace_detection_sensitivities(db=db, workspace_id=workspace_id)
+
+    high_risk_check = {
+        subcategory.sensitivity_subcategory_id: subcategory.is_high
+        for subcategory in workspace_sensitivies
+    }
+
     result = {}
 
     # Group subcategories under their category
@@ -612,7 +619,8 @@ def get_sensitivity_subcategories(db: Session):
         result[category]["subcategories"].append(
             {
                 "subcategory_id": subcategory.sensitivity_subcategory_id,
-                "subcategory_name": subcategory.name
+                "subcategory_name": subcategory.name,
+                "is_high_risk": high_risk_check.get(subcategory.sensitivity_subcategory_id, False)
             }
         )
     return list(result.values())

@@ -77,7 +77,7 @@ function SensitivityConfiguration() {
                 </div>
                 <div className="subcategory-card-container">
                     {subcategories.map((subcategory) => (
-                        <SubcategoryCard key={subcategory.subcategory_id} subcategory={subcategory} />
+                        <SubcategoryCard key={subcategory.subcategory_id} subcategory={subcategory} isHigh={subcategory.is_high_risk}/>
                     ))}
                 </div>
             </div>
