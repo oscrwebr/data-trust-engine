@@ -8,7 +8,7 @@ import {
   within,
 } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import AdminFiles from "./adminFiles";
+import AdminFiles from "./AdminFiles";
 
 // ✅ mock axios api
 vi.mock("../api/axiosConfig", () => ({
