@@ -102,7 +102,7 @@ function Dashboard({toast}) {
         {user?.role === "admin" && (
             <div>
               <div className="scan-header">
-                  <h1 className="detection-heading">
+                  <h1 className="detection-heading" data-testid="dashboard-h1">
                       Dashboard
                   </h1>
               <Divider/>
