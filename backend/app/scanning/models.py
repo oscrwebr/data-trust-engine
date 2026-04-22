@@ -3,6 +3,8 @@ from app.core.database import Base
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 
 from app.ingestion.models import IngestionFile
+from app.workspaces.models import Workspace
+from app.roles.models import SensitivitySubcategory
 
 class File(Base):
     __tablename__ = 'file'
@@ -72,3 +74,11 @@ class DuplicateGroup(Base):
 
     duplicate_group_id = Column(Integer, primary_key=True, index=True)
     scan_id = Column(Integer, ForeignKey("scans.scan_id"))
+
+class WorkspaceDetectionSensitivity(Base):
+    __tablename__ = 'workspace_detection_sensitivity'
+
+    workspace_detection_sensitivity_id = Column(Integer, primary_key=True, index=True)
+    workspace_id = Column(Integer, ForeignKey("workspaces.id"))
+    sensitivity_subcategory_id = Column(Integer, ForeignKey("sensitivity_subcategory.sensitivity_subcategory_id"), nullable=False)
+    is_high = Column(Boolean, nullable=False)

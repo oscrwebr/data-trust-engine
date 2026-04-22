@@ -74,7 +74,9 @@ describe("FileOverviewPageTests", () => {
         const mockFile = {
             file_id: 1,
             file_name: "contract.pdf",
-            hash: "abc123"
+            hash: "abc123",
+            last_scanned: "2026-04-21T14:45:00Z",
+            last_modified: "2026-04-18T16:30:00Z"
         };
 
         const mockScanHistory = [
@@ -110,8 +112,9 @@ describe("FileOverviewPageTests", () => {
             expect(screen.getByText("contract.pdf")).toBeInTheDocument();
         });
 
-        // Ensure file information is rendered
-        expect(screen.getByText("abc123")).toBeInTheDocument();
+        // Ensure file information is rendered (formatted data using the formatted_data method)
+        expect(screen.getByText(/21 April 2026/i)).toBeInTheDocument();
+        expect(screen.getByText(/18 April 2026/i)).toBeInTheDocument();
 
         // Ensure section titles are rendered
         expect(screen.getByText("Latest Scan Results")).toBeInTheDocument();

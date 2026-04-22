@@ -1,0 +1,104 @@
+.scan-file-header-left {
+    display: flex;
+    flex-direction: column;
+}
+
+.back-button {
+    cursor: pointer;
+    margin-top: 0.67em;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.back-button:hover {
+    background-color: #323232;
+}
+
+.scan-file-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.p-accordion-header-link {
+    flex-direction: row-reverse;
+}
+
+.accordion-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.accordion-header-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.accordion-heading-detections span {
+    font-size: 14px;
+    color: #555;
+    font-weight: 500;;
+}
+
+.accordion-heading span {
+    font-size: 18px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.p-accordion .p-accordion-header .p-accordion-header-link {
+  padding: 0.55rem 0.75rem;
+}
+
+.p-accordion .p-toggleable-content {
+  transition: max-height 0.15s ease-in-out;
+}
+
+.pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 8px;
+    border-radius: 2px;
+    font-size: 13px;
+    font-weight: 500;
+    background-color: #F1F5F9;
+}
+
+.detection-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.detection-row {
+    display: flex;
+    align-items: center;
+    gap: 15px; 
+}
+
+.header-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 8px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    background-color: #F1F5F9;
+}
+
+.pills {
+    display: inline-flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.header-pill:hover {
+    background-color: #E2E8F0;
+    cursor: pointer;
+}   

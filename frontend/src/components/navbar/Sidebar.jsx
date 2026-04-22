@@ -9,11 +9,9 @@ import DropdownItemNoLink from "./DropdownItemNoLink.jsx";
 import api from "../../api/axiosConfig";
 import { Avatar } from "primereact/avatar";
 import { setAccessToken, getAccessToken } from "../../Auth/authStore.js";
-import { BiFileFind } from "react-icons/bi";
         
-function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role}){
+function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role, pendingEmployees}){
     const [openDropdown, setOpenDropdown] = useState(null);
-    const [pendingEmployees, setPendingEmployees] = useState([]);
     const [workspace_id, setWorkspaceId] = useState(null);
     const backend_uri = import.meta.env.VITE_BACKEND_HOST || "http://localhost:8000"
     const user_initials = (firstname?.[0]?.toUpperCase() || "?") + (surname?.[0]?.toUpperCase() || "?");
@@ -23,11 +21,6 @@ function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role
         api.get("/workspace/dashboard")
         .then(res => {
             setWorkspaceId(res.data.id)
-        })
-
-        api.get("/workspace/get-pending-employees")
-        .then(res => {
-            setPendingEmployees(res.data)
         })
     }, []);
 
@@ -70,7 +63,9 @@ function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role
                     <DropdownItem className={styles.navbar_item} url="/dashboard" text="Dashboard" icon="pi pi-th-large"/>
                     <div className={styles.line}/>
                     <SidebarDropdown className={styles.dropdown} icon="pi pi-file" label="Files" openDropdown={openDropdown} setOpenDropdown={setOpenDropdown}>
-                       <DropdownItem url="/dashboard-files" text="View Files"/>
+                       <DropdownItem url="/my-files" text="My Files"/>
+                       <DropdownItem url="/workspace-files" text="Workspace Files"/>
+                        <DropdownItem url="/high-risk-files" text="High-Risk Files"/>
                     </SidebarDropdown>
                     {/* Add a dropdown menu item using SidebarDropdown - choose your own label, an icon from PrimeReact and everything else can be kept the same*/}
                     <SidebarDropdown className={styles.dropdown} icon="pi pi-search" label="Scanning" openDropdown={openDropdown} setOpenDropdown={setOpenDropdown} basePaths={["/files"]}>
@@ -83,12 +78,13 @@ function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role
 
                         {/* SidebarDropdowns have their own children for styling purposes - specify the url and text displayed */}
                         <DropdownItem url="/view-employees" text="View Employees"/>
-                        <DropdownItem url="/manage-employees" text="Manage Employees" value={pendingEmployees.length}/>
+                        <DropdownItem url="/manage-employees" text="Manage Employees" value={pendingEmployees?.length}/>
                     </SidebarDropdown>
 
                     <SidebarDropdown className={styles.dropdown} icon="pi pi-pen-to-square" label="Configure" openDropdown={openDropdown} setOpenDropdown={setOpenDropdown} basePaths={["/roles", "/upload-org-chart"]}>
-                        <DropdownItem url="/roles" text="Create Roles"/>
+                        <DropdownItem url="/roles" text="Manage Roles"/>
                         <DropdownItem url="/upload-org-chart" text="Upload Org Chart"/>
+                        <DropdownItem url="/detection-sensitivity" text="Detection Sensitivity"/>
                     </SidebarDropdown>
 
                     <div className={styles.line}/>
@@ -129,7 +125,7 @@ function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role
                     <DropdownItem className={styles.navbar_item} url="/dashboard" text="Dashboard" icon="pi pi-th-large"/>
                     <div className={styles.line}/>
                     <SidebarDropdown className={styles.dropdown} icon="pi pi-file" label="Files" openDropdown={openDropdown} setOpenDropdown={setOpenDropdown}>
-                       <DropdownItem url="/dashboard-files" text="View Files"/>
+                       <DropdownItem url="/my-files" text="My Files"/>
                     </SidebarDropdown>
                     <div className={styles.line}/>
                     <DropdownItem url="/settings" text="Settings" icon="pi pi-cog"/>

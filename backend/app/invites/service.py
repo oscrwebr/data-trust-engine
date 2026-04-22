@@ -34,7 +34,7 @@ async def create_invite(db, invite, workspace, time_now, email):
 
 # Validating the invite
 def validate_invite(db, email: str, expiry_date: datetime | None, workspace: Workspace, time_now:datetime, admin_email: str):
-    cooldown = timedelta(days=1)
+    cooldown = timedelta(minutes=1)
 
     if email is None:
         return "invalid"

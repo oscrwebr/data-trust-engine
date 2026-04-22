@@ -16,7 +16,7 @@ import { Button } from "primereact/button";
 
 import api from "../api/axiosConfig.js";
 
-function Invite({ visible, setVisible, toast}) {
+function Invite({ visible, setVisible, toast, fetchEmployees}) {
   const [loading, setLoading] = useState(false);
   const [expiryDate, setExpiryDate] = useState(null);
   const [email, setEmail] = useState(null);
@@ -72,6 +72,7 @@ function Invite({ visible, setVisible, toast}) {
         
       } else if (res.data.success == true) {
         showSuccessMessage();
+        fetchEmployees();
         setDateError(false);
         setEmailError(false);
         setEmailValid(true);

@@ -1,7 +1,13 @@
 import pytest
+from sqlalchemy import select, insert
 
 from app.scanning import router, service, repository, models
 from app.scanning.scan_type import ScanType
+
+from app.workspaces.models import Workspace
+from app.authentication.models import User
+from app.workspaces.models import user_workspace as UserWorkspace
+from app.ingestion.models import UserFiles
 
 from app.roles import models as role_models
 
@@ -29,8 +35,39 @@ def sensitivity_categories(db):
 
     db.commit()
 
-def test_sensitivity_scan_with_no_detections_returns_zero_counts(db, sensitivity_categories):
+@pytest.fixture()
+def sensitivity_scan_setup(db):
+    workspace = Workspace(name="Test Workspace", image=b"image")
+    db.add(workspace)
+    db.commit()
+    db.refresh(workspace)
+
+    user = User(
+        firstname="Test",
+        surname="User",
+        username="test.user@example.com",
+        email="test.user@example.com",
+        oid="test-oid",
+        refresh=b"refresh",
+        role="admin"
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    db.execute(
+        insert(UserWorkspace).values(
+            user_id=user.user_id,
+            workspace_id=workspace.id
+        )
+    )
+    db.commit()
+
+    return user, workspace
+
+def test_sensitivity_scan_with_no_detections_returns_zero_counts(db, sensitivity_categories, sensitivity_scan_setup):
     # Arrange
+    user, workspace = sensitivity_scan_setup
     scan = repository.create_scan(db, scan_type=ScanType.SENSITIVITY)
 
     file = repository.create_test_file(
@@ -46,15 +83,16 @@ def test_sensitivity_scan_with_no_detections_returns_zero_counts(db, sensitivity
     scan_file = repository.create_scan_file(db, scan.scan_id, file.ingestion_file_id)
 
     # Act
-    scan = service.get_sensitivity_scan_details(db, scan)
+    scan = service.get_sensitivity_scan_details(db, scan, user_id=user.user_id)
 
     # Assert
     assert scan["detection_counts"]["personal"] == 0
     assert scan["detection_counts"]["financial"] == 0
     assert scan["detection_counts"]["legal_case"] == 0
 
-def test_get_sensitivity_scan_details_correctly_counts_detection_categories(db, sensitivity_categories):
+def test_get_sensitivity_scan_details_correctly_counts_detection_categories(db, sensitivity_categories, sensitivity_scan_setup):
     # Arrange
+    user, workspace = sensitivity_scan_setup
     scan = repository.create_scan(db, scan_type=ScanType.SENSITIVITY)
 
     file = repository.create_test_file(
@@ -81,7 +119,7 @@ def test_get_sensitivity_scan_details_correctly_counts_detection_categories(db, 
     repository.create_scan_file_detection(db, scan_file.scan_file_id, "IBAN", 1)
 
     # Act
-    scan = service.get_sensitivity_scan_details(db, scan)
+    scan = service.get_sensitivity_scan_details(db, scan, user_id=user.user_id)
 
     # Assert
     assert "detection_counts" in scan
@@ -89,8 +127,9 @@ def test_get_sensitivity_scan_details_correctly_counts_detection_categories(db, 
     assert scan["detection_counts"]["financial"] == 1
     assert scan["detection_counts"]["legal_case"] == 0
 
-def test_get_sensitivity_scan_details_returns_unique_subcategories(db, sensitivity_categories):
+def test_get_sensitivity_scan_details_returns_unique_subcategories(db, sensitivity_categories, sensitivity_scan_setup):
     # Arrange
+    user, workspace = sensitivity_scan_setup
     scan = repository.create_scan(db, scan_type=ScanType.SENSITIVITY)
 
     file = repository.create_test_file(
@@ -111,7 +150,7 @@ def test_get_sensitivity_scan_details_returns_unique_subcategories(db, sensitivi
     repository.create_scan_file_detection(db, scan_file.scan_file_id, "NAME", 3)
 
     # Act
-    scan = service.get_sensitivity_scan_details(db, scan)
+    scan = service.get_sensitivity_scan_details(db, scan, user_id=user.user_id)
 
     # Assert
     results = scan["files"][0]["sensitivity_scan_results"]
@@ -120,8 +159,9 @@ def test_get_sensitivity_scan_details_returns_unique_subcategories(db, sensitivi
     assert len(results) == 1
     assert results[0]["subcategory_name"] == "NAME"
 
-def test_get_sensitivity_scan_details_returns_subcategories_with_correct_category(db, sensitivity_categories):
+def test_get_sensitivity_scan_details_returns_subcategories_with_correct_category(db, sensitivity_categories, sensitivity_scan_setup):
     # Arrange
+    user, workspace = sensitivity_scan_setup
     scan = repository.create_scan(db, scan_type=ScanType.SENSITIVITY)
 
     file = repository.create_test_file(
@@ -141,7 +181,7 @@ def test_get_sensitivity_scan_details_returns_subcategories_with_correct_categor
     repository.create_scan_file_detection(db, scan_file.scan_file_id, "CITATION", 1)
 
     # Act
-    scan = service.get_sensitivity_scan_details(db, scan)
+    scan = service.get_sensitivity_scan_details(db, scan, user_id=user.user_id)
 
     # Assert
     results = scan["files"][0]["sensitivity_scan_results"]
@@ -152,8 +192,9 @@ def test_get_sensitivity_scan_details_returns_subcategories_with_correct_categor
     assert map["IBAN"] == "Financial"
     assert map["CITATION"] == "Legal Case"
 
-def test_get_sensitivity_scan_details_correctly_counts_detections_with_multiple_files(db, sensitivity_categories):
+def test_get_sensitivity_scan_details_correctly_counts_detections_with_multiple_files(db, sensitivity_categories, sensitivity_scan_setup):
     # Arrange
+    user, workspace = sensitivity_scan_setup
     scan = repository.create_scan(db, scan_type=ScanType.SENSITIVITY)
 
     file1 = repository.create_test_file(
@@ -189,7 +230,7 @@ def test_get_sensitivity_scan_details_correctly_counts_detections_with_multiple_
     repository.create_scan_file_detection(db, scan_file2.scan_file_id, "CITATION", 1)
 
     # Act
-    scan = service.get_sensitivity_scan_details(db, scan)
+    scan = service.get_sensitivity_scan_details(db, scan, user_id=user.user_id)
 
     # Assert
     assert "detection_counts" in scan

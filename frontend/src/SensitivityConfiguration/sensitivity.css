@@ -1,0 +1,96 @@
+.category-header{
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 26px;
+    font-weight: 500;
+}
+
+.detection-heading {
+    font-size: 40px;
+    margin-bottom: 0;
+}
+
+.subcategory-card {
+    border: 1px solid #d9e3f0;
+    border-radius: 14px;
+    padding: 15px;
+    width: 250px;
+    height: 120px;
+}
+
+.subcategory-icon-box {
+    width: 28px;
+    height: 28px;
+    background-color: #F1F5F9;
+    border-radius: 8px; 
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.subcategory-card-left {
+    display: flex;
+    align-items: flex-start;
+}
+
+.subcategory-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.subcategory-name {
+    font-weight: 500;
+}
+
+.subcategory-card-container {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 270px);
+    gap: 5px;
+    margin-bottom: 20px;
+}
+
+.subcategory-card-right {
+    margin-top: 15px;
+}
+
+.subcategory-select {
+    width: 100%;
+}
+
+.risk-toggle.p-selectbutton {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    background: #f3f4f6;
+    border-radius: 12px;
+    /* padding: 4px; */
+    gap: 4px;
+}
+
+.risk-toggle .p-button {
+    border: none;
+    border-radius: 12px;
+    min-width: 100px;
+    font-weight: 600;
+
+    background: transparent;
+    color: #8b95a7;
+
+    box-shadow: none;
+    outline: none;
+}
+
+.risk-toggle.high-selected .p-button.p-highlight {
+    background: #F61E49;
+    color: white;
+
+}
+
+.risk-toggle.standard-selected .p-button.p-highlight {
+    background: #FEC307;
+    color: white;
+
+}

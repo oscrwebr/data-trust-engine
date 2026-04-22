@@ -1,4 +1,9 @@
 services:
+  # Setting up redis for dev and prod environments
+  redis:
+    image: redis:8.6.2-alpine
+    profiles: ["dev", "prod"]
+
   # Setting up the dev environment
   frontend-dev:
     build:
@@ -71,6 +76,7 @@ services:
       - FERNET_KEY=${FERNET_KEY}
       - FRONTEND_HOST=${FRONTEND_HOST} #  THESE MUST ALWAYS BE TO WHATEVER THE USER'S CLIENT SHOULD BE! FOR DEV, THAT IS LOCALHOST
       - REDIRECT_URI=${REDIRECT_URI}
+      - REDIS_HOST=redis
     command: ["fastapi", "dev", "app/main.py", "--host", "0.0.0.0", "--port", "8000"]
     develop:
       watch:
@@ -84,6 +90,38 @@ services:
     depends_on:
       alembic_migrations-dev:
         condition: service_completed_successfully
+
+  # Setting up celery for dev environment
+  celery-dev:
+    build:
+      context: ./backend
+    image: fastapi-backend-dev:latest
+    pull_policy: never
+    profiles: ["dev"]
+    # working_dir: /app/core
+    environment:
+      - CLIENT_ID=${CLIENT_ID}
+      - CLIENT_SECRET=${CLIENT_SECRET}
+      - AUTHORITY=${AUTHORITY}
+      - SCOPES=${SCOPES}
+      - DB_HOST=database-dev
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_TEST_NAME=${DB_TEST_NAME}
+      - ACCESS_TOKEN_SECRET=${ACCESS_TOKEN_SECRET}
+      - ALGORITHM=${ALGORITHM}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      - ZEROBOUNCE_API_KEY=${ZEROBOUNCE_API_KEY}
+      - FERNET_KEY=${FERNET_KEY}
+      - FRONTEND_HOST=${FRONTEND_HOST} #  THESE MUST ALWAYS BE TO WHATEVER THE USER'S CLIENT SHOULD BE! FOR DEV, THAT IS LOCALHOST
+      - REDIRECT_URI=${REDIRECT_URI}
+      - REDIS_HOST=redis
+    command: ["celery","-A","app.core.celery_worker.celery", "worker", "--loglevel=info", "--concurrency=1"]
+    # command: celery -A celery_worker.celery worker --loglevel=info --concurrency=1
+    depends_on:
+      - redis
+      - backend-dev
 
 # Setting up the prod env -- TO BE PROPERLY CONFIGURED WHEN SETTING UP CLOUD DEPLOYMENT
   database-prod:
@@ -137,6 +175,7 @@ services:
       - FERNET_KEY=${FERNET_KEY}
       - FRONTEND_HOST=http://localhost #  THESE MUST ALWAYS BE TO WHATEVER THE USER'S CLIENT SHOULD BE! FOR DEV, THAT IS LOCALHOST
       - REDIRECT_URI=http://localhost/api
+      - REDIS_HOST=redis
     depends_on:
       alembic_migrations-prod:
         condition: service_completed_successfully
@@ -152,6 +191,36 @@ services:
     ports:
       - 80:80
     depends_on:
+      - backend-prod
+
+  # Setting up celery for prod env
+  celery-prod:
+    build:
+      context: ./backend
+    image: fastapi-backend-prod:latest
+    pull_policy: never
+    profiles: ["prod"]
+    environment:
+      - CLIENT_ID=${CLIENT_ID}
+      - CLIENT_SECRET=${CLIENT_SECRET}
+      - AUTHORITY=${AUTHORITY}
+      - SCOPES=${SCOPES}
+      - DB_HOST=database-prod
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_TEST_NAME=${DB_TEST_NAME}
+      - ACCESS_TOKEN_SECRET=${ACCESS_TOKEN_SECRET}
+      - ALGORITHM=${ALGORITHM}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      - ZEROBOUNCE_API_KEY=${ZEROBOUNCE_API_KEY}
+      - FERNET_KEY=${FERNET_KEY}
+      - FRONTEND_HOST=http://localhost #  THESE MUST ALWAYS BE TO WHATEVER THE USER'S CLIENT SHOULD BE! FOR DEV, THAT IS LOCALHOST
+      - REDIRECT_URI=http://localhost/api
+      - REDIS_HOST=redis
+    command: ["celery","-A","app.core.celery_worker.celery", "worker", "--loglevel=info", "--concurrency=1"]
+    depends_on:
+      - redis
       - backend-prod
 
 

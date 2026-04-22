@@ -48,7 +48,7 @@ function ScanPage() {
                 ) : scan === null ? (
                     <p className="scan-loading">No scan found.</p>
                 ) : ScanTypePage ? (
-                    <div>
+                    <>
                         {/* Heading portion */}
                         <div className="scan-header">
                             <h1 className="scan-heading">
@@ -62,7 +62,7 @@ function ScanPage() {
 
                         {/* Render the type of page depending on scan type (only organisation and sensitivity as of now) */}
                         <ScanTypePage scan={scan} />
-                    </div>
+                    </>
                 ) : (
                     <p className="scan-loading">Error fetching scan type.</p>
                 )}

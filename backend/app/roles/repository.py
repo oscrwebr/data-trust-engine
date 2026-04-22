@@ -8,16 +8,17 @@ from app.roles.models import (
     PendingUserRole
 )
 from app.authentication.models import User
+from datetime import datetime
 
-def create_role(db: Session, name: str, workspace_id: int):
-    role = Role(name=name, workspace_id=workspace_id)
+def create_role(db: Session, name: str, workspace_id: int, date: datetime):
+    role = Role(name=name, workspace_id=workspace_id, last_updated=date)
     db.add(role)
     db.commit()
     db.refresh(role)
     return role
 
-def get_all_roles(db: Session):
-    return db.query(Role).all()
+def get_all_roles(db: Session, workspace_id):
+    return db.query(Role).filter(Role.workspace_id == workspace_id).all()
 
 def get_role_by_name(db: Session, name: str):
     role = db.query(Role).filter(Role.name == name).first()
@@ -28,13 +29,14 @@ def delete_role(db: Session, role_id: int):
     db.query(Role).filter(Role.role_id == role_id).delete(synchronize_session=False)
     db.commit()
 
-def update_role(db: Session, role_id: int, name: str, thresholds: list[dict]):
+def update_role(db: Session, role_id: int, name: str, thresholds: list[dict], date: datetime):
     role = db.query(Role).filter(Role.role_id == role_id).first()
 
     if not role:
         return None
 
     role.name = name
+    role.last_updated = date
 
     db.query(RolePermission).filter(
         RolePermission.role_id == role_id
@@ -44,7 +46,7 @@ def update_role(db: Session, role_id: int, name: str, thresholds: list[dict]):
         perm = RolePermission(
             role_id=role_id,
             sensitivity_subcategory_id=t["sensitivity_subcategory_id"],
-            threshold=t.get("threshold")
+            threshold=t.get("threshold"),
         )
         db.add(perm)
 

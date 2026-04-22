@@ -25,6 +25,35 @@ def get_file_employees_with_access(db: Session, file_id: int):
     )
 
 
+# Method to get all employees with access to all files provided
+def get_employees_with_access_for_files(db: Session, file_ids: list[int]):
+    rows = (
+        db.query(
+            UserFiles.file_id.label("file_id"),
+            User.user_id,
+            User.firstname,
+            User.surname,
+            User.email,
+            Role.name.label("role_name")
+        )
+        .join(User, User.user_id == UserFiles.user_id)
+        .outerjoin(UserRole, UserRole.user_id == User.user_id)
+        .outerjoin(Role, Role.role_id == UserRole.role_id)
+        .filter(UserFiles.file_id.in_(file_ids))
+        .all()
+    )
+
+    records_by_file = {}
+
+    for row in rows:
+        if row.file_id not in records_by_file:
+            records_by_file[row.file_id] = []
+
+        records_by_file[row.file_id].append(row)
+
+    return records_by_file
+
+
 # Method to get a user's role ids
 def get_user_role_ids(db: Session, user_id: int):
     rows = (

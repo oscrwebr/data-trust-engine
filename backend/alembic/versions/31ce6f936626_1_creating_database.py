@@ -1,8 +1,8 @@
-"""pulled from dev
+"""1 Creating database
 
-Revision ID: 85705444f91e
+Revision ID: 31ce6f936626
 Revises: 
-Create Date: 2026-04-15 18:25:42.705587
+Create Date: 2026-04-21 20:19:06.221290
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision: str = '85705444f91e'
+revision: str = '31ce6f936626'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -176,6 +176,7 @@ def upgrade() -> None:
     sa.Column('role_id', sa.Integer(), nullable=False),
     sa.Column('workspace_id', sa.Integer(), nullable=True),
     sa.Column('name', sa.String(length=128), nullable=False),
+    sa.Column('last_updated', sa.DateTime(), nullable=False),
     sa.ForeignKeyConstraint(['workspace_id'], ['workspaces.id'], ),
     sa.PrimaryKeyConstraint('role_id')
     )
@@ -200,8 +201,8 @@ def upgrade() -> None:
     op.create_table('user_folders',
     sa.Column('folder_id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['folder_id'], ['folder.folder_id'], ),
-    sa.ForeignKeyConstraint(['user_id'], ['user.user_id'], ),
+    sa.ForeignKeyConstraint(['folder_id'], ['folder.folder_id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['user_id'], ['user.user_id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('folder_id', 'user_id')
     )
     op.create_index('rev_idx_user_folders', 'user_folders', ['user_id', 'folder_id'], unique=False)
@@ -253,8 +254,8 @@ def upgrade() -> None:
     op.create_table('user_files',
     sa.Column('file_id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['file_id'], ['ingestion_file.ingestion_file_id'], ),
-    sa.ForeignKeyConstraint(['user_id'], ['user.user_id'], ),
+    sa.ForeignKeyConstraint(['file_id'], ['ingestion_file.ingestion_file_id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['user_id'], ['user.user_id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('file_id', 'user_id')
     )
     op.create_index('rev_idx_user_files', 'user_files', ['user_id', 'file_id'], unique=False)

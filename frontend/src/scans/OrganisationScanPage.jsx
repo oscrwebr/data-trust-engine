@@ -45,9 +45,16 @@ function OrganisationScanPage({ scan }) {
         duplicateCount += duplicateGroups[duplicateGroupId].length - 1;
     }
 
+    // Files can be both duplicates and have naming issues
+    // Need to avoid counting the same file twice when calculating the percentage for clean files
+    // Sets remove duplicates automatically
+    const filesWithIssues = new Set(
+        scan.files.filter(
+            file => file.naming_convention_scan_results.every(result => !result.passed) || file.duplicate_group_id !== null
+        ).map(file => file.scan_file_id)
+    );
     // Get the amount of issues and percentage of clean files for display
-    const totalIssues = namingIssues + duplicateCount;
-    const cleanFiles = scan.file_count - totalIssues;
+    const cleanFiles = scan.file_count - filesWithIssues.size;
     const cleanFilesPercentage = getPercentage(cleanFiles, scan.file_count);
 
     
@@ -58,12 +65,14 @@ function OrganisationScanPage({ scan }) {
         <div className="scan-page-card-container">
             <div className="scan-page-card">
                 <div className="scan-page-card-text">
-                    <span className="scan-page-card-subtitle">Total Files Scanned</span>
+                    <span className="scan-page-card-subtitle">Total Files</span>
                     <span className="scan-page-card-title">{scan.file_count}</span>
                     
                 </div>
                 <div>
-                    <PiFileBold size={50}/>
+                    <div className="icon-box">
+                    <PiFileBold size={30}/>
+                    </div>
                 </div>
             </div>
             <div className={`scan-page-card ${getScanPageCardClass(namingIssues, scan.file_count)}`}>
@@ -74,7 +83,9 @@ function OrganisationScanPage({ scan }) {
                     
                 </div>
                 <div>
-                    <PiTextAaBold size={50}/>
+                    <div className="icon-box">
+                    <PiTextAaBold size={30}/>
+                    </div>
                 </div>
             </div>
             <div className={`scan-page-card ${getScanPageCardClass(duplicateCount, scan.file_count)}`}>
@@ -84,7 +95,9 @@ function OrganisationScanPage({ scan }) {
                     
                 </div>
                 <div>
-                    <PiCardsBold size={50}/>
+                    <div className="icon-box">
+                    <PiCardsBold size={30}/>
+                    </div>
                 </div>
             </div>
             <div className={`scan-page-card ${getCleanFilesClass(cleanFilesPercentage)}`}>
@@ -93,8 +106,10 @@ function OrganisationScanPage({ scan }) {
                     <span className="scan-page-card-title">{cleanFilesPercentage}%</span>
                     
                 </div>
-                <div>
-                    <PiCheckCircleBold size={50}/>
+                <div className="scan-page-card-image">
+                    <div className="icon-box">
+                    <PiCheckCircleBold size={30}/>
+                    </div>
                 </div>
             </div>
             

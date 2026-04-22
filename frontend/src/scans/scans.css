@@ -28,13 +28,13 @@
 
 
 .scan-type-organisation {
-    background: #F4F8FD;
-    border-color: #BEDBFF;
+    background: #ffffff;
+    border-color: #E6E8EC;
 }
 
 .scan-type-sensitivity {
-    background: #FAF8FD;
-    border-color: #E9D4FF;
+    background: #ffffff;
+    border-color: #E6E8EC;
 }
 
 .scan-card-top {
@@ -56,27 +56,27 @@
 }
 
 .scan-type-text {
-    color: white;
+    color: #314158;
     padding: 4px 10px;
-    border-radius: 15px;
+    border-radius: 4px;
     font-size: 14px;
     font-weight: 600;
 }
 
 .scan-type-icon-organisation {
-    color: #2563eb;
+    color: #45556C;
 }
 
 .scan-type-text-organisation {
-    background: #2563eb;
+    background: #F1F5F9;
 }
 
 .scan-type-icon-sensitivity {
-    color: #9810FA;
+    color: #45556C;
 }
 
 .scan-type-text-sensitivity {
-    background: #9810FA;
+    background: #F1F5F9;
 }
 
 .scan-card-top-right {
@@ -89,7 +89,7 @@
     align-items: center;
     color: white;
     padding: 4px 10px;
-    border-radius: 15px;
+    border-radius: 4px;
     font-size: 14px;
     font-weight: 500;
 }
@@ -98,11 +98,13 @@
 .scan-status-completed {
     background: #d9f5df;
     color: #11823b;
+    border: #A4F4CF 1px solid;
 }
 
 .scan-status-ongoing {
     background: #FEF3C6;
     color: #BB4D00;
+    border: #FCD34D 1px solid;
 }
 
 .scan-status-text svg {
@@ -179,42 +181,54 @@
 
 .scan-page-card-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, 250px);
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 20px;
     margin-top: 20px;
+    width: 100%;
 }
 
 .scan-page-card {
     background: #ffffff;
-    border: 1px solid #d9d9d9;
+    border: 1px solid #E6E8EC;
     display: flex;
     align-items: center;
     justify-content: space-between;
     border-radius: 16px;
-    padding: 28px 20px;
-    min-height: 120px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    padding: 10px 20px;
+    min-height: 90px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+.scan-page-card-image {
+    font-size: 16px;
+}
+
+.scan-page-card:hover {
+    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
 }
 
 /* variations for card */
 .clean {
-    background: #F0FDF4;
-    border: 1px solid #B9F8CF;
+    background: #ffffff;
+    /* border: 1px solid #B9F8CF; */
+    border: 1px solid #E6E8EC;
 }
 .issues {
 
-    background: #FFF7ED;
-    border: 1px solid #FFD6A7;
+    background: #ffffff;
+    /* border: 1px solid #FFD6A7; */
+    border: 1px solid #E6E8EC;
 }
 
 .critical {
-    background: #FEF2F2;
-    border: 1px solid #FECACA;
+    background: #ffffff;
+    /* border: 1px solid #FECACA;  */
+    border: 1px solid #E6E8EC;
 }
 
 /* variations for images */
 .clean svg {
-    color: #0D542B;
+    color: #166534;
 }
 .issues svg {
     color: #bd461f;
@@ -226,27 +240,34 @@
 
 /* variations for text */
 .critical .scan-page-card-title {
-    color: #d42121;
+    /* color: #d42121; */
+    /* background: #fee2e2; */
+    color: #DC2626;
 }
 
 .critical .scan-page-card-subtitle {
-    color: #DC2626; 
+    color: #6B7280; 
 }
 
 .issues .scan-page-card-title {
+    /* color: #bd461f; */
+    /* background: #ffedd5; */
     color: #bd461f;
 }
 
+
 .issues .scan-page-card-subtitle {
-    color: #C2410C;
+    color: #6B7280;
 }
 
 .clean .scan-page-card-title {
-    color: #0D542B;
+    /* color: #0D542B; */
+    color: #166534;
+    /* background: #dcfce7; */
 }
 
 .clean .scan-page-card-subtitle {
-    color: #278236;
+    color: #6B7280;
 }
 
 .scan-page-card-text {
@@ -257,13 +278,13 @@
 }
 
 .scan-page-card-title {
-    font-size: 30px;
+    font-size: 24px;
     font-weight: 800;
     color: #111827;
 }
 
 .scan-page-card-subtitle {
-    font-size: 14px;
+    font-size: 13px;
     color: #6B7280;
 }
 
@@ -290,7 +311,7 @@
     border-radius: 16px;
     padding: 15px 20px;
     width: 100%;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
     margin-top: 5px;
 }
 
@@ -300,6 +321,10 @@
 
 .card-issue {
     border: 1px solid #FFD6A7;
+}
+
+.card-critical {
+    border: 1px solid #FECACA;
 }
 
 .scan-page-files-heading {
@@ -333,6 +358,10 @@
     color: #bd461f;
 }
 
+.critical-issue {
+    color: #DC2626;
+}
+
 .scan-file-pill {
     border-radius: 5px;
     font-weight: 500;
@@ -348,6 +377,11 @@
 .pill-issue {
     background: #FEF3C6;
     color: #BB4D00;
+}
+
+.pill-critical {
+    background: #FEE2E2;
+    color: #DC2626;
 }
 
 .scan-file-name {
@@ -423,7 +457,7 @@
 }
 
 .scan-page-file-card:hover {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     cursor: pointer;
 }
 
@@ -438,12 +472,23 @@
 }
 
 .sensitivity-detection-category {
-    background: #FEF3C6;
-    color: #BB4D00;
+    background: grey;
+    color: black;
     border-radius: 5px;
     font-weight: 500;
     padding: 4px 10px;
     font-size: 12px;
+}
+
+.standard-risk .sensitivity-detection-category {
+    background-color: #FEF3C6;
+    color: #B45309;
+}
+
+
+.high-risk .sensitivity-detection-category {
+    background-color: #FEE2E2;
+    color: #DC2626;
 }
 
 .scan-file-sensitivity-details {
@@ -501,4 +546,27 @@
 
 .scan-file-details-wrapper {
     width: 100%;
+}
+
+.icon-box {
+    width: 40px;
+    height: 40px;
+    background-color: #F1F5F9;
+    border-radius: 8px; 
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.clean .icon-box {
+    background: #dcfce7;
+}
+
+.critical .icon-box {
+    background: #fee2e2;
+}
+
+.issues .icon-box {
+    background: #ffedd5;
 }

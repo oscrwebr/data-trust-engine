@@ -1,0 +1,157 @@
+.file_row {
+    display: grid;
+    grid-template-columns: 70px 2.4fr 1.2fr 1.6fr 1fr 1fr;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #e5e7eb;
+    background-color: #ffffff;
+    column-gap: 1rem;
+}
+
+.file_row:last-child {
+    border-bottom: none;
+}
+
+
+.file_risk {
+    display: flex;
+    align-items: center;
+}
+
+.risk_badge {
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-size: 0.85rem;
+}
+
+.high {
+    background-color: #e11d48;
+}
+
+.medium {
+    background-color: #f97316;
+}
+
+.low {
+    background-color: #f59e0b;
+}
+
+.file_info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+}
+
+.file_icon_box {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background-color: #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.file_icon {
+    font-size: 1rem;
+    color: #6b7280;
+}
+
+.file_name {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #111827;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.file_access_count {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #111827;
+}
+
+.file_valid_access {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.progress_row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.progress_bar {
+    width: 90px;
+    height: 8px;
+    border-radius: 999px;
+    background-color: #e5e7eb;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.progress_fill {
+    height: 100%;
+    background-color: #2563eb;
+    border-radius: 999px;
+}
+
+.progress_text {
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin: 0;
+    min-width: 32px;
+}
+
+.file_access_counts {
+    font-size: 0.78rem;
+    color: #6b7280;
+}
+
+.file_detections {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #2563eb;
+    white-space: nowrap;
+}
+
+.file_actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.file_actions button {
+    background: none;
+    border: none;
+    color: #111827;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+}
+
+.file_actions button:hover {
+    opacity: 0.7;
+}
+
+@media (max-width: 1100px) {
+    .file_row {
+        grid-template-columns: 60px 2fr 1fr 1.4fr 0.9fr 0.9fr;
+    }
+}
+
+@media (max-width: 900px) {
+    .file_row {
+        min-width: 900px;
+    }
+}
