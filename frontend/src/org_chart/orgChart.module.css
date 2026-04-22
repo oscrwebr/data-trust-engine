@@ -50,11 +50,24 @@
 }
 
 /* ===== Page Header ===== */
-.pageHeader {
-  font-size: 2.2rem;
+.header_container {
+  display: flex;
+  align-items: center; 
+  width: 100%;
+  gap: 10px;
+}
+
+#header_icon {
+    font-size: 1.5rem;
+    color: #111827;
+}
+
+.title {
+  margin: 0;
+  font-size: 2.1rem;
   font-weight: 700;
-  color: var(--accent-blue);
-  text-align: center;
+  color: #111827;
+  margin-bottom: 5px;
 }
 
 /* ===== Upload Section ===== */
