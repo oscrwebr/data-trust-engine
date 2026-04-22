@@ -8,11 +8,12 @@ import secrets
 import requests
 import pytest
 
-from app.authentication.service import create_user, DRIVE_DATA_GRAPH_URL, add_pending_user
+from app.authentication.service import create_user, DRIVE_DATA_GRAPH_URL, add_pending_user, handle_user_creation_after_invite
 from app.workspaces.models import Notification
+from app.workspaces.models import user_workspace
 from app.workspaces.repository import add_workspace, add_user_workspace
 from app.invites.repository import add_invite
-from app.authentication.models import User
+from app.authentication.models import User, PendingUser
 from app.authentication.router import get_session
 from app.core.security import application, decrypt_refresh
 from app.core.database import get_database
@@ -191,3 +192,35 @@ def test_delay_called_correctly(db, mock_delay):
     
     # assertions
     mock_delay.assert_called_once_with("ms-access-token", user.user_id)
+
+
+# Test that handle_user_creation_after_invite adds user to workspace
+def test_handle_user_creation_after_invite_performs_correctly(db, client):
+    image = create_test_image()
+    token = str(secrets.token_hex(16))
+
+    dummy_user = {
+        "name": "John Katherine Smith",
+        "email": "jkatherinesmith@outlook.com",
+        "preferred_username": "jkatherinesmith@outlook.com",
+        "oid": "00000000-0000-0000-476j-987sdf88se", # This is random
+    }
+
+    oid = "000000-7sdf77-88asdf8-9sdiy99"
+    admin = insert(User).values(firstname="John", surname="Smith", username="johnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", refresh="ms-refresh-token".encode(), oid=oid, role="admin")
+    admin_instance=db.execute(admin)
+    workspace = add_workspace(db=db, name="Test Workspace", image=image)
+    add_user_workspace(db, workspace.id, admin_instance.inserted_primary_key[0])
+
+    pending_user = add_pending_user(db, "johnSmith1@hotmail.com", "invite")
+    add_invite(db, '2026-04-20 12:00:00', '2026-04-20 12:00:00', token, True, pending_user.user_id, workspace)
+    user = create_user(db=db, details=dummy_user, refresh="ms-refresh-token", ms_access_token="ms-access-token", role="employee")
+
+    # Call said function 
+    handle_user_creation_after_invite(db, user, workspace.id, token)
+
+    # assertions
+    assert db.query(user_workspace).count() == 2
+    assert db.query(Notification).count() == 1
+    assert db.query(PendingUser).count() == 0
+    
