@@ -606,3 +606,23 @@
     display: flex;
     justify-content: flex-end;
 }
+
+.rename-success-message {
+    margin-left: 10px;
+    font-size: 13px;
+    color: #22c55e;
+    font-weight: 500;
+}
+
+.success-message-container {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.rename-error-message {
+    margin-left: 10px;
+    font-size: 13px;
+    color: #dc2626;
+    font-weight: 500;
+}

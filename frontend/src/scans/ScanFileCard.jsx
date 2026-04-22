@@ -83,12 +83,20 @@ function ScanFileCard({scan_file, scan_type, scan_files}) {
                             ? issues.map(i => i.type).join(", ")
                             : `${detectionCount} Detections Found`
 
+    const[renameSuccess, setRenameSuccess] = useState(false);
+    const[renameError, setRenameError] = useState(false)
+
     async function applySuggestedName(event, suggestedName) {
         event.preventDefault();
         event.stopPropagation();
 
         // const extension = scan_file.file_name.split('.').pop();
         // const nameWithExtension =  `${suggestedName}.${extension}`;
+
+        // Reset success/error messages for edge cases
+        setRenameSuccess(false);
+        setRenameError(false);
+
 
         try {
             await api.patch("/ingestion/rename-file", null, {
@@ -98,11 +106,18 @@ function ScanFileCard({scan_file, scan_type, scan_files}) {
             }
             
         });
-        console.log("File renamed successfully");
+            // Display success message if successful call
+            setRenameSuccess(true);
+            // Hides success message after 6 seconds
+            setTimeout(() => setRenameSuccess(false), 6000);
+
+            console.log("File renamed successfully");
         } catch (error) {
             console.error("Error applying suggested name:", error);
-            console.error("Status:", error?.response?.status);
-            console.error("Data:", error?.response?.data);
+            // Display error message
+            setRenameError(true)
+            // Hides error message after 6 seconds
+            setTimeout(() => setRenameError(false), 6000)
         }
     }
                             
@@ -158,6 +173,11 @@ function ScanFileCard({scan_file, scan_type, scan_files}) {
 
 
                                         </button>
+                                        
+                                    </div>
+                                    <div className="success-message-container">
+                                        {renameSuccess && <span className="rename-success-message">Name updated successfully!</span>}
+                                        {renameError && <span className="rename-error-message">Error updating name.</span>}
                                     </div>
                                 </div>
                                 </>
