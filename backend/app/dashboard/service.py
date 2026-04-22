@@ -18,11 +18,19 @@ def get_recent_activity(db: Session, user_id: int):
     # Append to the recent activity list for sorting by most recent timestamp later on
     for scan in scans:
         recent_activity.append({
-            "type": "scan",
+            "type": "scan_started",
             "scan_id": scan.scan_id,
             "timestamp": scan.started_at,
             "scan_type": scan.scan_type,
         })
+
+        if scan.completed_at is not None:
+            recent_activity.append({
+                "type": "scan_completed",
+                "scan_id": scan.scan_id,
+                "timestamp": scan.completed_at,
+                "scan_type": scan.scan_type,
+            })
 
     for invite in invites:
         recent_activity.append({

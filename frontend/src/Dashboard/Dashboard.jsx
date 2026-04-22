@@ -12,11 +12,25 @@ function Dashboard({toast}) {
   const { user, workspace } = useOutletContext();
   const [requestJoinWorkspaceVisible, setRequestJoinWorkspaceVisible] = useState(false);
   const [pendingUser, setPendingUser] = useState([])
+  const [recentActivity, setRecentActivity] = useState([])
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     api.get("/auth/test")
     .then(res => {
       setPendingUser(res.data.pending)
+    });
+
+    api.get("/dashboard/get_recent_activity")
+    .then(response => {
+      console.log(response.data)
+      setRecentActivity(response.data);
+      setLoading(false);
+    })
+    .catch(err => {
+      setError(err);
+      setLoading(false);
     })
   }, [])
 
@@ -41,6 +55,7 @@ function Dashboard({toast}) {
                 </h1>
             <Divider/>
             </div>
+
           </div>
         )}
         
