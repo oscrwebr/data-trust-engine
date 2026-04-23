@@ -68,11 +68,9 @@ def get_all_users(db: Session = Depends(get_database)):
     result = []
 
     for u in users:
-        # fetch assigned sensitivity role
         user_role = db.query(UserRole).filter(UserRole.user_id == u.user_id).first()
         role_id = user_role.role_id if user_role else None
 
-        # optionally fetch role name
         role_name = None
         if role_id:
             role = db.query(Role).filter(Role.role_id == role_id).first()

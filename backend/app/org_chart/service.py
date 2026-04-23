@@ -1,4 +1,3 @@
-# app/orgChart/service.py
 from sqlalchemy.orm import Session
 from app.roles import service as roles_service
 from app.authentication.repository import get_pending_user_by_email, add_user
@@ -44,7 +43,6 @@ async def confirm_orgchart(roles: list, db: Session, workspace_id: int):
     time_now = datetime.now()
 
     for r in roles:
-        # 1. Create role
         existing_role = db.query(Role).filter(
             Role.name == r["name"],
             Role.workspace_id == workspace_id
@@ -64,16 +62,13 @@ async def confirm_orgchart(roles: list, db: Session, workspace_id: int):
 
         role_id = role["role_id"] if isinstance(role, dict) else role.role_id
 
-        # 2. Assign employees + send invites
         for emp in r["employees"]:
             email = emp["email"]
 
-            # --- Pending user ---
             pending_user = get_pending_user_by_email(db, email)
             if not pending_user:
                 pending_user = add_user(db, email, type="employee")
 
-            # --- Assign role (no duplicates) ---
             existing = db.query(PendingUserRole).filter(
                 PendingUserRole.user_id == pending_user.user_id,
                 PendingUserRole.role_id == role_id
@@ -85,23 +80,20 @@ async def confirm_orgchart(roles: list, db: Session, workspace_id: int):
                     role_id=role_id
                 ))
 
-            # --- 🚀 SEND INVITE ---
             token = str(secrets.token_hex(16))
 
             expiry_date = datetime.now().date()  # or set default logic
             expiry_formatted = arrow.get(str(expiry_date), "YYYY-MM-DD").format("Do MMMM YYYY")
 
-            # send email
             await send_invite_service(
                 db,
                 email,
                 expiry_formatted,
                 token,
                 workspace,
-                None  # no "admin user" here (optional improvement later)
+                None
             )
 
-            # save invite in DB
             add_invite(
                 db,
                 time_now,

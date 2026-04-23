@@ -148,7 +148,6 @@ function OrgChart({ toast }) {
         </div>
       )}
 
-      {/* Preview Section */}
       {previewData && (
         <div className={styles.orgPreviewSection}>
           <h3 className={styles.orgPreviewTitle}>Organisation Structure</h3>
@@ -161,7 +160,6 @@ function OrgChart({ toast }) {
             {showAddUser ? "Cancel Add User" : "Add User"}
           </button>
 
-          {/* Add User Form */}
           {showAddUser && (
             <div className={styles.orgAddUserForm}>
               <label>Name</label>
@@ -196,7 +194,6 @@ function OrgChart({ toast }) {
             </div>
           )}
 
-          {/* Drag & Drop Org Chart */}
           <DragDropContext onDragEnd={handleDragEnd}>
             {previewData.roles.map((role, roleIndex) => (
               <Droppable key={role.name} droppableId={role.name}>

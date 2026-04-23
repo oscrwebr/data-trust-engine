@@ -9,8 +9,9 @@ import {
 } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import AdminFiles from "./AdminFiles.jsx";
+import api from "../api/axiosConfig";
 
-// ✅ mock axios api
+
 vi.mock("../api/axiosConfig", () => ({
   default: {
     get: vi.fn(),
@@ -22,7 +23,6 @@ vi.mock("../api/axiosConfig", () => ({
   },
 }));
 
-// ✅ mock navigate
 const mockNavigate = vi.fn();
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual("react-router-dom");
@@ -32,9 +32,7 @@ vi.mock("react-router-dom", async () => {
   };
 });
 
-import api from "../api/axiosConfig";
 
-// ✅ mock global fetch (FIRST API CALL)
 global.fetch = vi.fn();
 
 describe("AdminFiles Component", () => {
@@ -71,9 +69,6 @@ describe("AdminFiles Component", () => {
     },
   ];
 
-  // -------------------------------
-  // Test 1: Loads + renders data
-  // -------------------------------
   test("renders files with merged scan data", async () => {
     fetch.mockResolvedValueOnce({
       json: async () => ({
@@ -95,18 +90,13 @@ describe("AdminFiles Component", () => {
     expect(await screen.findByText("file1.txt")).toBeInTheDocument();
     expect(await screen.findByText("file2.txt")).toBeInTheDocument();
 
-    // sensitivity labels
     expect(await screen.findByText("High")).toBeInTheDocument();
     expect(await screen.findByText("Low")).toBeInTheDocument();
 
-    // last scanned
     expect(await screen.findByText(/2026/)).toBeInTheDocument();
     expect(await screen.findByText("Never")).toBeInTheDocument();
   });
 
-  // -------------------------------
-  // Test 2: Checkbox selection
-  // -------------------------------
   test("selecting a file enables scan button", async () => {
     fetch.mockResolvedValueOnce({
       json: async () => ({ items: baseFiles, total: 2 }),
@@ -130,9 +120,7 @@ describe("AdminFiles Component", () => {
     expect(scanButton).not.toBeDisabled();
   });
 
-  // -------------------------------
-  // Test 3: Scan API call
-  // -------------------------------
+
   test("scan button calls API with selected graph ids", async () => {
     fetch.mockResolvedValueOnce({
       json: async () => ({ items: baseFiles, total: 2 }),
@@ -160,9 +148,7 @@ describe("AdminFiles Component", () => {
     });
   });
 
-  // -------------------------------
-  // Test 4: Navigation works
-  // -------------------------------
+
   test("clicking file name navigates correctly", async () => {
     fetch.mockResolvedValueOnce({
       json: async () => ({ items: baseFiles, total: 2 }),
@@ -182,9 +168,6 @@ describe("AdminFiles Component", () => {
     expect(mockNavigate).toHaveBeenCalledWith("/files/1");
   });
 
-  // -------------------------------
-  // Test 5: Pagination next page
-  // -------------------------------
   test("pagination next button loads next page", async () => {
     fetch
       .mockResolvedValueOnce({
@@ -210,9 +193,7 @@ describe("AdminFiles Component", () => {
     });
   });
 
-  // -------------------------------
-  // Test 6: Loading state
-  // -------------------------------
+
   test("shows loading state", async () => {
     fetch.mockImplementation(
       () =>
@@ -236,9 +217,6 @@ describe("AdminFiles Component", () => {
     expect(screen.getByText("Loading...")).toBeInTheDocument();
   });
 
-  // -------------------------------
-  // Test 7: No graph_id disables checkbox
-  // -------------------------------
   test("checkbox disabled when graph_file_id is null", async () => {
     fetch.mockResolvedValueOnce({
       json: async () => ({

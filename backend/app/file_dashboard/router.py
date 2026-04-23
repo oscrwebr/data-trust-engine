@@ -7,9 +7,6 @@ from app.file_dashboard import service
 router = APIRouter(prefix="/files", tags=["Files"])
 
 
-# -------------------------
-# ROOT
-# -------------------------
 @router.get("/folders")
 def get_root_folders(
     db: Session = Depends(get_database),
@@ -18,9 +15,6 @@ def get_root_folders(
     return service.get_root_folders(db, user.user_id)
 
 
-# -------------------------
-# SUBFOLDERS
-# -------------------------
 @router.get("/folders/{parent_graph_id}")
 def get_subfolders(
     parent_graph_id: str,
@@ -30,9 +24,6 @@ def get_subfolders(
     return service.get_subfolders(db, user.user_id, parent_graph_id)
 
 
-# -------------------------
-# FILES
-# -------------------------
 @router.get("/{parent_graph_id}")
 def get_files(
     parent_graph_id: str,

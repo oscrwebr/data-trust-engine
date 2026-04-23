@@ -47,16 +47,13 @@ describe("OrgChart Component", () => {
       </MemoryRouter>
     );
   
-    // Select the hidden file input
     const input = document.querySelector('._fileUpload_415fd9 input[type="file"]');
     const file = new File(["dummy content"], "orgchart.csv", { type: "text/csv" });
     Object.defineProperty(input, 'files', { value: [file] });
     fireEvent.change(input);
   
-    // Click parse button
     fireEvent.click(screen.getByText(/Parse Org Chart/i));
   
-    // Wait for roles and employees to appear
     await waitFor(() => {
       expect(screen.getByText("Manager")).toBeInTheDocument();
       expect(screen.getByText("Alice (alice@example.com)")).toBeInTheDocument();

@@ -89,11 +89,6 @@ def create_role_permission(db: Session, role_id: int, subcategory_id: int):
     return permission
 
 def get_all_users_by_role(db: Session, role_id: int):
-    """
-    Return all users who have a specific sensitivity role.
-    role_id: the id of the sensitivity role (from Role table)
-    """
-    # Join UserRole to filter users with the given sensitivity role
     users = (
         db.query(User)
         .join(UserRole, User.user_id == UserRole.user_id)
@@ -101,14 +96,13 @@ def get_all_users_by_role(db: Session, role_id: int):
         .all()
     )
 
-    # Prepare list of dicts for API response
     result = [
         {
             "user_id": u.user_id,
             "firstname": u.firstname,
             "surname": u.surname,
             "email": u.email,
-            "user_level_role": u.role  # admin/employee
+            "user_level_role": u.role
         }
         for u in users
     ]

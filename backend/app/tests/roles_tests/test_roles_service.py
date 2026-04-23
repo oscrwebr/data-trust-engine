@@ -7,9 +7,8 @@ from app.roles.models import Role, RolePermission, SensitivityCategory, Sensitiv
 from app.authentication.models import User
 from app.workspaces.models import Workspace
 from app.workspaces.repository import add_user_workspace
-# ---------------- Helper functions ----------------
+
 def create_admin_user(db, email="admin@test.com"):
-    """Create a user who can own a workspace"""
     oid = secrets.token_hex(8)
     stmt = insert(User).values(
         firstname="Admin",
@@ -26,7 +25,6 @@ def create_admin_user(db, email="admin@test.com"):
     return db.query(User).filter(User.user_id == user_id).first()
 
 def create_workspace(db, user=None, name="Test Workspace", image=b"fake-image-bytes"):
-    """Create a workspace owned by a valid user"""
     if not user:
         user = create_admin_user(db)
     workspace = Workspace(
@@ -39,7 +37,6 @@ def create_workspace(db, user=None, name="Test Workspace", image=b"fake-image-by
     return workspace
 
 def create_user(db, workspace=None, email="user@test.com"):
-    """Create a normal user and optionally associate with workspace."""
     oid = secrets.token_hex(8)
     user = User(
         firstname="Test",
@@ -54,7 +51,6 @@ def create_user(db, workspace=None, email="user@test.com"):
     db.commit()
     db.refresh(user)
 
-    # If a workspace is provided and has no owner, assign this user as owner
     user_workspace = user.workspaces
     if workspace and user_workspace is None:
         workspace.user_id = user.user_id
@@ -63,14 +59,12 @@ def create_user(db, workspace=None, email="user@test.com"):
     return user
 
 def create_role(db, workspace, name="Test Role", date='2024-01-15 09:30:00'):
-    """Create a role in a workspace."""
     role = Role(name=name, workspace_id=workspace.id, last_updated=date)
     db.add(role)
     db.commit()
     db.refresh(role)
     return role
     
-# ---------------- Role Tests ----------------
 def test_create_role_service(db):
     admin = create_user(db, email="admin1@test.com")
     workspace = create_workspace(db)
@@ -138,7 +132,6 @@ def test_delete_role_service(db):
     deleted = db.query(Role).filter(Role.role_id == role_id).first()
     assert deleted is None
 
-# ---------------- Category/Subcategory Tests ----------------
 def test_get_categories_service(db):
     repository.create_sensitivity_category(db, "PII")
     repository.create_sensitivity_category(db, "Legal")
@@ -152,7 +145,6 @@ def test_get_subcategories_service(db):
     assert len(subs) >= 1
     assert subs[0].name == "Emails"
 
-# ---------------- User Tests ----------------
 def test_update_user_role_assigns_role(db):
     admin = create_user(db, email="admin3@test.com")
     workspace = create_workspace(db)

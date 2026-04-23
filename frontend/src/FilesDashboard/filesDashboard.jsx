@@ -108,7 +108,6 @@ function FilesDashboard({ toast }) {
     });
   };
 
-  // ✅ Toggle file selection (FIXED: uses graph_id)
   const toggleFile = (graphId) => {
     console.log("TOGGLE FILE:", graphId);
 
@@ -130,7 +129,7 @@ function FilesDashboard({ toast }) {
       return;
     }
   
-    setScanning(true); // ✅ start spinner
+    setScanning(true); //
   
     try {
       await api.post("/scanning/scan_files", {
@@ -171,7 +170,6 @@ function FilesDashboard({ toast }) {
   const renderFolder = (folder) => (
     <div key={folder.folder_id} className={styles.folder}>
       
-      {/* Folder header (NO checkbox) */}
       <div
         className={styles.folderHeader}
         onClick={() => toggleFolder(folder.folder_id, folder.graph_id)}

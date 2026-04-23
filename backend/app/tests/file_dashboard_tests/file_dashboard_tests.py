@@ -10,11 +10,6 @@ from app.workspaces.models import Workspace
 from app.ingestion.models import Folder, IngestionFile, UserFolders, UserFiles
 from app.file_dashboard import service, repository
 
-
-# =========================================================
-# FIXTURES / HELPERS
-# =========================================================
-
 def create_admin_user(db, email="admin@test.com"):
     oid = secrets.token_hex(8)
 
@@ -90,14 +85,6 @@ def link_file(db, file_id, user_id):
     db.commit()
 
 
-# =========================================================
-# TESTS
-# =========================================================
-
-# -------------------------
-# ROOT FOLDERS
-# -------------------------
-
 def test_get_root_folders(db):
     user = create_user(db)
 
@@ -112,9 +99,6 @@ def test_get_root_folders(db):
     assert any(f.graph_id == "r1" for f in result)
 
 
-# -------------------------
-# SUBFOLDERS
-# -------------------------
 
 def test_get_subfolders(db):
     user = create_user(db)
@@ -131,9 +115,6 @@ def test_get_subfolders(db):
     assert result[0].graph_id == "c1"
 
 
-# -------------------------
-# FILES IN FOLDER
-# -------------------------
 
 def test_get_files_in_folder(db):
     user = create_user(db)
@@ -151,10 +132,6 @@ def test_get_files_in_folder(db):
     assert len(result) == 2
     assert {f.name for f in result} == {"file1.txt", "file2.pdf"}
 
-
-# -------------------------
-# ISOLATION TESTS
-# -------------------------
 
 def test_folder_and_files_are_isolated(db):
     user = create_user(db)
