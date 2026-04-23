@@ -22,7 +22,6 @@ function AdminFiles() {
   const backend_uri =
     import.meta.env.VITE_BACKEND_HOST || "http://localhost:8000";
 
-  // ✅ SAME RISK LOGIC
   const getRiskLevel = (file) => {
     if (file.invalid_access_percentage >= 50) return "high";
     if (file.invalid_access_percentage >= 25) return "medium";
@@ -44,14 +43,12 @@ function AdminFiles() {
     }
   }
 
-  // ✅ FETCH FILES + LAST SCANNED
   const fetchFiles = async () => {
     setLoading(true);
 
     try {
       const offset = (page - 1) * pageSize;
 
-      // 1️⃣ GET BASE FILES
       const filesRes = await fetch(
         `${backend_uri}/access_mapping/get_highest_risk_files?limit=${pageSize}&offset=${offset}`
       );
@@ -67,7 +64,6 @@ function AdminFiles() {
       let scanMap = {};
       let graphMap = {};
 
-      // 2️⃣ GET LAST SCANNED + GRAPH IDs
       if (ids.length > 0) {
         const scanRes = await api.get("/admin/files/last-scanned", {
           params: { file_ids: ids },
@@ -75,14 +71,12 @@ function AdminFiles() {
             params.file_ids.map((id) => `file_ids=${id}`).join("&")
         });
 
-        // ✅ FIX: use scanRes.data (NOT .data.data)
         scanRes.data.forEach((f) => {
           scanMap[f.file_id] = f.last_scanned;
           graphMap[f.file_id] = f.graph_file_id;
         });
       }
 
-      // 3️⃣ MERGE EVERYTHING
       const merged = baseFiles.map((f) => ({
         ...f,
         last_scanned: scanMap[f.file_id] || null,
@@ -101,7 +95,6 @@ function AdminFiles() {
     fetchFiles();
   }, [page]);
 
-  // ✅ SELECT FILES (STORE GRAPH IDS!)
   const toggleFile = (file) => {
     if (!file.graph_file_id) return;
 
@@ -112,7 +105,6 @@ function AdminFiles() {
     );
   };
 
-  // ✅ SCAN
   const scanSelected = async () => {
     if (selected.length === 0) return;
 
@@ -120,7 +112,7 @@ function AdminFiles() {
 
     try {
       await api.post("/scanning/scan_files", {
-        graph_file_ids: selected // ✅ CORRECT NOW
+        graph_file_ids: selected
       });
 
       setSelected([]);
@@ -132,7 +124,6 @@ function AdminFiles() {
     }
   };
 
-  // ✅ STYLING
   const getSensitivityStyle = (level) => {
     switch (level) {
       case "low":
@@ -152,7 +143,6 @@ function AdminFiles() {
     <div className={styles.container}>
       <h2>Admin Files</h2>
 
-      {/* SCAN BUTTON */}
       <button
         onClick={scanSelected}
         disabled={selected.length === 0 || scanning}
@@ -165,7 +155,6 @@ function AdminFiles() {
         Run Organisation Scan
       </button>
 
-      {/* TABLE */}
       {loading ? (
         <p>Loading...</p>
       ) : (
@@ -187,7 +176,6 @@ function AdminFiles() {
 
               return (
                 <tr key={file.file_id}>
-                  {/* CHECKBOX */}
                   <td>
                     <input
                       type="checkbox"
@@ -197,7 +185,6 @@ function AdminFiles() {
                     />
                   </td>
 
-                  {/* NAME */}
                   <td>
                     <span
                       className={styles.fileLink}
@@ -206,14 +193,12 @@ function AdminFiles() {
                       {file.file_name}
                     </span>
                   </td>
-                  {/* SENSITIVITY */}
                   <td>
                     <span className={`${styles.badge} ${s.className}`}>
                       {s.label}
                     </span>
                   </td>
 
-                  {/* LAST SCANNED */}
                   <td>
                     {file.last_scanned ? (
                       new Date(file.last_scanned).toLocaleString()
@@ -222,8 +207,7 @@ function AdminFiles() {
                     )}
                   </td>
 
-                  {/* DETECTIONS */}
-                  <td>{file.detection_count ?? 0}</td>
+=                  <td>{file.detection_count ?? 0}</td>
                 </tr>
               );
             })}
@@ -231,7 +215,6 @@ function AdminFiles() {
         </table>
       )}
 
-      {/* PAGINATION */}
       <div className={styles.pagination}>
         <button
           disabled={page === 1}

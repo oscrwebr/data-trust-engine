@@ -22,7 +22,6 @@ function Roles() {
   const [editSidebar, setEditSidebar] = useState(false);
   const [deleteModal, setDeleteModal] = useState(false);
 
-  // Form state for Add / Edit Role
   const [editingRole, setEditingRole] = useState(null);
   const [roleName, setRoleName] = useState("");
   const [thresholds, setThresholds] = useState({});
@@ -37,9 +36,6 @@ function Roles() {
 
   const [sortOption, setSortOption] = useState("nothing")
 
-  // -------------------------
-  // Fetch roles, categories, subcategories, and users
-  // -------------------------
   useEffect(() => {
     async function fetchData() {
       try {
@@ -70,9 +66,6 @@ function Roles() {
     fetchData();
   }, []);
 
-  // -------------------------
-  // Role Handlers
-  // -------------------------
   const mapThresholdsForAPI = () =>
     Object.entries(thresholds)
       .filter(([_, value]) => value !== null && value !== "")
@@ -167,7 +160,6 @@ function Roles() {
         onChange={(e) => setRoleName(e.target.value)}
         editingRole={editingRole}/>
 
-      {/* ---------------- Buttons ---------------- */}
       <div className={styles.manage_roles_header}>
           <div className={styles.title_row}>
               <RiUserSettingsLine className={styles.title_icon}/>

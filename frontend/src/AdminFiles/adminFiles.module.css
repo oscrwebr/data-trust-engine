@@ -1,6 +1,6 @@
-/* ========================= */
-/* Container                */
-/* ========================= */
+
+
+
 .container {
   padding: 24px 32px;
   background-color: #f5f7fb;
@@ -8,7 +8,7 @@
   font-family: "Segoe UI", sans-serif;
 }
 
-/* Title */
+
 .container h2 {
   margin-bottom: 20px;
   font-size: 26px;
@@ -16,9 +16,9 @@
   color: #1f2937;
 }
 
-/* ========================= */
-/* Filters                  */
-/* ========================= */
+
+
+
 .filters {
   display: flex;
   gap: 12px;
@@ -44,9 +44,9 @@
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
 }
 
-/* ========================= */
-/* Scan Button              */
-/* ========================= */
+
+
+
 .button {
   padding: 10px 16px;
   border-radius: 8px;
@@ -70,9 +70,9 @@
   transform: none;
 }
 
-/* ========================= */
-/* Table                    */
-/* ========================= */
+
+
+
 .table {
   width: 100%;
   border-collapse: collapse;
@@ -82,7 +82,7 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
-/* Header */
+
 .table thead {
   background: #f1f5f9;
 }
@@ -96,7 +96,7 @@
   letter-spacing: 0.02em;
 }
 
-/* Rows */
+
 .table td {
   padding: 14px;
   font-size: 14px;
@@ -108,9 +108,9 @@
   background: #f8fafc;
 }
 
-/* ========================= */
-/* File Link                */
-/* ========================= */
+
+
+
 .fileLink {
   font-weight: 500;
   cursor: pointer;
@@ -121,17 +121,17 @@
   text-decoration: underline;
 }
 
-/* ========================= */
-/* Checkbox                 */
-/* ========================= */
+
+
+
 .table input[type="checkbox"] {
   transform: scale(1.15);
   cursor: pointer;
 }
 
-/* ========================= */
-/* 🔥 Sensitivity System    */
-/* ========================= */
+
+
+
 .badge {
   padding: 4px 10px;
   border-radius: 999px;
@@ -141,36 +141,36 @@
   letter-spacing: 0.02em;
 }
 
-/* LOW (safe-ish) */
+
 .low {
   background-color: #ecfdf5;
   color: #047857;
   border: 1px solid #a7f3d0;
 }
 
-/* MEDIUM (warning) */
+
 .medium {
   background-color: #fffbeb;
   color: #b45309;
   border: 1px solid #fde68a;
 }
 
-/* HIGH (danger) */
+
 .high {
   background-color: #fef2f2;
   color: #b91c1c;
   border: 1px solid #fecaca;
 }
 
-/* OPTIONAL fallback */
+
 .na {
   background-color: #f1f5f9;
   color: #475569;
 }
 
-/* ========================= */
-/* Row emphasis (important) */
-/* ========================= */
+
+
+
 .highRow {
   background: rgba(239, 68, 68, 0.04);
 }
@@ -179,17 +179,17 @@
   background: rgba(245, 158, 11, 0.03);
 }
 
-/* ========================= */
-/* Detections               */
-/* ========================= */
+
+
+
 td strong {
   font-size: 14px;
   color: #0f172a;
 }
 
-/* ========================= */
-/* Pagination               */
-/* ========================= */
+
+
+
 .pagination {
   display: flex;
   align-items: center;
@@ -202,17 +202,17 @@ td strong {
   font-size: 13px;
 }
 
-/* ========================= */
-/* Loading text             */
-/* ========================= */
+
+
+
 .container p {
   color: #64748b;
   font-size: 14px;
 }
 
-/* ========================= */
-/* Spinner                  */
-/* ========================= */
+
+
+
 .spinner {
   display: inline-block;
   width: 16px;
@@ -230,9 +230,9 @@ td strong {
   }
 }
 
-/* ========================= */
-/* Never scanned            */
-/* ========================= */
+
+
+
 .neverScanned {
   color: #94a3b8;
   font-style: italic;
