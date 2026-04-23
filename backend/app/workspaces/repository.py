@@ -155,3 +155,16 @@ def remove_employee_from_workspace(db: Session, user_id: int):
     db.execute(stmt)
     db.commit()
     
+
+def get_employee_in_workspace_by_email(db: Session, email: str, workspace: Workspace):
+    
+    user = (
+        db.query(User)
+        .join(user_workspace, user_workspace.c.user_id == User.user_id)
+        .filter(user_workspace.c.workspace_id == workspace.id)
+        .filter(User.email == email)
+        .filter(User.role == "employee")
+        .first()
+    )
+
+    return user
