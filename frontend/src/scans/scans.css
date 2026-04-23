@@ -389,6 +389,18 @@
     font-size: 16px;
     color: black;
     margin-top: 10px;
+    overflow: hidden;
+    width: 100%;
+    min-width: 0;
+}
+
+.scan-file-name span {
+    width: 100%;
+    min-width: 0;
+    display: block;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 .scan-file-details {
@@ -531,8 +543,8 @@
     align-items: center;
     display: flex;
     gap: 5px;
-    font-size: 13px;
-    padding: 4px 10px;
+    font-size: 12px;
+    padding: 4px 6px;
     border-radius: 5px;
     border: none;
     background: #BB4D00;
@@ -569,4 +581,48 @@
 
 .issues .icon-box {
     background: #ffedd5;
+}
+
+.apply-suggested-name-button {
+    margin-top: 5px;
+    align-items: center;
+    display: flex;
+    gap: 5px;
+    font-size: 12px;
+    padding: 4px 6px;
+    border-radius: 5px;
+    border: none;
+    background: #3f9d61;
+    color: white;
+    cursor: pointer;
+}
+
+.apply-suggested-name-button:hover {
+    background: #5abf7c;
+}
+
+.button-container-suggested {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.rename-success-message {
+    margin-left: 10px;
+    font-size: 13px;
+    color: #22c55e;
+    font-weight: 500;
+}
+
+.success-message-container {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.rename-error-message {
+    margin-left: 10px;
+    font-size: 13px;
+    color: #dc2626;
+    font-weight: 500;
 }
