@@ -74,7 +74,7 @@ async def process_invite(token: str = Query(...), db: Session = Depends(get_data
     
     invite_repository.update_invite_used_value(db, invite.invite_id)
     next_url = "/dashboard?toast=signup"
-    redirect_url = f"{REDIRECT_URI}/auth/sign-in?next={quote(next_url)}&signup=true&role=2&workspace_id={workspace_id}"
+    redirect_url = f"{REDIRECT_URI}/auth/sign-in?next={quote(next_url)}&signup=true&role=2&workspace_id={workspace_id}&token={token}"
 
     return RedirectResponse(redirect_url, status_code=302)
 

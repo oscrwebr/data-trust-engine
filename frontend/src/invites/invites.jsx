@@ -16,7 +16,7 @@ import { Button } from "primereact/button";
 
 import api from "../api/axiosConfig.js";
 
-function Invite({ visible, setVisible, toast}) {
+function Invite({ visible, setVisible, toast, fetchEmployees}) {
   const [loading, setLoading] = useState(false);
   const [expiryDate, setExpiryDate] = useState(null);
   const [email, setEmail] = useState(null);
@@ -35,6 +35,10 @@ function Invite({ visible, setVisible, toast}) {
 
   const showAdminMessage = () => {
       toast.current.show({ severity: 'error', summary: 'Error', detail: 'You cannot send an invite to yourself.', life: 4000});
+  };
+
+  const showExistsMessage = () => {
+      toast.current.show({ severity: 'error', summary: 'Error', detail: 'This employee has already been added to your workspace.', life: 4000});
   };
 
   const today = new Date();
@@ -67,11 +71,15 @@ function Invite({ visible, setVisible, toast}) {
       } else if (res.data.success == "cooldown") {
         showCooldownMessage();
 
+      } else if (res.data.success == "exists") {
+        showExistsMessage();
+
       } else if (res.data.success == "admin") {
         showAdminMessage();
         
       } else if (res.data.success == true) {
         showSuccessMessage();
+        fetchEmployees();
         setDateError(false);
         setEmailError(false);
         setEmailValid(true);

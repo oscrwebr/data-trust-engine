@@ -1,0 +1,143 @@
+.popup-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(17, 24, 39, 0.35);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.popup-window {
+    background-color: white;
+    width: 100%;
+    max-width: 500px;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
+}
+
+.popup-header {
+    width: 100%;
+    margin-bottom: 16px;
+}
+
+.popup-header-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.popup-file-name {
+    font-size: 26px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.popup-file-hash {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.popup-hash-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.popup-hash-value {
+    margin-top: 4px;
+    padding: 8px 10px;
+
+    background: #F9FAFB;
+    border: 1px solid #E5E7EB;
+    border-radius: 6px;
+
+    font-size: 13px;
+    font-family: "Courier New", Courier, monospace;
+    color: black;
+
+    word-break: break-all;
+}
+
+
+
+.popup-duplicates-heading {
+    display: block;
+    margin-top: 16px;
+    margin-bottom: 8px;
+
+    font-size: 16px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.duplicate-popup-card {
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    padding: 12px;
+    background: white;
+}
+
+
+
+
+
+.duplicate-popup-card-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.duplicate-popup-card-name {
+    flex: 1;
+    font-size: 15px;
+    font-weight: 600;
+    color: #111827;
+    line-height: 1.2;
+}
+
+.duplicate-popup-card-buttons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+}
+
+.duplicate-popup-card-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 38px;
+    padding: 0 10px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.delete {
+    background: #D4183D;
+    color: white;
+    border: none;
+}
+
+.view-file {
+    background: #ffffff;
+    color: #111827;
+    border: 1px solid rgba(0, 0, 0, 0.086);
+}
+
+.delete:hover {
+    background: #ef2a48;
+}
+
+.view-file:hover {
+    background: #e7e7e7;
+}

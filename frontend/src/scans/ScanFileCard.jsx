@@ -4,13 +4,30 @@ import { formatNamingConventionName } from "./utils/formatNamingConventionName";
 import { formatSubcategoryText } from "./utils/formatSubcategoryText";
 import { PiMagnifyingGlassBold } from "react-icons/pi";
 import { useNavigate } from "react-router-dom";
+import { PiCopySimpleBold } from "react-icons/pi";
+import { useState } from "react";
+import DuplicatePopUp from "./DuplicatePopUp";
+import api from "../api/axiosConfig";
 
 
 
 
-function ScanFileCard({scan_file, scan_type}) {
+
+function ScanFileCard({scan_file, scan_type, scan_files}) {
 
     const navigate = useNavigate();
+
+    const [showPopUp, setShowPopup] = useState(false);
+
+    const duplicateFiles = scan_file.duplicate_group_id ?
+                            scan_files.filter(file => 
+                            // Check for scan files with the same duplicate group id
+                            file.duplicate_group_id === scan_file.duplicate_group_id 
+                            // Don't display the scanned file as a duplicate of itself in the pop up (only want other files)
+                            && file.scan_file_id !== scan_file.scan_file_id)
+                        // Check whether the file has a duplicate group (first line), otherwise return an empty array
+                        : [];
+            
 
     const issues = []
     // Issue check for organisational scan files
@@ -27,6 +44,12 @@ function ScanFileCard({scan_file, scan_type}) {
                 suggested_name: scan_file.naming_convention_scan_results.map(result => result.suggested_name)
             });
         }
+
+        if (scan_file.duplicate_group_id != null) {
+            issues.push({
+                type: "Duplicate File"
+            })
+        }
         
     }
 
@@ -36,13 +59,19 @@ function ScanFileCard({scan_file, scan_type}) {
             issues.push({
                 category: result.category,
                 subcategory: result.subcategory_name,
+                highRisk: result.is_high_risk
             })
         })
         
     }
 
+    const detectionCount = scan_file.detection_count
+
+    const isHighRisk = issues.some(issue => issue.highRisk);
+
     const cardClass = issues.length === 0 ?
         "card-clean" :
+        isHighRisk ? "card-critical" :
         "card-issue";
 
     const issueCheck = issues.length === 0;
@@ -52,20 +81,58 @@ function ScanFileCard({scan_file, scan_type}) {
                             ? 'Clean' : 
                             scan_type === "organisation"
                             ? issues.map(i => i.type).join(", ")
-                            : 'Detections Found'
+                            : `${detectionCount} Detections Found`
+
+    const[renameSuccess, setRenameSuccess] = useState(false);
+    const[renameError, setRenameError] = useState(false)
+
+    async function applySuggestedName(event, suggestedName) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        // const extension = scan_file.file_name.split('.').pop();
+        // const nameWithExtension =  `${suggestedName}.${extension}`;
+
+        // Reset success/error messages for edge cases
+        setRenameSuccess(false);
+        setRenameError(false);
+
+
+        try {
+            await api.patch("/ingestion/rename-file", null, {
+            params: {
+                graph_id: scan_file.graph_file_id,
+                new_name: suggestedName
+            }
+            
+        });
+            // Display success message if successful call
+            setRenameSuccess(true);
+            // Hides success message after 6 seconds
+            setTimeout(() => setRenameSuccess(false), 6000);
+
+            console.log("File renamed successfully");
+        } catch (error) {
+            console.error("Error applying suggested name:", error);
+            // Display error message
+            setRenameError(true)
+            // Hides error message after 6 seconds
+            setTimeout(() => setRenameError(false), 6000)
+        }
+    }
                             
 
     return (
+        <>
         <div className={`scan-page-file-card ${cardClass} scan-page-link-fix`} onClick={() => navigate(`/files/${scan_file.file_id}`)}>
             <div className="scan-file-top">
                 <div className="scan-file-top-left">
                     {issueCheck ? (
                         <PiCheckCircle size={26} className="scan-file-icon icon-clean" />
                     ) : (
-                        <PiWarningCircle size={26} className="scan-file-icon icon-issue" />
-
+                        <PiWarningCircle size={26} className={`scan-file-icon ${isHighRisk ? 'critical-issue' : 'icon-issue'}`} />
                     )}
-                    <span className={`scan-file-pill ${issueCheck ? 'pill-clean' : 'pill-issue'}`}>
+                    <span className={`scan-file-pill ${issueCheck ? 'pill-clean' : isHighRisk ? 'pill-critical' : 'pill-issue'}`}>
                         {scanFilePillText}
                     </span>
 
@@ -77,7 +144,7 @@ function ScanFileCard({scan_file, scan_type}) {
                 <span>{scan_file.file_name}</span>
             </div>
             {scan_type === "organisation" && issues.length > 0 && (
-                <div>
+                <div className="scan-file-details-wrapper">
                     {issues.map((issue, index) => (
                         <div key={index} className="scan-file-details">
                             {issue.type === "Naming Issue" && (
@@ -98,9 +165,50 @@ function ScanFileCard({scan_file, scan_type}) {
                                     <div className="scan-file-suggested-text">
                                         <span>{issue.suggested_name[0]}</span>
                                     </div>
+                                    <div className="button-container-suggested">
+                                        <button className="apply-suggested-name-button"
+                                                onClick={(event) => applySuggestedName(event, issue.suggested_name[0])}
+                                        >
+                                            <PiCheckCircle size={20}/> Apply Suggested Name
+
+
+                                        </button>
+                                        
+                                    </div>
+                                    <div className="success-message-container">
+                                        {renameSuccess && <span className="rename-success-message">Name updated successfully!</span>}
+                                        {renameError && <span className="rename-error-message">Error updating name.</span>}
+                                    </div>
                                 </div>
                                 </>
                                     
+                            )}
+
+                            {issue.type === "Duplicate File" && (
+                                <>
+                                <div className="scan-file-issue">
+                                    <div className="scan-file-issue-text-heading">
+                                        <span>Issue:</span>
+                                    </div>
+                                    <div className="scan-file-issue-text">
+                                        <span>File is a duplicate</span>
+                                    </div>
+                                </div>
+
+                                <div className="scan-file-suggested">
+                                    <div className="scan-file-duplicates-heading">
+                                        <span>Manage Duplicates</span>
+                                    </div>
+                                    <button className="duplicate-scan-file-button"
+                                    // Link inside a link code adapted from: 
+                                    // https://stackoverflow.com/a/30362416
+                                    // Opens pop up to view duplicate files related to the scanned file
+                                            onClick={(event) => {event.preventDefault(); event.stopPropagation(); setShowPopup(true)}}
+                                    >
+                                        <PiCopySimpleBold size={20}/> View Duplicates
+                                    </button>
+                                </div>
+                                </>
                             )}
 
                         </div>
@@ -110,6 +218,7 @@ function ScanFileCard({scan_file, scan_type}) {
                 
             )}
 
+
             {scan_type === "sensitivity" && issues.length > 0 && (
                 <>
                 <div className="scan-file-sensitivity-details">
@@ -117,7 +226,7 @@ function ScanFileCard({scan_file, scan_type}) {
                         <span>Detections:</span>
                     </div>
                     {issues.map((issue, index) => (
-                        <div key={index} className="sensitivity-detection">
+                        <div key={index} className={`sensitivity-detection ${issue.highRisk ? 'high-risk' : 'standard-risk'}`}>
                             <div className="sensitivity-detection-category">
                                 <span>{issue.category}</span>
                             </div>
@@ -132,7 +241,7 @@ function ScanFileCard({scan_file, scan_type}) {
                     <button className="sensitivity-scan-file-button"
                     // Link inside a link code adapted from: 
                     // https://stackoverflow.com/a/30362416
-                            onClick={(event) => {event.preventDefault(); event.stopPropagation(); navigate(`/scan_file/${scan_file.scan_file_id}`)}}
+                            onClick={(event) => {event.preventDefault(); event.stopPropagation(); navigate(`/scan-file/${scan_file.scan_file_id}`)}}
                     >
                         <PiMagnifyingGlassBold /> View Advanced Details
                     </button>
@@ -141,6 +250,11 @@ function ScanFileCard({scan_file, scan_type}) {
             )}
 
         </div>
+
+        {showPopUp && (
+            <DuplicatePopUp scan_file={scan_file}duplicates={duplicateFiles} onClose={() => setShowPopup(false)} />
+        )}
+        </>
     )
 }
 

@@ -1,14 +1,11 @@
-import { render, screen, fireEvent, waitFor, cleanup } from "@testing-library/react";
-import { describe, test, expect, beforeEach, vi } from "vitest";
-import Roles from "./roles";
-import api from "../api/axiosConfig";
-
-// Mock API
-vi.mock("../api/axiosConfig");
+import { cleanup, render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
+import { afterEach, describe, expect, test, vi, beforeEach } from "vitest";
+import Role from "./roles";
 
 const mockRoles = [
-  { role_id: 1, name: "Admin", role_permissions: [] },
-  { role_id: 2, name: "Employee", role_permissions: [] },
+  { role_id: 1, name: "Admin", role_permissions: [], last_updated:"2024-01-15 13:45:30" },
+  { role_id: 2, name: "Employee", role_permissions: [], last_updated: "2024-01-15 13:50:30" },
 ];
 
 const mockCategories = [
@@ -26,89 +23,186 @@ const mockUsers = [
   { user_id: 2, firstname: "Bob", surname: "Jones", role_id: 2, role_name: "Employee" },
 ];
 
-describe("Roles Component", () => {
-  beforeEach(() => {
-    cleanup();
-    vi.clearAllMocks();
+vi.mock("../api/axiosConfig.js", () => ({
+  default: {
+    get: vi.fn(),
+    post: vi.fn(),
+    put: vi.fn(),
+    delete: vi.fn(),
+    interceptors: {
+      request: { use: vi.fn() },
+      response: { use: vi.fn() },
+    },
+  },
+}));
 
-    api.get.mockImplementation((url) => {
-      switch (url) {
-        case "/roles/get":
-          return Promise.resolve({ data: mockRoles });
-        case "/roles/sensitivity/categories":
-          return Promise.resolve({ data: mockCategories });
-        case "/roles/sensitivity/subcategories":
-          return Promise.resolve({ data: mockSubcategories });
-        case "/roles/users/all":
-          return Promise.resolve({ data: mockUsers });
-        default:
-          return Promise.resolve({ data: [] });
-      }
+import api from "../api/axiosConfig";
+
+describe("Role Component", () => {
+    beforeEach(() => {
+        cleanup();
+        vi.clearAllMocks();
+
+        api.get.mockImplementation((url) => {
+        switch (url) {
+            case "/roles/get":
+            return Promise.resolve({ data: mockRoles });
+            case "/roles/sensitivity/categories":
+            return Promise.resolve({ data: mockCategories });
+            case "/roles/sensitivity/subcategories":
+            return Promise.resolve({ data: mockSubcategories });
+            case "/roles/users/all":
+            return Promise.resolve({ data: mockUsers });
+            default:
+            return Promise.resolve({ data: [] });
+        }
+        });
+
+        api.post.mockResolvedValue({});
+        api.put.mockResolvedValue({});
+        api.delete.mockResolvedValue({});
     });
 
-    api.post.mockResolvedValue({
-      data: { role_id: 3, name: "New Role", role_permissions: [] },
+    afterEach(() => {
+        vi.clearAllMocks();
+        cleanup();
     });
 
-    api.put.mockResolvedValue({});
-    api.delete.mockResolvedValue({});
-  });
 
-  test("renders loading then roles", async () => {
-    render(<Roles />);
+    // Test 1
+    test("Test all content in component loads correctly", async () => {
+        render(
+            <MemoryRouter>
+                <Role/>
+            </MemoryRouter>
+        );
 
-    expect(screen.getByText(/loading/i)).toBeInTheDocument();
+        expect(await screen.findByText("Manage Roles")).toBeInTheDocument();
+        expect(await screen.findByText("Manage roles and sensitivity thresholds for organisational data")).toBeInTheDocument();
+        expect(await screen.findByText("Role Name")).toBeInTheDocument();
+        expect(await screen.findByText("Last Updated")).toBeInTheDocument();
+        expect(await screen.findByText("Actions")).toBeInTheDocument();
+        const rows = await screen.findAllByTestId("role-card");
+        expect(rows.length).toBe(2);
 
-    const roles = await screen.findAllByText("Admin");
-    expect(roles.length).toBeGreaterThan(0);
-  });
-
-  test("add a new role", async () => {
-    render(<Roles />);
-
-    await screen.findByText("Admin");
-
-    fireEvent.change(screen.getByPlaceholderText("Role Name"), {
-      target: { value: "New Role" },
     });
 
-    fireEvent.click(screen.getByText("Add Role"));
+    // Test 2
+    test("Check that search bar works as expected and returns correct row", async() => {
 
-    await waitFor(() => {
-      expect(screen.getByText("New Role")).toBeInTheDocument();
-    });
-  });
+        render(
+            <MemoryRouter>
+                <Role />
+            </MemoryRouter>
+        );
 
-  test("edit an existing role", async () => {
-    render(<Roles />);
+        const search = await screen.findByPlaceholderText("Search by role name");
+        fireEvent.change(search, { target: { value: "a" } });
 
-    await screen.findByText("Admin");
+        expect(await screen.findByText("Admin")).toBeInTheDocument();
+        expect(screen.queryByText("Employee")).not.toBeInTheDocument();
+    })
 
-    fireEvent.click(screen.getAllByText("Edit")[0]);
+    // Test 3
+    test("Test full use case for creating a new role", async() => {
+        api.post.mockResolvedValue({
+            data: {
+                role_id: 3,
+                name: "New Role",
+                last_updated: "2024-01-15 13:55:00",
+                role_permissions: []
+            }
+        });
 
-    const input = screen.getByPlaceholderText("Role Name");
+        render(
+            <MemoryRouter>
+                <Role />
+            </MemoryRouter>
+        );
 
-    fireEvent.change(input, {
-      target: { value: "Admin Updated" },
-    });
+        const create_button = await screen.findByText("Create Role");
+        fireEvent.click(create_button);
 
-    fireEvent.click(screen.getByText("Save Changes"));
+        const input = screen.getByPlaceholderText("Enter the name of the role");
+        fireEvent.change(input, { target: { value: "New Role" } });
 
-    await waitFor(() => {
-      expect(api.put).toHaveBeenCalled();
-    });
-  });
+        const create_button_2 = await screen.findByTestId("submit-button");
+        fireEvent.click(create_button_2);
 
-  test("delete a role", async () => {
-    render(<Roles />);
+        await waitFor(() => {
+            expect(api.post).toHaveBeenCalledWith(
+                '/roles/create',
+                {
+                    name: "New Role",
+                    thresholds: [],
+                }
+            );
+        });
+        
+        expect(await screen.findByText("New Role")).toBeInTheDocument();
+    })
 
-    await screen.findByText("Admin");
+    // Test 4
+    test("Test full use case for updating an existing role", async() => {
 
-    fireEvent.click(screen.getAllByText("Edit")[0]);
-    fireEvent.click(screen.getByText("Delete"));
+        api.put.mockResolvedValue({
+            data: {
+                role_id: 1,
+                name: "New Role",
+                last_updated: "2024-01-15 13:55:00",
+                role_permissions: []
+            }
+        });
 
-    await waitFor(() => {
-      expect(screen.queryByText("Admin")).not.toBeInTheDocument();
-    });
-  });
+        render(
+            <MemoryRouter>
+                <Role />
+            </MemoryRouter>
+        );
+
+        const edit_button = await screen.findAllByTestId("edit-button");
+        fireEvent.click(edit_button[0]);
+
+        const input = await screen.findByTestId("role-input")
+        fireEvent.change(input, { target: { value: "New Role" } });
+
+        const save_changes_button = await screen.findByTestId("submit-button");
+        fireEvent.click(save_changes_button);
+
+        await waitFor(() => {
+            expect(api.put).toHaveBeenCalledWith(
+                '/roles/update/1',
+                {
+                    name: "New Role",
+                    thresholds: [],
+                }
+            );
+        });
+    })
+
+    // Test 5
+    test("Test full use case for deleting a role", async() => {
+
+        render(
+            <MemoryRouter>
+                <Role />
+            </MemoryRouter>
+        );
+
+        const delete_button = await screen.findAllByTestId("delete-button");
+        fireEvent.click(delete_button[0]);
+
+        const delete_button_modal = await screen.findByTestId("delete-button-modal");
+        fireEvent.click(delete_button_modal);
+
+        await waitFor(() => {
+            expect(api.delete).toHaveBeenCalledWith(
+                '/roles/delete/1'
+            );
+        });
+    
+        await waitFor(() => {
+            expect(screen.queryByText("Admin")).not.toBeInTheDocument();
+        });
+    })
 });

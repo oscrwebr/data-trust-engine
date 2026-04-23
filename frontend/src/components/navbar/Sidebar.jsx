@@ -1,32 +1,44 @@
 import { FiSidebar } from "react-icons/fi";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import logo from "../../assets/CIH_long_logo.png";
 import styles from "./navbar.module.css"
 import SidebarDropdown from "../dropdown/dropdown";
 import DropdownItem from "./DropdownItem";
+import DropdownItemNoLink from "./DropdownItemNoLink.jsx";
 import api from "../../api/axiosConfig";
 import { Avatar } from "primereact/avatar";
-import { BiFileFind } from "react-icons/bi";
+import { setAccessToken, getAccessToken } from "../../Auth/authStore.js";
         
-function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role}){
+function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role, pendingEmployees}){
     const [openDropdown, setOpenDropdown] = useState(null);
-    const [pendingEmployees, setPendingEmployees] = useState([])
-    const [workspace_id, setWorkspaceId] = useState(null)
+    const [workspace_id, setWorkspaceId] = useState(null);
     const backend_uri = import.meta.env.VITE_BACKEND_HOST || "http://localhost:8000"
     const user_initials = (firstname?.[0]?.toUpperCase() || "?") + (surname?.[0]?.toUpperCase() || "?");
+    const nav = useNavigate();
 
     useEffect(() => {
         api.get("/workspace/dashboard")
         .then(res => {
             setWorkspaceId(res.data.id)
         })
-
-        api.get("/workspace/get-pending-employees")
-        .then(res => {
-            setPendingEmployees(res.data)
-        })
     }, []);
+
+    async function signOut() {
+        console.log(`This is the access token before removal${getAccessToken()}`);
+        // Hitting the signout endpoint to remove refresh token 
+        let logoutStatus = 400
+        await api.post("/auth/logout")
+        .then(res => {
+            logoutStatus = res.status
+        })
+        .catch(err => {
+        });
+        // Clearing the access token from local memory
+        setAccessToken(null);
+        // redirecting user to the homepage
+        nav("/", {state: {status_code: logoutStatus}})
+    }
 
     return(
         <div className={styles.container}>
@@ -51,7 +63,9 @@ function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role
                     <DropdownItem className={styles.navbar_item} url="/dashboard" text="Dashboard" icon="pi pi-th-large"/>
                     <div className={styles.line}/>
                     <SidebarDropdown className={styles.dropdown} icon="pi pi-file" label="Files" openDropdown={openDropdown} setOpenDropdown={setOpenDropdown}>
-            
+                       <DropdownItem url="/my-files" text="My Files"/>
+                       <DropdownItem url="/workspace-files" text="Workspace Files"/>
+                        <DropdownItem url="/high-risk-files" text="High-Risk Files"/>
                     </SidebarDropdown>
                     {/* Add a dropdown menu item using SidebarDropdown - choose your own label, an icon from PrimeReact and everything else can be kept the same*/}
                     <SidebarDropdown className={styles.dropdown} icon="pi pi-search" label="Scanning" openDropdown={openDropdown} setOpenDropdown={setOpenDropdown} basePaths={["/files"]}>
@@ -64,19 +78,19 @@ function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role
 
                         {/* SidebarDropdowns have their own children for styling purposes - specify the url and text displayed */}
                         <DropdownItem url="/view-employees" text="View Employees"/>
-                        <DropdownItem url="/manage-employees" text="Manage Employees" value={pendingEmployees.length}/>
+                        <DropdownItem url="/manage-employees" text="Manage Employees" value={pendingEmployees?.length}/>
                     </SidebarDropdown>
 
                     <SidebarDropdown className={styles.dropdown} icon="pi pi-pen-to-square" label="Configure" openDropdown={openDropdown} setOpenDropdown={setOpenDropdown} basePaths={["/roles", "/upload-org-chart"]}>
-                        <DropdownItem url="/roles" text="Create Roles"/>
+                        <DropdownItem url="/roles" text="Manage Roles"/>
                         <DropdownItem url="/upload-org-chart" text="Upload Org Chart"/>
+                        <DropdownItem url="/detection-sensitivity" text="Detection Sensitivity"/>
                     </SidebarDropdown>
 
-                    <div className={styles.line}/>
+                    <div className={styles.line2}/>
 
                     {/* Add regular navbar items here, specifying the url and the text you want displayed on the navbar */}
-                    <DropdownItem url="/settings" text="Settings" icon="pi pi-cog"/>
-                    <DropdownItem text="Sign-out" icon="pi pi-sign-out"/>
+                    <DropdownItemNoLink onClick={() => signOut()} text="Sign-out" icon="pi pi-sign-out"/>
                     <div className={styles.line}/>
                 </div> 
                 <div className={styles.user_info_container}>
@@ -109,8 +123,12 @@ function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role
                     {/* Add regular navbar items like this, specifying the url and the text you want displayed on the navbar */}
                     <DropdownItem className={styles.navbar_item} url="/dashboard" text="Dashboard" icon="pi pi-th-large"/>
                     <div className={styles.line}/>
+                    <SidebarDropdown className={styles.dropdown} icon="pi pi-file" label="Files" openDropdown={openDropdown} setOpenDropdown={setOpenDropdown}>
+                       <DropdownItem url="/my-files" text="My Files"/>
+                    </SidebarDropdown>
+                    <div className={styles.line}/>
                     <DropdownItem url="/settings" text="Settings" icon="pi pi-cog"/>
-                    <DropdownItem text="Sign-out" icon="pi pi-sign-out"/>
+                    <DropdownItemNoLink onClick={() => signOut()} text="Sign-out" icon="pi pi-sign-out"/>
                     <div className={styles.line}/>
                 </div> 
                 <div className={styles.user_info_container}>

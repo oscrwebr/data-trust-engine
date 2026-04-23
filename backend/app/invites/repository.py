@@ -32,9 +32,19 @@ def get_invite_by_workspace_id(db: Session, workspace_id: int):
     invite = db.query(Invite).filter(Invite.workspace_id == workspace_id).first()
     return invite
 
-def get_invite_by_pending_user_id(db: Session, user_id: int):
-    invite = db.query(Invite).filter(Invite.user_id == user_id).first()
+def get_invite_by_token(db: Session, token: str):
+    invite = db.query(Invite).filter(Invite.token == token).first()
     return invite
+
+def get_invite_by_pending_user_id(db: Session, user_id: int):
+    return (
+        db.query(Invite)
+        .filter(
+            Invite.user_id == user_id
+        )
+        .order_by(desc(Invite.created_at))
+        .first() 
+    )
 
 def update_invite_used_value(db: Session, invite_id: int):
     invite = db.query(Invite).filter(Invite.invite_id == invite_id).first()

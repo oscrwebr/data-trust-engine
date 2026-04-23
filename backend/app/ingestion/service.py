@@ -8,13 +8,15 @@ from ..core.security import decrypt_refresh, encrypt_refresh
 from ..core.config import SCOPES
 from . import repository
 from ..authentication import service as auth_service
+from app.authentication.repository import get_user_id_by_drive_id
+from app.workspaces.repository import get_workspace_by_user
 
 
 INIT_GRAPH_GET = "https://graph.microsoft.com/v1.0/me/drive/root/delta?$select=id,name,lastModifiedDateTime,parentReference,file,folder,webUrl,content.downloadUrl,shared"
 DOWNLOAD_URL_GET = "https://graph.microsoft.com/v1.0/me/drive/items/{graph_id}?select=content.downloadUrl"
 GET_PERMISSIONS = "me/drive/items/{graph_id}/permissions"
 GRAPH_BATCH_URL = "https://graph.microsoft.com/v1.0/$batch"
-
+GRAPH_PATCH_NAME = "https://graph.microsoft.com/v1.0/me/drive/items/{graph_id}"
 
 
 def get_values_data(folders: dict, files: dict, shared_folder_files: dict, values: list[dict]):
@@ -143,12 +145,15 @@ def get_permissions(shared_folders_files: dict, access_token: str) -> dict:
 def clean_folders_files_with_permissions(folder_file_data: dict, permissions: dict, id: int, db: Session):
     '''
     Function that will take in file and folder data in a dictionary, along with the permissions dictionary.
-    It will then return two lists of dictionaries that can be directly fed into the repository functions that handle insertion into the user_files and user_folders table
+    It will then return FOUR lists of dictionaries that can be directly fed into the repository functions that handle insertion into the user_files, user_folders, unknown_user_files and unknown_user_folders tables
     It requires the 'db', for calls to the db to retrieve the user_id's linked to the granted users (if they exist) and will add to a dict for rapid lookup and reduce redundant DB calls
     '''
     user_id_dict = {}
+    unknown_user_email_set = set()
     folder_list = []
     file_list = []
+    unknown_folder_list = []
+    unknown_file_list = []
     # Setting the user first
     current_user = auth_service.check_get_by_id(id, db)
     user_id_dict[current_user.email] = id
@@ -176,11 +181,19 @@ def clean_folders_files_with_permissions(folder_file_data: dict, permissions: di
                             "folder_id": folder[0],
                             "user_id": user_id_dict[user_email]
                         })
+                    elif user_email in unknown_user_email_set:
+                        unknown_folder_list.append({
+                            "folder_id": folder[0],
+                            "email": user_email.lower()
+                        })
                     else: # If not, we add the user to the dict as well as adding them to the dict
                         user = auth_service.check_get_by_email(user_email, db)
                         if not user: # This is a case where the user doesn't exist!
-                            # Need to decide how to handle this
-                            continue
+                            unknown_user_email_set.add(user_email)
+                            unknown_folder_list.append({
+                                "folder_id": folder[0],
+                                "email": user_email.lower()
+                            })
                         else:
                             user_id_dict[user.email] = user.user_id
                             # Add the user to the folder_list
@@ -209,11 +222,20 @@ def clean_folders_files_with_permissions(folder_file_data: dict, permissions: di
                             "file_id": file[0],
                             "user_id": user_id_dict[user_email]
                         })
+                    # check if the user exists in the unknown users set
+                    elif user_email in unknown_user_email_set:
+                        unknown_file_list.append({
+                            "file_id": file[0],
+                            "email": user_email.lower()
+                        })
                     else: # If not, we add the user to the dict as well as adding them to the dict
                         user = auth_service.check_get_by_email(user_email, db)
                         if not user: # This is a case where the user doesn't exist!
-                            # Need to decide how to handle this
-                            continue
+                            unknown_user_email_set.add(user_email)
+                            unknown_file_list.append({
+                                "file_id": file[0],
+                                "email": user_email.lower()
+                            })
                         else:
                             user_id_dict[user.email] = user.user_id
                             # Add the user to the file_list
@@ -222,7 +244,7 @@ def clean_folders_files_with_permissions(folder_file_data: dict, permissions: di
                                 "user_id": user.user_id
                             })
                             
-        return folder_list, file_list
+        return folder_list, file_list, unknown_folder_list, unknown_file_list
     except Exception as e: 
         print("Something went terribly wrong trying to prep for the user_folder or user_file table :/")
         print(f"{type(e).__name__} - {e}")
@@ -289,16 +311,24 @@ def get_set_all_graph_files(access_token: str, id: int, db:Session) -> str:
 
     # Go through folder and files and add them to the correct tables
     ## Get two list[dict] for files and folders with the linked user that has to be added 
-    user_folders, user_files = clean_folders_files_with_permissions(folder_file_data=folder_file_response["data"], permissions=permissions_dict, id=id, db=db)
+    user_folders, user_files, unknown_user_folders, unknown_user_files = clean_folders_files_with_permissions(folder_file_data=folder_file_response["data"], permissions=permissions_dict, id=id, db=db)
     
+
+
     iu_folders = repository.insert_user_folders(user_folders=user_folders, db=db)
     iu_files = repository.insert_user_files(user_files=user_files, db=db)
-    
+    iuu_folders = repository.insert_unknown_user_folders(user_folders=unknown_user_folders, db=db) if unknown_user_folders else 204
+    iuu_files = repository.insert_unknown_user_files(user_files=unknown_user_files, db=db) if unknown_user_files else 204
+    # print(f"\n\nThese are the unknown user_folders: {unknown_user_folders}\n\n")
+    # print(f"\n\nThese are the unknown user files: {unknown_user_files}\n\n")
+
     # print(permissions_dict)
     return {
         "repo_response_u_folders": iu_folders,
-        "repo_response_u_files": iu_files
-            }
+        "repo_response_u_files": iu_files,
+        "repo_response_uu_folders": iuu_folders,
+        "repo_response_uu_files": iuu_files
+        }
 
 def get_access_token_by_graph_id(application: ConfidentialClientApplication, graph_id: str, db) -> str|None:
     '''
@@ -328,3 +358,98 @@ def get_download_link_by_graph_id(application:ConfidentialClientApplication, gra
         return response.json()["@microsoft.graph.downloadUrl"]
     else:
         return None
+    
+def update_file_name(application: ConfidentialClientApplication, graph_id: str, name: str, db: Session):
+    # Get the ingestion file from the grph Id
+    file = repository.get_ingestion_file_by_graph_id(graph_id=graph_id, db=db)
+    if not file: # This means that the graph Id doesn't exist in our database
+        return None
+    
+    # Get the access token from the graph Id
+    access_token = get_access_token_by_graph_id(application=application, graph_id=graph_id, db=db)
+    if not access_token: # If there is no access token, either the user, driveId or graphId don't exist - this will force a 400 error to be raised
+        return None
+    # Send request to Graph API to update the name
+    headers = {"Authorization": f"Bearer {access_token}"}
+    response = requests.patch(
+        url=GRAPH_PATCH_NAME.format(graph_id=file.graph_id),
+        json={"name": f"{name}.{file.extension}"},
+        headers=headers
+    )
+
+    # Handle the non 200 response from microsoft
+    if response.status_code != 200:
+        return None
+    
+    json_response = response.json()
+    
+    # Update the name
+    updated_name = json_response["name"]
+    # Update the web url
+    updated_web_url = json_response["webUrl"]
+    # Update the last modified date time - 
+    new_last_updated = datetime.fromisoformat(json_response["lastModifiedDateTime"])
+
+    # Update the ingesiton table with the latest values returned by microsoft
+    repository.update_ingestion_file_after_name_change(db=db, graph_id=graph_id, name=updated_name, web_url=updated_web_url, updated_modified=new_last_updated)
+
+    return 200
+
+def delete_ingestion_file(application: ConfidentialClientApplication, user_id: int, graph_id: str, db: Session):
+     # Get the ingestion file from the grph Id
+    file = repository.get_ingestion_file_by_graph_id(graph_id=graph_id, db=db)
+    if not file: # This means that the graph Id doesn't exist in our database
+        print("File doesn't exist")
+        return None
+    
+    # Get the workspace for the admin
+    admin_workspace = get_workspace_by_user(db=db, user_id=user_id)
+    # Get the workspace where driveId == driveId
+    file_owner = get_user_id_by_drive_id(drive_id=file.drive_id, db=db)
+    if not file_owner:
+        print("There is no file owner")
+        return None
+    file_owner_workspace = get_workspace_by_user(db=db, user_id=file_owner.user_id)
+    
+    if admin_workspace != file_owner_workspace:
+        print("workspaces don't match!")
+        return None
+    
+    # Get the access token from the graph Id
+    access_token = get_access_token_by_graph_id(application=application, graph_id=graph_id, db=db)
+    if not access_token: # If there is no access token, either the user, driveId or graphId don't exist - this will force a 400 error to be raised
+        print("no access token")
+        return None
+    
+    # Send request to Graph API to update the name
+    headers = {"Authorization": f"Bearer {access_token}"}
+    response = requests.delete(
+        url=GRAPH_PATCH_NAME.format(graph_id=file.graph_id),
+        headers=headers
+    )
+
+    # Handle the non 200 response from microsoft
+    if response.status_code != 204:
+        print("Microsoft bad request")
+        return None
+    try:
+        repository.delete_ingestion_file(db=db, graph_id=graph_id)
+        return 204
+    except:
+        return None
+    
+def get_workspace_unknown_folders(id: int, email: str, db: Session):
+    return repository.get_workspace_unknown_folders(id=id, email=email, db=db)
+
+def get_workspace_unknown_files(id: int, email: str, db: Session):
+    return repository.get_workspace_unknown_files(id=id, email=email, db=db)
+
+def add_user_files_after_workspace_join(user_files: list, db: Session):
+    return repository.add_user_files_after_workspace_join(user_files=user_files, db=db)
+
+def add_user_folders_after_workspace_join(user_folders: list, db: Session):
+    return repository.add_user_folders_after_workspace_join(user_folders=user_folders, db=db)
+
+def remove_unknown_by_email(email: str, db: Session):
+    repository.remove_unknown_by_email(email=email, db=db)
+

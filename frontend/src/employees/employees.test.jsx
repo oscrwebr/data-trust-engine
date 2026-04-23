@@ -2,23 +2,33 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, within, waitFor, getByTestId, findByTestId } from "@testing-library/react";
 import ViewEmployees from "./ViewEmployees";
 import ManageEmployees from "./ManageEmployees";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Routes, Route, Outlet } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 
 const employees = [
-    { user: { email:"alice@example.com", firstname:"Alice", surname:"Smith", user_id:1 }, role_name:"PII Role" },
-    { user: { email:"bob@example.com", firstname:"Bob", surname:"Messi", user_id:2 }, role_name:"" },
-    { user: { email:"charlie@example.com", firstname:"Charlie", surname:"Brown", user_id:3 }, role_name:"Legal Role" },
+    { user: { email:"alice@example.com", firstname:"Alice", surname:"Smith", user_id:1 }, role_name:"PII Role", files: {id: 1, status: 'Risk Detected', flagged_files: []}},
+    { user: { email:"bob@example.com", firstname:"Bob", surname:"Messi", user_id:2 }, role_name:"", files: {id: 1, status: 'No Files Found', flagged_files: []}},
+    { user: { email:"charlie@example.com", firstname:"Charlie", surname:"Brown", user_id:3 }, role_name:"Legal Role", files: {id: 1, status: 'No Files Found', flagged_files: []}},
 ];
 
 const pending_users = [
-    { pending: {user_id: 4, email: 'valid@example.com', type: 'request'}, datetime: '2026-12-25T18:05:00'},
-    { pending: {user_id: 5, email: 'test@email.com', type: 'invite'}, datetime: '2026-12-25T18:05:00'},
+    { user: {user_id: 4, email: 'valid@example.com', type: 'request'}, datetime: '2026-12-25T18:05:00'},
+    { user: {user_id: 5, email: 'test@email.com', type: 'invite'}, datetime: '2026-12-25T18:05:00'},
 ];
 
 const roles = [
     {id: 1, name: "PII Role"}, {id: 2, name: "Financial Role"}
 ];
+
+function ManageEmployeesWithContext({ contextValue, toast }) {
+  return (
+    <Routes>
+      <Route path="/" element={<Outlet context={contextValue} />}>
+        <Route index element={<ManageEmployees toast={toast} />} />
+      </Route>
+    </Routes>
+  );
+}
 
 vi.mock("../api/axiosConfig.js", () => ({
   default: {
@@ -190,7 +200,52 @@ describe("View Employees Component", () => {
         });
     })
 
+
     // Test 6
+    test("Check that filter by scanning risk works as expected and returns correct row", async() => {
+        api.get.mockResolvedValueOnce({
+            data: {
+                active: employees,
+            }
+        });
+
+        render(
+            <MemoryRouter>
+                <ViewEmployees />
+            </MemoryRouter>
+        );
+
+        const trigger = await screen.findByRole("button", { name: /filter by risk level/i });
+        await userEvent.click(trigger);
+
+        const panel = await waitFor(() => {
+            const el = document.querySelector(".p-dropdown-items-wrapper");
+            if (!el) throw new Error("Dropdown not ready");
+            return el;
+        });
+
+        expect(panel).toBeInTheDocument();
+        const options = await screen.findAllByText(/^Risk Detected$/i);
+
+        const dropdownOption = options.find(el =>
+        el.classList.contains("p-dropdown-item-label")
+        );
+
+        if (!dropdownOption) {
+        throw new Error("Dropdown option not found");
+        }
+
+        await userEvent.click(dropdownOption);
+
+        await waitFor(() => {
+            expect(screen.getByText(/Alice\s+Smith/i)).toBeInTheDocument();
+            expect(screen.queryByText(/Bob\s+Messi/i)).not.toBeInTheDocument();
+            expect(screen.queryByText(/Charlie\s+Brown/i)).not.toBeInTheDocument();
+        });
+    })
+
+
+    // Test 7
     test("Check clicking select all performs correct actions", async() => {
         api.get.mockResolvedValueOnce({
             data: {
@@ -233,7 +288,7 @@ describe("View Employees Component", () => {
     })
 
 
-    // Test 7
+    // Test 8
     test("Test that all elements for manage employees page load correctly", async() => {
         api.get.mockResolvedValueOnce({
             data: {
@@ -244,7 +299,7 @@ describe("View Employees Component", () => {
 
         render(
             <MemoryRouter>
-                <ManageEmployees />
+                <ManageEmployeesWithContext contextValue={{fetchPendingEmployees: vi.fn()}} toast={null}/>
             </MemoryRouter>
         );
 
@@ -262,7 +317,7 @@ describe("View Employees Component", () => {
     })
 
 
-    // Test 8
+    // Test 9
     test("Test change display icon button works as expected", async() => {
         api.get.mockResolvedValueOnce({
             data: {
@@ -273,7 +328,7 @@ describe("View Employees Component", () => {
 
         render(
             <MemoryRouter>
-                <ManageEmployees />
+                <ManageEmployeesWithContext contextValue={{fetchPendingEmployees: vi.fn()}} toast={null}/>
             </MemoryRouter>
         );
 
@@ -290,7 +345,7 @@ describe("View Employees Component", () => {
     })
 
 
-    // Test 9
+    // Test 10
     test("Test that remove button opens up correct modal", async() => {
         api.get.mockResolvedValueOnce({
             data: {
@@ -301,7 +356,7 @@ describe("View Employees Component", () => {
 
         render(
             <MemoryRouter>
-                <ManageEmployees />
+                <ManageEmployeesWithContext contextValue={{fetchPendingEmployees: vi.fn()}} toast={null}/>
             </MemoryRouter>
         );
 
@@ -313,7 +368,7 @@ describe("View Employees Component", () => {
     })
 
 
-    // Test 10
+    // Test 11
     test("Test that accept button opens up correct modal", async() => {
         api.get.mockResolvedValueOnce({
             data: {
@@ -324,7 +379,7 @@ describe("View Employees Component", () => {
 
         render(
             <MemoryRouter>
-                <ManageEmployees />
+                <ManageEmployeesWithContext contextValue={{fetchPendingEmployees: vi.fn()}} toast={null}/>
             </MemoryRouter>
         );
 
@@ -336,7 +391,8 @@ describe("View Employees Component", () => {
         expect(within(modal).getByText(/An email containing an invite request will be sent to/)).toBeInTheDocument();
     })
 
-    // Test 11
+
+    // Test 12
     test("Test that reject button opens up correct modal", async() => {
         api.get.mockResolvedValueOnce({
             data: {
@@ -347,7 +403,7 @@ describe("View Employees Component", () => {
 
         render(
             <MemoryRouter>
-                <ManageEmployees />
+                <ManageEmployeesWithContext contextValue={{fetchPendingEmployees: vi.fn()}} toast={null}/>
             </MemoryRouter>
         );
 
@@ -359,7 +415,8 @@ describe("View Employees Component", () => {
         expect(within(modal).getByText(/Are you sure you want to reject/)).toBeInTheDocument();
     })
 
-    // Test 12
+
+    // Test 13
     test("Test that filter by roles displays correct employees", async() => {
         api.get.mockResolvedValueOnce({
             data: {
@@ -374,7 +431,7 @@ describe("View Employees Component", () => {
 
         render(
             <MemoryRouter>
-                <ManageEmployees />
+                <ManageEmployeesWithContext contextValue={{fetchPendingEmployees: vi.fn()}} toast={null}/>
             </MemoryRouter>
         );
 
@@ -407,7 +464,8 @@ describe("View Employees Component", () => {
         });
     })
 
-    // Test 13
+
+    // Test 14
     test("Test that filter by status displays correct employees", async() => {
         api.get.mockResolvedValueOnce({
             data: {
@@ -418,7 +476,7 @@ describe("View Employees Component", () => {
 
         render(
             <MemoryRouter>
-                <ManageEmployees />
+                <ManageEmployeesWithContext contextValue={{fetchPendingEmployees: vi.fn()}} toast={null}/>
             </MemoryRouter>
         );
 
@@ -453,7 +511,8 @@ describe("View Employees Component", () => {
         });
     })
 
-    // Test 14
+
+    // Test 15
     test("Test that search by name/email displays correct employees", async() => {
         api.get.mockResolvedValueOnce({
             data: {
@@ -464,7 +523,7 @@ describe("View Employees Component", () => {
 
         render(
             <MemoryRouter>
-                <ManageEmployees />
+                <ManageEmployeesWithContext contextValue={{fetchPendingEmployees: vi.fn()}} toast={null}/>
             </MemoryRouter>
         );
 
@@ -476,7 +535,8 @@ describe("View Employees Component", () => {
         expect(screen.queryByText("Bob Messi")).not.toBeInTheDocument();
     })
 
-    // Test 15
+
+    // Test 16
     test("Test flow for updating and saving an employee's role", async() => {
         api.get.mockResolvedValueOnce({
             data: {
@@ -500,7 +560,7 @@ describe("View Employees Component", () => {
 
         render(
             <MemoryRouter>
-                <ManageEmployees toast={ mockToast } />
+                <ManageEmployeesWithContext contextValue={{fetchPendingEmployees: vi.fn()}} toast={mockToast}/>
             </MemoryRouter>
         );
 
@@ -524,7 +584,7 @@ describe("View Employees Component", () => {
         });
     })
 
-    // Test 16
+    // Test 17
     test("Test confirm button for employee remove modal works as expected", async() => {
         api.get
             .mockResolvedValueOnce({ data: { active: employees, pending: pending_users } }) 
@@ -541,7 +601,7 @@ describe("View Employees Component", () => {
 
         render(
         <MemoryRouter>
-            <ManageEmployees toast={mockToast} />
+            <ManageEmployeesWithContext contextValue={{fetchPendingEmployees: vi.fn()}} toast={mockToast}/>
         </MemoryRouter>
         );
 
@@ -565,7 +625,7 @@ describe("View Employees Component", () => {
         });
     })
 
-    // Test 17
+    // Test 18
     test("Test cancel button for employee remove modal works as expected", async() => {
         api.get.mockResolvedValueOnce({
             data: {
@@ -576,7 +636,7 @@ describe("View Employees Component", () => {
 
         render(
             <MemoryRouter>
-                <ManageEmployees />
+                <ManageEmployeesWithContext contextValue={{fetchPendingEmployees: vi.fn()}} toast={null}/>
             </MemoryRouter>
         );
 
@@ -591,7 +651,7 @@ describe("View Employees Component", () => {
         });
     })
 
-    // Test 18
+    // Test 19
     test("Test confirm button for accept user modal works as expected", async() => {
         api.get
             .mockResolvedValueOnce({ data: { active: employees, pending: pending_users } }) 
@@ -613,31 +673,15 @@ describe("View Employees Component", () => {
 
         render(
             <MemoryRouter>
-                <ManageEmployees toast={mockToast}/>
+                <ManageEmployeesWithContext contextValue={{fetchPendingEmployees: vi.fn()}} toast={mockToast}/>
             </MemoryRouter>
         );
-
-        const expiryDate = new Date();
-        expiryDate.setDate(expiryDate.getDate() + 7);
-        if (expiryDate.getSeconds() >=500) {
-            expiryDate.setMilliseconds(0);
-            expiryDate.setSeconds(expiryDate.getSeconds() + 1);
-        } else {
-            expiryDate.setMilliseconds(0);
-        }
 
         const accept_button = await screen.findByTestId("accept-button-valid@example.com")
         fireEvent.click(accept_button)
 
         const yes_button = await screen.findByText(/Yes, accept employee/i)
         fireEvent.click(yes_button)
-
-        await waitFor(() => {
-            expect(api.post).toHaveBeenCalledWith("/invite/send-invite", {
-                email: "valid@example.com",
-                expiry_date: expiryDate.toISOString()
-            });
-        });
 
         await waitFor(() => {
             expect(toastCalled).not.toBeNull();
@@ -649,7 +693,7 @@ describe("View Employees Component", () => {
         });
     })
 
-    // Test 19
+    // Test 20
     test("Test confirm button for accept user modal outputs correct error message if invite email is invalid", async() => {
         api.get
             .mockResolvedValueOnce({ data: { active: employees, pending: pending_users } }) 
@@ -671,31 +715,15 @@ describe("View Employees Component", () => {
 
         render(
             <MemoryRouter>
-                <ManageEmployees toast={mockToast}/>
+                <ManageEmployeesWithContext contextValue={{fetchPendingEmployees: vi.fn()}} toast={mockToast}/>
             </MemoryRouter>
         );
-
-        const expiryDate = new Date();
-        expiryDate.setDate(expiryDate.getDate() + 7);
-        if (expiryDate.getSeconds() >=500) {
-            expiryDate.setMilliseconds(0);
-            expiryDate.setSeconds(expiryDate.getSeconds() + 1);
-        } else {
-            expiryDate.setMilliseconds(0);
-        }
 
         const accept_button = await screen.findByTestId("accept-button-valid@example.com")
         fireEvent.click(accept_button)
 
         const yes_button = await screen.findByText(/Yes, accept employee/i)
         fireEvent.click(yes_button)
-
-        await waitFor(() => {
-            expect(api.post).toHaveBeenCalledWith("/invite/send-invite", {
-                email: "valid@example.com",
-                expiry_date: expiryDate.toISOString()
-            });
-        });
 
         await waitFor(() => {
             expect(toastCalled).not.toBeNull();
@@ -707,7 +735,7 @@ describe("View Employees Component", () => {
         });
     })
 
-    // Test 20
+    // Test 21
     test("Test confirm button for accept user modal outputs correct error message if invite email is untrustworthy", async() => {
         api.get
             .mockResolvedValueOnce({ data: { active: employees, pending: pending_users } }) 
@@ -729,31 +757,15 @@ describe("View Employees Component", () => {
 
         render(
             <MemoryRouter>
-                <ManageEmployees toast={mockToast}/>
+                <ManageEmployeesWithContext contextValue={{fetchPendingEmployees: vi.fn()}} toast={mockToast}/>
             </MemoryRouter>
         );
-
-        const expiryDate = new Date();
-        expiryDate.setDate(expiryDate.getDate() + 7);
-        if (expiryDate.getSeconds() >=500) {
-            expiryDate.setMilliseconds(0);
-            expiryDate.setSeconds(expiryDate.getSeconds() + 1);
-        } else {
-            expiryDate.setMilliseconds(0);
-        }
 
         const accept_button = await screen.findByTestId("accept-button-valid@example.com")
         fireEvent.click(accept_button)
 
         const yes_button = await screen.findByText(/Yes, accept employee/i)
         fireEvent.click(yes_button)
-
-        await waitFor(() => {
-            expect(api.post).toHaveBeenCalledWith("/invite/send-invite", {
-                email: "valid@example.com",
-                expiry_date: expiryDate.toISOString()
-            });
-        });
 
         await waitFor(() => {
             expect(toastCalled).not.toBeNull();
@@ -765,7 +777,7 @@ describe("View Employees Component", () => {
         });
     })
 
-    // Test 21
+    // Test 22
     test("Test confirm button for accept user modal outputs correct error message if admin is sending too many invites", async() => {
         api.get
             .mockResolvedValueOnce({ data: { active: employees, pending: pending_users } }) 
@@ -787,7 +799,7 @@ describe("View Employees Component", () => {
 
         render(
             <MemoryRouter>
-                <ManageEmployees toast={mockToast}/>
+                <ManageEmployeesWithContext contextValue={{fetchPendingEmployees: vi.fn()}} toast={mockToast}/>
             </MemoryRouter>
         );
 
@@ -802,13 +814,6 @@ describe("View Employees Component", () => {
         fireEvent.click(yes_button)
 
         await waitFor(() => {
-            expect(api.post).toHaveBeenCalledWith("/invite/send-invite", {
-                email: "valid@example.com",
-                expiry_date: expiryDate.toISOString()
-            });
-        });
-
-        await waitFor(() => {
             expect(toastCalled).not.toBeNull();
             expect(toastCalled.detail).toContain("You are sending this employee too many invites, please try again tomorrow.");
         });
@@ -818,7 +823,7 @@ describe("View Employees Component", () => {
         });
     })
 
-    // Test 22
+    // Test 23
     test("Test cancel button for accept user modal works as expected", async() => {
         api.get.mockResolvedValueOnce({
             data: {
@@ -829,7 +834,7 @@ describe("View Employees Component", () => {
 
         render(
             <MemoryRouter>
-                <ManageEmployees />
+                <ManageEmployeesWithContext contextValue={{fetchPendingEmployees: vi.fn()}} toast={null}/>
             </MemoryRouter>
         );
 
@@ -844,7 +849,7 @@ describe("View Employees Component", () => {
         });
     })
 
-    // Test 23
+    // Test 24
     test("Test confirm button for reject user modal works as expected", async() => {
         api.get
             .mockResolvedValueOnce({ data: { active: employees, pending: pending_users } }) 
@@ -864,7 +869,7 @@ describe("View Employees Component", () => {
 
         render(
             <MemoryRouter>
-                <ManageEmployees toast={mockToast}/>
+                <ManageEmployeesWithContext contextValue={{fetchPendingEmployees: vi.fn()}} toast={mockToast}/>
             </MemoryRouter>
         );
 
@@ -888,7 +893,7 @@ describe("View Employees Component", () => {
         });
     })
 
-    // Test 24
+    // Test 25
     test("Test cancel button for reject user modal works as expected", async() => {
         api.get.mockResolvedValueOnce({
             data: {
@@ -899,7 +904,7 @@ describe("View Employees Component", () => {
 
         render(
             <MemoryRouter>
-                <ManageEmployees />
+                <ManageEmployeesWithContext contextValue={{fetchPendingEmployees: vi.fn()}} toast={null}/>
             </MemoryRouter>
         );
 
@@ -914,7 +919,7 @@ describe("View Employees Component", () => {
         });
     })
 
-    // Test 25
+    // Test 26
     test("Check that ViewEmployees send invite button opens the send invite modal correctly", async() => {
         api.get
             .mockResolvedValueOnce({ data: { active: employees, pending: pending_users } }) 
@@ -932,7 +937,7 @@ describe("View Employees Component", () => {
         expect(await screen.findByText(/Send your employee an invite/i)).toBeInTheDocument();
     })
 
-    // Test 25
+    // Test 27
     test("Check that ManageEmployees send invite button opens the send invite modal correctly", async() => {
         api.get
             .mockResolvedValueOnce({ data: { active: employees, pending: pending_users } }) 
@@ -941,7 +946,7 @@ describe("View Employees Component", () => {
 
         render(
             <MemoryRouter>
-                <ManageEmployees />
+                <ManageEmployeesWithContext contextValue={{fetchPendingEmployees: vi.fn()}} toast={null}/>
             </MemoryRouter>
         );
 

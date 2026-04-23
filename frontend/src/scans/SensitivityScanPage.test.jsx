@@ -73,28 +73,28 @@ describe("SensitivityScanPageTests", () => {
     test("sensitivityScanPageShowsCorrectTotalFilesScanned", () => {
         renderSensitivityScanPage();
 
-        expect(screen.getByText("Total Files Scanned")).toBeInTheDocument();
+        expect(screen.getByText("Total Files")).toBeInTheDocument();
         expect(screen.getByText("5")).toBeInTheDocument();
     });
 
     test("sensitivityScanPageShowsCorrectPIIDetections", () => {
         renderSensitivityScanPage();
 
-        expect(screen.getByText("PII Detections")).toBeInTheDocument();
+        expect(screen.getByText("PII")).toBeInTheDocument();
         expect(screen.getByText("201")).toBeInTheDocument();
     });
 
     test("sensitivityScanPageShowsCorrectFinancialDetections", () => {
         renderSensitivityScanPage();
 
-        expect(screen.getByText("Financial Detections")).toBeInTheDocument();
+        expect(screen.getByText("Financial")).toBeInTheDocument();
         expect(screen.getByText("250")).toBeInTheDocument();
     });
 
     test("sensitivityScanPageShowsCorrectLegalDetections", () => {
         renderSensitivityScanPage();
 
-        expect(screen.getByText("Legal Detections")).toBeInTheDocument();
+        expect(screen.getByText("Legal")).toBeInTheDocument();
         expect(screen.getByText("2")).toBeInTheDocument();
     });
 
@@ -102,9 +102,9 @@ describe("SensitivityScanPageTests", () => {
     test("sensitivityScanPageCorrectlyAppliesCardClass", () => {
         renderSensitivityScanPage();
 
-        const piiCard = screen.getByText("PII Detections").closest(".scan-page-card");
-        const financialCard = screen.getByText("Financial Detections").closest(".scan-page-card");
-        const legalCard = screen.getByText("Legal Detections").closest(".scan-page-card");
+        const piiCard = screen.getByText("PII").closest(".scan-page-card");
+        const financialCard = screen.getByText("Financial").closest(".scan-page-card");
+        const legalCard = screen.getByText("Legal").closest(".scan-page-card");
 
         // Each card has a threshold of 50 detections per file scanned before it becomes 'critical'
         // Financial should be critical as it has 250 detections across 5 files

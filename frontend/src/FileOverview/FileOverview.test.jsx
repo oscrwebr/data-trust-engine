@@ -1,5 +1,5 @@
 import { describe, test, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, waitFor, cleanup } from "@testing-library/react";
+import { render, screen, waitFor, cleanup, fireEvent } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import FileOverviewPage from "./FileOverviewPage";
 
@@ -15,6 +15,19 @@ vi.mock("./LatestScanResultCard", () => ({
         </div>
     )
 }));
+
+vi.mock("../api/axiosConfig.js", () => ({
+  default: {
+    get: vi.fn().mockResolvedValue({ data: [] }),
+    post: vi.fn().mockResolvedValue({ data: { success: true } }), 
+    interceptors: {
+      request: { use: vi.fn() },
+      response: { use: vi.fn() },
+    },
+  },
+}));
+
+import api from "../api/axiosConfig";
 
 
 // Method to render FileOverviewPage with router context
@@ -61,7 +74,9 @@ describe("FileOverviewPageTests", () => {
         const mockFile = {
             file_id: 1,
             file_name: "contract.pdf",
-            hash: "abc123"
+            hash: "abc123",
+            last_scanned: "2026-04-21T14:45:00Z",
+            last_modified: "2026-04-18T16:30:00Z"
         };
 
         const mockScanHistory = [
@@ -97,8 +112,9 @@ describe("FileOverviewPageTests", () => {
             expect(screen.getByText("contract.pdf")).toBeInTheDocument();
         });
 
-        // Ensure file information is rendered
-        expect(screen.getByText("abc123")).toBeInTheDocument();
+        // Ensure file information is rendered (formatted data using the formatted_data method)
+        expect(screen.getByText(/21 April 2026/i)).toBeInTheDocument();
+        expect(screen.getByText(/18 April 2026/i)).toBeInTheDocument();
 
         // Ensure section titles are rendered
         expect(screen.getByText("Latest Scan Results")).toBeInTheDocument();
@@ -199,4 +215,131 @@ describe("FileOverviewPageTests", () => {
         expect(screen.queryByText(/Latest Result Card:/)).not.toBeInTheDocument();
         expect(screen.queryByText(/Scan History Item:/)).not.toBeInTheDocument();
     })
+
+    // Test to ensure clicking the send alert button returns a toast
+    test("clickingSendAlertButtonReturnsInfoToast", async () => {
+
+        let toastCalled = null;
+        const mockToast = {
+            current: {
+            show: (args) => {
+                toastCalled = args;
+                console.log("Toast triggered:", args);
+            },
+            },
+        };
+
+        const mockFile = {
+            file_id: 1,
+            file_name: "empty_file.pdf",
+            hash: "emptyhash123"
+        };
+
+        const employee = {
+            user_id: 1,
+            name: "Test Case",
+            email: "test@email.com",
+            roles: [],
+            access_allowed: false,
+            last_sent: null,
+            failed_detections: [{"subcategory":null}]
+        };
+
+        // Mock fetch calls
+        vi.spyOn(global, "fetch")
+            .mockResolvedValueOnce({
+                json: async () => mockFile
+            })
+            .mockResolvedValueOnce({
+                json: async () => ([])
+            })
+            .mockResolvedValueOnce({
+                json: async () => ([])
+            })
+
+            // employees
+            .mockResolvedValueOnce({
+                json: async () => [employee]
+            });
+
+        render(<FileOverviewPage toast={mockToast}/>)
+
+        const cancel_button = await screen.findByRole("button", { name: /send alert/i });
+        fireEvent.click(cancel_button)
+
+        await waitFor(() => {
+            expect(api.post).toHaveBeenCalledWith("/access_mapping/send-violations-email", {
+                file_name: mockFile.file_name,
+                employee: employee
+            });
+        });
+
+        await waitFor(() => {
+            expect(toastCalled).not.toBeNull();
+            expect(toastCalled.detail).toContain("An email containing the violations was sent to the employee.");
+        });
+    });
+
+
+    // Test to ensure clicking the send alert button back to back returns a cooldown error
+    test("clickingSendAlertButtonTwiceReturnCooldownToast", async () => {
+
+        let toastCalled = null;
+        const mockToast = {
+            current: {
+            show: (args) => {
+                toastCalled = args;
+                console.log("Toast triggered:", args);
+            },
+            },
+        };
+
+        const mockFile = {
+            file_id: 1,
+            file_name: "empty_file.pdf",
+            hash: "emptyhash123"
+        };
+
+        const employee = {
+            user_id: 1,
+            name: "Test Case",
+            email: "test@email.com",
+            roles: [],
+            access_allowed: false,
+            last_sent: null,
+            failed_detections: [{"subcategory":null}]
+        };
+
+        // Mock fetch calls
+        vi.spyOn(global, "fetch")
+            .mockResolvedValueOnce({
+                json: async () => mockFile
+            })
+            .mockResolvedValueOnce({
+                json: async () => ([])
+            })
+            .mockResolvedValueOnce({
+                json: async () => ([])
+            })
+
+            // employees
+            .mockResolvedValueOnce({
+                json: async () => [employee]
+            });
+
+        api.post
+            .mockResolvedValueOnce({ data: "ok" })       
+            .mockResolvedValueOnce({ data: "cooldown" });
+
+        render(<FileOverviewPage toast={mockToast}/>)
+
+        const cancel_button = await screen.findByRole("button", { name: /send alert/i });
+        fireEvent.click(cancel_button)
+        fireEvent.click(cancel_button)
+
+        await waitFor(() => {
+            expect(toastCalled).not.toBeNull();
+            expect(toastCalled.detail).toContain("You are sending this employee too many emails, please try again later.");
+        });
+    });
 })

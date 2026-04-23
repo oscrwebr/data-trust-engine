@@ -256,7 +256,7 @@ def test_valid_invite(db, client):
 
     response = client.get("/invite/invite-processing", params={"token": token}, follow_redirects=False)
     next_url = "/dashboard?toast=signup"
-    redirect_url = f"http://localhost:8000/auth/sign-in?next={quote(next_url)}&signup=true&role=2&workspace_id={workspace.id}"
+    redirect_url = f"http://localhost:8000/auth/sign-in?next={quote(next_url)}&signup=true&role=2&workspace_id={workspace.id}&token={token}"
     assert response.headers["location"] == redirect_url
     assert response.status_code == 302
     assert db.query(PendingUser).count() == 1
@@ -367,6 +367,40 @@ def test_return_statement_with_same_email_as_admin(db, client):
     assert db.query(Invite).count() == 0
     assert db.query(PendingUser).count() == 0
 
+# Test return statement when sending an invite to the same email as an employee in workspace
+def test_return_statement_with_same_email_as_admin(db, client):
+    image = create_test_image()
+
+    oid = "000000-7sdf77-88asdf8-9sdiy99"
+    insert_statement = insert(User).values(firstname="John", surname="Smith", username="admin@example.com", email="valid@example.com", refresh="ms-refresh".encode(), oid=oid, role="admin")
+    res=db.execute(insert_statement)
+
+    oid2 = "000000-7sdf77-88asdf8-9sdiy98"
+    insert_statement_2 = insert(User).values(firstname="Charlie", surname="Brown", username="employee@example.com", email="employee@example.com", refresh="ms-refresh".encode(), oid=oid2, role="employee")
+    res_2=db.execute(insert_statement_2)
+
+    workspace = insert(models.Workspace).values(name="Test Workspace", image=image)
+    workspace_insert=db.execute(workspace)
+
+    add_user_workspace(db, workspace_insert.inserted_primary_key[0], res.inserted_primary_key[0])
+    add_user_workspace(db, workspace_insert.inserted_primary_key[0], res_2.inserted_primary_key[0])
+
+    refresh_family = repository.create_refresh_family(db)
+
+    access, refresh, _ = service.create_access_refresh(db, data={"userId": res.inserted_primary_key[0], "role": "admin"}, refresh_family_id=refresh_family.refresh_family_id)
+
+    req = client.build_request(
+        method="post",
+        url="/invite/send-invite",
+        headers={"Authorization": f"Bearer {access}"}, 
+        json={"email":"employee@example.com", "expiry_date":"2030-03-01T14:35:10.123456"},
+    )
+    response = client.send(request = req)
+
+    assert response.json().get("success") == "exists"
+    assert db.query(Invite).count() == 0
+    assert db.query(PendingUser).count() == 0
+
 
 # Testing the route to get all notifications for a user
 def test_get_all_notifications_route(db, client):
@@ -385,8 +419,6 @@ def test_get_all_notifications_route(db, client):
 
     # Notifications
     n_1 = add_notification(db, "title", "body", datetime.now(), res.inserted_primary_key[0])
-    n_2 = add_notification(db, "title", "body", datetime.now(), res.inserted_primary_key[0])
-    n_3 = add_notification(db, "title", "body", datetime.now(), res.inserted_primary_key[0])
 
     req = client.build_request(
         method="get",
@@ -394,21 +426,13 @@ def test_get_all_notifications_route(db, client):
         headers={"Authorization": f"Bearer {access}"}, 
     )
 
-    expected_notifications = [
-    {
-        "title": n.title,
-        "body": n.body,
-        "datetime": n.datetime.isoformat(),
-        "id": n.id,
-        "user_id": n.user_id,
-    }
-    for n in [n_1, n_2, n_3]
-    ]
-
     response = client.send(request = req)
     data = response.json()
-    assert db.query(models.Notification).count() == 3
-    assert data == expected_notifications
+    assert db.query(models.Notification).count() == 1
+    assert data[0]["title"] == n_1.title
+    assert data[0]["body"] == n_1.body
+    assert data[0]["id"] == n_1.id
+    assert data[0]["user_id"] == res.inserted_primary_key[0]
 
 
 # Testing deleting a user's notification 

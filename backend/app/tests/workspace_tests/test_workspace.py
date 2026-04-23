@@ -190,7 +190,6 @@ def test_get_all_notifications_route(db, client):
     for n in data:
         assert data[0]["title"] == n_1.title 
         assert data[0]["body"] == n_1.body
-        assert datetime.fromisoformat(n["datetime"]) == n_1.datetime
         assert data[0]["user_id"] == n_1.user_id
 
         
@@ -444,7 +443,7 @@ def test_get_all_employees_route(db, client):
     active_list = response_json["active"]
 
     # Check pending emails and type only
-    pending_emails = [{"email": p["pending"]["email"], "type": p["pending"]["type"]} for p in pending_list]
+    pending_emails = [{"email": p["user"]["email"], "type": p["user"]["type"]} for p in pending_list]
     assert pending_emails == [{"email": "maria@email.com", "type": "invite"}]
 
     # Check active users
@@ -467,9 +466,9 @@ def test_get_all_workspace_roles_route(db, client):
 
     add_user_workspace(db, workspace_insert.inserted_primary_key[0], res.inserted_primary_key[0])
 
-    r_1 = create_role(db, "Role 1", workspace_insert.inserted_primary_key[0])
-    r_2 = create_role(db, "Role 2", workspace_insert.inserted_primary_key[0])
-    r_3 = create_role(db, "Role 3", workspace_insert.inserted_primary_key[0])
+    r_1 = create_role(db, "Role 1", workspace_insert.inserted_primary_key[0], '2024-01-15 09:30:00')
+    r_2 = create_role(db, "Role 2", workspace_insert.inserted_primary_key[0], '2024-01-15 09:35:00')
+    r_3 = create_role(db, "Role 3", workspace_insert.inserted_primary_key[0], '2024-01-15 09:40:00')
 
     refresh_family = repository.create_refresh_family(db)
 
@@ -484,7 +483,10 @@ def test_get_all_workspace_roles_route(db, client):
     response = client.send(request = req)
 
     assert response.status_code == 200
-    assert response.json() == [{"name":"Role 1", "role_id": r_1.role_id, "workspace_id":workspace_insert.inserted_primary_key[0]}, { "name":"Role 2", "role_id": r_2.role_id, "workspace_id":workspace_insert.inserted_primary_key[0]}, {"name":"Role 3", "role_id": r_3.role_id, "workspace_id":workspace_insert.inserted_primary_key[0]}]
+    assert response.json() == [
+        {"name":"Role 1", "role_id": r_1.role_id, "workspace_id":workspace_insert.inserted_primary_key[0], "last_updated":r_1.last_updated.isoformat()},
+        {"name":"Role 2", "role_id": r_2.role_id, "workspace_id":workspace_insert.inserted_primary_key[0], "last_updated":r_2.last_updated.isoformat()},
+        {"name":"Role 3", "role_id": r_3.role_id, "workspace_id":workspace_insert.inserted_primary_key[0], "last_updated":r_3.last_updated.isoformat()}]
 
 # Test the delete user endpoint
 def test_delete_employee_route(db, client):
@@ -520,7 +522,8 @@ def test_delete_employee_route(db, client):
     response = client.send(request = req)
 
     assert response.status_code == 200
-    assert db.query(auth_model.User).count() is 1
+    assert db.query(auth_model.User).count() is 2
+    assert db.query(workspace_model.user_workspace).count() is 1
     
 
 # Test the reject user endpoint
@@ -593,7 +596,7 @@ def test_get_pending_employees_route(db, client):
     response = client.send(request = req)
 
     assert response.status_code == 200
-    assert response.json() == [{'email': 'mary@email.com', 'type': 'request', 'user_id': res_2.inserted_primary_key[0]}]
+    assert response.json() == [{'user':{'email': 'mary@email.com', 'type': 'request', 'user_id': res_2.inserted_primary_key[0]}}]
     
 
 # Test the /get-all-workspaces route

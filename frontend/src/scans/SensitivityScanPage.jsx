@@ -10,6 +10,7 @@ import { getPercentage } from "./utils/getPercentage";
 import { getCleanFilesClass } from "./utils/getCleanFilesClass";
 import { formatNamingConventionName } from "./utils/formatNamingConventionName";
 import { getSensitivityScanPageCardClass } from "./utils/getSensitivityScanPageCardClass";
+import { PiFileMagnifyingGlass } from "react-icons/pi";
 
 function SensitivityScanPage({ scan }) {
 
@@ -20,63 +21,74 @@ function SensitivityScanPage({ scan }) {
         <div className="sensitivity-scan-page-file-container">
             <div className="scan-page-card">
                 <div className="scan-page-card-text">
-                    <span className="scan-page-card-subtitle">Total Files Scanned</span>
+                    <span className="scan-page-card-subtitle">Total Files</span>
                     <span className="scan-page-card-title">{scan.file_count}</span>
                     
                 </div>
-                <div>
-                    <PiFileBold size={50}/>
+                <div className="scan-page-card-image">
+                    <div className="icon-box">
+                    <PiFileBold size={30}/>
+                    </div>
+                </div>
+            </div>
+
+            <div className={`scan-page-card ${getSensitivityScanPageCardClass(scan.detection_counts.personal + scan.detection_counts.financial + scan.detection_counts.legal_case, scan.file_count)}`}>
+                <div className="scan-page-card-text">
+                    <span className="scan-page-card-subtitle">Total Detections</span>
+                    <span className="scan-page-card-title">{scan.detection_counts.personal + scan.detection_counts.financial + scan.detection_counts.legal_case}</span>
+                    
+                </div>
+                <div className="scan-page-card-image">
+                    <div className="icon-box">
+                    <PiFileMagnifyingGlass size={30}/>
+                    </div>
                 </div>
             </div>
             <div className={`scan-page-card ${getSensitivityScanPageCardClass(scan.detection_counts.personal, scan.file_count)}`}>
                 <div className="scan-page-card-text">
-                    <span className="scan-page-card-subtitle">PII Detections</span>
+                    <span className="scan-page-card-subtitle">PII</span>
                     <span className="scan-page-card-title">{scan.detection_counts.personal}</span>
                     
                 </div>
-                <div>
-                    <PiUserListBold size={50}/>
+                <div className="scan-page-card-image">
+                    <div className="icon-box">
+                    <PiUserListBold size={30}/>
+                    </div>
                 </div>
             </div>
             <div className={`scan-page-card ${getSensitivityScanPageCardClass(scan.detection_counts.financial, scan.file_count)}`}>
                 <div className="scan-page-card-text">
-                    <span className="scan-page-card-subtitle">Financial Detections</span>
+                    <span className="scan-page-card-subtitle">Financial</span>
                     <span className="scan-page-card-title">{scan.detection_counts.financial}</span>
                     
                 </div>
-                <div>
-                    <PiCurrencyGbpBold size={50}/>
+                <div className="scan-page-card-image">
+                    <div className="icon-box">
+                    <PiCurrencyGbpBold size={30}/>
+                    </div>
                 </div>
             </div>
 
             <div className={`scan-page-card ${getSensitivityScanPageCardClass(scan.detection_counts.legal_case, scan.file_count)}`}>
                 <div className="scan-page-card-text">
-                    <span className="scan-page-card-subtitle">Legal Detections</span>
+                    <span className="scan-page-card-subtitle">Legal</span>
                     <span className="scan-page-card-title">{scan.detection_counts.legal_case}</span>
                     
                 </div>
-                <div>
-                    <PiScalesBold size={50}/>
+                <div className="scan-page-card-image">
+                    <div className="icon-box">
+                    <PiScalesBold size={30}/>
+                    </div>
                 </div>
             </div>
-            <div className={"scan-page-card critical"}>
-                <div className="scan-page-card-text">
-                    <span className="scan-page-card-subtitle">High Risk Files</span>
-                    {/* HARDCODED FOR NOW... */}
-                    <span className="scan-page-card-title">1</span>
-                    
-                </div>
-                <div>
-                    <PiWarningCircleBold size={50}/>
-                </div>
-            </div>
+            
             
         </div>
         <h2 className="scan-page-files-heading">All Scanned Files</h2>
 
         <div className="scan-page-file-container">
             {scan.files.map(scan_file => (
-                <ScanFileCard key={scan_file.scan_file_id} scan_file={scan_file} scan_type={scan.scan_type}/>
+                <ScanFileCard key={scan_file.scan_file_id} scan_file={scan_file} scan_type={scan.scan_type} scan_files={scan.files} />
             ))}
         </div>
         </>

@@ -32,7 +32,8 @@ const mockScan = {
                     passed: true,
                     suggested_name: null
                 }
-            ]
+            ],
+            duplicate_group_id: null
         },
         {
             scan_file_id: 2,
@@ -49,7 +50,9 @@ const mockScan = {
                     passed: false,
                     suggested_name: "bad_file_name"
                 }
-            ]
+            ],
+            duplicate_group_id: null
+
         },
         {
             scan_file_id: 3,
@@ -66,7 +69,8 @@ const mockScan = {
                     passed: false,
                     suggested_name: "another_bad_file"
                 }
-            ]
+            ],
+            duplicate_group_id: null
         }
     ]
 };
@@ -86,7 +90,7 @@ describe("OrganisationScanPageTests", () => {
 
     test("organisationScanPageShowsCorrectTotalFilesScanned", async () => {
         renderOrganisationScanPage();
-        expect(screen.getByText("Total Files Scanned")).toBeInTheDocument();
+        expect(screen.getByText("Total Files")).toBeInTheDocument();
         expect(screen.getByText("3")).toBeInTheDocument();
     });
 
@@ -132,7 +136,66 @@ describe("OrganisationScanPageTests", () => {
         expect(screen.getByText("ScanFileCard - another bad file")).toBeInTheDocument();
     });
 
+    test("scanWithNoDuplicatesShowsZeroDuplicateCount", () => {
+        renderOrganisationScanPage();
 
+        expect(screen.getByText("Duplicate Files")).toBeInTheDocument();
+        expect(screen.getByText("0")).toBeInTheDocument();
+    });
 
+    test("scanWithDuplicatesCalculatesDuplicateCountCorrectly", () => {
+        // add two files to a new mock scan that are duplicates of one another
+        const mockScanWithDuplicates = {
+            files: [
+                {
+                    scan_file_id: 4,
+                    file_id: 104,
+                    file_name: "duplicate file",
+                    naming_convention_scan_results: [
+                        {
+                            naming_convention_name: "camel_case",
+                            passed: true,
+                            suggested_name: "null"
+                        }
+                    ],
+                    duplicate_group_id: 2
+                },
+                {
+                    scan_file_id: 5,
+                    file_id: 105,
+                    file_name: "duplicate file 2",
+                    naming_convention_scan_results: [
+                        {
+                            naming_convention_name: "camel_case",
+                            passed: true,
+                            suggested_name: "null"
+                        }
+                    ],
+                    duplicate_group_id: 2
+                },
+
+                {
+                    scan_file_id: 6,
+                    file_id: 106,
+                    file_name: "non duplicate file",
+                    naming_convention_scan_results: [
+                        {
+                            naming_convention_name: "camel_case",
+                            passed: true,
+                            suggested_name: "null"
+                        }
+                    ],
+                    duplicate_group_id: null
+                }
+                            
+            ]
+        };
+        render(<OrganisationScanPage scan={mockScanWithDuplicates} />);
+
+        expect(screen.getByText("Duplicate Files")).toBeInTheDocument();
+        // Duplicate files are not the amount of files with a duplicate group
+        // They are the amount of files -1 (e.g. two files in a duplicate group means there is 1 duplicate file)
+        expect(screen.getByText("1")).toBeInTheDocument();
+    });
 
 });

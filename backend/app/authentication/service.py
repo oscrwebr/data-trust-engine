@@ -6,14 +6,18 @@ import requests
 
 from ..core.config import SCOPES
 from ..core.security import create_refresh_token, create_access_token, hash_user_refresh_token, encrypt_refresh, decrypt_refresh
+from app.core.celery_worker import celery
+from app.core.database import SessionLocal
+from app.ingestion.service import get_set_all_graph_files, get_workspace_unknown_folders, get_workspace_unknown_files, add_user_files_after_workspace_join, add_user_folders_after_workspace_join, remove_unknown_by_email
 from app.workspaces.repository import add_notification, get_workspace_by_workspace_id, add_user_workspace
-from app.invites.repository import get_invite_by_workspace_id, update_invite_used_value
+from app.invites.repository import get_invite_by_token
 from app.roles.repository import migrate_pending_roles
 from app.authentication.repository import get_pending_user_by_email, delete_pending_user
+from app.authentication.models import User
 
 DRIVE_DATA_GRAPH_URL = "https://graph.microsoft.com/v1.0/me/drive?$select=id"
 
-def create_user(db, details: dict, refresh: str, ms_access_token: str, role: str, workspace_id: int):
+def create_user(db, details: dict, refresh: str, ms_access_token: str, role: str):
     split_name = details["name"].split()
     firstname, surname = split_name[0], split_name[-1]
     enc_refresh = encrypt_refresh(refresh)
@@ -21,8 +25,6 @@ def create_user(db, details: dict, refresh: str, ms_access_token: str, role: str
     drive_id = get_drive_id(access_token=ms_access_token)
 
     email = details["email"]
-
-    pending_user = repository.get_pending_user_by_email(db, email)
 
     user = repository.create_user(
         db=db,
@@ -35,27 +37,70 @@ def create_user(db, details: dict, refresh: str, ms_access_token: str, role: str
         driveId=drive_id,
         role=role
     )
-    
-    if pending_user:
-        migrate_pending_roles(db, pending_user.user_id, user.user_id)
-
-        # delete pending user AFTER migration
-        delete_pending_user(db, pending_user.user_id)
-    
-    if(workspace_id != None and role == "employee"):
-        invite = get_invite_by_workspace_id(db, workspace_id)
-        add_user_workspace(db, workspace_id, user.user_id)
-        if invite:
-            update_invite_used_value(db, invite.invite_id)
-            workspace = get_workspace_by_workspace_id(db, workspace_id)
-            users = workspace.user
-            for user in users:
-                if(user.role == "admin"):
-                    user_id = user.user_id
-
-            add_notification(db, "Employee Accepted Invite", f"{firstname} {surname} accepted their invite request to join your workspace.", datetime.now(), user_id)
+    # Handle ingestion with celery - in the background and sets up a queue, incase of multiple signup and inturn ingestion requests at once
+    _ = setup_ingestion_celery.delay(ms_access_token, user.user_id)
 
     return user
+
+def check_user_unknown(workspace_id: int, user: User, db: Session):
+    # Get all the unknown user files and folders for this work space
+    workspace_unknown_folders = get_workspace_unknown_folders(id=workspace_id, email=user.email, db=db)
+    workspace_unknown_files = get_workspace_unknown_files(id=workspace_id, email=user.email, db=db)
+
+    # If both lists are empty, return return None
+    if not workspace_unknown_folders and not workspace_unknown_files:
+        print("they're empty")
+        return
+
+    # Need to now iterate through and check if the user's email is the unknown
+    user_folders_add = []
+    user_files_add = []
+    for i in workspace_unknown_folders:
+        # Add the user to the user_folders table and remove the entry from the unknown folders table
+        user_folders_add.append({"folder_id": i[0], "user_id": user.user_id})
+    # print(user_folders_add)
+
+    for i in workspace_unknown_files:
+        user_files_add.append({"file_id": i[0], "user_id": user.user_id})
+    # print(user_files_add)
+
+    # If the users email is the unknown, we add them to the userFiles and remove them from here. Otherwise, continue
+    ufolder_add_res = add_user_folders_after_workspace_join(user_folders=user_folders_add, db=db)
+    ufile_add_res = add_user_files_after_workspace_join(user_files=user_files_add, db=db)
+    if ufolder_add_res != 200 or ufile_add_res != 200:
+        print("something went wrong updating user files/folders, not removing unknown!")
+    else:
+        remove_unknown_by_email(user.email, db=db)
+
+# Method to handle user creation for anyone who has accepted an invite
+def handle_user_creation_after_invite(db: Session, user: User, workspace_id: int, token: str):
+    invite = get_invite_by_token(db, token)
+    pending_user = repository.get_pending_user_by_id(db, invite.user_id) if invite else None
+    
+    if pending_user == None:
+        return
+    
+    migrate_pending_roles(db, pending_user.user_id, user.user_id)
+    delete_pending_user(db, pending_user.user_id)
+    add_user_workspace(db, workspace_id, user.user_id)
+    workspace = get_workspace_by_workspace_id(db, workspace_id)
+    users = workspace.user
+    for user in users:
+        if(user.role == "admin"):
+            user_id = user.user_id
+    add_notification(db, "Employee Accepted Invite", f"{user.firstname} {user.surname} accepted their invite request to join your workspace.", datetime.now(), user_id)
+    # Checking whether the user is one of the unknown users for the workspace
+    check_user_unknown(workspace_id=workspace_id, user=user, db=db)
+    return
+
+
+@celery.task
+def setup_ingestion_celery(ms_access_token, user_id):
+    db = SessionLocal()
+    try:
+        return get_set_all_graph_files(ms_access_token, user_id, db)
+    finally:
+        db.close()
 
 def check_get_by_id(id: int, db):
     user = repository.get_by_id(id, db)
@@ -86,16 +131,6 @@ def create_access_refresh(db: Session, data: dict, refresh_family_id: int | None
     
     new_entry = repository.create_refresh(db=db, uid=data['userId'], hashed_token=hashed_token, expiry=refresh_token.expiry_date, refresh_family_id=refresh_family_id, access_token=access_token)
     return access_token, refresh_token, new_entry
-
-def update_refresh(refresh_token: str, expiry_date: datetime, db): # This doesn't seem to be used anywhere??
-    hashed_token = hash_user_refresh_token(refresh_token)
-    print(f"refresh token from client: {refresh_token} -- hashed token: {hashed_token}")
-    matched_refresh = repository.verify_refresh(hashed_token=hashed_token, expiry=expiry_date, db=db)
-    # check if the refresh has been used before
-    if matched_refresh.replaced_by:
-        return "This has been replaced! Compromised tokens! Delete chain immediately!"
-    else:
-        return "We are ready to roll baby!"
     
 def refresh_flow(db, client_refresh: str, current_time: datetime):
     """
@@ -114,9 +149,14 @@ def refresh_flow(db, client_refresh: str, current_time: datetime):
     # Check if there is a family, and whether it has been revoked
     if refresh_family_id := refresh_details.refresh_family_id: # checks whether there is anything in that column for the row
         refresh_family = repository.get_by_refresh_family_id(db=db, refresh_family_id=refresh_family_id)
-        if refresh_family.is_revoked: # Does this need to be nested?
+        if refresh_family.is_revoked:
             print("This token family is revoked!")
             return return_dict
+        if refresh_family.is_disconnected:
+            repository.revoke_refresh_family(db, refresh_details.refresh_family_id)
+            print("this family is disconnected! It is now revoked!")
+            return return_dict
+
     # Check that the token has not been replaced by another token yet
     if refresh_details.replaced_by:
         # These are checks incase the client has sent multiple requests at once within the grace period of 30 seconds
@@ -221,5 +261,33 @@ def get_pending_by_email(db: Session, email: str):
 def add_pending_user(db: Session, email: str, type: str):
     return repository.add_user(db, email, type)
 
+def log_out_flow(db: Session, client_refresh: str, current_time: datetime):
+    '''
+    Function that will handle user's when they log out. 
+    - Checks that refresh token is the latest by checking whether it has been replaced ('by' and 'at')
+    - Checks that the associated refresh_family is not revoked and is not also logged out
+    - If there are multiple logouts with the same refresh token - it will allow a grace period of 30 seconds in case of repeat requests to log out by the client - if > 30 seconds, the refresh family will be revoked
+    '''
+    # Getting the refresh token by from the string obtained by the visiting user
+    hashed_token = hash_user_refresh_token(client_refresh)
+    refresh_details = repository.get_refresh_details_by_token(db=db, hashed_token=hashed_token)
 
-    
+    # Checking that this is the latest version of the refresh token - if not, time delay doesn't matter here. The refresh family must be revoked!
+    if refresh_details.replaced_by:
+        repository.revoke_refresh_family(db, refresh_details.refresh_family_id)
+        return
+    # Checking whether the token has been revoked
+    refresh_family_details = repository.get_by_refresh_family_id(db=db, refresh_family_id=refresh_details.refresh_family_id)
+    if refresh_family_details.is_revoked:
+        return
+    # Checking whether the token has been disconnected
+    if refresh_family_details.is_disconnected:
+        # Check whether the token has been disconnected in the last 30 seconds
+        if refresh_details.replaced_at.replace(tzinfo=timezone.utc) + timedelta(seconds=30) > current_time:
+            return
+        # This means that someone is reusing an old refresh token to logout - must revoke refresh_family!
+        repository.revoke_refresh_family(db, refresh_details.refresh_family_id)
+        return
+    # If this point is reached, all checks have passed - can update the replaced_at time and set the refresh_family 'is_disconnected' value to true
+    repository.disconnect_refresh_family(db=db, refresh_family_id=refresh_details.refresh_family_id)
+    repository.update_refresh_replaced_at(db=db, refresh_id=refresh_details.refresh_id)

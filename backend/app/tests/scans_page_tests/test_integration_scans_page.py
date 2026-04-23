@@ -70,14 +70,21 @@ def organisation_scan_setup(db):
     return user, workspace, file
 
 
-def test_get_scans_with_file_count_gets_all_scans(db, naming_conventions):
+def test_get_scans_with_file_count_gets_all_scans(db, naming_conventions, organisation_scan_setup):
     # Arrange
+
+    user, workspace, file = organisation_scan_setup
+
     scan1 = repository.create_scan(db, scan_type=ScanType.ORGANISATION)
     scan2 = repository.create_scan(db, scan_type=ScanType.ORGANISATION)
     scan3 = repository.create_scan(db, scan_type=ScanType.SENSITIVITY)
 
+    repository.create_scan_file(db, scan_id=scan1.scan_id, file_id=file.ingestion_file_id)
+    repository.create_scan_file(db, scan_id=scan2.scan_id, file_id=file.ingestion_file_id)
+    repository.create_scan_file(db, scan_id=scan3.scan_id, file_id=file.ingestion_file_id)
+
     # Act
-    act = service.get_scans_with_file_count(db)
+    act = service.get_scans_with_file_count(db, user_id=user.user_id)
 
     # Assert
     # Check that all three scans are returned
@@ -93,7 +100,7 @@ def test_get_scans_with_file_count_includes_correct_file_count(db, naming_conven
     scan = service.perform_organisation_scan(db, user_id=user.user_id, naming_convention_ids=[1])
 
     # Act
-    act = service.get_scans_with_file_count(db)
+    act = service.get_scans_with_file_count(db, user_id=user.user_id)
 
     # Assert
     # Check file_count exists in the response

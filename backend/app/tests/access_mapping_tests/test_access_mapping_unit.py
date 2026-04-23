@@ -1,4 +1,11 @@
 import app.access_mapping.service as service
+import app.authentication.repository as auth_repository
+import app.authentication.models as auth_model
+import app.authentication.service as auth_service
+import app.access_mapping.models as model
+import app.roles.repository as roles_repository
+from sqlalchemy import insert
+
 from types import SimpleNamespace
 from unittest.mock import Mock
 
@@ -304,3 +311,105 @@ def test_evaluate_employee_access_denies_employee_when_failed_detections_exist(m
             "threshold": 5
         }
     ]
+
+
+# Test that /send-violations-email route works as expected when called
+def test_success_for_send_violations_email_route(db, client):
+    oid = "000000-7sdf77-88asdf8-9sdiy99"
+    failed_detections_list = {
+        "subcategory": "NAME",
+        "count": 8,
+        "threshold": 5
+    }
+
+    employee = {
+        "user_id": 1,
+        "name": "Test Account",
+        "email": "testaccount@test.com",
+        "roles": [],
+        "access_allowed": False,
+        "last_sent": None,
+        "failed_detections": [failed_detections_list]
+    }
+
+    insert_statement = insert(auth_model.User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode(), role="employee")
+    res=db.execute(insert_statement)
+
+    category = roles_repository.create_sensitivity_category(db, "Category")
+    subcategory = roles_repository.create_sensitivity_subcategory(db, "NAME", category.sensitivity_category_id)
+
+    refresh_family = auth_repository.create_refresh_family(db)
+
+    access, refresh, _ = auth_service.create_access_refresh(db, data={"userId": res.inserted_primary_key[0], "role": "admin"}, refresh_family_id=refresh_family.refresh_family_id)
+
+    req = client.build_request(
+        method="post",
+        url="/access_mapping/send-violations-email",
+        headers={"Authorization": f"Bearer {access}"}, 
+        json={
+            "file_name": "test_file.pdf",
+            "employee": employee
+        }, 
+    )
+
+    response = client.send(request = req)
+
+    assert response.json() == True
+    assert db.query(model.ViolationEmail).count() == 1
+
+
+# Test that /send-violations-email route works as expected when called
+def test_success_for_send_violations_email_route(db, client):
+    oid = "000000-7sdf77-88asdf8-9sdiy99"
+    failed_detections_list = {
+        "subcategory": "NAME",
+        "count": 8,
+        "threshold": 5
+    }
+
+    employee = {
+        "user_id": 1,
+        "name": "Test Account",
+        "email": "testaccount@test.com",
+        "roles": [],
+        "access_allowed": False,
+        "last_sent": None,
+        "failed_detections": [failed_detections_list]
+    }
+
+    insert_statement = insert(auth_model.User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode(), role="employee")
+    res=db.execute(insert_statement)
+
+    category = roles_repository.create_sensitivity_category(db, "Category")
+    subcategory = roles_repository.create_sensitivity_subcategory(db, "NAME", category.sensitivity_category_id)
+
+    refresh_family = auth_repository.create_refresh_family(db)
+
+    access, refresh, _ = auth_service.create_access_refresh(db, data={"userId": res.inserted_primary_key[0], "role": "admin"}, refresh_family_id=refresh_family.refresh_family_id)
+
+    email_1 = client.build_request(
+        method="post",
+        url="/access_mapping/send-violations-email",
+        headers={"Authorization": f"Bearer {access}"}, 
+        json={
+            "file_name": "test_file.pdf",
+            "employee": employee
+        }, 
+    )
+
+    response = client.send(request = email_1)
+
+    email_2 = client.build_request(
+        method="post",
+        url="/access_mapping/send-violations-email",
+        headers={"Authorization": f"Bearer {access}"}, 
+        json={
+            "file_name": "test_file.pdf",
+            "employee": employee
+        }, 
+    )
+
+    response = client.send(request = email_2)
+
+    assert response.json() == "cooldown"
+    assert db.query(model.ViolationEmail).count() == 1

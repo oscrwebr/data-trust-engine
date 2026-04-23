@@ -1,0 +1,9 @@
+This is a sample .txt file
+
+This is used for the scanning component's extractor tests
+
+Sample name:
+Emma Thompson
+
+Sample Email:
+emma.thompson@example.com

@@ -1,6 +1,8 @@
 from app.workspaces import repository
 from sqlalchemy.orm import Session
 from datetime import datetime
+from app.workspaces.models import Workspace
+from app.workspaces.repository import get_employee_in_workspace_by_email
 
 # Checking workspace creation inputs
 def workspace(name:str, image: bytes, db: Session, user_id: int):
@@ -16,6 +18,9 @@ def add_notification(db: Session, title: str, body: str, datetime: datetime, use
 # Get all notifications for a user
 def get_user_notifications(db: Session, user_id: int):
     return repository.get_all_notifications(db, user_id)
+
+def check_employee_in_workspace(db: Session, email: str, workspace: Workspace):
+    return get_employee_in_workspace_by_email(db, email, workspace)
 
 def del_notification(db: Session, notification_id: int, user_id: int):
     return repository.delete_notification(db, notification_id, user_id)
@@ -46,3 +51,9 @@ def get_pending_employees(db: Session, user_id: int):
 
 def add_pending_user_to_workspace(db: Session, workspace_id: int, user_id: int):
     return repository.add_pending_user_workspace(db, workspace_id, user_id)
+
+def get_pending_employees_type_request(db: Session, user_id: int):
+    return repository.get_all_pending_employees_type_request(db, user_id)
+
+def remove_employee_from_workspace(db: Session, user_id: int):
+    return repository.remove_employee_from_workspace(db, user_id)
