@@ -1,8 +1,8 @@
-"""Added ondelete CASCADE to user_id column in Notifications table
+"""Re-created database
 
-Revision ID: cb31b12d9973
+Revision ID: a807cea48cdf
 Revises: 
-Create Date: 2026-04-22 19:17:56.271189
+Create Date: 2026-04-23 01:48:24.016078
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision: str = 'cb31b12d9973'
+revision: str = 'a807cea48cdf'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -198,6 +198,13 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('sensitivity_subcategory_id')
     )
     op.create_index(op.f('ix_sensitivity_subcategory_sensitivity_subcategory_id'), 'sensitivity_subcategory', ['sensitivity_subcategory_id'], unique=False)
+    op.create_table('unknown_user_folders',
+    sa.Column('folder_id', sa.Integer(), nullable=False),
+    sa.Column('email', sa.String(length=254), nullable=False),
+    sa.ForeignKeyConstraint(['folder_id'], ['folder.folder_id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('folder_id', 'email')
+    )
+    op.create_index('rev_idx_unknown_user_folders', 'unknown_user_folders', ['email', 'folder_id'], unique=False)
     op.create_table('user_folders',
     sa.Column('folder_id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
@@ -251,6 +258,13 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('scan_file_id')
     )
     op.create_index(op.f('ix_scan_file_scan_file_id'), 'scan_file', ['scan_file_id'], unique=False)
+    op.create_table('unknown_user_files',
+    sa.Column('file_id', sa.Integer(), nullable=False),
+    sa.Column('email', sa.String(length=254), nullable=False),
+    sa.ForeignKeyConstraint(['file_id'], ['ingestion_file.ingestion_file_id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('file_id', 'email')
+    )
+    op.create_index('rev_idx_unknown_user_files', 'unknown_user_files', ['email', 'file_id'], unique=False)
     op.create_table('user_files',
     sa.Column('file_id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
@@ -325,6 +339,8 @@ def downgrade() -> None:
     op.drop_table('user_role')
     op.drop_index('rev_idx_user_files', table_name='user_files')
     op.drop_table('user_files')
+    op.drop_index('rev_idx_unknown_user_files', table_name='unknown_user_files')
+    op.drop_table('unknown_user_files')
     op.drop_index(op.f('ix_scan_file_scan_file_id'), table_name='scan_file')
     op.drop_table('scan_file')
     op.drop_index(op.f('ix_role_permission_role_permission_id'), table_name='role_permission')
@@ -336,6 +352,8 @@ def downgrade() -> None:
     op.drop_table('user_workspace')
     op.drop_index('rev_idx_user_folders', table_name='user_folders')
     op.drop_table('user_folders')
+    op.drop_index('rev_idx_unknown_user_folders', table_name='unknown_user_folders')
+    op.drop_table('unknown_user_folders')
     op.drop_index(op.f('ix_sensitivity_subcategory_sensitivity_subcategory_id'), table_name='sensitivity_subcategory')
     op.drop_table('sensitivity_subcategory')
     op.drop_index(op.f('ix_scan_naming_convention_scan_naming_convention_id'), table_name='scan_naming_convention')

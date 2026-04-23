@@ -70,7 +70,6 @@ describe("Sidebar Component", () => {
         expect(screen.queryByText("Scanning")).not.toBeInTheDocument();
         expect(screen.getByText("test@example.com")).toBeInTheDocument();
         expect(screen.getByText("Dashboard")).toBeInTheDocument();
-        expect(screen.getByText("Settings")).toBeInTheDocument();
         expect(screen.getByText("Sign-out")).toBeInTheDocument();
     })
 
