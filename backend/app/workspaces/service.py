@@ -54,3 +54,6 @@ def add_pending_user_to_workspace(db: Session, workspace_id: int, user_id: int):
 
 def get_pending_employees_type_request(db: Session, user_id: int):
     return repository.get_all_pending_employees_type_request(db, user_id)
+
+def remove_employee_from_workspace(db: Session, user_id: int):
+    return repository.remove_employee_from_workspace(db, user_id)
