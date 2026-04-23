@@ -367,6 +367,40 @@ def test_return_statement_with_same_email_as_admin(db, client):
     assert db.query(Invite).count() == 0
     assert db.query(PendingUser).count() == 0
 
+# Test return statement when sending an invite to the same email as an employee in workspace
+def test_return_statement_with_same_email_as_admin(db, client):
+    image = create_test_image()
+
+    oid = "000000-7sdf77-88asdf8-9sdiy99"
+    insert_statement = insert(User).values(firstname="John", surname="Smith", username="admin@example.com", email="valid@example.com", refresh="ms-refresh".encode(), oid=oid, role="admin")
+    res=db.execute(insert_statement)
+
+    oid2 = "000000-7sdf77-88asdf8-9sdiy98"
+    insert_statement_2 = insert(User).values(firstname="Charlie", surname="Brown", username="employee@example.com", email="employee@example.com", refresh="ms-refresh".encode(), oid=oid2, role="employee")
+    res_2=db.execute(insert_statement_2)
+
+    workspace = insert(models.Workspace).values(name="Test Workspace", image=image)
+    workspace_insert=db.execute(workspace)
+
+    add_user_workspace(db, workspace_insert.inserted_primary_key[0], res.inserted_primary_key[0])
+    add_user_workspace(db, workspace_insert.inserted_primary_key[0], res_2.inserted_primary_key[0])
+
+    refresh_family = repository.create_refresh_family(db)
+
+    access, refresh, _ = service.create_access_refresh(db, data={"userId": res.inserted_primary_key[0], "role": "admin"}, refresh_family_id=refresh_family.refresh_family_id)
+
+    req = client.build_request(
+        method="post",
+        url="/invite/send-invite",
+        headers={"Authorization": f"Bearer {access}"}, 
+        json={"email":"employee@example.com", "expiry_date":"2030-03-01T14:35:10.123456"},
+    )
+    response = client.send(request = req)
+
+    assert response.json().get("success") == "exists"
+    assert db.query(Invite).count() == 0
+    assert db.query(PendingUser).count() == 0
+
 
 # Testing the route to get all notifications for a user
 def test_get_all_notifications_route(db, client):

@@ -10,7 +10,8 @@ from sqlalchemy.orm import Session
 from app.invites.models import Invite
 from app.invites.repository import get_invite_for_cooldown, get_invite_by_pending_user_id
 from app.workspaces.models import Workspace
-from app.authentication.repository import get_pending_user_by_email, set_pending_user_type
+from app.workspaces.service import get_employee_in_workspace_by_email
+from app.authentication.repository import get_pending_user_by_email, set_pending_user_type, get_by_email
 from app.authentication.models import User, PendingUser
 from app.core.config import REDIRECT_URI
 import base64
@@ -35,9 +36,13 @@ async def create_invite(db, invite, workspace, time_now, email):
 # Validating the invite
 def validate_invite(db, email: str, expiry_date: datetime | None, workspace: Workspace, time_now:datetime, admin_email: str):
     cooldown = timedelta(minutes=1)
+    employee = get_employee_in_workspace_by_email(db, email, workspace)
 
     if email is None:
         return "invalid"
+    
+    if employee is not None:
+        return "exists"
     
     # Call validate email function
     is_email_valid = validate_email(email)
