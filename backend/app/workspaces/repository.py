@@ -4,7 +4,7 @@ from app.authentication.models import User, PendingUser
 from app.invites.models import Invite
 from app.roles.models import Role, UserRole
 from datetime import datetime
-from sqlalchemy import desc, insert, func
+from sqlalchemy import desc, insert, func, delete
 
 def add_workspace(db: Session, name:str, image:bytes):
     workspace = Workspace(name=name, image=image)
@@ -150,6 +150,11 @@ def get_all_pending_employees_type_request(db: Session, user_id: int):
 
     return pending_users
 
+def remove_employee_from_workspace(db: Session, user_id: int):
+    stmt = delete(user_workspace).where(user_workspace.c.user_id == user_id)
+    db.execute(stmt)
+    db.commit()
+    
 
 def get_employee_in_workspace_by_email(db: Session, email: str, workspace: Workspace):
     
