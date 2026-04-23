@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, UploadFile, File, Form, Response
 from app.core.database import get_database
 from sqlalchemy.orm import Session
-from app.workspaces.service import workspace, add_notification, get_user_notifications, del_notification, get_employees, get_pending_employees, get_workspaces, get_workspace_by_id, get_admin_from_workspace, add_pending_user_to_workspace, get_pending_employees_type_request
+from app.workspaces.service import remove_employee_from_workspace, workspace, add_notification, get_user_notifications, del_notification, get_employees, get_pending_employees, get_workspaces, get_workspace_by_id, get_admin_from_workspace, add_pending_user_to_workspace, get_pending_employees_type_request
 from typing import Annotated
 from ..core.security_schemas import User
 from ..core.security import get_user_from_access_token
@@ -133,7 +133,7 @@ async def get_all_pending_employees_type_request(db: Annotated[Session, Depends(
 
 @router.delete("/delete-user/{user_id}")
 async def delete_active_user(user_id: int, db: Annotated[Session, Depends(get_database)]):
-    return service.delete_user(db, user_id)
+    return remove_employee_from_workspace(db, user_id)
 
 @router.patch("/reject-pending/{user_id}")
 async def reject_pending(user_id: int, db: Annotated[Session, Depends(get_database)]):

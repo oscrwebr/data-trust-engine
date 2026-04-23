@@ -14,6 +14,8 @@ function AdminFiles() {
 
   const [loading, setLoading] = useState(false);
   const [scanning, setScanning] = useState(false);
+
+  const [organisationScanning, setOrganisationScanning] = useState(false);
   
   const pageSize = 10;
 
@@ -27,6 +29,21 @@ function AdminFiles() {
     return "low";
   };
 
+  const performOrganisationScan = async () => {
+    setOrganisationScanning(true);
+
+    try {
+      await api.post("/scanning/organisation_scan", {
+        naming_convention_ids: [2]
+      });
+      console.log("Organisation scan performed successfully");
+    } catch (error) {
+      console.error("Error performing organisation scan:", error);
+    } finally {
+      setOrganisationScanning(false);
+    }
+  }
+
   // ✅ FETCH FILES + LAST SCANNED
   const fetchFiles = async () => {
     setLoading(true);
@@ -38,6 +55,7 @@ function AdminFiles() {
       const filesRes = await fetch(
         `${backend_uri}/access_mapping/get_highest_risk_files?limit=${pageSize}&offset=${offset}`
       );
+
 
       const filesData = await filesRes.json();
 
@@ -141,6 +159,10 @@ function AdminFiles() {
         className={styles.button}
       >
         {scanning ? "Scanning..." : "Scan Selected"}
+      </button>
+
+      <button onClick={performOrganisationScan} className={styles.button}>
+        Run Organisation Scan
       </button>
 
       {/* TABLE */}

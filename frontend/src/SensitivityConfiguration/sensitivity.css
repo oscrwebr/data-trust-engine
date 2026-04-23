@@ -48,8 +48,8 @@
 .subcategory-card-container {
     margin-top: 20px;
     display: grid;
-    grid-template-columns: repeat(auto-fill, 270px);
-    gap: 5px;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 250px));
+    gap: 8px;
     margin-bottom: 20px;
 }
 
@@ -62,7 +62,8 @@
 }
 
 .risk-toggle.p-selectbutton {
-    display: inline-flex;
+    display: flex;
+    width: 100%;
     flex-wrap: nowrap;
     background: #f3f4f6;
     border-radius: 12px;
@@ -73,14 +74,15 @@
 .risk-toggle .p-button {
     border: none;
     border-radius: 12px;
-    min-width: 100px;
+    flex: 1 1 0;
+    width: 50%;
+    min-width: 0;
     font-weight: 600;
-
     background: transparent;
     color: #8b95a7;
-
     box-shadow: none;
     outline: none;
+    justify-content: center;
 }
 
 .risk-toggle.high-selected .p-button.p-highlight {
