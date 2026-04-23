@@ -60,14 +60,14 @@ These pages are then served to the user via an NGINX web server running in the n
 
 NGINX not only serves static files, but also acts as a reverse proxy, proxying calls to the backend, ensuring only one point of entry to the fastapi application.
 #### Command
-`docker compose --env-file <path/to/.env/file> -- profile prod up --build`
+`docker compose --env-file <path/to/.env/file> --profile prod up --build`
 #### Running test environments
 There are two test profiles that are used in the pipelines. The primary use of these are for pipelines, however, they are a useful tool to ensure that your code changes will pass, as they use the same base images that are used in the dev and more importantly *production* environments.
 #### Commands
 - Frontend:
-    - `docker compose -- profile test-frontend up --build`
+    - `docker compose --profile test-frontend up --build`
 - Backend:
-    - `docker compose --env-file <path/to/.env/file> -- profile test-backend up --build`
+    - `docker compose --env-file <path/to/.env/file> --profile test-backend up --build`
 
 
 ## Support
