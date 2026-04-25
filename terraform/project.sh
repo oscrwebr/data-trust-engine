@@ -153,6 +153,14 @@ services:
       - redis
       - backend-prod
 
+  # Setting up WatchTower for monitoring changes in docker repository in docker hub
+  watchtower:
+    image: containrrr/watchtower:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /home/c23026535/.docker/config.json:/config.json
+    command: --cleanup --api-version 1.54 --interval 3600
+
 volumes:
   dte-prod-db-volume:
 `EOF`
