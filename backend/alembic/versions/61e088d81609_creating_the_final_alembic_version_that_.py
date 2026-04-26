@@ -1,8 +1,8 @@
-"""Create DB - final alembic
+"""Creating the final alembic version that all others will be based upon
 
-Revision ID: 4c8fd5b7dad9
+Revision ID: 61e088d81609
 Revises: 
-Create Date: 2026-04-25 22:38:50.316532
+Create Date: 2026-04-26 11:36:13.105337
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision: str = '4c8fd5b7dad9'
+revision: str = '61e088d81609'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
