@@ -37,7 +37,6 @@ def get_recent_activity(db: Session, user_id: int):
             "type": "invite",
             "invite_id": invite.invite_id,
             "timestamp": invite.created_at,
-            "email": invite.email,
         })
 
     for role_change in role_changes:
