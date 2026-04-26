@@ -86,12 +86,13 @@ function SensitivityConfiguration() {
 
 
     return (
-        <>
+        <div className="page">
         <div>
             <div className="scan-header">
-                <h1 className="detection-heading">
-                    Detection Sensitivity
-                </h1>
+                <div className="header_container">
+                    <i id="header_icon" className="pi pi-search"/>
+                    <h1 className="title">Detection Sensitivity</h1>
+                </div>
             <Divider/>
             </div>
         </div>
@@ -109,7 +110,7 @@ function SensitivityConfiguration() {
                 </div>
             </div>
         ))}
-        </>
+        </div>
     )
 }
 

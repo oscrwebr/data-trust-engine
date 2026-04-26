@@ -115,8 +115,11 @@ function OrgChart({ toast }) {
 
   return (
     <div className={styles.orgPageContainer}>
-      <h2 className={styles.pageHeader}>Organisation Chart</h2>
-
+      <div className={styles.header_container}>
+          <i id={styles.header_icon} className="pi pi-sitemap"/>
+          <h2 className={styles.title}>Organisation Chart</h2>
+      </div>
+      
       {/* Upload Section */}
       {!previewData && (
         <div className={styles.orgUploadSection}>

@@ -218,24 +218,30 @@ function FilesDashboard({ toast }) {
 
   return (
     <div className={styles.pageContainer}>
-      <h2 className={styles.title}>Files & Folders</h2>
-
-      {isAdmin && (
-        <button
-          onClick={scanSelected}
-          disabled={selectedFiles.length === 0 || scanning}
-          className={styles.scanButton}
-        >
-          {scanning ? (
-            <>
-              <span className={styles.spinner}></span> Scanning...
-            </>
-          ) : (
-            "Scan Selected Files"
+      <div>
+        <div className={styles.header_container}>
+          <i id={styles.header_icon} className="pi pi-folder"/>
+          <h2 className={styles.title}>Files & Folders</h2>
+        </div>
+        <div>
+          {isAdmin && (
+            <button
+              onClick={scanSelected}
+              disabled={selectedFiles.length === 0 || scanning}
+              className={styles.scanButton}
+            >
+              {scanning ? (
+                <>
+                  <span className={styles.spinner}></span> Scanning...
+                </>
+              ) : (
+                "Scan Selected Files"
+              )}
+            </button>
           )}
-        </button>
-      )}
-
+        </div>
+      </div>
+      
       {tree.length === 0 ? (
         <p className={styles.message}>No files or folders found</p>
       ) : (

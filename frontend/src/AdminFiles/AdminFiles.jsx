@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import api from "../api/axiosConfig";
 import styles from "./adminFiles.module.css";
 import { useNavigate } from "react-router-dom";
+import { FaFileShield } from "react-icons/fa6";
 
 function AdminFiles() {
   const navigate = useNavigate();
@@ -150,21 +151,22 @@ function AdminFiles() {
 
   return (
     <div className={styles.container}>
-      <h2>Admin Files</h2>
-
-      {/* SCAN BUTTON */}
-      <button
-        onClick={scanSelected}
-        disabled={selected.length === 0 || scanning}
-        className={styles.button}
-      >
-        {scanning ? "Scanning..." : "Scan Selected"}
-      </button>
-
-      <button onClick={performOrganisationScan} className={styles.button}>
-        Run Organisation Scan
-      </button>
-
+      <div>
+        <div className={styles.header_container}>
+          <FaFileShield className={styles.header_icon}/>
+          <h2 className={styles.title}>Admin Files</h2>
+        </div>
+        <div>
+          {/* SCAN BUTTON */}
+          <button
+              onClick={scanSelected}
+              disabled={selected.length === 0 || scanning}
+              className={styles.button}
+            >
+              {scanning ? "Scanning..." : "Scan Selected"}
+          </button>
+        </div>   
+      </div>
       {/* TABLE */}
       {loading ? (
         <p>Loading...</p>
