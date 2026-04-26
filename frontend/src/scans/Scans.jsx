@@ -3,6 +3,7 @@ import api from "../api/axiosConfig";
 import ScanCard from "./ScanCard";
 import { Divider } from 'primereact/divider';
 import "./scans.css";
+import { LuFileScan } from "react-icons/lu";
 
 
 function Scans(){
@@ -30,9 +31,13 @@ function Scans(){
 
 
     return (
-        <div>
+        <div className="page">
             <div className="scan-header">
-                <h1 className="scan-heading">Scans</h1>
+                <div className="header_container">
+                    <LuFileScan className="header_icon"/>
+                    <h1 className="title">Scans</h1>
+                </div>
+                
                 <Divider/>
             </div>
             

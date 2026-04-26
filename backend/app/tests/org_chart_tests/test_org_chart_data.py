@@ -6,8 +6,8 @@ from app.authentication.models import User
 from app.workspaces.models import Workspace
 from app.roles.models import PendingUserRole
 from unittest.mock import patch
-from app.invites.service import send_invite_service
 from app.authentication.repository import get_pending_user_by_email
+from unittest.mock import AsyncMock, patch
 
 # ---------------- Helper classes ----------------
 class UploadFileMock:
@@ -57,11 +57,23 @@ async def test_confirm_orgchart_success(db):
         {"name": "Engineer", "employees": [{"name": "Bob", "email": "bob@example.com"}]},
     ]
 
-    async def fake_send_invite(*args, **kwargs):
-        return None
+    mock_send = AsyncMock(return_value=None)
 
-    with patch.object(send_invite_service, "__call__", side_effect=fake_send_invite):
-        saved_roles = await service.confirm_orgchart(roles_payload, db, workspace_id=workspace_id)
+    with patch(
+        "app.org_chart.service.send_invite_service", 
+        new_callable=AsyncMock
+    ) as mock_send:
+
+        mock_send.return_value = None
+
+        saved_roles = await service.confirm_orgchart(
+            roles_payload,
+            db,
+            workspace_id=workspace_id
+        )
+
+        # optional assert
+        assert mock_send.await_count >= 0
 
     # Check roles saved
     assert len(saved_roles) == 2

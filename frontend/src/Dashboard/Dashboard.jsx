@@ -92,23 +92,27 @@ function Dashboard({toast}) {
         
         {/* Employee View of the Dashboard */}
         {user?.role === "employee" && (
-          <div className={styles.headerRow}>
-            <h1 className={styles.title} data-testid="dashboard-h1">Dashboard</h1>
+          <div className={styles.header_container}>
+            <div className={styles.header_container_2}>
+                <i id={styles.icon} className="pi pi-compass"/>
+                <h1 className={styles.title} data-testid="dashboard-h1">Dashboard</h1>
+            </div>
             {workspace == null && (<Button data-testid="request-join-workspace-button" onClick={() => setRequestJoinWorkspaceVisible(true)} disabled={pendingUser == null || pendingUser != true ? false : true} label={pendingUser == null || pendingUser != true ? "Request to Join Workspace" : "A request has been sent"} />)}
           </div>
         )}
 
         {/* Admin View of the Dashboard */}
         {user?.role === "admin" && (
-            <div>
-              <div className="scan-header">
-                  <h1 className="detection-heading" data-testid="dashboard-h1">
-                      Dashboard
-                  </h1>
-              <Divider/>
+        <div>
+          <div className="scan-header">
+                  <div className={styles.headerRow}>
+                    <i id={styles.icon} className="pi pi-compass"/>
+                    <h1 className={styles.title} data-testid="dashboard-h1">Dashboard</h1>
+                  </div>
+                  <Divider/>
               </div>
 
-              <div >
+              <div>
                 <h2 className={styles.welcomeHeading}>Welcome back, {user.firstname}!</h2>
               </div>
 
@@ -163,10 +167,8 @@ function Dashboard({toast}) {
                   )}
               </div>
 
-          </div>
+        </div>
         )}
-        
-        {/* This is how and where the notifications are loaded */}
     </div>
   );
 }

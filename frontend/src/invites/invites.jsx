@@ -79,7 +79,6 @@ function Invite({ visible, setVisible, toast, fetchEmployees}) {
         
       } else if (res.data.success == true) {
         showSuccessMessage();
-        fetchEmployees();
         setDateError(false);
         setEmailError(false);
         setEmailValid(true);
@@ -87,6 +86,7 @@ function Invite({ visible, setVisible, toast, fetchEmployees}) {
         setEmail(null);
         setExpiryDate(null);
         setEmailValid(false);
+        fetchEmployees();
       }
       });
  
@@ -124,14 +124,17 @@ function Invite({ visible, setVisible, toast, fetchEmployees}) {
             <small id="expiry-date" className={styles.d_expiry_date}>
                 Select an expiry date for the invite
             </small>
-            <Calendar
-              id={styles.d_date_input}
-              className={`mr-2 ${date_error ? "p-invalid" : ""}`}
-              showIcon
-              minDate={today}    
-              maxDate={maxDay} 
-              value={expiryDate} onChange={(e) => setExpiryDate(e.value)} dateFormat="dd/mm/yy" 
-            />
+            <div>
+              <Calendar
+                id={styles.d_date_input}
+                className={`mr-2 ${date_error ? "p-invalid" : ""}`}
+                showIcon
+                minDate={today}    
+                maxDate={maxDay} 
+                readOnlyInput
+                value={expiryDate} onChange={(e) => setExpiryDate(e.value)} dateFormat="dd/mm/yy" 
+              />
+            </div>
             {date_error &&(<Message severity="error" className={styles.d_error} text={<p className={styles.d_error_text}>No expiry date selected.</p>}/>)}
             {loading ? (
               <ProgressSpinner style={{ width: "40px", height: "40px", marginTop: "15px"}} strokeWidth="8" animationDuration=".5s"/>

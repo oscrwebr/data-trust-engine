@@ -127,12 +127,13 @@ function Sidebar({setSidebarVisible, firstname, surname, email, setVisible, role
                        <DropdownItem url="/my-files" text="My Files"/>
                     </SidebarDropdown>
                     <div className={styles.line}/>
-                    <DropdownItem url="/settings" text="Settings" icon="pi pi-cog"/>
                     <DropdownItemNoLink onClick={() => signOut()} text="Sign-out" icon="pi pi-sign-out"/>
-                    <div className={styles.line}/>
+                    
                 </div> 
+                
                 <div className={styles.user_info_container}>
-                    <Avatar label={user_initials} size="large" shape="circle" />
+                    <div className={styles.line}/>
+                    <Avatar label={user_initials} size="large" shape="circle" style={{width: "45px", height: "45px",flexShrink: 0}}/>
                     <div>
                         <div className={styles.user_name}>{firstname} {surname}</div>
                         <div className={styles.user_email}>{email}</div>

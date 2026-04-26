@@ -1,7 +1,13 @@
 import app.access_mapping.service as service
+import app.access_mapping.repository as repository
+from app.access_mapping.models import ViolationEmail
 from types import SimpleNamespace
-from app.access_mapping.schemas import FileRiskDetailsResponse
+from app.access_mapping.schemas import FailedDetectionResponse, FileRiskDetailsResponse, SendViolationsEmailRequest, FileEmployeeAccessResponse
 from unittest.mock import Mock
+import pytest
+from unittest.mock import AsyncMock
+from app.authentication.models import User
+from sqlalchemy import insert
 
 def test_get_file_employees_with_access_sets_unknown_when_file_not_scanned(monkeypatch):
     # Mock employee records
@@ -559,3 +565,109 @@ def test_employee_access_allowed_true_no_false(monkeypatch):
     assert result[0]["files"]["id"] == 4
     assert result[0]["files"]["status"] == "No Risk Detected"
     assert result[0]["files"]["flagged_files"] == []
+
+
+# Test to ensure the correct violations are sent with an email in access_mapping
+@pytest.mark.asyncio
+async def test_sending_a_violation_email_service_function(monkeypatch, db):
+    admin_id = 1
+
+    employee = FileEmployeeAccessResponse(
+        user_id=1,
+        name="Test",
+        email="test@test.com",
+        roles=[],
+        access_allowed=False,
+        failed_detections=[
+            FailedDetectionResponse(
+                subcategory="NAME",
+                count=8,
+                threshold=5
+            )
+        ]
+    )
+
+    payload = SendViolationsEmailRequest(
+        file_name="test.pdf",
+        employee=employee
+    )
+
+    # Mock category lookup
+    def mock_get_category_by_subcategory_name(db, subcategory):
+        return SimpleNamespace(name="Category")
+
+    monkeypatch.setattr(service, "get_category_by_subcategory_name",mock_get_category_by_subcategory_name)
+    mock_send = AsyncMock(return_value=True)
+    monkeypatch.setattr(service, "send_email_with_violations", mock_send)
+
+    result = await service.process_data_for_violation_email_template(db, admin_id, payload)
+    assert result is True
+
+    mock_send.assert_awaited_once()
+
+    args, kwargs = mock_send.call_args
+    sent_detections = args[3]
+
+    assert sent_detections == [
+        {
+            "subcategory": "NAME",
+            "count": 8,
+            "threshold": 5,
+            "category": "Category"
+        }
+    ]
+
+
+# Test to ensure that function returns cooldown if 2 emails are sent back to back
+@pytest.mark.asyncio
+async def test_email_cooldown_returns_cooldown_when_two_emails_sent_back_to_back(monkeypatch, db):
+
+    oid = "000000-7sdf77-88asdf8-9sdiy98"
+    insert_statement = insert(User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode(), role="admin")
+    res=db.execute(insert_statement)
+
+    employee = FileEmployeeAccessResponse(
+        user_id=1,
+        name="Test",
+        email="test@test.com",
+        roles=[],
+        access_allowed=False,
+        failed_detections=[
+            FailedDetectionResponse(
+                subcategory="NAME",
+                count=8,
+                threshold=5
+            )
+        ]
+    )
+
+    payload = SendViolationsEmailRequest(
+        file_name="test.pdf",
+        employee=employee
+    )
+
+    monkeypatch.setattr(
+        service,
+        "get_category_by_subcategory_name",
+        lambda db, sub: SimpleNamespace(name="Category")
+    )
+
+    mock_send = AsyncMock(return_value=None)
+    monkeypatch.setattr(
+        "app.access_mapping.service.FastMail.send_message",
+        mock_send
+    )
+
+    result_1 = await service.process_data_for_violation_email_template(
+        db, res.inserted_primary_key[0], payload
+    )
+
+    assert result_1 is True
+    assert mock_send.await_count == 1
+
+    result_2 = await service.process_data_for_violation_email_template(
+        db, res.inserted_primary_key[0], payload
+    )
+
+    assert result_2 == "cooldown"
+    assert mock_send.await_count == 1

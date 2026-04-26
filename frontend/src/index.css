@@ -50,22 +50,55 @@ button {
   cursor: pointer;
   transition: border-color 0.25s;
 }
-/* button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-} */
 
-/* @media (prefers-color-scheme: light) {
-  :root {
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #000000;
-  }
-} */
+.p-toast .p-toast-icon-close {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+
+  width: 1.8rem;
+  height: 1.8rem;
+
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+
+  opacity: 1 !important;
+}
+
+.p-toast .p-toast-icon-close::before {
+  content: "\e90b" !important; 
+  font-family: "primeicons" !important;
+  font-size: 1rem !important;
+  color: #615d5d !important;
+}
+
+.p-sidebar .p-sidebar-header-icon,
+.p-sidebar .p-sidebar-close {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+
+  width: 2rem;
+  height: 2rem;
+
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+
+  opacity: 1 !important;
+}
+
+.p-sidebar .p-sidebar-header-icon::before,
+.p-sidebar .p-sidebar-close::before {
+  content: "\e90b" !important; 
+  font-family: "primeicons" !important;
+  font-size: 1.1rem !important;
+  color: #333 !important;
+}
+
+.p-sidebar .p-sidebar-header-icon:hover,
+.p-sidebar .p-sidebar-close:hover {
+  background: rgba(0,0,0,0.05) !important;
+  border-radius: 6px !important;
+}

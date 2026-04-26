@@ -255,7 +255,7 @@
                         </div>
                         <IconField iconPosition="left">
                             <InputIcon className="pi pi-search"></InputIcon>
-                            <InputText onChange={(e) => setSearchValue(e.target.value)} style={{ width: '23vw'}} placeholder="Search by employee name or email" className="p-inputtext-sm"/>
+                            <InputText autoComplete="new-password" onChange={(e) => setSearchValue(e.target.value)} style={{ width: '23vw'}} placeholder="Search by employee name or email" className="p-inputtext-sm"/>
                         </IconField>
                         <Button data-testid="display-change-button" className={styles.view_button} onClick={() => setView(!view)}><i style={{ color:"black", fontSize:"20px" }} className={view ? "pi pi-list" : "pi pi-table"}/></Button>
                     </div>
