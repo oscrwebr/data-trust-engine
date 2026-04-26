@@ -478,6 +478,7 @@ def get_organisational_scan_details(db: Session, scan):
         "files": [{
             "scan_file_id": scan_file.scan_file_id,
             "file_id": file.ingestion_file_id,
+            "graph_file_id": file.graph_id,
             "file_name": file.name,
             "hash": file.hash,
             "naming_convention_scan_results": naming_results.get(scan_file.scan_file_id, []),

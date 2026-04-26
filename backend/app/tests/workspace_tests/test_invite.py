@@ -1,4 +1,5 @@
 import secrets
+import app.invites.router as invite_router
 from app.invites.models import Invite
 from app.invites.repository import add_invite, get_invite, get_invite_for_cooldown, get_invite_by_workspace_id, update_invite_used_value
 from app.authentication.repository import delete_pending_user, get_pending_user_by_id
@@ -11,6 +12,7 @@ from sqlalchemy import insert
 from urllib.parse import quote
 from io import BytesIO
 from PIL import Image
+from unittest.mock import AsyncMock
 
 # Creating test image 
 def create_test_image():
@@ -108,8 +110,15 @@ def test_valid_email_input(db, client):
 
 
 # Test a valid email with an expiry date selected
-def test_valid_invite_request(db, client):
+def test_valid_invite_request(db, client, monkeypatch):
     image = create_test_image()
+
+    mock_send = AsyncMock(return_value=None)
+    monkeypatch.setattr(
+        invite_router,
+        "send_invite_service",
+        mock_send
+    )
 
     oid = "000000-7sdf77-88asdf8-9sdiy99"
     insert_statement = insert(User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode(), role="employee")
@@ -137,23 +146,26 @@ def test_valid_invite_request(db, client):
     assert db.query(Invite).count() == 1
     assert db.query(PendingUser).count() == 1
     assert db.query(models.pending_user_workspace).count() == 1
+    assert mock_send.call_count == 1
 
 
 # Test sending an invite when a pending user with type 'request' has already been added to the database
-def test_valid_invite_request(db, client):
+def test_valid_invite_request_when_user_has_already_been_added(db, client):
     image = create_test_image()
 
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    insert_statement = insert(User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode(), role="employee")
+    oid2 = "000000-7sdf77-88asdf8-9sdiy98"
+    insert_statement = insert(User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode(), role="admin")
     res=db.execute(insert_statement)
 
-    pending_user = insert(PendingUser).values(email="valid@example.com", type="request")
+    pending_user = insert(User).values(firstname="Charlie", surname="Brown", username="valid@example.com", email="valid@example.com", oid=oid2, refresh="ms-refresh".encode(), role="employee")
     res_2=db.execute(pending_user)
 
     workspace = insert(models.Workspace).values(name="Test Workspace", image=image)
     workspace_insert=db.execute(workspace)
     
     add_user_workspace(db, workspace_insert.inserted_primary_key[0], res.inserted_primary_key[0])
+    add_user_workspace(db, workspace_insert.inserted_primary_key[0], res_2.inserted_primary_key[0])
 
     refresh_family = repository.create_refresh_family(db)
 
@@ -169,9 +181,8 @@ def test_valid_invite_request(db, client):
 
     user = get_pending_user_by_id(db, res_2.inserted_primary_key[0])
     assert response.status_code == 200
-    assert response.json().get("success") == True
-    assert db.query(PendingUser).count() == 1
-    assert user.type == "invite"
+    assert response.json().get("success") == "exists"
+    assert db.query(User).count() == 2
 
 
 # Test invite record can be retrieved using its token
@@ -299,11 +310,14 @@ def test_method_get_invite_for_cooldown(db):
     assert invite.workspace_id == workspace.id
 
 # Test return statement when sending 2 invites back-to-back
-def test_return_statement_with_invalid_cooldown(db, client):
+def test_return_statement_with_invalid_cooldown(db, client, monkeypatch):
     image = create_test_image()
 
+    mock_send = AsyncMock(return_value=None)
+    monkeypatch.setattr("app.invites.router.send_invite_service", mock_send)
+
     oid = "000000-7sdf77-88asdf8-9sdiy99"
-    insert_statement = insert(User).values(firstname="John", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode(), role="employee")
+    insert_statement = insert(User).values(firstname="wefwf", surname="Smith", username="JohnSmith1@hotmail.com", email="JohnSmith1@hotmail.com", oid=oid, refresh="ms-refresh".encode(), role="employee")
     res=db.execute(insert_statement)
 
     workspace = insert(models.Workspace).values(name="Test Workspace", image=image)
@@ -336,6 +350,7 @@ def test_return_statement_with_invalid_cooldown(db, client):
     assert response.json().get("success") == "cooldown"
     assert db.query(Invite).count() == 1
     assert db.query(PendingUser).count() == 1
+    assert mock_send.call_count == 1
 
 
 # Test return statement when sending an invite to the same email as the admin sending the email

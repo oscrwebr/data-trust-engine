@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { PiCopySimpleBold } from "react-icons/pi";
 import { useState } from "react";
 import DuplicatePopUp from "./DuplicatePopUp";
+import api from "../api/axiosConfig";
 
 
 
@@ -81,6 +82,44 @@ function ScanFileCard({scan_file, scan_type, scan_files}) {
                             scan_type === "organisation"
                             ? issues.map(i => i.type).join(", ")
                             : `${detectionCount} Detections Found`
+
+    const[renameSuccess, setRenameSuccess] = useState(false);
+    const[renameError, setRenameError] = useState(false)
+
+    async function applySuggestedName(event, suggestedName) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        // const extension = scan_file.file_name.split('.').pop();
+        // const nameWithExtension =  `${suggestedName}.${extension}`;
+
+        // Reset success/error messages for edge cases
+        setRenameSuccess(false);
+        setRenameError(false);
+
+
+        try {
+            await api.patch("/ingestion/rename-file", null, {
+            params: {
+                graph_id: scan_file.graph_file_id,
+                new_name: suggestedName
+            }
+            
+        });
+            // Display success message if successful call
+            setRenameSuccess(true);
+            // Hides success message after 6 seconds
+            setTimeout(() => setRenameSuccess(false), 6000);
+
+            console.log("File renamed successfully");
+        } catch (error) {
+            console.error("Error applying suggested name:", error);
+            // Display error message
+            setRenameError(true)
+            // Hides error message after 6 seconds
+            setTimeout(() => setRenameError(false), 6000)
+        }
+    }
                             
 
     return (
@@ -126,6 +165,20 @@ function ScanFileCard({scan_file, scan_type, scan_files}) {
                                     <div className="scan-file-suggested-text">
                                         <span>{issue.suggested_name[0]}</span>
                                     </div>
+                                    <div className="button-container-suggested">
+                                        <button className="apply-suggested-name-button"
+                                                onClick={(event) => applySuggestedName(event, issue.suggested_name[0])}
+                                        >
+                                            <PiCheckCircle size={20}/> Apply Suggested Name
+
+
+                                        </button>
+                                        
+                                    </div>
+                                    <div className="success-message-container">
+                                        {renameSuccess && <span className="rename-success-message">Name updated successfully!</span>}
+                                        {renameError && <span className="rename-error-message">Error updating name.</span>}
+                                    </div>
                                 </div>
                                 </>
                                     
@@ -152,7 +205,7 @@ function ScanFileCard({scan_file, scan_type, scan_files}) {
                                     // Opens pop up to view duplicate files related to the scanned file
                                             onClick={(event) => {event.preventDefault(); event.stopPropagation(); setShowPopup(true)}}
                                     >
-                                        <PiCopySimpleBold /> View Duplicates
+                                        <PiCopySimpleBold size={20}/> View Duplicates
                                     </button>
                                 </div>
                                 </>
@@ -199,7 +252,7 @@ function ScanFileCard({scan_file, scan_type, scan_files}) {
         </div>
 
         {showPopUp && (
-            <DuplicatePopUp duplicates={duplicateFiles} onClose={() => setShowPopup(false)} />
+            <DuplicatePopUp scan_file={scan_file}duplicates={duplicateFiles} onClose={() => setShowPopup(false)} />
         )}
         </>
     )
