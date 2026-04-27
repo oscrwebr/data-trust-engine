@@ -96,6 +96,7 @@
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  table-layout: fixed;
 }
 
 /* Header */
@@ -118,6 +119,9 @@
   font-size: 14px;
   color: #334155;
   border-top: 1px solid #eef2f7;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .table tr:hover {
@@ -131,6 +135,10 @@
   font-weight: 500;
   cursor: pointer;
   transition: color 0.15s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  word-break: break-word;
+  text-overflow: ellipsis;
 }
 
 .fileLink:hover {
