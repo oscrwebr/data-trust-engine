@@ -165,6 +165,9 @@ function AdminFiles() {
             >
               {scanning ? "Scanning..." : "Scan Selected"}
           </button>
+          <button onClick={performOrganisationScan} className={styles.button}>
+            Run Organisation Scan
+          </button>
         </div>   
       </div>
       {/* TABLE */}
